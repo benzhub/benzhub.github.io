@@ -118,18 +118,33 @@
 touch Dockerfile
 FROM alpine:latest
 <span style="color:#75715e">#RUN 執行指令(build中執行)</span>
+<span style="color:#75715e">#ARG可以賦予變量</span>
+ARG whoami<span style="color:#f92672">=</span>docker
+<span style="color:#75715e">#賦予路徑myworkspace變數,只後使用${}就能帶入變數</span>
+env myworkspace /var/www/localhost/htdocs
+<span style="color:#75715e">#工作預設路徑改為${myworkspace}</span>
+WORKDIR <span style="color:#e6db74">${</span>myworkspace<span style="color:#e6db74">}</span>
+<span style="color:#75715e">#COPY複製檔案到image裡面</span>
+COPY ./content.txt ./
+RUN ls -l ./
+RUN cat ./content.txt &gt;&gt; index.html
 RUN echo <span style="color:#e6db74">&#34;I impersonated the unicorn.&#34;</span> <span style="color:#ae81ff">\
-</span><span style="color:#ae81ff"></span>    <span style="color:#f92672">&amp;&amp;</span> echo <span style="color:#e6db74">&#34;I love docker.&#34;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    <span style="color:#f92672">&amp;&amp;</span> echo <span style="color:#e6db74">&#34;I love </span><span style="color:#e6db74">${</span>whoami<span style="color:#e6db74">}</span><span style="color:#e6db74">.&#34;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    <span style="color:#f92672">&amp;&amp;</span> ls -l /
+RUN echo <span style="color:#e6db74">&#34;I impersonated the unicorn.&#34;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    <span style="color:#f92672">&amp;&amp;</span> echo <span style="color:#e6db74">&#34;I love </span><span style="color:#e6db74">${</span>whoami<span style="color:#e6db74">}</span><span style="color:#e6db74">.&#34;</span> <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>    <span style="color:#f92672">&amp;&amp;</span> ls -l /
 RUN apk --update add apache2
 RUN rm -rf /var/cache/apk/*
 <span style="color:#75715e"># httpd -D FOREGROUND</span>
-<span style="color:#75715e">#ENTRYPOINT,image一啟動默認執行的command(container 啟動後執行)</span>
+<span style="color:#75715e">#ENTRYPOINT,image一啟動container默認執行的command(container 啟動後執行)</span>
 ENTRYPOINT <span style="color:#f92672">[</span><span style="color:#e6db74">&#34;tail&#34;</span>, <span style="color:#e6db74">&#34;-f&#34;</span>, <span style="color:#e6db74">&#34;/dev/null&#34;</span><span style="color:#f92672">]</span>
 ENTRYPOINT <span style="color:#f92672">[</span><span style="color:#e6db74">&#34;httpd&#34;</span>, <span style="color:#e6db74">&#34;-D&#34;</span>, <span style="color:#e6db74">&#34;FOREGROUND&#34;</span><span style="color:#f92672">]</span>
 <span style="color:#75715e">#建立image</span>
 docker build -t lenrich1403/aplinetest .
 
+</code></pre></div><h4 id="dockerfile-build">Dockerfile build</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo docker build --build-arg whoami<span style="color:#f92672">=</span>Linux -t lenrich1403/argtest .
 </code></pre></div><hr>
 <h5 id="下一篇我們將會開始進入docker-網路模式的介紹和實做">下一篇我們將會開始進入docker 網路模式的介紹和實做</h5>
 <h6 id="進入下一篇docker-05"><a href="/docker-05">進入下一篇</a></h6>
