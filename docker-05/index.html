@@ -5,7 +5,7 @@
 
   <!-- mobile responsive meta -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="Ben&#39;s Code Blog">
+  <meta name="description" content="docker container 網路模式介紹">
   <meta name="author" content="Ben Z">
   <meta name="generator" content="Hugo 0.80.0" />
 
@@ -115,7 +115,7 @@
   <div class="container">
     <div class="row">
       <div class="col-lg-12">
-        <h4>Philosophy</h4>
+        <h4>Docker 教學系列05 docker container 網路模式介紹</h4>
       </div>
     </div>
   </div>
@@ -126,43 +126,46 @@
 <section>
   <div class="container">
     <div class="row">
-      <div class="col-lg-8 mt-5">
-        
-        
-        <div class="row masonry-container">
-          
-          <div class="col-sm-6 mb-5">
-            <article class="text-center">
-              <img class="img-fluid mb-4" src="https://benzhub.github.io/images/featured-post/post-2.jpg" alt="post-thumb">
-              <p class="text-uppercase mb-2">[Philosophy]</p>
-              <h4 class="title-border"><a class="text-dark" href="https://benzhub.github.io/organize-your-life.1/">Organize Your Life With 10 Simple rule</a></h4>
-              <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-              <a href="https://benzhub.github.io/organize-your-life.1/" class="btn btn-transparent">read more</a>
-            </article>
-          </div>
-          
-        </div>
+      <div class="col-lg-8">
+        <ul class="list-inline d-flex justify-content-between py-3">
+          <li class="list-inline-item"><i class="ti-user mr-2"></i>Post by Ben Z</li>
+          <li class="list-inline-item"><i class="ti-calendar mr-2"></i>Feb 05, 2021</li>
+        </ul>
+        <article class="content">
+          <img src="https://benzhub.github.io/images/masonary-post/docker-logo.png" alt="post-thumb" class="img-fluid rounded float-left mr-5 mb-4">
+          <h4 id="docker-container-網路模式介紹">docker container 網路模式介紹.</h4>
+<p>None模式:container 不能向外連線網路,外面也不能連線進去</p>
+<p>Bridge模式:container 啟動的時候,我們會把container 放到設定的bridge network中</p>
+<p>Container模式:啟動的container會複製已有的container的網路模式</p>
+<p>Host模式:啟動的container我們會它放到設定的Linux VM network 中</p>
+<h6 id="列出我們所擁有的network">列出我們所擁有的network</h6>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo docker network ls 
+</code></pre></div><h6 id="none-模式">none 模式</h6>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo docker run -d --network null --name none-model alpine tail -f /dev/null
+</code></pre></div><h6 id="查看網路界面">查看網路界面</h6>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e">#查看none模式的網路界面</span>
+sudo docker network inspect none
+</code></pre></div><h6 id="bridge--container-模式">bridge &amp; container 模式</h6>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e">#創建屬於自己的bridge網路</span>
+sudo docker network create --dirver bridge my-bridge
+<span style="color:#75715e">#查看my-bridge模式的網路界面,並記下Subnet的ip</span>
+sudo docker network inspect my-bridge
+<span style="color:#75715e">#建立屬於my-bridge網路的container</span>
+sudo docker run -d --network my-bridge --name my-bridge-test01 alpine tail -f /dev/null
+<span style="color:#75715e">#再次檢查,會發現my-bridge-test在my-bridge網路中</span>
+sudo docker network inspect my-bridge
+<span style="color:#75715e">#不同的netword bridge 連線, 會將container 在不同的bridge 網路中各自分配給它ip</span>
+sudo docker network connect my-bridge my-bridge-test02
+<span style="color:#75715e">#container模式,會去複製現有的container的網路設定</span>
+sudo docker run -d --name container-mode-test01 --network container:my-bridge-test01 alpine tail -f /dev/null
+<span style="color:#75715e">#host模式,會將啟動的container 跟Linux VM 分配一個 ip給它</span>
+sudo docker run -d --name host-alpine --network host alpine tail -f /dev/null
+</code></pre></div><hr>
+<h5 id="下一篇我們將會開始進入docker-volume的介紹">下一篇我們將會開始進入docker volume的介紹</h5>
+<h6 id="進入下一篇docker-06"><a href="/docker-06">進入下一篇</a></h6>
 
-        
-        
-        <div class="row">
-          <div class="col-12">
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-          </div>
-        </div>
-        
+        </article>
       </div>
-      
       <div class="col-lg-4">
   <div class="widget search-box">
     <form action="https://benzhub.github.io/search">
