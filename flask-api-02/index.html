@@ -86,6 +86,8 @@
             
             <a class="dropdown-item" href="https://benzhub.github.io/flask-api-01/">Flask-Restful API 教學系列01 flask入門</a>
             
+            <a class="dropdown-item" href="https://benzhub.github.io/flask-api-02/">Flask-Restful API 教學系列02 Flask串接MySQL建立資源</a>
+            
           </div>
         </li>
         
@@ -99,6 +101,22 @@
           <div class="dropdown-menu" >
             
             <a class="dropdown-item" href="https://benzhub.github.io/git-01/">Git 教學系列01 git常用指令整理</a>
+            
+          </div>
+        </li>
+        
+        
+        
+        <li class="nav-item dropdown">
+          <a class="nav-link text-uppercase text-dark dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
+            aria-expanded="false">
+            MySQL教學系列
+          </a>
+          <div class="dropdown-menu" >
+            
+            <a class="dropdown-item" href="https://benzhub.github.io/mysql-01/">MySQL 教學系列01 MySQL常用指令</a>
+            
+            <a class="dropdown-item" href="https://benzhub.github.io/mysql-02/">MySQL 教學系列02 MySQL安裝教學</a>
             
           </div>
         </li>
@@ -165,9 +183,101 @@
         </ul>
         <article class="content">
           <img src="https://benzhub.github.io/images/flask-restful-api-logo.png" alt="post-thumb" class="img-fluid rounded float-left mr-5 mb-4">
-          <h4 id="pip-安裝-pymysql">pip 安裝 pymysql.</h4>
-<hr>
-<h5 id="下一篇我們將會開始進入flask">下一篇我們將會開始進入Flask</h5>
+          <p>&laquo;&laquo;&laquo;&lt; HEAD</p>
+<h4 id="pip-安裝-必要套件">pip 安裝 必要套件.</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e">#安裝 flask_restful</span>
+python -m pip install flask_restful
+<span style="color:#75715e">#安裝 pymysql</span>
+python -m pip install pymysql
+</code></pre></div><h5 id="mainpy中">main.py中</h5>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">from flask import Flask 
+from flask_restful import Api
+
+app <span style="color:#f92672">=</span> Flask<span style="color:#f92672">(</span>__name__<span style="color:#f92672">)</span>
+api <span style="color:#f92672">=</span> Api<span style="color:#f92672">(</span>app<span style="color:#f92672">)</span>
+
+api.add_resource<span style="color:#f92672">(</span>Users, <span style="color:#e6db74">&#39;/users&#39;</span><span style="color:#f92672">)</span>
+api.add_resource<span style="color:#f92672">(</span>User, <span style="color:#e6db74">&#39;/user/&lt;id&gt;&#39;</span><span style="color:#f92672">)</span>
+
+
+@app.route<span style="color:#f92672">(</span><span style="color:#e6db74">&#39;/&#39;</span><span style="color:#f92672">)</span>
+def index<span style="color:#f92672">()</span>:
+    <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;hello world XD&#34;</span>
+
+<span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;__main__&#39;</span>:
+    app.debug <span style="color:#f92672">=</span> True
+    app.run<span style="color:#f92672">(</span>host <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;0.0.0.0&#39;</span>, port <span style="color:#f92672">=</span> 5000<span style="color:#f92672">)</span>
+</code></pre></div><h5 id="根目錄中創建resources目錄在resources目錄下再創建userpy">根目錄中創建resources目錄,在resources目錄下再創建user.py</h5>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e">#根目錄中創建resources目錄</span>
+sudo mkdir resources
+<span style="color:#75715e">#進入resources目錄</span>
+cd resources
+<span style="color:#75715e">#將resources成為python套件</span>
+touch __init__.py
+<span style="color:#75715e">#創建user.py</span>
+touch user.py
+</code></pre></div><h5 id="userpy中">user.py中</h5>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">from flask_restful import Resource, reqparse
+from flask import jsonify
+import pymysql
+import traceback
+
+parser <span style="color:#f92672">=</span> reqparse.RequestParser<span style="color:#f92672">()</span>
+parser.add_argument<span style="color:#f92672">(</span><span style="color:#e6db74">&#39;name&#39;</span><span style="color:#f92672">)</span>
+parser.add_argument<span style="color:#f92672">(</span><span style="color:#e6db74">&#39;gender&#39;</span><span style="color:#f92672">)</span>
+parser.add_argument<span style="color:#f92672">(</span><span style="color:#e6db74">&#39;birth&#39;</span><span style="color:#f92672">)</span>
+parser.add_argument<span style="color:#f92672">(</span><span style="color:#e6db74">&#39;note&#39;</span><span style="color:#f92672">)</span>
+
+class Users<span style="color:#f92672">(</span>Resource<span style="color:#f92672">)</span>:
+    def db_init<span style="color:#f92672">(</span>self<span style="color:#f92672">)</span>:
+        db <span style="color:#f92672">=</span> pymysql.connect<span style="color:#f92672">(</span>
+            host <span style="color:#f92672">=</span> r<span style="color:#e6db74">&#39;127.0.0.1&#39;</span>,
+            user <span style="color:#f92672">=</span>  r<span style="color:#e6db74">&#39;root&#39;</span>,
+            password <span style="color:#f92672">=</span>  r<span style="color:#e6db74">&#39;mysql&#39;</span>,
+            database <span style="color:#f92672">=</span>  r<span style="color:#e6db74">&#39;api&#39;</span>,
+            <span style="color:#f92672">)</span>
+
+        cursor <span style="color:#f92672">=</span> db.cursor<span style="color:#f92672">(</span>pymysql.cursors.DictCursor<span style="color:#f92672">)</span>
+        <span style="color:#66d9ef">return</span> db, cursor
+
+    def get<span style="color:#f92672">(</span>self<span style="color:#f92672">)</span>:
+        db, cursor <span style="color:#f92672">=</span> self.db_init<span style="color:#f92672">()</span>
+        sql <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;Select * From api.users&#39;</span>
+        cursor.execute<span style="color:#f92672">(</span>sql<span style="color:#f92672">)</span>
+        db.commit<span style="color:#f92672">()</span>
+        users <span style="color:#f92672">=</span> cursor.fetchall<span style="color:#f92672">()</span>
+        db.close<span style="color:#f92672">()</span>
+
+        <span style="color:#66d9ef">return</span> jsonify<span style="color:#f92672">({</span><span style="color:#e6db74">&#39;data&#39;</span>: users<span style="color:#f92672">})</span>
+
+    def post<span style="color:#f92672">(</span>self<span style="color:#f92672">)</span>:
+        db, cursor <span style="color:#f92672">=</span> self.db_init<span style="color:#f92672">()</span>
+        arg <span style="color:#f92672">=</span> parser.parse_args<span style="color:#f92672">()</span>
+        user <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+            <span style="color:#e6db74">&#39;name&#39;</span>: arg<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;name&#39;</span><span style="color:#f92672">]</span>,
+            <span style="color:#e6db74">&#39;gender&#39;</span>: arg<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;gender&#39;</span><span style="color:#f92672">]</span> or 0,
+            <span style="color:#e6db74">&#39;birth&#39;</span>: arg<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;birth&#39;</span><span style="color:#f92672">]</span> or <span style="color:#e6db74">&#39;1900-01-01&#39;</span>,
+            <span style="color:#e6db74">&#39;note&#39;</span>: arg<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;note&#39;</span><span style="color:#f92672">]</span> or None,
+        <span style="color:#f92672">}</span>
+
+        sql <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">            INSERT INTO `users` (`name`, `gender`, `birth`, `note`) VALUES (&#39;{}&#39;, &#39;{}&#39;, &#39;{}&#39;, &#39;{}&#39;);
+</span><span style="color:#e6db74">        &#34;&#34;&#34;</span>.format<span style="color:#f92672">(</span>user<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;name&#39;</span><span style="color:#f92672">]</span>, user<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;gender&#39;</span><span style="color:#f92672">]</span>, user<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;birth&#39;</span><span style="color:#f92672">]</span>, user<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;note&#39;</span><span style="color:#f92672">])</span>
+
+        response <span style="color:#f92672">=</span> <span style="color:#f92672">{}</span>
+        try:
+            cursor.execute<span style="color:#f92672">(</span>sql<span style="color:#f92672">)</span>
+            response<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;msg&#39;</span><span style="color:#f92672">]</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;success&#39;</span>
+        except :
+            traceback.print_exc<span style="color:#f92672">()</span>
+            response<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;msg&#39;</span><span style="color:#f92672">]</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;failed&#39;</span>
+
+        db.commit<span style="color:#f92672">()</span>
+        db.close<span style="color:#f92672">()</span>
+        <span style="color:#66d9ef">return</span> jsonify<span style="color:#f92672">(</span>response<span style="color:#f92672">)</span>
+
+</code></pre></div><hr>
+<h5 id="下一篇我們將會開始建立flask-restful-api-的crud">下一篇我們將會開始建立Flask Restful-Api 的CRUD</h5>
 <h6 id="進入下一篇flask-api-03"><a href="/flask-api-03">進入下一篇</a></h6>
 
         </article>
@@ -184,6 +294,32 @@
     
     <div class="media mb-4">
       <div class="post-thumb-sm mr-3">
+        <a href="https://benzhub.github.io/mysql-01/"><img class="mr-3 post-thumb-sm" src="https://benzhub.github.io/images/mysql-logo.png"></a>
+      </div>
+      <div class="media-body">
+        <ul class="list-inline d-flex justify-content-between mb-2">
+          <li class="list-inline-item">Post By Ben Z</li>
+          <li class="list-inline-item">Feb 06, 2021</li>
+        </ul>
+        <h6><a class="text-dark" href="https://benzhub.github.io/mysql-01/">MySQL 教學系列01 MySQL常用指令</a></h6>
+      </div>
+    </div>
+    
+    <div class="media mb-4">
+      <div class="post-thumb-sm mr-3">
+        <a href="https://benzhub.github.io/mysql-02/"><img class="mr-3 post-thumb-sm" src="https://benzhub.github.io/images/mysql-logo.png"></a>
+      </div>
+      <div class="media-body">
+        <ul class="list-inline d-flex justify-content-between mb-2">
+          <li class="list-inline-item">Post By Ben Z</li>
+          <li class="list-inline-item">Feb 06, 2021</li>
+        </ul>
+        <h6><a class="text-dark" href="https://benzhub.github.io/mysql-02/">MySQL 教學系列02 MySQL安裝教學</a></h6>
+      </div>
+    </div>
+    
+    <div class="media mb-4">
+      <div class="post-thumb-sm mr-3">
         <a href="https://benzhub.github.io/flask-api-01/"><img class="mr-3 post-thumb-sm" src="https://benzhub.github.io/images/flask-restful-api-logo.png"></a>
       </div>
       <div class="media-body">
@@ -192,32 +328,6 @@
           <li class="list-inline-item">Feb 06, 2021</li>
         </ul>
         <h6><a class="text-dark" href="https://benzhub.github.io/flask-api-01/">Flask-Restful API 教學系列01 flask入門</a></h6>
-      </div>
-    </div>
-    
-    <div class="media mb-4">
-      <div class="post-thumb-sm mr-3">
-        <a href="https://benzhub.github.io/flask-api-02/"><img class="mr-3 post-thumb-sm" src="https://benzhub.github.io/images/flask-restful-api-logo.png"></a>
-      </div>
-      <div class="media-body">
-        <ul class="list-inline d-flex justify-content-between mb-2">
-          <li class="list-inline-item">Post By Ben Z</li>
-          <li class="list-inline-item">Feb 06, 2021</li>
-        </ul>
-        <h6><a class="text-dark" href="https://benzhub.github.io/flask-api-02/">Flask-Restful API 教學系列02 Flask串接MySQL建立資源</a></h6>
-      </div>
-    </div>
-    
-    <div class="media mb-4">
-      <div class="post-thumb-sm mr-3">
-        <a href="https://benzhub.github.io/git-01/"><img class="mr-3 post-thumb-sm" src="https://benzhub.github.io/images/git-logo.png"></a>
-      </div>
-      <div class="media-body">
-        <ul class="list-inline d-flex justify-content-between mb-2">
-          <li class="list-inline-item">Post By Ben Z</li>
-          <li class="list-inline-item">Feb 05, 2021</li>
-        </ul>
-        <h6><a class="text-dark" href="https://benzhub.github.io/git-01/">Git 教學系列01 git常用指令整理</a></h6>
       </div>
     </div>
     
@@ -234,6 +344,7 @@
       <li class="list-inline-item m-1"><a href="/tags/github">Github</a></li>
       <li class="list-inline-item m-1"><a href="/tags/markdown">Markdown</a></li>
       <li class="list-inline-item m-1"><a href="/tags/mysql">Mysql</a></li>
+      <li class="list-inline-item m-1"><a href="/tags/mysql-%e6%95%99%e5%ad%b8%e7%b3%bb%e5%88%97">Mysql 教學系列</a></li>
       <li class="list-inline-item m-1"><a href="/tags/python">Python</a></li>
       <li class="list-inline-item m-1"><a href="/tags/restful-api">Restful api</a></li>
       <li class="list-inline-item m-1"><a href="/tags/scrapy">Scrapy</a></li>
@@ -247,6 +358,7 @@
       <li class="list-inline-item m-1"><a href="/categories/flask-restful-api">Flask restful api</a></li>
       <li class="list-inline-item m-1"><a href="/categories/git">Git</a></li>
       <li class="list-inline-item m-1"><a href="/categories/markdown">Markdown</a></li>
+      <li class="list-inline-item m-1"><a href="/categories/mysql">Mysql</a></li>
       <li class="list-inline-item m-1"><a href="/categories/scrapy">Scrapy</a></li>
       <li class="list-inline-item m-1"><a href="/categories/%e7%a8%8b%e5%bc%8f%e7%85%89%e9%87%91%e8%a1%93-python-%e8%b6%85%e5%85%a5%e9%96%80">程式煉金術 python 超入門</a></li>
     </ul>
