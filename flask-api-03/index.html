@@ -5,7 +5,7 @@
 
   <!-- mobile responsive meta -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="Flask-Restful API 串接MySQL建立資源">
+  <meta name="description" content="建立Flask Restful-Api 的CRUD">
   <meta name="author" content="Ben Z">
   <meta name="generator" content="Hugo 0.80.0" />
 
@@ -165,7 +165,7 @@
   <div class="container">
     <div class="row">
       <div class="col-lg-12">
-        <h4>Flask-Restful API 教學系列02 Flask串接MySQL建立資源</h4>
+        <h4>Flask-Restful API 教學系列03 建立Flask Restful-Api 的CRUD</h4>
       </div>
     </div>
   </div>
@@ -183,12 +183,8 @@
         </ul>
         <article class="content">
           <img src="https://benzhub.github.io/images/flask-restful-api-logo.png" alt="post-thumb" class="img-fluid rounded float-left mr-5 mb-4">
-          <h4 id="pip-安裝-必要套件">pip 安裝 必要套件.</h4>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e">#安裝 flask_restful</span>
-python -m pip install flask_restful
-<span style="color:#75715e">#安裝 pymysql</span>
-python -m pip install pymysql
-</code></pre></div><h5 id="mainpy中">main.py中</h5>
+          <h4 id="建立flask-restful-api-的crud">建立Flask Restful-Api 的CRUD.</h4>
+<h5 id="mainpy中">main.py中</h5>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">from flask import Flask 
 from flask_restful import Api
 
@@ -206,15 +202,6 @@ def index<span style="color:#f92672">()</span>:
 <span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;__main__&#39;</span>:
     app.debug <span style="color:#f92672">=</span> True
     app.run<span style="color:#f92672">(</span>host <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;0.0.0.0&#39;</span>, port <span style="color:#f92672">=</span> 5000<span style="color:#f92672">)</span>
-</code></pre></div><h5 id="根目錄中創建resources目錄在resources目錄下再創建userpy">根目錄中創建resources目錄,在resources目錄下再創建user.py</h5>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e">#根目錄中創建resources目錄</span>
-sudo mkdir resources
-<span style="color:#75715e">#進入resources目錄</span>
-cd resources
-<span style="color:#75715e">#將resources成為python套件</span>
-touch __init__.py
-<span style="color:#75715e">#創建user.py</span>
-touch user.py
 </code></pre></div><h5 id="userpy中">user.py中</h5>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">from flask_restful import Resource, reqparse
 from flask import jsonify
@@ -226,6 +213,83 @@ parser.add_argument<span style="color:#f92672">(</span><span style="color:#e6db7
 parser.add_argument<span style="color:#f92672">(</span><span style="color:#e6db74">&#39;gender&#39;</span><span style="color:#f92672">)</span>
 parser.add_argument<span style="color:#f92672">(</span><span style="color:#e6db74">&#39;birth&#39;</span><span style="color:#f92672">)</span>
 parser.add_argument<span style="color:#f92672">(</span><span style="color:#e6db74">&#39;note&#39;</span><span style="color:#f92672">)</span>
+parser.add_argument<span style="color:#f92672">(</span><span style="color:#e6db74">&#39;deleted&#39;</span><span style="color:#f92672">)</span>
+
+class User<span style="color:#f92672">(</span>Resource<span style="color:#f92672">)</span>:
+    def db_init<span style="color:#f92672">(</span>self<span style="color:#f92672">)</span>:
+        db <span style="color:#f92672">=</span> pymysql.connect<span style="color:#f92672">(</span>
+            host <span style="color:#f92672">=</span> r<span style="color:#e6db74">&#39;127.0.0.1&#39;</span>,
+            user <span style="color:#f92672">=</span>  r<span style="color:#e6db74">&#39;root&#39;</span>,
+            password <span style="color:#f92672">=</span>  r<span style="color:#e6db74">&#39;mysql&#39;</span>,
+            database <span style="color:#f92672">=</span>  r<span style="color:#e6db74">&#39;api&#39;</span>,
+            <span style="color:#f92672">)</span>
+
+        cursor <span style="color:#f92672">=</span> db.cursor<span style="color:#f92672">(</span>pymysql.cursors.DictCursor<span style="color:#f92672">)</span>
+        <span style="color:#66d9ef">return</span> db, cursor
+
+    def get<span style="color:#f92672">(</span>self, id<span style="color:#f92672">)</span>:
+        db, cursor <span style="color:#f92672">=</span> self.db_init<span style="color:#f92672">()</span>
+        sql <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;&#34;SELECT * FROM api.users where id = {} and deleted is not True;&#34;&#34;&#34;</span>.format<span style="color:#f92672">(</span>id<span style="color:#f92672">)</span>
+        try:
+            cursor.execute<span style="color:#f92672">(</span>sql<span style="color:#f92672">)</span>
+            db.commit<span style="color:#f92672">()</span>
+            user <span style="color:#f92672">=</span> cursor.fetchone<span style="color:#f92672">()</span>
+            db.close<span style="color:#f92672">()</span>
+            <span style="color:#66d9ef">return</span> jsonify<span style="color:#f92672">({</span><span style="color:#e6db74">&#39;data&#39;</span>: user<span style="color:#f92672">})</span>
+        except :
+            <span style="color:#75715e"># traceback.print_exc()</span>
+            <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;Your id can&#39;t find result&#34;</span>
+
+    def patch<span style="color:#f92672">(</span>self, id<span style="color:#f92672">)</span>:
+        db, cursor <span style="color:#f92672">=</span> self.db_init<span style="color:#f92672">()</span>
+        arg <span style="color:#f92672">=</span> parser.parse_args<span style="color:#f92672">()</span>
+        user <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+            <span style="color:#e6db74">&#39;name&#39;</span>: arg<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;name&#39;</span><span style="color:#f92672">]</span>,
+            <span style="color:#e6db74">&#39;gender&#39;</span>: arg<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;gender&#39;</span><span style="color:#f92672">]</span>,
+            <span style="color:#e6db74">&#39;birth&#39;</span>: arg<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;birth&#39;</span><span style="color:#f92672">]</span>,
+            <span style="color:#e6db74">&#39;note&#39;</span>: arg<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;note&#39;</span><span style="color:#f92672">]</span>,
+        <span style="color:#f92672">}</span>
+
+        query <span style="color:#f92672">=</span> <span style="color:#f92672">[]</span>
+
+        <span style="color:#66d9ef">for</span> key, value in user.items<span style="color:#f92672">()</span>:
+            <span style="color:#66d9ef">if</span> value !<span style="color:#f92672">=</span> None:
+                <span style="color:#75715e"># query.append(key + &#34; = &#34; + &#34;&#39;{}&#39;&#34;.format(value))</span>
+                query.append<span style="color:#f92672">(</span>f<span style="color:#e6db74">&#34;{key} = &#39;{value}&#39;&#34;</span><span style="color:#f92672">)</span>
+        query <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;, &#34;</span>.join<span style="color:#f92672">(</span>query<span style="color:#f92672">)</span>
+        sql <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">            UPDATE `api`.`users` SET {} WHERE (`id` = &#39;{}&#39;);
+</span><span style="color:#e6db74">        &#34;&#34;&#34;</span>.format<span style="color:#f92672">(</span>query, id<span style="color:#f92672">)</span>
+
+        response <span style="color:#f92672">=</span> <span style="color:#f92672">{}</span>
+        try:
+            cursor.execute<span style="color:#f92672">(</span>sql<span style="color:#f92672">)</span>
+            response<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;msg&#39;</span><span style="color:#f92672">]</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;success&#39;</span>
+        except :
+            traceback.print_exc<span style="color:#f92672">()</span>
+            response<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;msg&#39;</span><span style="color:#f92672">]</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;failed&#39;</span>
+
+        db.commit<span style="color:#f92672">()</span>
+        db.close<span style="color:#f92672">()</span>
+        <span style="color:#66d9ef">return</span> jsonify<span style="color:#f92672">(</span>response<span style="color:#f92672">)</span>
+
+    def delete<span style="color:#f92672">(</span>self, id<span style="color:#f92672">)</span>:
+        db, cursor <span style="color:#f92672">=</span> self.db_init<span style="color:#f92672">()</span>
+        sql <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">            UPDATE `flask`.`users` SET deleted = True WHERE (`id` = &#39;{}&#39;);
+</span><span style="color:#e6db74">        &#34;&#34;&#34;</span>.format<span style="color:#f92672">(</span>id<span style="color:#f92672">)</span>
+
+        response <span style="color:#f92672">=</span> <span style="color:#f92672">{}</span>
+        try:
+            cursor.execute<span style="color:#f92672">(</span>sql<span style="color:#f92672">)</span>
+            response<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;msg&#39;</span><span style="color:#f92672">]</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;success&#39;</span>
+        except :
+            traceback.print_exc<span style="color:#f92672">()</span>
+            response<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;msg&#39;</span><span style="color:#f92672">]</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;failed&#39;</span>
+
+        db.commit<span style="color:#f92672">()</span>
+        db.close<span style="color:#f92672">()</span>
+        <span style="color:#66d9ef">return</span> jsonify<span style="color:#f92672">(</span>response<span style="color:#f92672">)</span>
 
 class Users<span style="color:#f92672">(</span>Resource<span style="color:#f92672">)</span>:
     def db_init<span style="color:#f92672">(</span>self<span style="color:#f92672">)</span>:
@@ -241,7 +305,10 @@ class Users<span style="color:#f92672">(</span>Resource<span style="color:#f9267
 
     def get<span style="color:#f92672">(</span>self<span style="color:#f92672">)</span>:
         db, cursor <span style="color:#f92672">=</span> self.db_init<span style="color:#f92672">()</span>
-        sql <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;Select * From api.users&#39;</span>
+        arg <span style="color:#f92672">=</span> parser.parse_args<span style="color:#f92672">()</span>
+        sql <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;Select * From api.users where deleted is not True&#39;</span>
+        <span style="color:#66d9ef">if</span> arg<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;gender&#39;</span><span style="color:#f92672">]</span> !<span style="color:#f92672">=</span> None:
+            sql <span style="color:#f92672">+=</span> <span style="color:#e6db74">&#39; and gender = &#34;{}&#34;&#39;</span>.format<span style="color:#f92672">(</span>arg<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;gender&#39;</span><span style="color:#f92672">])</span>
         cursor.execute<span style="color:#f92672">(</span>sql<span style="color:#f92672">)</span>
         db.commit<span style="color:#f92672">()</span>
         users <span style="color:#f92672">=</span> cursor.fetchall<span style="color:#f92672">()</span>
@@ -257,11 +324,12 @@ class Users<span style="color:#f92672">(</span>Resource<span style="color:#f9267
             <span style="color:#e6db74">&#39;gender&#39;</span>: arg<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;gender&#39;</span><span style="color:#f92672">]</span> or 0,
             <span style="color:#e6db74">&#39;birth&#39;</span>: arg<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;birth&#39;</span><span style="color:#f92672">]</span> or <span style="color:#e6db74">&#39;1900-01-01&#39;</span>,
             <span style="color:#e6db74">&#39;note&#39;</span>: arg<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;note&#39;</span><span style="color:#f92672">]</span> or None,
+            <span style="color:#e6db74">&#39;deleted&#39;</span>: arg<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;deleted&#39;</span><span style="color:#f92672">]</span> or <span style="color:#ae81ff">0</span>
         <span style="color:#f92672">}</span>
 
         sql <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;&#34;
-</span><span style="color:#e6db74">            INSERT INTO `users` (`name`, `gender`, `birth`, `note`) VALUES (&#39;{}&#39;, &#39;{}&#39;, &#39;{}&#39;, &#39;{}&#39;);
-</span><span style="color:#e6db74">        &#34;&#34;&#34;</span>.format<span style="color:#f92672">(</span>user<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;name&#39;</span><span style="color:#f92672">]</span>, user<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;gender&#39;</span><span style="color:#f92672">]</span>, user<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;birth&#39;</span><span style="color:#f92672">]</span>, user<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;note&#39;</span><span style="color:#f92672">])</span>
+</span><span style="color:#e6db74">            INSERT INTO `users` (`name`, `gender`, `birth`, `note`, `deleted`) VALUES (&#39;{}&#39;, &#39;{}&#39;, &#39;{}&#39;, &#39;{}&#39;, &#39;{}&#39;);
+</span><span style="color:#e6db74">        &#34;&#34;&#34;</span>.format<span style="color:#f92672">(</span>user<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;name&#39;</span><span style="color:#f92672">]</span>, user<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;gender&#39;</span><span style="color:#f92672">]</span>, user<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;birth&#39;</span><span style="color:#f92672">]</span>, user<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;note&#39;</span><span style="color:#f92672">]</span>, user<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;deleted&#39;</span><span style="color:#f92672">])</span>
 
         response <span style="color:#f92672">=</span> <span style="color:#f92672">{}</span>
         try:
