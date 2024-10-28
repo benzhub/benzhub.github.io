@@ -1,39 +1,464 @@
-<!doctype html><html lang=en><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>BenzHub | 淺談Python中的字典理解式(Dictionary comprehensions) | Python</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#ffffff"><meta property="og:title" content="BenzHub | 淺談Python中的字典理解式(Dictionary comprehensions) | Python"><link rel=stylesheet href="/css/style.min.30a7f893a803920304ef458af63e1f017bf50b1cb5c56973c437f13547307cab.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="在Python中，字典（Dictionary）是一個非常強大且常用的資料結構，它允許我們將資料以鍵值對的形式進行存儲和訪問。而字典理解式（Dictionary Comprehensions）則是一種精簡且有效的創建字典的方法，讓我們能夠以更簡單、更易讀的方式來生成字典。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="在Python中，字典（Dictionary）是一個非常強大且常用的資料結構，它允許我們將資料以鍵值對的形式進行存儲和訪問。而字典理解式（Dictionary Comprehensions）則是一種精簡且有效的創建字典的方法，讓我們能夠以更簡單、更易讀的方式來生成字典。"><meta property="og:url" content="https://benzhub.github.io/post/python/019-dictionary-comprehensions/"><meta property="og:type" content="website"><meta property="og:locale" content="en_US"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/python/019-dictionary-comprehensions/><meta name=twitter:description content="在Python中，字典（Dictionary）是一個非常強大且常用的資料結構，它允許我們將資料以鍵值對的形式進行存儲和訪問。而字典理解式（Dictionary Comprehensions）則是一種精簡且有效的創建字典的方法，讓我們能夠以更簡單、更易讀的方式來生成字典。"><meta property="article:published_time" content="2024-02-04T00:00:00+00:00"><meta property="article:updated_time" content="2024-02-04T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/python/019-Dictionary-Comprehensions.png"><meta property="og:image:url" content="https://benzhub.github.io/img/python/019-Dictionary-Comprehensions.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i></head><body class=font-sans><div class="min-h-screen flex flex-col bg-gray-100 dark:bg-warmgray-800"><div class=bg-blue-500><div class="container max-w-screen-xl mr-auto ml-auto"><nav class="flex items-center justify-between flex-wrap bg-blue-500 p-6"><div class="flex items-center flex-no-shrink bg-blue-500 text-white mr-6"><a href=https://benzhub.github.io/><span class="font-semibold text-2xl tracking-tight">BenzHub</span></a></div><div class="flex md:hidden"><div class=py-2><button onclick=toggleDarkMode() class="focus:outline-none mr-1" aria-label="Darkmode Toggle Button"><i id=icon class="icon-moon inline-flex align-middle leading-normal text-lg text-white"></i></button>
-<span class=text-white>|</span></div><button id=hamburgerbtn class="flex items-center px-3 py-1 text-white hover:opacity-50" aria-label="Hamburger Button">
-<span class="icon-menu text-2xl"></span></button></div><div class="hidden w-full md:flex md:flex-row sm:items-center md:w-auto" id=mobileMenu><div class="text-sm lg:flex-grow"></div><div class=navmenu><a href=/ class="no-underline duration-200 block mt-4 sm:inline-block sm:mt-0 text-white hover:opacity-50 mr-4">Home</a>
-<a href=/about/ class="no-underline duration-200 block mt-4 sm:inline-block sm:mt-0 text-white hover:opacity-50 mr-4">About</a>
-<a href=/contact/ class="no-underline duration-200 block mt-4 sm:inline-block sm:mt-0 text-white hover:opacity-50 mr-4">Contact</a>
-<a href=/resourses/ class="no-underline duration-200 block mt-4 sm:inline-block sm:mt-0 text-white hover:opacity-50 mr-4">Resourses</a></div><div class="text-white invisible md:visible"><span>|</span>
-<button onclick=toggleDarkMode() class=focus-visible:outline-none aria-label="Darkmode Toggle Button"><i id=icon2 class="icon-moon hover:opacity-50 duration-200 inline-flex align-middle leading-normal text-lg ml-2"></i></button></div></div></nav></div></div><style>.active{display:block}</style><script>let hamburger=document.getElementById("hamburgerbtn"),mobileMenu=document.getElementById("mobileMenu");hamburger.addEventListener("click",function(){mobileMenu.classList.toggle("active")})</script><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-4"><div class="col-span-3 lg:col-span-2 dark:text-white"><div class="bg-white dark:bg-warmgray-900 p-5 my-4"><h1 class="mb-2 text-4xl font-bold">淺談Python中的字典理解式(Dictionary comprehensions) | Python</h1><aside id=meta><div><section><h4 id=date><span class="icon-access_time mr-2"></span>2024/02/04</h4></section><div id=tags><span class="icon-local_offer mr-1"></span>
-<a href=https://benzhub.github.io/tags/python>python</a> |</div></div></aside><img class="py-4 m-auto" src=https://benzhub.github.io/img/python/019-Dictionary-Comprehensions.png><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p>在Python中，字典（Dictionary）是一個非常強大且常用的資料結構，它允許我們將資料以鍵值對的形式進行存儲和訪問。而字典理解式（Dictionary Comprehensions）則是一種精簡且有效的創建字典的方法，讓我們能夠以更簡單、更易讀的方式來生成字典。</p></blockquote><h3 id=什麼是字典理解式>什麼是字典理解式？</h3><p>字典理解式提供了一種便捷的方式來根據特定的條件和規則來創建字典。它們的語法與列表理解式和集合理解式相似，但產生的結果是一個字典而不是列表或集合。</p><h3 id=如何使用字典理解式>如何使用字典理解式？</h3><p>字典理解式的一般語法如下：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=display:flex><span>{key_expression: value_expression <span style=color:#66d9ef>for</span> item <span style=color:#f92672>in</span> iterable <span style=color:#66d9ef>if</span> condition}
-</span></span></code></pre></div><p>其中：</p><ul><li><code>key_expression</code> 和 <code>value_expression</code> 是用來生成字典鍵值的運算式。</li><li><code>item</code> 是從 <code>iterable</code> 中取出的元素。</li><li><code>condition</code> 是一個可選的條件，用來過濾元素。</li></ul><h3 id=簡易範例>簡易範例</h3><p>讓我們通過一個簡單的例子來演示字典理解式的使用。假設我們有一個列表，其中包含一組學生的名稱和他們的成績，我們想要將這些資料轉換為一個字典，其中學生的名稱作為鍵，成績作為值，並且只包含成績大於等於60分的學生。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># 原始資料</span>
-</span></span><span style=display:flex><span>students <span style=color:#f92672>=</span> [(<span style=color:#e6db74>&#39;小明&#39;</span>, <span style=color:#ae81ff>85</span>), (<span style=color:#e6db74>&#39;小華&#39;</span>, <span style=color:#ae81ff>90</span>), (<span style=color:#e6db74>&#39;小美&#39;</span>, <span style=color:#ae81ff>55</span>), (<span style=color:#e6db74>&#39;小強&#39;</span>, <span style=color:#ae81ff>75</span>)]
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 使用字典理解式轉換資料</span>
-</span></span><span style=display:flex><span>passed_students <span style=color:#f92672>=</span> {name: score <span style=color:#66d9ef>for</span> name, score <span style=color:#f92672>in</span> students <span style=color:#66d9ef>if</span> score <span style=color:#f92672>&gt;=</span> <span style=color:#ae81ff>60</span>}
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>print(passed_students)
-</span></span></code></pre></div><p>執行上述程式碼後，將會輸出：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-arduino data-lang=arduino><span style=display:flex><span>{<span style=color:#960050;background-color:#1e0010>&#39;小明&#39;</span><span style=color:#f92672>:</span> <span style=color:#ae81ff>85</span>, <span style=color:#960050;background-color:#1e0010>&#39;小華&#39;</span><span style=color:#f92672>:</span> <span style=color:#ae81ff>90</span>, <span style=color:#960050;background-color:#1e0010>&#39;小強&#39;</span><span style=color:#f92672>:</span> <span style=color:#ae81ff>75</span>}
-</span></span></code></pre></div><p>如此一來，我們便快速地將原始資料轉換為一個只包含及格學生的字典。</p><h3 id=總結>總結</h3><p>字典理解式是Python中一個非常實用的功能，它使得我們能夠以更簡潔和優雅的方式來創建字典。通過合理地利用字典理解式，我們可以提高代碼的可讀性和效率，同時更快地實現我們的需求。希望本文能夠幫助你更好地理解和應用字典理解式這一特性。</p></div><aside id=meta></aside></div><div class="bg-white dark:bg-warmgray-900 p-5 my-4"><div class="grid grid-cols-2"><div class=col-span-1><a class="previous lg:text-2xl" href=https://benzhub.github.io/post/python/018-default-parameters/><div class="transition-colors duration-300 border border-gray-600 hover:border-black h-auto m-3 text-center py-3 lg:py-1"><span class=icon-keyboard_arrow_left></span> Python 函數預設參數(Default Parameters)的常見錯誤問題及解析 | Python</div></a></div><a class="next lg:text-2xl" href=https://benzhub.github.io/post/django/005-one-to-many-relationships/><div class="transition-colors duration-300 col-span-1 border border-gray-600 hover:border-black h-auto m-3 text-center py-3 lg:py-1">在Django中使用一對多(One-to-Many Relationship)建立Models | Django <span class=icon-keyboard_arrow_right></span></div></a></div></div><div class="bg-white dark:bg-warmgray-900 p-5 my-4"><div class=mb-3></div></div></div><div class="hidden lg:block lg:col-span-1"><div class=mb-3><form class=widget-search__form role=search method=get action=https://google.com/search><label><input class="w-full p-3 focus:outline-none dark:bg-warmgray-900 dark:text-white placeholder-gray-700 dark:placeholder-gray-300" type=search placeholder=Search... name=q aria-label=Search></label>
-<input class=hidden type=submit value=Search>
-<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="bg-white panel mb-3 dark:bg-warmgray-900"><p class="text-xl text-center text-gray-700 py-3 pl-3 dark:text-gray-300 font-bold">Tags</p><div class="panel-block p-2"><a href=/tags/css><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">css</span></a>
-<a href=/tags/django><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">django</span></a>
-<a href=/tags/flutter><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">flutter</span></a>
-<a href=/tags/git><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">git</span></a>
-<a href=/tags/html><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">html</span></a>
-<a href=/tags/javascript><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">javascript</span></a>
-<a href=/tags/linux><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">linux</span></a>
-<a href=/tags/networking><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">networking</span></a>
-<a href=/tags/nodejs><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">nodejs</span></a>
-<a href=/tags/npm><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">npm</span></a>
-<a href=/tags/nvm><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">nvm</span></a>
-<a href=/tags/postgresql><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">postgresql</span></a>
-<a href=/tags/python><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">python</span></a>
-<a href=/tags/react><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">react</span></a>
-<a href=/tags/react-native><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">react-native</span></a>
-<a href=/tags/seo><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">seo</span></a>
-<a href=/tags/tools><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">tools</span></a>
-<a href=/tags/typescript><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">typescript</span></a>
-<a href=/tags/%E7%B6%B2%E7%B5%A1%E9%80%9A%E8%A8%8A><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">網絡通訊</span></a>
-<a href=/tags/%E8%B3%87%E6%96%99%E7%B5%90%E6%A7%8B%E6%BC%94%E7%AE%97%E6%B3%95><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">資料結構演算法</span></a></div></div><div class="bg-white panel mb-3 pb-5 dark:bg-warmgray-900"><p class="text-xl text-center text-gray-700 py-5 dark:text-gray-300 font-bold">Recent Posts</p><div class=mx-6><a href=/post/javascript/051-this-situation/><div class="w-full block mt-3 bg-white hover:bg-gray-100 duration-200 dark:bg-warmgray-900 dark:text-gray-200 dark:hover:bg-warmgray-800"><div class=p-4><div class="text-gray-900 font-bold text-xl dark:text-white">Javascript各種情況下的this | Javascript</div><p class="text-sm text-gray-600 flex items-center pb-1 dark:text-gray-400"><time><span class="icon-access_time mr-1"></span>2024/03/08</time></p></div></div></a><a href=/post/python/020-args-kwargs/><div class="w-full block mt-3 bg-white hover:bg-gray-100 duration-200 dark:bg-warmgray-900 dark:text-gray-200 dark:hover:bg-warmgray-800"><div class=p-4><div class="text-gray-900 font-bold text-xl dark:text-white">Python中的*args和**kwargs：讓你的函式更具彈性 | Python</div><p class="text-sm text-gray-600 flex items-center pb-1 dark:text-gray-400"><time><span class="icon-access_time mr-1"></span>2024/03/06</time></p></div></div></a><a href=/post/python/021-oop/><div class="w-full block mt-3 bg-white hover:bg-gray-100 duration-200 dark:bg-warmgray-900 dark:text-gray-200 dark:hover:bg-warmgray-800"><div class=p-4><div class="text-gray-900 font-bold text-xl dark:text-white">Python的物件導向程式設計 | Python</div><p class="text-sm text-gray-600 flex items-center pb-1 dark:text-gray-400"><time><span class="icon-access_time mr-1"></span>2024/03/05</time></p></div></div></a><a href=/post/git/018-cherry-pick/><div class="w-full block mt-3 bg-white hover:bg-gray-100 duration-200 dark:bg-warmgray-900 dark:text-gray-200 dark:hover:bg-warmgray-800"><div class=p-4><div class="text-gray-900 font-bold text-xl dark:text-white">深入探索Git Rebase：提升你的分支合併技能 | Git</div><p class="text-sm text-gray-600 flex items-center pb-1 dark:text-gray-400"><time><span class="icon-access_time mr-1"></span>2024/03/03</time></p></div></div></a><a href=/post/git/017-rebase/><div class="w-full block mt-3 bg-white hover:bg-gray-100 duration-200 dark:bg-warmgray-900 dark:text-gray-200 dark:hover:bg-warmgray-800"><div class=p-4><div class="text-gray-900 font-bold text-xl dark:text-white">深入探索Git Rebase：提升你的分支合併技能 | Git</div><p class="text-sm text-gray-600 flex items-center pb-1 dark:text-gray-400"><time><span class="icon-access_time mr-1"></span>2024/03/02</time></p></div></div></a></div></div></div></div></div></div></div><footer class="bg-blue-500 text-white p-6"><div class="container max-w-screen-xl mr-auto ml-auto"><p>&copy; 2024 <a href=https://benzhub.github.io/ class="duration-200 hover:opacity-50">BenzHub</a></p></div><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun"),icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun"),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon"),icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon"),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun"),icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun"),document.documentElement.classList.add("dark"),localStorage.theme="dark")}</script></footer></div></body></html>
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-FSEWPBJMJT');
+</script>
+
+<title>BenzHub | 淺談Python中的字典理解式(Dictionary comprehensions) | Python</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+    <link rel="apple-touch-icon" sizes="180x180" href='/favicon/apple-touch-icon.png'>
+    <link rel="icon" type="image/png" sizes="32x32" href='/favicon/favicon-32x32.png'>
+    <link rel="icon" type="image/png" sizes="16x16" href='/favicon/favicon-16x16.png'>
+    <link rel="manifest" href='/favicon/site.webmanifest' />
+    <link rel="mask-icon" href=' /favicon/safari-pinned-tab.svg' color="#5bbad5" />
+    <link rel="shortcut icon" href='/favicon/favicon.ico' />
+    <meta name="theme-color" content="#ffffff">
+    <meta property="og:title" content="BenzHub | 淺談Python中的字典理解式(Dictionary comprehensions) | Python" />
+    
+    
+    
+    <link rel="stylesheet" href="/css/style.min.30a7f893a803920304ef458af63e1f017bf50b1cb5c56973c437f13547307cab.css" />
+    
+    <link href=' /css/blonde.min.css' rel="stylesheet" type="text/css" media="print"
+        onload="this.media=' all'">
+    
+
+
+
+<meta name="description" content="在Python中，字典（Dictionary）是一個非常強大且常用的資料結構，它允許我們將資料以鍵值對的形式進行存儲和訪問。而字典理解式（Dictionary Comprehensions）則是一種精簡且有效的創建字典的方法，讓我們能夠以更簡單、更易讀的方式來生成字典。">
+<meta property="og:site_name" content="BenzHub">
+<meta property="og:description" content="在Python中，字典（Dictionary）是一個非常強大且常用的資料結構，它允許我們將資料以鍵值對的形式進行存儲和訪問。而字典理解式（Dictionary Comprehensions）則是一種精簡且有效的創建字典的方法，讓我們能夠以更簡單、更易讀的方式來生成字典。">
+<meta property="og:url" content="https://benzhub.github.io/post/python/019-dictionary-comprehensions/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="">
+
+<link rel="canonical" href="https://benzhub.github.io/post/python/019-dictionary-comprehensions/">
+
+<meta name="twitter:description" content="在Python中，字典（Dictionary）是一個非常強大且常用的資料結構，它允許我們將資料以鍵值對的形式進行存儲和訪問。而字典理解式（Dictionary Comprehensions）則是一種精簡且有效的創建字典的方法，讓我們能夠以更簡單、更易讀的方式來生成字典。">
+<meta property="article:published_time" content="2024-02-04T00:00:00&#43;00:00">
+<meta property="article:updated_time" content="2024-02-04T00:00:00&#43;00:00">
+
+
+
+
+
+    
+<meta property="og:image" content="https://benzhub.github.io/img/python/019-Dictionary-Comprehensions.png">
+<meta property="og:image:url" content="https://benzhub.github.io/img/python/019-Dictionary-Comprehensions.png">
+    
+
+    
+    <link rel="stylesheet" href='/css/custom.css'>
+    <i class="dark hidden"></i>
+</head>
+<body class="font-sans">
+    <div class="min-h-screen flex flex-col bg-gray-100 dark:bg-warmgray-800"><div class="bg-blue-500">
+    <div class="container max-w-screen-xl mr-auto ml-auto">
+        <nav class="flex items-center justify-between flex-wrap bg-blue-500 p-6">
+            <div class="flex items-center flex-no-shrink bg-blue-500 text-white mr-6">
+                <a href="https://benzhub.github.io/"><span class="font-semibold text-2xl tracking-tight">BenzHub</span></a>
+            </div>
+            <div class="flex md:hidden">
+                <div class="py-2">
+                    <button onclick="toggleDarkMode()" class="focus:outline-none mr-1" aria-label="Darkmode Toggle Button"><i id="icon"
+                            class="icon-moon inline-flex align-middle leading-normal text-lg text-white"></i></button>
+                    <span class="text-white">|</span>
+                </div>
+                <button id="hamburgerbtn" class="flex items-center px-3 py-1 text-white hover:opacity-50" aria-label="Hamburger Button">
+                    <span class="icon-menu text-2xl"></span>
+                </button>
+            </div>
+            <div class="hidden w-full md:flex md:flex-row sm:items-center md:w-auto" id="mobileMenu">
+                <div class="text-sm lg:flex-grow">
+                </div>
+                <div class="navmenu">
+                    
+                    <a href="/"
+                        class="no-underline duration-200 block mt-4 sm:inline-block sm:mt-0 text-white hover:opacity-50 mr-4">
+                        Home
+                    </a>
+                    
+                    <a href="/about/"
+                        class="no-underline duration-200 block mt-4 sm:inline-block sm:mt-0 text-white hover:opacity-50 mr-4">
+                        About
+                    </a>
+                    
+                    <a href="/contact/"
+                        class="no-underline duration-200 block mt-4 sm:inline-block sm:mt-0 text-white hover:opacity-50 mr-4">
+                        Contact
+                    </a>
+                    
+                    <a href="/resourses/"
+                        class="no-underline duration-200 block mt-4 sm:inline-block sm:mt-0 text-white hover:opacity-50 mr-4">
+                        Resourses
+                    </a>
+                    
+                </div>
+                <div class="text-white invisible md:visible">
+                    <span>|</span>
+                    <button onclick="toggleDarkMode()" class="focus-visible:outline-none" aria-label="Darkmode Toggle Button"><i id="icon2"
+                            class="icon-moon hover:opacity-50 duration-200 inline-flex align-middle leading-normal text-lg ml-2"></i></button>
+                </div>
+            </div>
+        </nav>
+    </div>
+</div>
+<style>
+    .active {
+        display: block;
+    }
+</style>
+
+<script>
+    let hamburger = document.getElementById('hamburgerbtn');
+
+    let mobileMenu = document.getElementById('mobileMenu');
+
+    hamburger.addEventListener('click', function () {
+        mobileMenu.classList.toggle('active');
+    });
+</script>
+<div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id="content">
+            <div class="lg:mx-5">
+<div class="grid grid-cols-3 gap-4">
+  
+  <div class="col-span-3 lg:col-span-2 dark:text-white">
+    
+      <div class="bg-white dark:bg-warmgray-900 p-5 my-4">
+        <h1 class="mb-2 text-4xl font-bold">淺談Python中的字典理解式(Dictionary comprehensions) | Python</h1>
+        <aside id="meta">
+          <div>
+            <section>
+              <h4 id="date"><span class="icon-access_time mr-2"></span>2024/02/04
+              </h4>
+            </section>
+            
+            <div id="tags">
+              <span class="icon-local_offer mr-1"></span>
+              
+              <a href='https://benzhub.github.io/tags/python'>python</a> |
+              
+            </div>
+            
+          </div>
+        </aside>
+        
+        <img class="py-4 m-auto" src="https://benzhub.github.io/img/python/019-Dictionary-Comprehensions.png">
+        
+        
+        <div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote>
+<p>在Python中，字典（Dictionary）是一個非常強大且常用的資料結構，它允許我們將資料以鍵值對的形式進行存儲和訪問。而字典理解式（Dictionary Comprehensions）則是一種精簡且有效的創建字典的方法，讓我們能夠以更簡單、更易讀的方式來生成字典。</p>
+</blockquote>
+<h3 id="什麼是字典理解式">什麼是字典理解式？</h3>
+<p>字典理解式提供了一種便捷的方式來根據特定的條件和規則來創建字典。它們的語法與列表理解式和集合理解式相似，但產生的結果是一個字典而不是列表或集合。</p>
+<h3 id="如何使用字典理解式">如何使用字典理解式？</h3>
+<p>字典理解式的一般語法如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>{key_expression: value_expression <span style="color:#66d9ef">for</span> item <span style="color:#f92672">in</span> iterable <span style="color:#66d9ef">if</span> condition}
+</span></span></code></pre></div><p>其中：</p>
+<ul>
+<li><code>key_expression</code> 和 <code>value_expression</code> 是用來生成字典鍵值的運算式。</li>
+<li><code>item</code> 是從 <code>iterable</code> 中取出的元素。</li>
+<li><code>condition</code> 是一個可選的條件，用來過濾元素。</li>
+</ul>
+<h3 id="簡易範例">簡易範例</h3>
+<p>讓我們通過一個簡單的例子來演示字典理解式的使用。假設我們有一個列表，其中包含一組學生的名稱和他們的成績，我們想要將這些資料轉換為一個字典，其中學生的名稱作為鍵，成績作為值，並且只包含成績大於等於60分的學生。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 原始資料</span>
+</span></span><span style="display:flex;"><span>students <span style="color:#f92672">=</span> [(<span style="color:#e6db74">&#39;小明&#39;</span>, <span style="color:#ae81ff">85</span>), (<span style="color:#e6db74">&#39;小華&#39;</span>, <span style="color:#ae81ff">90</span>), (<span style="color:#e6db74">&#39;小美&#39;</span>, <span style="color:#ae81ff">55</span>), (<span style="color:#e6db74">&#39;小強&#39;</span>, <span style="color:#ae81ff">75</span>)]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 使用字典理解式轉換資料</span>
+</span></span><span style="display:flex;"><span>passed_students <span style="color:#f92672">=</span> {name: score <span style="color:#66d9ef">for</span> name, score <span style="color:#f92672">in</span> students <span style="color:#66d9ef">if</span> score <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">60</span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>print(passed_students)
+</span></span></code></pre></div><p>執行上述程式碼後，將會輸出：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-arduino" data-lang="arduino"><span style="display:flex;"><span>{<span style="color:#960050;background-color:#1e0010">&#39;小明&#39;</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">85</span>, <span style="color:#960050;background-color:#1e0010">&#39;小華&#39;</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">90</span>, <span style="color:#960050;background-color:#1e0010">&#39;小強&#39;</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">75</span>}
+</span></span></code></pre></div><p>如此一來，我們便快速地將原始資料轉換為一個只包含及格學生的字典。</p>
+<h3 id="總結">總結</h3>
+<p>字典理解式是Python中一個非常實用的功能，它使得我們能夠以更簡潔和優雅的方式來創建字典。通過合理地利用字典理解式，我們可以提高代碼的可讀性和效率，同時更快地實現我們的需求。希望本文能夠幫助你更好地理解和應用字典理解式這一特性。</p></div>
+        
+        <aside id="meta">
+          
+        </aside>
+      </div>
+      <div class="bg-white dark:bg-warmgray-900 p-5 my-4">
+        <div class="grid grid-cols-2">
+          <div class="col-span-1">
+            
+            <a class="previous lg:text-2xl" href="https://benzhub.github.io/post/python/018-default-parameters/">
+              <div
+                class="transition-colors duration-300 border border-gray-600 hover:border-black h-auto m-3 text-center py-3 lg:py-1">
+                <span class="icon-keyboard_arrow_left"></span> Python 函數預設參數(Default Parameters)的常見錯誤問題及解析 | Python
+              </div>
+            </a>
+            
+          </div>
+          
+          <a class="next lg:text-2xl" href="https://benzhub.github.io/post/django/005-one-to-many-relationships/">
+            <div
+              class="transition-colors duration-300 col-span-1 border border-gray-600 hover:border-black h-auto m-3 text-center py-3 lg:py-1">
+              在Django中使用一對多(One-to-Many Relationship)建立Models | Django <span class="icon-keyboard_arrow_right"></span>
+            </div>
+          </a>
+          
+        </div>
+      </div>
+      <div class="bg-white dark:bg-warmgray-900 p-5 my-4">
+        <div class="mb-3">
+          
+        </div>
+      </div>
+    </div>
+    
+    <div class="hidden lg:block lg:col-span-1">
+    
+    
+            
+            <div class="mb-3">
+    <form class="widget-search__form" role="search" method="get" action="https://google.com/search">
+        <label>
+            <input class="w-full p-3 focus:outline-none dark:bg-warmgray-900 dark:text-white placeholder-gray-700 dark:placeholder-gray-300" type="search"
+                placeholder="Search..." value="" name="q" aria-label="Search">
+        </label>
+        <input class="hidden" type="submit" value="Search">
+        <input type="hidden" name="sitesearch" value="https://benzhub.github.io/" />
+    </form>
+</div>
+        
+            
+            
+        
+            
+            
+<div class="bg-white panel mb-3 dark:bg-warmgray-900">
+    <p class="text-xl text-center text-gray-700 py-3 pl-3 dark:text-gray-300 font-bold">Tags</p>
+    <div class="panel-block p-2">
+        <a href='/tags/css'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                css
+            </span></a>
+        <a href='/tags/django'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                django
+            </span></a>
+        <a href='/tags/flutter'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                flutter
+            </span></a>
+        <a href='/tags/git'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                git
+            </span></a>
+        <a href='/tags/html'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                html
+            </span></a>
+        <a href='/tags/javascript'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                javascript
+            </span></a>
+        <a href='/tags/linux'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                linux
+            </span></a>
+        <a href='/tags/networking'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                networking
+            </span></a>
+        <a href='/tags/nodejs'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                nodejs
+            </span></a>
+        <a href='/tags/npm'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                npm
+            </span></a>
+        <a href='/tags/nvm'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                nvm
+            </span></a>
+        <a href='/tags/postgresql'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                postgresql
+            </span></a>
+        <a href='/tags/python'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                python
+            </span></a>
+        <a href='/tags/react'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                react
+            </span></a>
+        <a href='/tags/react-native'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                react native
+            </span></a>
+        <a href='/tags/seo'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                seo
+            </span></a>
+        <a href='/tags/tools'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                tools
+            </span></a>
+        <a href='/tags/typescript'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                typescript
+            </span></a>
+        <a href='/tags/%E7%B6%B2%E7%B5%A1%E9%80%9A%E8%A8%8A'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                網絡通訊
+            </span></a>
+        <a href='/tags/%E8%B3%87%E6%96%99%E7%B5%90%E6%A7%8B%E6%BC%94%E7%AE%97%E6%B3%95'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                資料結構&amp;演算法
+            </span></a>
+    </div>
+</div>
+
+
+        
+            
+            
+
+<div class="bg-white panel mb-3 pb-5 dark:bg-warmgray-900">
+    <p class="text-xl text-center text-gray-700 py-5 dark:text-gray-300 font-bold">Recent Posts</p>
+    <div class="mx-6">
+        <a href="/post/javascript/051-this-situation/" class="">
+            <div
+                class="w-full block mt-3 bg-white hover:bg-gray-100 duration-200 dark:bg-warmgray-900 dark:text-gray-200 dark:hover:bg-warmgray-800">
+                <div class="p-4">
+                    <div class="text-gray-900 font-bold text-xl dark:text-white">Javascript各種情況下的this | Javascript</div>
+                    <p class="text-sm text-gray-600 flex items-center pb-1 dark:text-gray-400">
+                        <time><span class="icon-access_time mr-1"></span>2024/03/08</time>
+                    </p>
+                </div>
+            </div>
+        </a>
+        <a href="/post/python/020-args-kwargs/" class="">
+            <div
+                class="w-full block mt-3 bg-white hover:bg-gray-100 duration-200 dark:bg-warmgray-900 dark:text-gray-200 dark:hover:bg-warmgray-800">
+                <div class="p-4">
+                    <div class="text-gray-900 font-bold text-xl dark:text-white">Python中的*args和**kwargs：讓你的函式更具彈性 | Python</div>
+                    <p class="text-sm text-gray-600 flex items-center pb-1 dark:text-gray-400">
+                        <time><span class="icon-access_time mr-1"></span>2024/03/06</time>
+                    </p>
+                </div>
+            </div>
+        </a>
+        <a href="/post/python/021-oop/" class="">
+            <div
+                class="w-full block mt-3 bg-white hover:bg-gray-100 duration-200 dark:bg-warmgray-900 dark:text-gray-200 dark:hover:bg-warmgray-800">
+                <div class="p-4">
+                    <div class="text-gray-900 font-bold text-xl dark:text-white">Python的物件導向程式設計 | Python</div>
+                    <p class="text-sm text-gray-600 flex items-center pb-1 dark:text-gray-400">
+                        <time><span class="icon-access_time mr-1"></span>2024/03/05</time>
+                    </p>
+                </div>
+            </div>
+        </a>
+        <a href="/post/git/018-cherry-pick/" class="">
+            <div
+                class="w-full block mt-3 bg-white hover:bg-gray-100 duration-200 dark:bg-warmgray-900 dark:text-gray-200 dark:hover:bg-warmgray-800">
+                <div class="p-4">
+                    <div class="text-gray-900 font-bold text-xl dark:text-white">深入探索Git Rebase：提升你的分支合併技能 | Git</div>
+                    <p class="text-sm text-gray-600 flex items-center pb-1 dark:text-gray-400">
+                        <time><span class="icon-access_time mr-1"></span>2024/03/03</time>
+                    </p>
+                </div>
+            </div>
+        </a>
+        <a href="/post/git/017-rebase/" class="">
+            <div
+                class="w-full block mt-3 bg-white hover:bg-gray-100 duration-200 dark:bg-warmgray-900 dark:text-gray-200 dark:hover:bg-warmgray-800">
+                <div class="p-4">
+                    <div class="text-gray-900 font-bold text-xl dark:text-white">深入探索Git Rebase：提升你的分支合併技能 | Git</div>
+                    <p class="text-sm text-gray-600 flex items-center pb-1 dark:text-gray-400">
+                        <time><span class="icon-access_time mr-1"></span>2024/03/02</time>
+                    </p>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+        
+    
+</div>
+    
+  </div>
+</div>
+
+            </div>
+        </div><footer class="bg-blue-500 text-white p-6">
+  
+  <div class="container max-w-screen-xl mr-auto ml-auto">
+    <p>&copy; 2024 <a href="https://benzhub.github.io/" class="duration-200 hover:opacity-50">BenzHub</a>
+    </p>
+  </div>
+  
+  <script>
+    var icon = document.getElementById("icon");
+    var icon2 = document.getElementById("icon2");
+    
+    if (document.documentElement.classList.contains("dark") || localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      icon.classList.remove("icon-moon");
+      icon.classList.add("icon-sun");
+      icon2.classList.remove("icon-moon");
+      icon2.classList.add("icon-sun");
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+    function toggleDarkMode() {
+      if (document.documentElement.classList.contains('dark')) {
+        icon.classList.remove("icon-sun");
+        icon.classList.add("icon-moon");
+        icon2.classList.remove("icon-sun");
+        icon2.classList.add("icon-moon");
+        document.documentElement.classList.remove('dark')
+        localStorage.theme = 'light'
+      } else {
+        icon.classList.remove("icon-moon");
+        icon.classList.add("icon-sun");
+        icon2.classList.remove("icon-moon");
+        icon2.classList.add("icon-sun");
+        document.documentElement.classList.add('dark')
+        localStorage.theme = 'dark'
+      }
+    }
+  </script>
+</footer></div>
+</body>
+
+</html>

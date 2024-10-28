@@ -1,38 +1,469 @@
-<!doctype html><html lang=en><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>BenzHub | 了解Git合併衝突：解決開發者最常見頭痛的狀況 | Git</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#ffffff"><meta property="og:title" content="BenzHub | 了解Git合併衝突：解決開發者最常見頭痛的狀況 | Git"><link rel=stylesheet href="/css/style.min.30a7f893a803920304ef458af63e1f017bf50b1cb5c56973c437f13547307cab.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="Git可以讓團隊能夠有效地協作、追蹤程式碼更動、以及管理版本控制。然而，當多個開發者同時修改相同的檔案時，就常常會引發Git合併衝突的問題發生。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="Git可以讓團隊能夠有效地協作、追蹤程式碼更動、以及管理版本控制。然而，當多個開發者同時修改相同的檔案時，就常常會引發Git合併衝突的問題發生。"><meta property="og:url" content="https://benzhub.github.io/post/git/013-merge-conflicts/"><meta property="og:type" content="website"><meta property="og:locale" content="en_US"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/git/013-merge-conflicts/><meta name=twitter:description content="Git可以讓團隊能夠有效地協作、追蹤程式碼更動、以及管理版本控制。然而，當多個開發者同時修改相同的檔案時，就常常會引發Git合併衝突的問題發生。"><meta property="article:published_time" content="2024-02-23T00:00:00+00:00"><meta property="article:updated_time" content="2024-02-23T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/git/013-Merge-Conflicts.png"><meta property="og:image:url" content="https://benzhub.github.io/img/git/013-Merge-Conflicts.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i></head><body class=font-sans><div class="min-h-screen flex flex-col bg-gray-100 dark:bg-warmgray-800"><div class=bg-blue-500><div class="container max-w-screen-xl mr-auto ml-auto"><nav class="flex items-center justify-between flex-wrap bg-blue-500 p-6"><div class="flex items-center flex-no-shrink bg-blue-500 text-white mr-6"><a href=https://benzhub.github.io/><span class="font-semibold text-2xl tracking-tight">BenzHub</span></a></div><div class="flex md:hidden"><div class=py-2><button onclick=toggleDarkMode() class="focus:outline-none mr-1" aria-label="Darkmode Toggle Button"><i id=icon class="icon-moon inline-flex align-middle leading-normal text-lg text-white"></i></button>
-<span class=text-white>|</span></div><button id=hamburgerbtn class="flex items-center px-3 py-1 text-white hover:opacity-50" aria-label="Hamburger Button">
-<span class="icon-menu text-2xl"></span></button></div><div class="hidden w-full md:flex md:flex-row sm:items-center md:w-auto" id=mobileMenu><div class="text-sm lg:flex-grow"></div><div class=navmenu><a href=/ class="no-underline duration-200 block mt-4 sm:inline-block sm:mt-0 text-white hover:opacity-50 mr-4">Home</a>
-<a href=/about/ class="no-underline duration-200 block mt-4 sm:inline-block sm:mt-0 text-white hover:opacity-50 mr-4">About</a>
-<a href=/contact/ class="no-underline duration-200 block mt-4 sm:inline-block sm:mt-0 text-white hover:opacity-50 mr-4">Contact</a>
-<a href=/resourses/ class="no-underline duration-200 block mt-4 sm:inline-block sm:mt-0 text-white hover:opacity-50 mr-4">Resourses</a></div><div class="text-white invisible md:visible"><span>|</span>
-<button onclick=toggleDarkMode() class=focus-visible:outline-none aria-label="Darkmode Toggle Button"><i id=icon2 class="icon-moon hover:opacity-50 duration-200 inline-flex align-middle leading-normal text-lg ml-2"></i></button></div></div></nav></div></div><style>.active{display:block}</style><script>let hamburger=document.getElementById("hamburgerbtn"),mobileMenu=document.getElementById("mobileMenu");hamburger.addEventListener("click",function(){mobileMenu.classList.toggle("active")})</script><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-4"><div class="col-span-3 lg:col-span-2 dark:text-white"><div class="bg-white dark:bg-warmgray-900 p-5 my-4"><h1 class="mb-2 text-4xl font-bold">了解Git合併衝突：解決開發者最常見頭痛的狀況 | Git</h1><aside id=meta><div><section><h4 id=date><span class="icon-access_time mr-2"></span>2024/02/23</h4></section><div id=tags><span class="icon-local_offer mr-1"></span>
-<a href=https://benzhub.github.io/tags/git>git</a> |</div></div></aside><img class="py-4 m-auto" src=https://benzhub.github.io/img/git/013-Merge-Conflicts.png><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p>Git可以讓團隊能夠有效地協作、追蹤程式碼更動、以及管理版本控制。然而，當多個開發者同時修改相同的檔案時，就常常會引發Git合併衝突的問題發生。</p></blockquote><h3 id=什麼是git-merge-conflicts合併衝突>什麼是Git Merge Conflicts(合併衝突)？</h3><p>Git Merge Conflicts(合併衝突)發生於當Git無法自動合併兩個不同版本的檔案時。這通常發生在兩個分支上有相同的檔案，但各自做了不同的修改，Git無法確定應該保留哪一個修改版本，因此需要開發者手動介入解決。</p><h3 id=什麼導致git合併衝突>什麼導致Git合併衝突？</h3><p>合併衝突可能由以下原因導致：</p><ol><li><strong>同時修改相同部分</strong> ：兩個開發者在相同的檔案的相同部分做了修改。</li><li><strong>合併的兩個分支基於不同的基準</strong> ：如果兩個分支是基於不同的基準進行修改，Git可能無法確定如何合併這些差異。</li></ol><h3 id=如何解決git合併衝突>如何解決Git合併衝突？</h3><p>解決合併衝突的一般步驟如下：</p><ol><li><strong>瞭解衝突</strong> ：執行合併操作後，Git會提示衝突存在。開發者需要檢視衝突的檔案，了解哪些部分有衝突。</li><li><strong>手動解決衝突</strong> ：開發者需手動編輯有衝突的檔案，選擇保留哪些修改。通常，Git會在衝突區域附近標記出兩個版本的修改，開發者需要根據需要選擇、保留或合併這些修改。</li><li><strong>標記衝突已解決</strong> ：解決衝突後，開發者需要將標記插入檔案中，告訴Git衝突已經解決。這個標記通常是特定的格式，告訴Git哪些部分已經被解決。</li></ol><h3 id=範例解決合併衝突>範例：解決合併衝突</h3><p>假設有一個名為<code>example.txt</code>的檔案，兩個開發者在不同的分支上修改了它：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-plaintext data-lang=plaintext><span style=display:flex><span># 分支A的版本
-</span></span><span style=display:flex><span>這是分支A的修改。
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
-</span></span><span style=display:flex><span>這是分支B的修改。
-</span></span><span style=display:flex><span>=======
-</span></span><span style=display:flex><span>這是分支A的修改。
-</span></span><span style=display:flex><span>&gt;&gt;&gt;&gt;&gt;&gt;&gt; branchB
-</span></span></code></pre></div><p>在這個例子中，<code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</code>和<code>>>>>>>> branchB</code>之間的部分是Git標記的衝突區域，開發者需要手動選擇保留哪個版本的修改，或者將兩個版本合併成一個新的修改。</p><h3 id=注意>注意</h3><p>如果你手動更改Conflicts的問題，理論上不要在這個merge中放入新的程式碼，如果這樣做會被稱作為evil commit，因為這樣會造成所有分支中都不存在的更改。</p><h3 id=結論>結論</h3><p>Git合併衝突是軟體開發中常見的挑戰之一，但它也提供了一個機會，讓開發者更深入地了解程式碼的變化以及協作過程中的溝通和合作。通過理解合併衝突的原因和解決方法，開發者可以更有效地處理這些情況，確保順利完成代碼的合併和協作。</p></div><aside id=meta></aside></div><div class="bg-white dark:bg-warmgray-900 p-5 my-4"><div class="grid grid-cols-2"><div class=col-span-1><a class="previous lg:text-2xl" href=https://benzhub.github.io/post/git/012-branchs/><div class="transition-colors duration-300 border border-gray-600 hover:border-black h-auto m-3 text-center py-3 lg:py-1"><span class=icon-keyboard_arrow_left></span> Git分支：有效管理開發流程的必備技巧 | Git</div></a></div><a class="next lg:text-2xl" href=https://benzhub.github.io/post/git/014-stash/><div class="transition-colors duration-300 col-span-1 border border-gray-600 hover:border-black h-auto m-3 text-center py-3 lg:py-1">Git Stash 暫存檔案指令 | Git <span class=icon-keyboard_arrow_right></span></div></a></div></div><div class="bg-white dark:bg-warmgray-900 p-5 my-4"><div class=mb-3></div></div></div><div class="hidden lg:block lg:col-span-1"><div class=mb-3><form class=widget-search__form role=search method=get action=https://google.com/search><label><input class="w-full p-3 focus:outline-none dark:bg-warmgray-900 dark:text-white placeholder-gray-700 dark:placeholder-gray-300" type=search placeholder=Search... name=q aria-label=Search></label>
-<input class=hidden type=submit value=Search>
-<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="bg-white panel mb-3 dark:bg-warmgray-900"><p class="text-xl text-center text-gray-700 py-3 pl-3 dark:text-gray-300 font-bold">Tags</p><div class="panel-block p-2"><a href=/tags/css><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">css</span></a>
-<a href=/tags/django><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">django</span></a>
-<a href=/tags/flutter><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">flutter</span></a>
-<a href=/tags/git><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">git</span></a>
-<a href=/tags/html><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">html</span></a>
-<a href=/tags/javascript><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">javascript</span></a>
-<a href=/tags/linux><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">linux</span></a>
-<a href=/tags/networking><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">networking</span></a>
-<a href=/tags/nodejs><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">nodejs</span></a>
-<a href=/tags/npm><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">npm</span></a>
-<a href=/tags/nvm><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">nvm</span></a>
-<a href=/tags/postgresql><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">postgresql</span></a>
-<a href=/tags/python><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">python</span></a>
-<a href=/tags/react><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">react</span></a>
-<a href=/tags/react-native><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">react-native</span></a>
-<a href=/tags/seo><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">seo</span></a>
-<a href=/tags/tools><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">tools</span></a>
-<a href=/tags/typescript><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">typescript</span></a>
-<a href=/tags/%E7%B6%B2%E7%B5%A1%E9%80%9A%E8%A8%8A><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">網絡通訊</span></a>
-<a href=/tags/%E8%B3%87%E6%96%99%E7%B5%90%E6%A7%8B%E6%BC%94%E7%AE%97%E6%B3%95><span class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">資料結構演算法</span></a></div></div><div class="bg-white panel mb-3 pb-5 dark:bg-warmgray-900"><p class="text-xl text-center text-gray-700 py-5 dark:text-gray-300 font-bold">Recent Posts</p><div class=mx-6><a href=/post/javascript/051-this-situation/><div class="w-full block mt-3 bg-white hover:bg-gray-100 duration-200 dark:bg-warmgray-900 dark:text-gray-200 dark:hover:bg-warmgray-800"><div class=p-4><div class="text-gray-900 font-bold text-xl dark:text-white">Javascript各種情況下的this | Javascript</div><p class="text-sm text-gray-600 flex items-center pb-1 dark:text-gray-400"><time><span class="icon-access_time mr-1"></span>2024/03/08</time></p></div></div></a><a href=/post/python/020-args-kwargs/><div class="w-full block mt-3 bg-white hover:bg-gray-100 duration-200 dark:bg-warmgray-900 dark:text-gray-200 dark:hover:bg-warmgray-800"><div class=p-4><div class="text-gray-900 font-bold text-xl dark:text-white">Python中的*args和**kwargs：讓你的函式更具彈性 | Python</div><p class="text-sm text-gray-600 flex items-center pb-1 dark:text-gray-400"><time><span class="icon-access_time mr-1"></span>2024/03/06</time></p></div></div></a><a href=/post/python/021-oop/><div class="w-full block mt-3 bg-white hover:bg-gray-100 duration-200 dark:bg-warmgray-900 dark:text-gray-200 dark:hover:bg-warmgray-800"><div class=p-4><div class="text-gray-900 font-bold text-xl dark:text-white">Python的物件導向程式設計 | Python</div><p class="text-sm text-gray-600 flex items-center pb-1 dark:text-gray-400"><time><span class="icon-access_time mr-1"></span>2024/03/05</time></p></div></div></a><a href=/post/git/018-cherry-pick/><div class="w-full block mt-3 bg-white hover:bg-gray-100 duration-200 dark:bg-warmgray-900 dark:text-gray-200 dark:hover:bg-warmgray-800"><div class=p-4><div class="text-gray-900 font-bold text-xl dark:text-white">深入探索Git Rebase：提升你的分支合併技能 | Git</div><p class="text-sm text-gray-600 flex items-center pb-1 dark:text-gray-400"><time><span class="icon-access_time mr-1"></span>2024/03/03</time></p></div></div></a><a href=/post/git/017-rebase/><div class="w-full block mt-3 bg-white hover:bg-gray-100 duration-200 dark:bg-warmgray-900 dark:text-gray-200 dark:hover:bg-warmgray-800"><div class=p-4><div class="text-gray-900 font-bold text-xl dark:text-white">深入探索Git Rebase：提升你的分支合併技能 | Git</div><p class="text-sm text-gray-600 flex items-center pb-1 dark:text-gray-400"><time><span class="icon-access_time mr-1"></span>2024/03/02</time></p></div></div></a></div></div></div></div></div></div></div><footer class="bg-blue-500 text-white p-6"><div class="container max-w-screen-xl mr-auto ml-auto"><p>&copy; 2024 <a href=https://benzhub.github.io/ class="duration-200 hover:opacity-50">BenzHub</a></p></div><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun"),icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun"),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon"),icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon"),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun"),icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun"),document.documentElement.classList.add("dark"),localStorage.theme="dark")}</script></footer></div></body></html>
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-FSEWPBJMJT');
+</script>
+
+<title>BenzHub | 了解Git合併衝突：解決開發者最常見頭痛的狀況 | Git</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+    <link rel="apple-touch-icon" sizes="180x180" href='/favicon/apple-touch-icon.png'>
+    <link rel="icon" type="image/png" sizes="32x32" href='/favicon/favicon-32x32.png'>
+    <link rel="icon" type="image/png" sizes="16x16" href='/favicon/favicon-16x16.png'>
+    <link rel="manifest" href='/favicon/site.webmanifest' />
+    <link rel="mask-icon" href=' /favicon/safari-pinned-tab.svg' color="#5bbad5" />
+    <link rel="shortcut icon" href='/favicon/favicon.ico' />
+    <meta name="theme-color" content="#ffffff">
+    <meta property="og:title" content="BenzHub | 了解Git合併衝突：解決開發者最常見頭痛的狀況 | Git" />
+    
+    
+    
+    <link rel="stylesheet" href="/css/style.min.30a7f893a803920304ef458af63e1f017bf50b1cb5c56973c437f13547307cab.css" />
+    
+    <link href=' /css/blonde.min.css' rel="stylesheet" type="text/css" media="print"
+        onload="this.media=' all'">
+    
+
+
+
+<meta name="description" content="Git可以讓團隊能夠有效地協作、追蹤程式碼更動、以及管理版本控制。然而，當多個開發者同時修改相同的檔案時，就常常會引發Git合併衝突的問題發生。">
+<meta property="og:site_name" content="BenzHub">
+<meta property="og:description" content="Git可以讓團隊能夠有效地協作、追蹤程式碼更動、以及管理版本控制。然而，當多個開發者同時修改相同的檔案時，就常常會引發Git合併衝突的問題發生。">
+<meta property="og:url" content="https://benzhub.github.io/post/git/013-merge-conflicts/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="">
+
+<link rel="canonical" href="https://benzhub.github.io/post/git/013-merge-conflicts/">
+
+<meta name="twitter:description" content="Git可以讓團隊能夠有效地協作、追蹤程式碼更動、以及管理版本控制。然而，當多個開發者同時修改相同的檔案時，就常常會引發Git合併衝突的問題發生。">
+<meta property="article:published_time" content="2024-02-23T00:00:00&#43;00:00">
+<meta property="article:updated_time" content="2024-02-23T00:00:00&#43;00:00">
+
+
+
+
+
+    
+<meta property="og:image" content="https://benzhub.github.io/img/git/013-Merge-Conflicts.png">
+<meta property="og:image:url" content="https://benzhub.github.io/img/git/013-Merge-Conflicts.png">
+    
+
+    
+    <link rel="stylesheet" href='/css/custom.css'>
+    <i class="dark hidden"></i>
+</head>
+<body class="font-sans">
+    <div class="min-h-screen flex flex-col bg-gray-100 dark:bg-warmgray-800"><div class="bg-blue-500">
+    <div class="container max-w-screen-xl mr-auto ml-auto">
+        <nav class="flex items-center justify-between flex-wrap bg-blue-500 p-6">
+            <div class="flex items-center flex-no-shrink bg-blue-500 text-white mr-6">
+                <a href="https://benzhub.github.io/"><span class="font-semibold text-2xl tracking-tight">BenzHub</span></a>
+            </div>
+            <div class="flex md:hidden">
+                <div class="py-2">
+                    <button onclick="toggleDarkMode()" class="focus:outline-none mr-1" aria-label="Darkmode Toggle Button"><i id="icon"
+                            class="icon-moon inline-flex align-middle leading-normal text-lg text-white"></i></button>
+                    <span class="text-white">|</span>
+                </div>
+                <button id="hamburgerbtn" class="flex items-center px-3 py-1 text-white hover:opacity-50" aria-label="Hamburger Button">
+                    <span class="icon-menu text-2xl"></span>
+                </button>
+            </div>
+            <div class="hidden w-full md:flex md:flex-row sm:items-center md:w-auto" id="mobileMenu">
+                <div class="text-sm lg:flex-grow">
+                </div>
+                <div class="navmenu">
+                    
+                    <a href="/"
+                        class="no-underline duration-200 block mt-4 sm:inline-block sm:mt-0 text-white hover:opacity-50 mr-4">
+                        Home
+                    </a>
+                    
+                    <a href="/about/"
+                        class="no-underline duration-200 block mt-4 sm:inline-block sm:mt-0 text-white hover:opacity-50 mr-4">
+                        About
+                    </a>
+                    
+                    <a href="/contact/"
+                        class="no-underline duration-200 block mt-4 sm:inline-block sm:mt-0 text-white hover:opacity-50 mr-4">
+                        Contact
+                    </a>
+                    
+                    <a href="/resourses/"
+                        class="no-underline duration-200 block mt-4 sm:inline-block sm:mt-0 text-white hover:opacity-50 mr-4">
+                        Resourses
+                    </a>
+                    
+                </div>
+                <div class="text-white invisible md:visible">
+                    <span>|</span>
+                    <button onclick="toggleDarkMode()" class="focus-visible:outline-none" aria-label="Darkmode Toggle Button"><i id="icon2"
+                            class="icon-moon hover:opacity-50 duration-200 inline-flex align-middle leading-normal text-lg ml-2"></i></button>
+                </div>
+            </div>
+        </nav>
+    </div>
+</div>
+<style>
+    .active {
+        display: block;
+    }
+</style>
+
+<script>
+    let hamburger = document.getElementById('hamburgerbtn');
+
+    let mobileMenu = document.getElementById('mobileMenu');
+
+    hamburger.addEventListener('click', function () {
+        mobileMenu.classList.toggle('active');
+    });
+</script>
+<div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id="content">
+            <div class="lg:mx-5">
+<div class="grid grid-cols-3 gap-4">
+  
+  <div class="col-span-3 lg:col-span-2 dark:text-white">
+    
+      <div class="bg-white dark:bg-warmgray-900 p-5 my-4">
+        <h1 class="mb-2 text-4xl font-bold">了解Git合併衝突：解決開發者最常見頭痛的狀況 | Git</h1>
+        <aside id="meta">
+          <div>
+            <section>
+              <h4 id="date"><span class="icon-access_time mr-2"></span>2024/02/23
+              </h4>
+            </section>
+            
+            <div id="tags">
+              <span class="icon-local_offer mr-1"></span>
+              
+              <a href='https://benzhub.github.io/tags/git'>git</a> |
+              
+            </div>
+            
+          </div>
+        </aside>
+        
+        <img class="py-4 m-auto" src="https://benzhub.github.io/img/git/013-Merge-Conflicts.png">
+        
+        
+        <div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote>
+<p>Git可以讓團隊能夠有效地協作、追蹤程式碼更動、以及管理版本控制。然而，當多個開發者同時修改相同的檔案時，就常常會引發Git合併衝突的問題發生。</p>
+</blockquote>
+<h3 id="什麼是git-merge-conflicts合併衝突">什麼是Git Merge Conflicts(合併衝突)？</h3>
+<p>Git Merge Conflicts(合併衝突)發生於當Git無法自動合併兩個不同版本的檔案時。這通常發生在兩個分支上有相同的檔案，但各自做了不同的修改，Git無法確定應該保留哪一個修改版本，因此需要開發者手動介入解決。</p>
+<h3 id="什麼導致git合併衝突">什麼導致Git合併衝突？</h3>
+<p>合併衝突可能由以下原因導致：</p>
+<ol>
+<li><strong>同時修改相同部分</strong> ：兩個開發者在相同的檔案的相同部分做了修改。</li>
+<li><strong>合併的兩個分支基於不同的基準</strong> ：如果兩個分支是基於不同的基準進行修改，Git可能無法確定如何合併這些差異。</li>
+</ol>
+<h3 id="如何解決git合併衝突">如何解決Git合併衝突？</h3>
+<p>解決合併衝突的一般步驟如下：</p>
+<ol>
+<li><strong>瞭解衝突</strong> ：執行合併操作後，Git會提示衝突存在。開發者需要檢視衝突的檔案，了解哪些部分有衝突。</li>
+<li><strong>手動解決衝突</strong> ：開發者需手動編輯有衝突的檔案，選擇保留哪些修改。通常，Git會在衝突區域附近標記出兩個版本的修改，開發者需要根據需要選擇、保留或合併這些修改。</li>
+<li><strong>標記衝突已解決</strong> ：解決衝突後，開發者需要將標記插入檔案中，告訴Git衝突已經解決。這個標記通常是特定的格式，告訴Git哪些部分已經被解決。</li>
+</ol>
+<h3 id="範例解決合併衝突">範例：解決合併衝突</h3>
+<p>假設有一個名為<code>example.txt</code>的檔案，兩個開發者在不同的分支上修改了它：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-plaintext" data-lang="plaintext"><span style="display:flex;"><span># 分支A的版本
+</span></span><span style="display:flex;"><span>這是分支A的修改。
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+</span></span><span style="display:flex;"><span>這是分支B的修改。
+</span></span><span style="display:flex;"><span>=======
+</span></span><span style="display:flex;"><span>這是分支A的修改。
+</span></span><span style="display:flex;"><span>&gt;&gt;&gt;&gt;&gt;&gt;&gt; branchB
+</span></span></code></pre></div><p>在這個例子中，<code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</code>和<code>&gt;&gt;&gt;&gt;&gt;&gt;&gt; branchB</code>之間的部分是Git標記的衝突區域，開發者需要手動選擇保留哪個版本的修改，或者將兩個版本合併成一個新的修改。</p>
+<h3 id="注意">注意</h3>
+<p>如果你手動更改Conflicts的問題，理論上不要在這個merge中放入新的程式碼，如果這樣做會被稱作為evil commit，因為這樣會造成所有分支中都不存在的更改。</p>
+<h3 id="結論">結論</h3>
+<p>Git合併衝突是軟體開發中常見的挑戰之一，但它也提供了一個機會，讓開發者更深入地了解程式碼的變化以及協作過程中的溝通和合作。通過理解合併衝突的原因和解決方法，開發者可以更有效地處理這些情況，確保順利完成代碼的合併和協作。</p></div>
+        
+        <aside id="meta">
+          
+        </aside>
+      </div>
+      <div class="bg-white dark:bg-warmgray-900 p-5 my-4">
+        <div class="grid grid-cols-2">
+          <div class="col-span-1">
+            
+            <a class="previous lg:text-2xl" href="https://benzhub.github.io/post/git/012-branchs/">
+              <div
+                class="transition-colors duration-300 border border-gray-600 hover:border-black h-auto m-3 text-center py-3 lg:py-1">
+                <span class="icon-keyboard_arrow_left"></span> Git分支：有效管理開發流程的必備技巧 | Git
+              </div>
+            </a>
+            
+          </div>
+          
+          <a class="next lg:text-2xl" href="https://benzhub.github.io/post/git/014-stash/">
+            <div
+              class="transition-colors duration-300 col-span-1 border border-gray-600 hover:border-black h-auto m-3 text-center py-3 lg:py-1">
+              Git Stash 暫存檔案指令 | Git <span class="icon-keyboard_arrow_right"></span>
+            </div>
+          </a>
+          
+        </div>
+      </div>
+      <div class="bg-white dark:bg-warmgray-900 p-5 my-4">
+        <div class="mb-3">
+          
+        </div>
+      </div>
+    </div>
+    
+    <div class="hidden lg:block lg:col-span-1">
+    
+    
+            
+            <div class="mb-3">
+    <form class="widget-search__form" role="search" method="get" action="https://google.com/search">
+        <label>
+            <input class="w-full p-3 focus:outline-none dark:bg-warmgray-900 dark:text-white placeholder-gray-700 dark:placeholder-gray-300" type="search"
+                placeholder="Search..." value="" name="q" aria-label="Search">
+        </label>
+        <input class="hidden" type="submit" value="Search">
+        <input type="hidden" name="sitesearch" value="https://benzhub.github.io/" />
+    </form>
+</div>
+        
+            
+            
+        
+            
+            
+<div class="bg-white panel mb-3 dark:bg-warmgray-900">
+    <p class="text-xl text-center text-gray-700 py-3 pl-3 dark:text-gray-300 font-bold">Tags</p>
+    <div class="panel-block p-2">
+        <a href='/tags/css'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                css
+            </span></a>
+        <a href='/tags/django'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                django
+            </span></a>
+        <a href='/tags/flutter'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                flutter
+            </span></a>
+        <a href='/tags/git'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                git
+            </span></a>
+        <a href='/tags/html'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                html
+            </span></a>
+        <a href='/tags/javascript'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                javascript
+            </span></a>
+        <a href='/tags/linux'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                linux
+            </span></a>
+        <a href='/tags/networking'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                networking
+            </span></a>
+        <a href='/tags/nodejs'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                nodejs
+            </span></a>
+        <a href='/tags/npm'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                npm
+            </span></a>
+        <a href='/tags/nvm'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                nvm
+            </span></a>
+        <a href='/tags/postgresql'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                postgresql
+            </span></a>
+        <a href='/tags/python'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                python
+            </span></a>
+        <a href='/tags/react'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                react
+            </span></a>
+        <a href='/tags/react-native'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                react native
+            </span></a>
+        <a href='/tags/seo'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                seo
+            </span></a>
+        <a href='/tags/tools'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                tools
+            </span></a>
+        <a href='/tags/typescript'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                typescript
+            </span></a>
+        <a href='/tags/%E7%B6%B2%E7%B5%A1%E9%80%9A%E8%A8%8A'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                網絡通訊
+            </span></a>
+        <a href='/tags/%E8%B3%87%E6%96%99%E7%B5%90%E6%A7%8B%E6%BC%94%E7%AE%97%E6%B3%95'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                資料結構&amp;演算法
+            </span></a>
+    </div>
+</div>
+
+
+        
+            
+            
+
+<div class="bg-white panel mb-3 pb-5 dark:bg-warmgray-900">
+    <p class="text-xl text-center text-gray-700 py-5 dark:text-gray-300 font-bold">Recent Posts</p>
+    <div class="mx-6">
+        <a href="/post/javascript/051-this-situation/" class="">
+            <div
+                class="w-full block mt-3 bg-white hover:bg-gray-100 duration-200 dark:bg-warmgray-900 dark:text-gray-200 dark:hover:bg-warmgray-800">
+                <div class="p-4">
+                    <div class="text-gray-900 font-bold text-xl dark:text-white">Javascript各種情況下的this | Javascript</div>
+                    <p class="text-sm text-gray-600 flex items-center pb-1 dark:text-gray-400">
+                        <time><span class="icon-access_time mr-1"></span>2024/03/08</time>
+                    </p>
+                </div>
+            </div>
+        </a>
+        <a href="/post/python/020-args-kwargs/" class="">
+            <div
+                class="w-full block mt-3 bg-white hover:bg-gray-100 duration-200 dark:bg-warmgray-900 dark:text-gray-200 dark:hover:bg-warmgray-800">
+                <div class="p-4">
+                    <div class="text-gray-900 font-bold text-xl dark:text-white">Python中的*args和**kwargs：讓你的函式更具彈性 | Python</div>
+                    <p class="text-sm text-gray-600 flex items-center pb-1 dark:text-gray-400">
+                        <time><span class="icon-access_time mr-1"></span>2024/03/06</time>
+                    </p>
+                </div>
+            </div>
+        </a>
+        <a href="/post/python/021-oop/" class="">
+            <div
+                class="w-full block mt-3 bg-white hover:bg-gray-100 duration-200 dark:bg-warmgray-900 dark:text-gray-200 dark:hover:bg-warmgray-800">
+                <div class="p-4">
+                    <div class="text-gray-900 font-bold text-xl dark:text-white">Python的物件導向程式設計 | Python</div>
+                    <p class="text-sm text-gray-600 flex items-center pb-1 dark:text-gray-400">
+                        <time><span class="icon-access_time mr-1"></span>2024/03/05</time>
+                    </p>
+                </div>
+            </div>
+        </a>
+        <a href="/post/git/018-cherry-pick/" class="">
+            <div
+                class="w-full block mt-3 bg-white hover:bg-gray-100 duration-200 dark:bg-warmgray-900 dark:text-gray-200 dark:hover:bg-warmgray-800">
+                <div class="p-4">
+                    <div class="text-gray-900 font-bold text-xl dark:text-white">深入探索Git Rebase：提升你的分支合併技能 | Git</div>
+                    <p class="text-sm text-gray-600 flex items-center pb-1 dark:text-gray-400">
+                        <time><span class="icon-access_time mr-1"></span>2024/03/03</time>
+                    </p>
+                </div>
+            </div>
+        </a>
+        <a href="/post/git/017-rebase/" class="">
+            <div
+                class="w-full block mt-3 bg-white hover:bg-gray-100 duration-200 dark:bg-warmgray-900 dark:text-gray-200 dark:hover:bg-warmgray-800">
+                <div class="p-4">
+                    <div class="text-gray-900 font-bold text-xl dark:text-white">深入探索Git Rebase：提升你的分支合併技能 | Git</div>
+                    <p class="text-sm text-gray-600 flex items-center pb-1 dark:text-gray-400">
+                        <time><span class="icon-access_time mr-1"></span>2024/03/02</time>
+                    </p>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+        
+    
+</div>
+    
+  </div>
+</div>
+
+            </div>
+        </div><footer class="bg-blue-500 text-white p-6">
+  
+  <div class="container max-w-screen-xl mr-auto ml-auto">
+    <p>&copy; 2024 <a href="https://benzhub.github.io/" class="duration-200 hover:opacity-50">BenzHub</a>
+    </p>
+  </div>
+  
+  <script>
+    var icon = document.getElementById("icon");
+    var icon2 = document.getElementById("icon2");
+    
+    if (document.documentElement.classList.contains("dark") || localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      icon.classList.remove("icon-moon");
+      icon.classList.add("icon-sun");
+      icon2.classList.remove("icon-moon");
+      icon2.classList.add("icon-sun");
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+    function toggleDarkMode() {
+      if (document.documentElement.classList.contains('dark')) {
+        icon.classList.remove("icon-sun");
+        icon.classList.add("icon-moon");
+        icon2.classList.remove("icon-sun");
+        icon2.classList.add("icon-moon");
+        document.documentElement.classList.remove('dark')
+        localStorage.theme = 'light'
+      } else {
+        icon.classList.remove("icon-moon");
+        icon.classList.add("icon-sun");
+        icon2.classList.remove("icon-moon");
+        icon2.classList.add("icon-sun");
+        document.documentElement.classList.add('dark')
+        localStorage.theme = 'dark'
+      }
+    }
+  </script>
+</footer></div>
+</body>
+
+</html>
