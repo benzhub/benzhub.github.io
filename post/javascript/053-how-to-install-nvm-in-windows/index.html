@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><title>BenzHub | Windows 上安裝 NVM | Javascript</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+    <link rel="apple-touch-icon" sizes="180x180" href='/favicon/apple-touch-icon.png'>
+    <link rel="icon" type="image/png" sizes="32x32" href='/favicon/favicon-32x32.png'>
+    <link rel="icon" type="image/png" sizes="16x16" href='/favicon/favicon-16x16.png'>
+    <link rel="manifest" href='/favicon/site.webmanifest' />
+    <link rel="mask-icon" href=' /favicon/safari-pinned-tab.svg' color="#5bbad5" />
+    <link rel="shortcut icon" href='/favicon/favicon.ico' />
+    <meta name="theme-color" content="#ffffff">
+    <meta property="og:title" content="BenzHub | Windows 上安裝 NVM | Javascript" />
+    
+    
+    <link rel="stylesheet" href="/css/style.css" />
+    
+    <link href=' /css/blonde.min.css' rel="stylesheet" type="text/css" media="print"
+        onload="this.media=' all'">
+    
+
+
+
+<meta name="description" content="
+NVM (Node Version Manager) 主要支援 Linux 和 Mac 系統。 雖然 Windows 不支援 NVM，但有一個名為 nvm-windows 的工具，由 coreybutler 開發，可在 Windows 上提供類似的 NVM 體驗。
+">
+<meta property="og:site_name" content="BenzHub">
+<meta property="og:description" content="
+NVM (Node Version Manager) 主要支援 Linux 和 Mac 系統。 雖然 Windows 不支援 NVM，但有一個名為 nvm-windows 的工具，由 coreybutler 開發，可在 Windows 上提供類似的 NVM 體驗。
+">
+<meta property="og:url" content="http://localhost:1313/post/javascript/053-how-to-install-nvm-in-windows/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="">
+
+<link rel="canonical" href="http://localhost:1313/post/javascript/053-how-to-install-nvm-in-windows/">
+
+<meta name="twitter:description" content="
+NVM (Node Version Manager) 主要支援 Linux 和 Mac 系統。 雖然 Windows 不支援 NVM，但有一個名為 nvm-windows 的工具，由 coreybutler 開發，可在 Windows 上提供類似的 NVM 體驗。
+">
+<meta property="article:published_time" content="2024-11-08T00:00:00&#43;00:00">
+<meta property="article:updated_time" content="2024-11-08T00:00:00&#43;00:00">
+
+
+
+
+
+    
+<meta property="og:image" content="http://localhost:1313/img/javascript/053-nvm-install-in-windows.png">
+<meta property="og:image:url" content="http://localhost:1313/img/javascript/053-nvm-install-in-windows.png">
+    
+
+    
+    <link rel="stylesheet" href='/css/custom.css'>
+    <i class="dark hidden"></i>
+</head>
+<body class="font-sans">
+    <div class="min-h-screen flex flex-col bg-gray-100 dark:bg-warmgray-800"><div class="bg-blue-500">
+    <div class="container max-w-screen-xl mr-auto ml-auto">
+        <nav class="flex items-center justify-between flex-wrap bg-blue-500 p-6">
+            <div class="flex items-center flex-no-shrink bg-blue-500 text-white mr-6">
+                <a href="http://localhost:1313/"><span class="font-semibold text-2xl tracking-tight">BenzHub</span></a>
+            </div>
+            <div class="flex md:hidden">
+                <div class="py-2">
+                    <button onclick="toggleDarkMode()" class="focus:outline-none mr-1" aria-label="Darkmode Toggle Button"><i id="icon"
+                            class="icon-moon inline-flex align-middle leading-normal text-lg text-white"></i></button>
+                    <span class="text-white">|</span>
+                </div>
+                <button id="hamburgerbtn" class="flex items-center px-3 py-1 text-white hover:opacity-50" aria-label="Hamburger Button">
+                    <span class="icon-menu text-2xl"></span>
+                </button>
+            </div>
+            <div class="hidden w-full md:flex md:flex-row sm:items-center md:w-auto" id="mobileMenu">
+                <div class="text-sm lg:flex-grow">
+                </div>
+                <div class="navmenu">
+                    
+                    <a href="/"
+                        class="no-underline duration-200 block mt-4 sm:inline-block sm:mt-0 text-white hover:opacity-50 mr-4">
+                        Home
+                    </a>
+                    
+                    <a href="/about/"
+                        class="no-underline duration-200 block mt-4 sm:inline-block sm:mt-0 text-white hover:opacity-50 mr-4">
+                        About
+                    </a>
+                    
+                    <a href="/contact/"
+                        class="no-underline duration-200 block mt-4 sm:inline-block sm:mt-0 text-white hover:opacity-50 mr-4">
+                        Contact
+                    </a>
+                    
+                    <a href="/resourses/"
+                        class="no-underline duration-200 block mt-4 sm:inline-block sm:mt-0 text-white hover:opacity-50 mr-4">
+                        Resourses
+                    </a>
+                    
+                </div>
+                <div class="text-white invisible md:visible">
+                    <span>|</span>
+                    <button onclick="toggleDarkMode()" class="focus-visible:outline-none" aria-label="Darkmode Toggle Button"><i id="icon2"
+                            class="icon-moon hover:opacity-50 duration-200 inline-flex align-middle leading-normal text-lg ml-2"></i></button>
+                </div>
+            </div>
+        </nav>
+    </div>
+</div>
+<style>
+    .active {
+        display: block;
+    }
+</style>
+
+<script>
+    let hamburger = document.getElementById('hamburgerbtn');
+
+    let mobileMenu = document.getElementById('mobileMenu');
+
+    hamburger.addEventListener('click', function () {
+        mobileMenu.classList.toggle('active');
+    });
+</script>
+<div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id="content">
+            <div class="lg:mx-5">
+<div class="grid grid-cols-3 gap-4">
+  
+  <div class="col-span-3 lg:col-span-2 dark:text-white">
+    
+      <div class="bg-white dark:bg-warmgray-900 p-5 my-4">
+        <h1 class="mb-2 text-4xl font-bold">Windows 上安裝 NVM | Javascript</h1>
+        <aside id="meta">
+          <div>
+            <section>
+              <h4 id="date"><span class="icon-access_time mr-2"></span>2024/11/08
+              </h4>
+            </section>
+            
+            <div id="tags">
+              <span class="icon-local_offer mr-1"></span>
+              
+              <a href='http://localhost:1313/tags/javascript'>javascript</a> |
+              
+              <a href='http://localhost:1313/tags/nvm'>nvm</a> |
+              
+              <a href='http://localhost:1313/tags/windows'>windows</a> |
+              
+            </div>
+            
+          </div>
+        </aside>
+        
+        <img class="py-4 m-auto thumb-img" src="http://localhost:1313/img/javascript/053-nvm-install-in-windows.png">
+        
+        
+        <div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote>
+<p>NVM (Node Version Manager) 主要支援 Linux 和 Mac 系統。 雖然 Windows 不支援 NVM，但有一個名為 <strong>nvm-windows</strong> 的工具，由 coreybutler 開發，可在 Windows 上提供類似的 NVM 體驗。</p>
+</blockquote>
+<h2 id="windows-上-nvm-的安裝方案">Windows 上 NVM 的安裝方案</h2>
+<ul>
+<li><a href="https://github.com/coreybutler/nvm-windows/releases">https://github.com/coreybutler/nvm-windows/releases</a></li>
+<li><a href="/post/javascript/024-linux-or-mac-install-nvm/">Linux or Mac 安裝 nvm</a></li>
+</ul>
+<h3 id="nvm-windows-如何運作">nvm-windows 如何運作</h3>
+<p><strong>nvm-windows</strong> 是一個用於在 Windows 中管理 Node.js 版本的工具。 以下是如何安裝它：</p>
+<ol>
+<li><strong>點擊「立即下載」:</strong> 在 nvm-windows 儲存庫的自述文件中，點擊「立即下載!」。 這會打開一個顯示不同 NVM 版本的頁面。</li>
+<li><strong>安裝最新版本的 .exe 檔案:</strong> 在最新版本中，你會找到不同的資源。點擊 <strong>nvm-setup.exe</strong> 資源，這是該工具的安裝檔案。</li>
+<li><strong>完成安裝精靈:</strong> 打開你下載的檔案，並完成安裝精靈。 完成後，你可以透過執行 <code>nvm -v</code> 來確認是否已安裝 nvm。如果正確安裝了 nvm，則此命令將顯示已安裝的 nvm 版本。</li>
+</ol>
+<p>安裝 <strong>nvm-windows</strong> 後，你就可以像在 Linux 和 Mac 上使用 NVM 一樣，在 Windows 上安裝、解除安裝和切換不同的 Node 版本。</p></div>
+        
+        <aside id="meta">
+          
+        </aside>
+      </div>
+      <div class="bg-white dark:bg-warmgray-900 p-5 my-4">
+        <div class="grid grid-cols-2">
+          <div class="col-span-1">
+            
+            <a class="previous lg:text-2xl" href="http://localhost:1313/post/design-pattern/002-design-pattern-classification/">
+              <div
+                class="transition-colors duration-300 border border-gray-600 hover:border-black h-auto m-3 text-center py-3 lg:py-1">
+                <span class="icon-keyboard_arrow_left"></span> 設計模式類別 | Design Pattern
+              </div>
+            </a>
+            
+          </div>
+          
+          <a class="next lg:text-2xl" href="http://localhost:1313/post/javascript/053-how-to-install-nvm-in-windows-copy/">
+            <div
+              class="transition-colors duration-300 col-span-1 border border-gray-600 hover:border-black h-auto m-3 text-center py-3 lg:py-1">
+              Windows 上安裝 NVM | Javascript <span class="icon-keyboard_arrow_right"></span>
+            </div>
+          </a>
+          
+        </div>
+      </div>
+      <div class="bg-white dark:bg-warmgray-900 p-5 my-4">
+        <div class="mb-3">
+          
+        </div>
+      </div>
+    </div>
+    
+    <div class="hidden lg:block lg:col-span-1">
+    
+    
+            
+            <div class="mb-3">
+    <form class="widget-search__form" role="search" method="get" action="https://google.com/search">
+        <label>
+            <input class="w-full p-3 focus:outline-none dark:bg-warmgray-900 dark:text-white placeholder-gray-700 dark:placeholder-gray-300" type="search"
+                placeholder="Search..." value="" name="q" aria-label="Search">
+        </label>
+        <input class="hidden" type="submit" value="Search">
+        <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
+    </form>
+</div>
+        
+            
+            
+        
+            
+            
+<div class="bg-white panel mb-3 dark:bg-warmgray-900">
+    <p class="text-xl text-center text-gray-700 py-3 pl-3 dark:text-gray-300 font-bold">Tags</p>
+    <div class="panel-block p-2">
+        <a href='/tags/css'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                css
+            </span></a>
+        <a href='/tags/design-pattern'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                design-pattern
+            </span></a>
+        <a href='/tags/django'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                django
+            </span></a>
+        <a href='/tags/flutter'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                flutter
+            </span></a>
+        <a href='/tags/git'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                git
+            </span></a>
+        <a href='/tags/html'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                html
+            </span></a>
+        <a href='/tags/javascript'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                javascript
+            </span></a>
+        <a href='/tags/linux'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                linux
+            </span></a>
+        <a href='/tags/networking'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                networking
+            </span></a>
+        <a href='/tags/nodejs'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                nodejs
+            </span></a>
+        <a href='/tags/npm'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                npm
+            </span></a>
+        <a href='/tags/nvm'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                nvm
+            </span></a>
+        <a href='/tags/postgresql'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                postgresql
+            </span></a>
+        <a href='/tags/python'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                python
+            </span></a>
+        <a href='/tags/react'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                react
+            </span></a>
+        <a href='/tags/react-native'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                react native
+            </span></a>
+        <a href='/tags/seo'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                seo
+            </span></a>
+        <a href='/tags/tools'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                tools
+            </span></a>
+        <a href='/tags/typescript'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                typescript
+            </span></a>
+        <a href='/tags/windows'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                windows
+            </span></a>
+    </div>
+</div>
+
+
+        
+            
+            
+
+<div class="bg-white panel mb-3 pb-5 dark:bg-warmgray-900">
+    <p class="text-xl text-center text-gray-700 py-5 dark:text-gray-300 font-bold">Recent Posts</p>
+    <div class="mx-6">
+        <a href="/post/javascript/052-whats-nvm/" class="">
+            <div
+                class="w-full block mt-3 bg-white hover:bg-gray-100 duration-200 dark:bg-warmgray-900 dark:text-gray-200 dark:hover:bg-warmgray-800">
+                <div class="p-4">
+                    <div class="text-gray-900 font-bold text-xl dark:text-white">nvm 是什麼，到底在哪裡會用到，怎麼用?</div>
+                    <p class="text-sm text-gray-600 flex items-center pb-1 dark:text-gray-400">
+                        <time><span class="icon-access_time mr-1"></span>2024/11/09</time>
+                    </p>
+                </div>
+            </div>
+        </a>
+        <a href="/post/javascript/053-how-to-install-nvm-in-windows-copy/" class="">
+            <div
+                class="w-full block mt-3 bg-white hover:bg-gray-100 duration-200 dark:bg-warmgray-900 dark:text-gray-200 dark:hover:bg-warmgray-800">
+                <div class="p-4">
+                    <div class="text-gray-900 font-bold text-xl dark:text-white">Windows 上安裝 NVM | Javascript</div>
+                    <p class="text-sm text-gray-600 flex items-center pb-1 dark:text-gray-400">
+                        <time><span class="icon-access_time mr-1"></span>2024/11/08</time>
+                    </p>
+                </div>
+            </div>
+        </a>
+        <a href="/post/javascript/053-how-to-install-nvm-in-windows/" class="">
+            <div
+                class="w-full block mt-3 bg-white hover:bg-gray-100 duration-200 dark:bg-warmgray-900 dark:text-gray-200 dark:hover:bg-warmgray-800">
+                <div class="p-4">
+                    <div class="text-gray-900 font-bold text-xl dark:text-white">Windows 上安裝 NVM | Javascript</div>
+                    <p class="text-sm text-gray-600 flex items-center pb-1 dark:text-gray-400">
+                        <time><span class="icon-access_time mr-1"></span>2024/11/08</time>
+                    </p>
+                </div>
+            </div>
+        </a>
+        <a href="/post/design-pattern/002-design-pattern-classification/" class="">
+            <div
+                class="w-full block mt-3 bg-white hover:bg-gray-100 duration-200 dark:bg-warmgray-900 dark:text-gray-200 dark:hover:bg-warmgray-800">
+                <div class="p-4">
+                    <div class="text-gray-900 font-bold text-xl dark:text-white">設計模式類別 | Design Pattern</div>
+                    <p class="text-sm text-gray-600 flex items-center pb-1 dark:text-gray-400">
+                        <time><span class="icon-access_time mr-1"></span>2024/11/06</time>
+                    </p>
+                </div>
+            </div>
+        </a>
+        <a href="/post/design-pattern/001-design-pattern-introduction/" class="">
+            <div
+                class="w-full block mt-3 bg-white hover:bg-gray-100 duration-200 dark:bg-warmgray-900 dark:text-gray-200 dark:hover:bg-warmgray-800">
+                <div class="p-4">
+                    <div class="text-gray-900 font-bold text-xl dark:text-white">為什麼要使用設計模式&amp;設計模式常見錯誤 | Design Pattern</div>
+                    <p class="text-sm text-gray-600 flex items-center pb-1 dark:text-gray-400">
+                        <time><span class="icon-access_time mr-1"></span>2024/11/05</time>
+                    </p>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+        
+    
+</div>
+    
+  </div>
+</div>
+
+            </div>
+        </div><footer class="bg-blue-500 text-white p-6">
+  
+  <div class="container max-w-screen-xl mr-auto ml-auto">
+    <p>&copy; 2024 <a href="http://localhost:1313/" class="duration-200 hover:opacity-50">BenzHub</a>
+    </p>
+  </div>
+  
+  <script>
+    (function (window, document) {
+      function main() {
+        var ad = document.createElement('script');
+        ad.async = true;
+        ad.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606';
+        ad.crossOrigin = "anonymous"
+        var sc = document.getElementsByTagName('script')[0];
+        sc.parentNode.insertBefore(ad, sc);
+      }
+
+      var lazyLoad = false;
+      function onLazyLoad() {
+        if (lazyLoad === false) {
+          lazyLoad = true;
+          window.removeEventListener('scroll', onLazyLoad);
+          window.removeEventListener('mousemove', onLazyLoad);
+          window.removeEventListener('mousedown', onLazyLoad);
+          window.removeEventListener('touchstart', onLazyLoad);
+          window.removeEventListener('keydown', onLazyLoad);
+          main();
+        }
+      }
+      window.addEventListener('scroll', onLazyLoad);
+      window.addEventListener('mousemove', onLazyLoad);
+      window.addEventListener('mousedown', onLazyLoad);
+      window.addEventListener('touchstart', onLazyLoad);
+      window.addEventListener('keydown', onLazyLoad);
+      window.addEventListener('load', function () {
+        if (window.pageYOffset) {
+          onLazyLoad();
+          window.setTimeout(onLazyLoad, 3000)
+        }
+      });
+    })(window, document);
+  </script>
+  
+  <script>
+    var icon = document.getElementById("icon");
+    var icon2 = document.getElementById("icon2");
+    
+    if (document.documentElement.classList.contains("dark") || localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      icon.classList.remove("icon-moon");
+      icon.classList.add("icon-sun");
+      icon2.classList.remove("icon-moon");
+      icon2.classList.add("icon-sun");
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+    function toggleDarkMode() {
+      if (document.documentElement.classList.contains('dark')) {
+        icon.classList.remove("icon-sun");
+        icon.classList.add("icon-moon");
+        icon2.classList.remove("icon-sun");
+        icon2.classList.add("icon-moon");
+        document.documentElement.classList.remove('dark')
+        localStorage.theme = 'light'
+      } else {
+        icon.classList.remove("icon-moon");
+        icon.classList.add("icon-sun");
+        icon2.classList.remove("icon-moon");
+        icon2.classList.add("icon-sun");
+        document.documentElement.classList.add('dark')
+        localStorage.theme = 'dark'
+      }
+    }
+  </script>
+</footer></div>
+</body>
+
+</html>

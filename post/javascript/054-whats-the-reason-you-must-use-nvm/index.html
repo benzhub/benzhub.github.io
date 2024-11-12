@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-FSEWPBJMJT');
+</script>
+
+<title>BenzHub | 你非使用 NVM 管理不同 Node.js 版本的根本原因 | Javascript</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+    <link rel="apple-touch-icon" sizes="180x180" href='/favicon/apple-touch-icon.png'>
+    <link rel="icon" type="image/png" sizes="32x32" href='/favicon/favicon-32x32.png'>
+    <link rel="icon" type="image/png" sizes="16x16" href='/favicon/favicon-16x16.png'>
+    <link rel="manifest" href='/favicon/site.webmanifest' />
+    <link rel="mask-icon" href=' /favicon/safari-pinned-tab.svg' color="#5bbad5" />
+    <link rel="shortcut icon" href='/favicon/favicon.ico' />
+    <meta name="theme-color" content="#ffffff">
+    <meta property="og:title" content="BenzHub | 你非使用 NVM 管理不同 Node.js 版本的根本原因 | Javascript" />
+    
+    
+    
+    <link rel="stylesheet" href="/css/style.min.e5dd53532f9b832267ad3199855796e84644cebf805f5e61e3e2b5630c15d710.css" />
+    
+    <link href=' /css/blonde.min.css' rel="stylesheet" type="text/css" media="print"
+        onload="this.media=' all'">
+    
+
+
+
+<meta name="description" content="
+許多人會說不一定要使用nvm去管理不同的node.js版本，但其實在工作職場上，我們大部分時候是要去維護已經存在的專案，這時候就可以知道nvm對於管理眾多不同node.js版本的重要性了
+">
+<meta property="og:site_name" content="BenzHub">
+<meta property="og:description" content="
+許多人會說不一定要使用nvm去管理不同的node.js版本，但其實在工作職場上，我們大部分時候是要去維護已經存在的專案，這時候就可以知道nvm對於管理眾多不同node.js版本的重要性了
+">
+<meta property="og:url" content="https://benzhub.github.io/post/javascript/054-whats-the-reason-you-must-use-nvm/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="">
+
+<link rel="canonical" href="https://benzhub.github.io/post/javascript/054-whats-the-reason-you-must-use-nvm/">
+
+<meta name="twitter:description" content="
+許多人會說不一定要使用nvm去管理不同的node.js版本，但其實在工作職場上，我們大部分時候是要去維護已經存在的專案，這時候就可以知道nvm對於管理眾多不同node.js版本的重要性了
+">
+<meta property="article:published_time" content="2024-11-07T00:00:00&#43;00:00">
+<meta property="article:updated_time" content="2024-11-07T00:00:00&#43;00:00">
+
+
+
+
+
+    
+<meta property="og:image" content="https://benzhub.github.io/img/javascript/054-what%27s-the-reason-you-must-use-nvm.png">
+<meta property="og:image:url" content="https://benzhub.github.io/img/javascript/054-what%27s-the-reason-you-must-use-nvm.png">
+    
+
+    
+    <link rel="stylesheet" href='/css/custom.css'>
+    <i class="dark hidden"></i>
+</head>
+<body class="font-sans">
+    <div class="min-h-screen flex flex-col bg-gray-100 dark:bg-warmgray-800"><div class="bg-blue-500">
+    <div class="container max-w-screen-xl mr-auto ml-auto">
+        <nav class="flex items-center justify-between flex-wrap bg-blue-500 p-6">
+            <div class="flex items-center flex-no-shrink bg-blue-500 text-white mr-6">
+                <a href="https://benzhub.github.io/"><span class="font-semibold text-2xl tracking-tight">BenzHub</span></a>
+            </div>
+            <div class="flex md:hidden">
+                <div class="py-2">
+                    <button onclick="toggleDarkMode()" class="focus:outline-none mr-1" aria-label="Darkmode Toggle Button"><i id="icon"
+                            class="icon-moon inline-flex align-middle leading-normal text-lg text-white"></i></button>
+                    <span class="text-white">|</span>
+                </div>
+                <button id="hamburgerbtn" class="flex items-center px-3 py-1 text-white hover:opacity-50" aria-label="Hamburger Button">
+                    <span class="icon-menu text-2xl"></span>
+                </button>
+            </div>
+            <div class="hidden w-full md:flex md:flex-row sm:items-center md:w-auto" id="mobileMenu">
+                <div class="text-sm lg:flex-grow">
+                </div>
+                <div class="navmenu">
+                    
+                    <a href="/"
+                        class="no-underline duration-200 block mt-4 sm:inline-block sm:mt-0 text-white hover:opacity-50 mr-4">
+                        Home
+                    </a>
+                    
+                    <a href="/about/"
+                        class="no-underline duration-200 block mt-4 sm:inline-block sm:mt-0 text-white hover:opacity-50 mr-4">
+                        About
+                    </a>
+                    
+                    <a href="/contact/"
+                        class="no-underline duration-200 block mt-4 sm:inline-block sm:mt-0 text-white hover:opacity-50 mr-4">
+                        Contact
+                    </a>
+                    
+                    <a href="/resourses/"
+                        class="no-underline duration-200 block mt-4 sm:inline-block sm:mt-0 text-white hover:opacity-50 mr-4">
+                        Resourses
+                    </a>
+                    
+                </div>
+                <div class="text-white invisible md:visible">
+                    <span>|</span>
+                    <button onclick="toggleDarkMode()" class="focus-visible:outline-none" aria-label="Darkmode Toggle Button"><i id="icon2"
+                            class="icon-moon hover:opacity-50 duration-200 inline-flex align-middle leading-normal text-lg ml-2"></i></button>
+                </div>
+            </div>
+        </nav>
+    </div>
+</div>
+<style>
+    .active {
+        display: block;
+    }
+</style>
+
+<script>
+    let hamburger = document.getElementById('hamburgerbtn');
+
+    let mobileMenu = document.getElementById('mobileMenu');
+
+    hamburger.addEventListener('click', function () {
+        mobileMenu.classList.toggle('active');
+    });
+</script>
+<div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id="content">
+            <div class="lg:mx-5">
+<div class="grid grid-cols-3 gap-4">
+  
+  <div class="col-span-3 lg:col-span-2 dark:text-white">
+    
+      <div class="bg-white dark:bg-warmgray-900 p-5 my-4">
+        <h1 class="mb-2 text-4xl font-bold">你非使用 NVM 管理不同 Node.js 版本的根本原因 | Javascript</h1>
+        <aside id="meta">
+          <div>
+            <section>
+              <h4 id="date"><span class="icon-access_time mr-2"></span>2024/11/07
+              </h4>
+            </section>
+            
+            <div id="tags">
+              <span class="icon-local_offer mr-1"></span>
+              
+              <a href='https://benzhub.github.io/tags/javascript'>javascript</a> |
+              
+              <a href='https://benzhub.github.io/tags/nvm'>nvm</a> |
+              
+            </div>
+            
+          </div>
+        </aside>
+        
+        <img class="py-4 m-auto thumb-img" src="https://benzhub.github.io/img/javascript/054-what%27s-the-reason-you-must-use-nvm.png">
+        
+        
+        <div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote>
+<p>許多人會說不一定要使用nvm去管理不同的node.js版本，但其實在工作職場上，我們大部分時候是要去維護已經存在的專案，這時候就可以知道nvm對於管理眾多不同node.js版本的重要性了</p>
+</blockquote>
+<h2 id="你非使用-nvm-管理不同-nodejs-版本的根本原因">你非使用 NVM 管理不同 Node.js 版本的根本原因</h2>
+<p>當您需要在不同的專案中使用不同版本的 Node.js 時，使用 NVM (Node 版本管理器) 可以帶來許多好處：</p>
+<p><strong>1. 避免版本衝突：</strong> 不同的專案可能依賴於不同版本的 Node.js 和其相關套件。 如果您只在系統上安裝單一版本的 Node.js，可能會導致某些專案無法正常運作， 甚至出現錯誤。 NVM 允許您為每個專案設定獨立的 Node.js 版本， 避免版本衝突，確保每個專案都能在正確的環境下執行。</p>
+<p><strong>2. 輕鬆切換 Node.js 版本：</strong> 使用 NVM，您可以透過簡單的指令 (例如 <code>nvm use &lt;版本號&gt;</code>) 快速切換到所需的 Node.js 版本。  這讓您能夠輕鬆地在不同專案之間切換，無需手動安裝或解除安裝 Node.js。</p>
+<p><strong>3. 簡化開發流程：</strong>  NVM 可以簡化您的 Node.js 開發流程。 您可以使用 NVM 快速安裝特定版本的 Node.js，並輕鬆切換版本進行測試和除錯。</p>
+<p><strong>4. 確保團隊合作順暢：</strong>  在團隊合作中，使用 NVM 可以確保所有開發者使用相同的 Node.js 版本。 這可以避免因為版本差異而導致的程式碼衝突或執行錯誤。</p>
+<p><strong>範例說明：</strong></p>
+<p>假設您正在開發兩個專案：</p>
+<ul>
+<li>專案 A 使用 Angular 15，需要 Node.js 14 或更高版本。</li>
+<li>專案 B 使用 Angular 16，需要 Node.js 16 或更高版本。</li>
+</ul>
+<p>如果您的系統上只安裝了 Node.js 14，則專案 B 可能無法正常運作。 使用 NVM，您可以：</p>
+<ol>
+<li>為專案 A 設定使用 Node.js 14。</li>
+<li>為專案 B 設定使用 Node.js 18。</li>
+</ol>
+<p>這樣一來，兩個專案都能在各自所需的 Node.js 版本下順利執行。</p>
+<p><strong>總結：</strong></p>
+<p>NVM 是一個強大的工具，可以幫助開發者更有效率地管理 Node.js 版本，並簡化開發流程， 尤其是在需要同時處理多個使用不同 Node.js 版本的專案時。</p>
+<p>你就應該現在立刻馬上安裝在你的電腦上，別在聽信任何人跟你說不用安裝這種鬼話了。</p>
+<ul>
+<li><a href="/post/javascript/024-linux-or-mac-install-nvm/">Linux or Mac 安裝 nvm</a></li>
+<li><a href="/post/javascript/053-how-to-install-nvm-in-windows/">Windows 上安裝 NVM</a></li>
+<li><a href="/post/javascript/055-nvm-commands/">nvm 常用指令一覽表</a></li>
+</ul></div>
+        
+        <aside id="meta">
+          
+        </aside>
+      </div>
+      <div class="bg-white dark:bg-warmgray-900 p-5 my-4">
+        <div class="grid grid-cols-2">
+          <div class="col-span-1">
+            
+            <a class="previous lg:text-2xl" href="https://benzhub.github.io/post/design-pattern/002-design-pattern-classification/">
+              <div
+                class="transition-colors duration-300 border border-gray-600 hover:border-black h-auto m-3 text-center py-3 lg:py-1">
+                <span class="icon-keyboard_arrow_left"></span> 設計模式類別 | Design Pattern
+              </div>
+            </a>
+            
+          </div>
+          
+          <a class="next lg:text-2xl" href="https://benzhub.github.io/post/javascript/053-how-to-install-nvm-in-windows-copy/">
+            <div
+              class="transition-colors duration-300 col-span-1 border border-gray-600 hover:border-black h-auto m-3 text-center py-3 lg:py-1">
+              Windows 上安裝 NVM | Javascript <span class="icon-keyboard_arrow_right"></span>
+            </div>
+          </a>
+          
+        </div>
+      </div>
+      <div class="bg-white dark:bg-warmgray-900 p-5 my-4">
+        <div class="mb-3">
+          
+        </div>
+      </div>
+    </div>
+    
+    <div class="hidden lg:block lg:col-span-1">
+    
+    
+            
+            <div class="mb-3">
+    <form class="widget-search__form" role="search" method="get" action="https://google.com/search">
+        <label>
+            <input class="w-full p-3 focus:outline-none dark:bg-warmgray-900 dark:text-white placeholder-gray-700 dark:placeholder-gray-300" type="search"
+                placeholder="Search..." value="" name="q" aria-label="Search">
+        </label>
+        <input class="hidden" type="submit" value="Search">
+        <input type="hidden" name="sitesearch" value="https://benzhub.github.io/" />
+    </form>
+</div>
+        
+            
+            
+        
+            
+            
+<div class="bg-white panel mb-3 dark:bg-warmgray-900">
+    <p class="text-xl text-center text-gray-700 py-3 pl-3 dark:text-gray-300 font-bold">Tags</p>
+    <div class="panel-block p-2">
+        <a href='/tags/css'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                css
+            </span></a>
+        <a href='/tags/design-pattern'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                design-pattern
+            </span></a>
+        <a href='/tags/django'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                django
+            </span></a>
+        <a href='/tags/flutter'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                flutter
+            </span></a>
+        <a href='/tags/git'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                git
+            </span></a>
+        <a href='/tags/html'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                html
+            </span></a>
+        <a href='/tags/javascript'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                javascript
+            </span></a>
+        <a href='/tags/linux'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                linux
+            </span></a>
+        <a href='/tags/networking'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                networking
+            </span></a>
+        <a href='/tags/nodejs'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                nodejs
+            </span></a>
+        <a href='/tags/npm'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                npm
+            </span></a>
+        <a href='/tags/nvm'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                nvm
+            </span></a>
+        <a href='/tags/postgresql'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                postgresql
+            </span></a>
+        <a href='/tags/python'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                python
+            </span></a>
+        <a href='/tags/react'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                react
+            </span></a>
+        <a href='/tags/react-native'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                react native
+            </span></a>
+        <a href='/tags/seo'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                seo
+            </span></a>
+        <a href='/tags/tools'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                tools
+            </span></a>
+        <a href='/tags/typescript'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                typescript
+            </span></a>
+        <a href='/tags/windows'>
+            <span
+                class="duration-100 inline-flex py-2 leading-4 mr-2 mb-2 content-center bg-gray-100 justify-center h-8 px-3 text-blue-500 hover:text-blue-900 dark:bg-warmgray-800">
+                windows
+            </span></a>
+    </div>
+</div>
+
+
+        
+            
+            
+
+<div class="bg-white panel mb-3 pb-5 dark:bg-warmgray-900">
+    <p class="text-xl text-center text-gray-700 py-5 dark:text-gray-300 font-bold">Recent Posts</p>
+    <div class="mx-6">
+        <a href="/post/javascript/055-nvm-commands/" class="">
+            <div
+                class="w-full block mt-3 bg-white hover:bg-gray-100 duration-200 dark:bg-warmgray-900 dark:text-gray-200 dark:hover:bg-warmgray-800">
+                <div class="p-4">
+                    <div class="text-gray-900 font-bold text-xl dark:text-white">nvm 常用指令一覽表 | Javascript</div>
+                    <p class="text-sm text-gray-600 flex items-center pb-1 dark:text-gray-400">
+                        <time><span class="icon-access_time mr-1"></span>2024/11/10</time>
+                    </p>
+                </div>
+            </div>
+        </a>
+        <a href="/post/javascript/052-whats-nvm/" class="">
+            <div
+                class="w-full block mt-3 bg-white hover:bg-gray-100 duration-200 dark:bg-warmgray-900 dark:text-gray-200 dark:hover:bg-warmgray-800">
+                <div class="p-4">
+                    <div class="text-gray-900 font-bold text-xl dark:text-white">nvm 是什麼，到底在哪裡會用到，怎麼用?</div>
+                    <p class="text-sm text-gray-600 flex items-center pb-1 dark:text-gray-400">
+                        <time><span class="icon-access_time mr-1"></span>2024/11/09</time>
+                    </p>
+                </div>
+            </div>
+        </a>
+        <a href="/post/javascript/053-how-to-install-nvm-in-windows-copy/" class="">
+            <div
+                class="w-full block mt-3 bg-white hover:bg-gray-100 duration-200 dark:bg-warmgray-900 dark:text-gray-200 dark:hover:bg-warmgray-800">
+                <div class="p-4">
+                    <div class="text-gray-900 font-bold text-xl dark:text-white">Windows 上安裝 NVM | Javascript</div>
+                    <p class="text-sm text-gray-600 flex items-center pb-1 dark:text-gray-400">
+                        <time><span class="icon-access_time mr-1"></span>2024/11/08</time>
+                    </p>
+                </div>
+            </div>
+        </a>
+        <a href="/post/javascript/054-whats-the-reason-you-must-use-nvm/" class="">
+            <div
+                class="w-full block mt-3 bg-white hover:bg-gray-100 duration-200 dark:bg-warmgray-900 dark:text-gray-200 dark:hover:bg-warmgray-800">
+                <div class="p-4">
+                    <div class="text-gray-900 font-bold text-xl dark:text-white">你非使用 NVM 管理不同 Node.js 版本的根本原因 | Javascript</div>
+                    <p class="text-sm text-gray-600 flex items-center pb-1 dark:text-gray-400">
+                        <time><span class="icon-access_time mr-1"></span>2024/11/07</time>
+                    </p>
+                </div>
+            </div>
+        </a>
+        <a href="/post/design-pattern/002-design-pattern-classification/" class="">
+            <div
+                class="w-full block mt-3 bg-white hover:bg-gray-100 duration-200 dark:bg-warmgray-900 dark:text-gray-200 dark:hover:bg-warmgray-800">
+                <div class="p-4">
+                    <div class="text-gray-900 font-bold text-xl dark:text-white">設計模式類別 | Design Pattern</div>
+                    <p class="text-sm text-gray-600 flex items-center pb-1 dark:text-gray-400">
+                        <time><span class="icon-access_time mr-1"></span>2024/11/06</time>
+                    </p>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+        
+    
+</div>
+    
+  </div>
+</div>
+
+            </div>
+        </div><footer class="bg-blue-500 text-white p-6">
+  
+  <div class="container max-w-screen-xl mr-auto ml-auto">
+    <p>&copy; 2024 <a href="https://benzhub.github.io/" class="duration-200 hover:opacity-50">BenzHub</a>
+    </p>
+  </div>
+  
+  <script>
+    (function (window, document) {
+      function main() {
+        var ad = document.createElement('script');
+        ad.async = true;
+        ad.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606';
+        ad.crossOrigin = "anonymous"
+        var sc = document.getElementsByTagName('script')[0];
+        sc.parentNode.insertBefore(ad, sc);
+      }
+
+      var lazyLoad = false;
+      function onLazyLoad() {
+        if (lazyLoad === false) {
+          lazyLoad = true;
+          window.removeEventListener('scroll', onLazyLoad);
+          window.removeEventListener('mousemove', onLazyLoad);
+          window.removeEventListener('mousedown', onLazyLoad);
+          window.removeEventListener('touchstart', onLazyLoad);
+          window.removeEventListener('keydown', onLazyLoad);
+          main();
+        }
+      }
+      window.addEventListener('scroll', onLazyLoad);
+      window.addEventListener('mousemove', onLazyLoad);
+      window.addEventListener('mousedown', onLazyLoad);
+      window.addEventListener('touchstart', onLazyLoad);
+      window.addEventListener('keydown', onLazyLoad);
+      window.addEventListener('load', function () {
+        if (window.pageYOffset) {
+          onLazyLoad();
+          window.setTimeout(onLazyLoad, 3000)
+        }
+      });
+    })(window, document);
+  </script>
+  
+  <script>
+    var icon = document.getElementById("icon");
+    var icon2 = document.getElementById("icon2");
+    
+    if (document.documentElement.classList.contains("dark") || localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      icon.classList.remove("icon-moon");
+      icon.classList.add("icon-sun");
+      icon2.classList.remove("icon-moon");
+      icon2.classList.add("icon-sun");
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+    function toggleDarkMode() {
+      if (document.documentElement.classList.contains('dark')) {
+        icon.classList.remove("icon-sun");
+        icon.classList.add("icon-moon");
+        icon2.classList.remove("icon-sun");
+        icon2.classList.add("icon-moon");
+        document.documentElement.classList.remove('dark')
+        localStorage.theme = 'light'
+      } else {
+        icon.classList.remove("icon-moon");
+        icon.classList.add("icon-sun");
+        icon2.classList.remove("icon-moon");
+        icon2.classList.add("icon-sun");
+        document.documentElement.classList.add('dark')
+        localStorage.theme = 'dark'
+      }
+    }
+  </script>
+</footer></div>
+</body>
+
+</html>
