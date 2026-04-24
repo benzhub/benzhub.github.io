@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><title>BenzHub | Python 錯誤處理（Error Handling）完整教學 | Python</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="apple-touch-icon" sizes="180x180" href='/favicon/apple-touch-icon.png'>
+    <link rel="icon" type="image/png" sizes="32x32" href='/favicon/favicon-32x32.png'>
+    <link rel="icon" type="image/png" sizes="16x16" href='/favicon/favicon-16x16.png'>
+    <link rel="manifest" href='/favicon/site.webmanifest' />
+    <link rel="mask-icon" href=' /favicon/safari-pinned-tab.svg' color="#5bbad5" />
+    <link rel="shortcut icon" href='/favicon/favicon.ico' />
+    <meta name="theme-color" content="#fafafa">
+    <meta property="og:title" content="BenzHub | Python 錯誤處理（Error Handling）完整教學 | Python" />
+    
+    
+    <link rel="stylesheet" href="/css/style.css" />
+    
+    <link href=' /css/blonde.min.css' rel="stylesheet" type="text/css" media="print"
+        onload="this.media=' all'">
+    
+
+
+
+<meta name="description" content="學習 Python 的例外處理機制，包含 try/except/else/finally 語法、常見內建例外類型、自定義例外，以及 EAFP 與 LBYL 兩種錯誤處理風格的比較。">
+<meta property="og:site_name" content="BenzHub">
+<meta property="og:description" content="學習 Python 的例外處理機制，包含 try/except/else/finally 語法、常見內建例外類型、自定義例外，以及 EAFP 與 LBYL 兩種錯誤處理風格的比較。">
+<meta property="og:url" content="http://localhost:1313/post/python/025-error-handling/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="">
+
+<link rel="canonical" href="http://localhost:1313/post/python/025-error-handling/">
+
+<meta name="twitter:description" content="學習 Python 的例外處理機制，包含 try/except/else/finally 語法、常見內建例外類型、自定義例外，以及 EAFP 與 LBYL 兩種錯誤處理風格的比較。">
+<meta property="article:published_time" content="2026-04-24T00:00:00&#43;00:00">
+<meta property="article:updated_time" content="2026-04-24T00:00:00&#43;00:00">
+
+
+
+
+
+    
+<meta property="og:image" content="http://localhost:1313/img/python/025-Error-Handling.png">
+<meta property="og:image:url" content="http://localhost:1313/img/python/025-Error-Handling.png">
+    
+
+    
+    <link rel="stylesheet" href='/css/custom.css'>
+    <i class="dark hidden"></i>
+</head>
+<body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class="site-nav" id="siteNav">
+    <div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full">
+        
+        <a href="http://localhost:1313/" class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">
+            BenzHub
+        </a>
+
+        
+        <div class="hidden md:flex items-center gap-6">
+            
+            <a href="/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                Home
+            </a>
+            
+            <a href="/about/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                About
+            </a>
+            
+            <a href="/contact/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                Contact
+            </a>
+            
+            <a href="/resourses/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                Resourses
+            </a>
+            
+
+            
+            <div class="flex items-center gap-2">
+                <form class="flex items-center" role="search" method="get" action="https://google.com/search" id="navSearchForm">
+                    <input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50"
+                        type="search" placeholder="Search..." name="q" aria-label="Search" id="navSearchInput">
+                    <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
+                </form>
+                <button onclick="toggleNavSearch()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+                    <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                    </svg>
+                </button>
+            </div>
+
+            
+            <span class="text-zinc-200 dark:text-zinc-700">|</span>
+
+            
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon2" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+        </div>
+
+        
+        <div class="flex md:hidden items-center gap-1">
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+            <button id="hamburgerbtn" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Menu">
+                <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    
+    <div class="mobile-menu md:hidden" id="mobileMenu">
+        
+        <a href="/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            Home
+        </a>
+        
+        <a href="/about/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            About
+        </a>
+        
+        <a href="/contact/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            Contact
+        </a>
+        
+        <a href="/resourses/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            Resourses
+        </a>
+        
+        <form class="mt-2" role="search" method="get" action="https://google.com/search">
+            <input class="search-input" type="search" placeholder="Search..." name="q" aria-label="Search">
+            <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
+        </form>
+    </div>
+</nav>
+
+<script>
+    
+    document.getElementById('hamburgerbtn').addEventListener('click', function () {
+        document.getElementById('mobileMenu').classList.toggle('active');
+    });
+
+    
+    window.addEventListener('scroll', function () {
+        var nav = document.getElementById('siteNav');
+        if (window.scrollY > 50) {
+            nav.classList.add('scrolled');
+        } else {
+            nav.classList.remove('scrolled');
+        }
+    });
+
+    
+    function toggleNavSearch() {
+        var input = document.getElementById('navSearchInput');
+        input.classList.toggle('expanded');
+        if (input.classList.contains('expanded')) {
+            input.focus();
+        }
+    }
+
+    
+    document.addEventListener('click', function (e) {
+        var form = document.getElementById('navSearchForm');
+        var input = document.getElementById('navSearchInput');
+        if (form && input && !form.contains(e.target) && !e.target.closest('[aria-label="Toggle Search"]')) {
+            input.classList.remove('expanded');
+        }
+    });
+</script>
+<div class="nav-spacer"></div>
+    <div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id="content">
+        <div class="lg:mx-5">
+<div class="grid grid-cols-3 gap-6">
+  
+  <div class="col-span-3 lg:col-span-2">
+  
+      
+      <div class="post-detail fade-in my-4">
+        <h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Python 錯誤處理（Error Handling）完整教學 | Python</h1>
+        <div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4">
+            <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/04/24
+            </span>
+        </div>
+        
+        <div class="flex flex-wrap gap-1.5 mb-5">
+            
+            <a href='http://localhost:1313/tags/python' class="tag-pill no-underline">python</a>
+            
+        </div>
+        
+        
+        <img class="py-4 m-auto rounded-lg thumb-img" src="http://localhost:1313/img/python/025-Error-Handling.png">
+        
+        
+        <div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote>
+<p>在撰寫 <strong>Python</strong> 程式時，錯誤是無法避免的。<strong>例外處理（Exception Handling）</strong> 讓你能優雅地處理這些錯誤，避免程式意外中斷。本篇將介紹 Python 的錯誤處理機制，從基礎的 <code>try/except</code> 語法到自定義例外類別，幫助你寫出更穩健的程式碼。</p>
+</blockquote>
+<h3 id="tryexcept-基礎">try/except 基礎</h3>
+<p><code>try/except</code> 是 Python 中最基本的錯誤處理語法。將可能出錯的程式碼放在 <code>try</code> 區塊中，用 <code>except</code> 捕捉並處理錯誤：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>    number <span style="color:#f92672">=</span> int(input(<span style="color:#e6db74">&#34;請輸入一個數字：&#34;</span>))
+</span></span><span style="display:flex;"><span>    result <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span> <span style="color:#f92672">/</span> number
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;結果是：</span><span style="color:#e6db74">{</span>result<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">except</span> <span style="color:#a6e22e">ValueError</span>:
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#34;錯誤：請輸入有效的數字&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">except</span> <span style="color:#a6e22e">ZeroDivisionError</span>:
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#34;錯誤：不能除以零&#34;</span>)
+</span></span></code></pre></div><h3 id="捕捉例外資訊">捕捉例外資訊</h3>
+<p>使用 <code>as</code> 關鍵字可以取得例外物件，獲取更詳細的錯誤資訊：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>    numbers <span style="color:#f92672">=</span> [<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>]
+</span></span><span style="display:flex;"><span>    print(numbers[<span style="color:#ae81ff">10</span>])
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">except</span> <span style="color:#a6e22e">IndexError</span> <span style="color:#66d9ef">as</span> e:
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;發生錯誤：</span><span style="color:#e6db74">{</span>e<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出：發生錯誤：list index out of range</span>
+</span></span></code></pre></div><p>你也可以用一個 <code>except</code> 同時捕捉多種例外：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>    value <span style="color:#f92672">=</span> int(<span style="color:#e6db74">&#34;abc&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">except</span> (<span style="color:#a6e22e">ValueError</span>, <span style="color:#a6e22e">TypeError</span>) <span style="color:#66d9ef">as</span> e:
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;型別相關錯誤：</span><span style="color:#e6db74">{</span>e<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出：型別相關錯誤：invalid literal for int() with base 10: &#39;abc&#39;</span>
+</span></span></code></pre></div><h3 id="else-與-finally">else 與 finally</h3>
+<p><code>else</code> 區塊在 <strong>沒有發生例外</strong> 時執行，<code>finally</code> 區塊 <strong>無論是否發生例外</strong> 都會執行：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>    file <span style="color:#f92672">=</span> open(<span style="color:#e6db74">&#34;data.txt&#34;</span>, <span style="color:#e6db74">&#34;r&#34;</span>)
+</span></span><span style="display:flex;"><span>    content <span style="color:#f92672">=</span> file<span style="color:#f92672">.</span>read()
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">except</span> <span style="color:#a6e22e">FileNotFoundError</span>:
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#34;檔案不存在&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 只在成功讀取時執行</span>
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;檔案內容：</span><span style="color:#e6db74">{</span>content<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">finally</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 無論如何都會執行，適合做清理工作</span>
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#34;檔案操作結束&#34;</span>)
+</span></span></code></pre></div><p>完整的執行順序是：<code>try</code> -&gt; 成功則 <code>else</code> -&gt; <code>finally</code>，或 <code>try</code> -&gt; 失敗則 <code>except</code> -&gt; <code>finally</code>。</p>
+<h3 id="常見內建例外">常見內建例外</h3>
+<p>Python 提供了許多內建的例外類型（Exception），以下是最常見的幾種：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># ValueError — 值不正確</span>
+</span></span><span style="display:flex;"><span>int(<span style="color:#e6db74">&#34;abc&#34;</span>)  <span style="color:#75715e"># ValueError: invalid literal for int()</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># TypeError — 型別不正確</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">&#34;hello&#34;</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">123</span>  <span style="color:#75715e"># TypeError: can only concatenate str to str</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># KeyError — 字典中找不到鍵</span>
+</span></span><span style="display:flex;"><span>my_dict <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#34;a&#34;</span>: <span style="color:#ae81ff">1</span>}
+</span></span><span style="display:flex;"><span>my_dict[<span style="color:#e6db74">&#34;b&#34;</span>]  <span style="color:#75715e"># KeyError: &#39;b&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># FileNotFoundError — 檔案不存在</span>
+</span></span><span style="display:flex;"><span>open(<span style="color:#e6db74">&#34;不存在的檔案.txt&#34;</span>)  <span style="color:#75715e"># FileNotFoundError</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># IndexError — 索引超出範圍</span>
+</span></span><span style="display:flex;"><span>[<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>][<span style="color:#ae81ff">10</span>]  <span style="color:#75715e"># IndexError: list index out of range</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># AttributeError — 屬性不存在</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">&#34;hello&#34;</span><span style="color:#f92672">.</span>append(<span style="color:#e6db74">&#34;!&#34;</span>)  <span style="color:#75715e"># AttributeError: &#39;str&#39; object has no attribute &#39;append&#39;</span>
+</span></span></code></pre></div><h3 id="主動拋出例外">主動拋出例外</h3>
+<p>使用 <code>raise</code> 關鍵字可以主動拋出例外，這在驗證輸入資料時特別有用：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">set_age</span>(age):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> isinstance(age, int):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">raise</span> <span style="color:#a6e22e">TypeError</span>(<span style="color:#e6db74">&#34;年齡必須是整數&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> age <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">or</span> age <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">150</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">raise</span> <span style="color:#a6e22e">ValueError</span>(<span style="color:#e6db74">&#34;年齡必須在 0 到 150 之間&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> age
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>    set_age(<span style="color:#f92672">-</span><span style="color:#ae81ff">5</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">except</span> <span style="color:#a6e22e">ValueError</span> <span style="color:#66d9ef">as</span> e:
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;驗證失敗：</span><span style="color:#e6db74">{</span>e<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出：驗證失敗：年齡必須在 0 到 150 之間</span>
+</span></span></code></pre></div><h3 id="自定義例外類別">自定義例外類別</h3>
+<p>當內建例外無法精確描述你的錯誤情境時，可以建立自定義例外類別。自定義例外應繼承自 <code>Exception</code>：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">InsufficientBalanceError</span>(<span style="color:#a6e22e">Exception</span>):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__init__</span>(self, balance, amount):
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>balance <span style="color:#f92672">=</span> balance
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>amount <span style="color:#f92672">=</span> amount
+</span></span><span style="display:flex;"><span>        super()<span style="color:#f92672">.</span><span style="color:#a6e22e">__init__</span>(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;餘額不足：目前餘額 </span><span style="color:#e6db74">{</span>balance<span style="color:#e6db74">}</span><span style="color:#e6db74">，嘗試提取 </span><span style="color:#e6db74">{</span>amount<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">BankAccount</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__init__</span>(self, balance):
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>balance <span style="color:#f92672">=</span> balance
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">withdraw</span>(self, amount):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> amount <span style="color:#f92672">&gt;</span> self<span style="color:#f92672">.</span>balance:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">raise</span> InsufficientBalanceError(self<span style="color:#f92672">.</span>balance, amount)
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>balance <span style="color:#f92672">-=</span> amount
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>balance
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>account <span style="color:#f92672">=</span> BankAccount(<span style="color:#ae81ff">1000</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>    account<span style="color:#f92672">.</span>withdraw(<span style="color:#ae81ff">1500</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">except</span> InsufficientBalanceError <span style="color:#66d9ef">as</span> e:
+</span></span><span style="display:flex;"><span>    print(e)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出：餘額不足：目前餘額 1000，嘗試提取 1500</span>
+</span></span></code></pre></div><h3 id="eafp-vs-lbyl">EAFP vs LBYL</h3>
+<p>Python 社群推崇兩種不同的錯誤處理風格：</p>
+<p><strong>LBYL（Look Before You Leap）</strong> — 先檢查再行動：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># LBYL 風格</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> key <span style="color:#f92672">in</span> my_dict:
+</span></span><span style="display:flex;"><span>    value <span style="color:#f92672">=</span> my_dict[key]
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>    value <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;預設值&#34;</span>
+</span></span></code></pre></div><p><strong>EAFP（Easier to Ask Forgiveness than Permission）</strong> — 先做再說，有錯再處理：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># EAFP 風格（更 Pythonic）</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>    value <span style="color:#f92672">=</span> my_dict[key]
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">except</span> <span style="color:#a6e22e">KeyError</span>:
+</span></span><span style="display:flex;"><span>    value <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;預設值&#34;</span>
+</span></span></code></pre></div><p>在 Python 中，<strong>EAFP</strong> 風格通常被認為更 Pythonic，因為它更簡潔，在大多數情況下效能也更好（因為例外很少發生）。</p>
+<h3 id="總結">總結</h3>
+<p><strong>例外處理</strong> 是撰寫穩健 Python 程式不可或缺的一環。善用 <code>try/except/else/finally</code> 結構來處理不同情境，了解常見的內建例外類型，並在需要時建立自定義例外類別。記住 Python 的 EAFP 風格——先行動、再處理例外，這會讓你的程式碼更簡潔、更 Pythonic。希望這篇文章能幫助你寫出更穩健的 Python 程式。</p>
+
+<p>例外處理經常與函式搭配使用，建議先閱讀 <a href="/post/python/017-functions/" class="text-blue-500 font-bold no-underline">Python 函數（Functions）入門指南</a>。自定義例外類別需要用到繼承的概念，可以參考 <a href="/post/python/021-oop/" class="text-blue-500 font-bold no-underline">Python 的物件導向程式設計</a>。</p></div>
+        
+        
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            
+            <a href="http://localhost:1313/post/python/037-async-await/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; Previous</span>
+                <span class="text-sm font-medium">Python 非同步程式設計（Async/Await）入門 | Python</span>
+            </a>
+            
+          </div>
+          <div>
+            
+            <a href="http://localhost:1313/post/python/029-iterators/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">Next &rarr;</span>
+                <span class="text-sm font-medium">Python 迭代器（Iterators）深入解析 | Python</span>
+            </a>
+            
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        
+      </div>
+    </div>
+    
+    <div class="hidden lg:block lg:col-span-1">
+    
+    
+            
+            <div class="widget fade-in">
+    <p class="widget-title">Search</p>
+    <form role="search" method="get" action="https://google.com/search">
+        <input class="search-input" type="search" placeholder="Search articles..." name="q" aria-label="Search">
+        <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
+    </form>
+</div>
+
+        
+            
+            
+
+        
+            
+            
+<div class="widget fade-in">
+    <p class="widget-title">Tags</p>
+    <div class="flex flex-wrap gap-1.5">
+        <a href='/tags/css'>
+            <span class="tag-pill">css</span>
+        </a>
+        <a href='/tags/design-pattern'>
+            <span class="tag-pill">design-pattern</span>
+        </a>
+        <a href='/tags/django'>
+            <span class="tag-pill">django</span>
+        </a>
+        <a href='/tags/flutter'>
+            <span class="tag-pill">flutter</span>
+        </a>
+        <a href='/tags/fnm'>
+            <span class="tag-pill">fnm</span>
+        </a>
+        <a href='/tags/git'>
+            <span class="tag-pill">git</span>
+        </a>
+        <a href='/tags/html'>
+            <span class="tag-pill">html</span>
+        </a>
+        <a href='/tags/javascript'>
+            <span class="tag-pill">javascript</span>
+        </a>
+        <a href='/tags/linux'>
+            <span class="tag-pill">linux</span>
+        </a>
+        <a href='/tags/networking'>
+            <span class="tag-pill">networking</span>
+        </a>
+        <a href='/tags/nodejs'>
+            <span class="tag-pill">nodejs</span>
+        </a>
+        <a href='/tags/npm'>
+            <span class="tag-pill">npm</span>
+        </a>
+        <a href='/tags/nvm'>
+            <span class="tag-pill">nvm</span>
+        </a>
+        <a href='/tags/postgresql'>
+            <span class="tag-pill">postgresql</span>
+        </a>
+        <a href='/tags/python'>
+            <span class="tag-pill">python</span>
+        </a>
+        <a href='/tags/react'>
+            <span class="tag-pill">react</span>
+        </a>
+        <a href='/tags/react-native'>
+            <span class="tag-pill">react native</span>
+        </a>
+        <a href='/tags/seo'>
+            <span class="tag-pill">seo</span>
+        </a>
+        <a href='/tags/tools'>
+            <span class="tag-pill">tools</span>
+        </a>
+        <a href='/tags/typescript'>
+            <span class="tag-pill">typescript</span>
+        </a>
+    </div>
+</div>
+
+
+        
+            
+            
+
+<div class="widget fade-in">
+    <p class="widget-title">Recent Posts</p>
+    <div class="flex flex-col gap-1">
+        <a href="/post/python/033-collections-module/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Python collections 模組常用工具教學 | Python</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/04/24
+            </p>
+        </a>
+        <a href="/post/python/035-functools-module/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Python functools 模組常用工具教學 | Python</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/04/24
+            </p>
+        </a>
+        <a href="/post/python/034-itertools-module/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Python itertools 模組實用教學 | Python</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/04/24
+            </p>
+        </a>
+        <a href="/post/python/032-lambda-higher-order-functions/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Python Lambda 與高階函式（Higher-Order Functions） | Python</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/04/24
+            </p>
+        </a>
+        <a href="/post/python/026-context-manager/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Python 上下文管理器（Context Manager）教學 | Python</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/04/24
+            </p>
+        </a>
+    </div>
+</div>
+
+        
+    
+</div>
+
+    
+</div>
+
+        </div>
+    </div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]">
+    
+    <p>&copy; 2026 <a href="http://localhost:1313/" class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p>
+</footer>
+
+
+<script>
+    (function (window, document) {
+        function main() {
+            var ad = document.createElement('script');
+            ad.async = true;
+            ad.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606';
+            ad.crossOrigin = "anonymous";
+            var sc = document.getElementsByTagName('script')[0];
+            sc.parentNode.insertBefore(ad, sc);
+        }
+        var lazyLoad = false;
+        function onLazyLoad() {
+            if (lazyLoad === false) {
+                lazyLoad = true;
+                window.removeEventListener('scroll', onLazyLoad);
+                window.removeEventListener('mousemove', onLazyLoad);
+                window.removeEventListener('mousedown', onLazyLoad);
+                window.removeEventListener('touchstart', onLazyLoad);
+                window.removeEventListener('keydown', onLazyLoad);
+                main();
+            }
+        }
+        window.addEventListener('scroll', onLazyLoad);
+        window.addEventListener('mousemove', onLazyLoad);
+        window.addEventListener('mousedown', onLazyLoad);
+        window.addEventListener('touchstart', onLazyLoad);
+        window.addEventListener('keydown', onLazyLoad);
+        window.addEventListener('load', function () {
+            if (window.pageYOffset) {
+                onLazyLoad();
+                window.setTimeout(onLazyLoad, 3000);
+            }
+        });
+    })(window, document);
+</script>
+
+
+<script>
+    
+    var icon = document.getElementById("icon");
+    var icon2 = document.getElementById("icon2");
+    if (document.documentElement.classList.contains("dark") || localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+        if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+    function toggleDarkMode() {
+        if (document.documentElement.classList.contains('dark')) {
+            if (icon) { icon.classList.remove("icon-sun"); icon.classList.add("icon-moon"); }
+            if (icon2) { icon2.classList.remove("icon-sun"); icon2.classList.add("icon-moon"); }
+            document.documentElement.classList.remove('dark');
+            localStorage.theme = 'light';
+        } else {
+            if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+            if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+            document.documentElement.classList.add('dark');
+            localStorage.theme = 'dark';
+        }
+    }
+
+    
+    document.addEventListener('DOMContentLoaded', function () {
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.fade-in').forEach(function (el) {
+            observer.observe(el);
+        });
+    });
+</script>
+</body>
+
+</html>

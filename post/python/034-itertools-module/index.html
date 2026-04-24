@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><title>BenzHub | Python itertools 模組實用教學 | Python</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="apple-touch-icon" sizes="180x180" href='/favicon/apple-touch-icon.png'>
+    <link rel="icon" type="image/png" sizes="32x32" href='/favicon/favicon-32x32.png'>
+    <link rel="icon" type="image/png" sizes="16x16" href='/favicon/favicon-16x16.png'>
+    <link rel="manifest" href='/favicon/site.webmanifest' />
+    <link rel="mask-icon" href=' /favicon/safari-pinned-tab.svg' color="#5bbad5" />
+    <link rel="shortcut icon" href='/favicon/favicon.ico' />
+    <meta name="theme-color" content="#fafafa">
+    <meta property="og:title" content="BenzHub | Python itertools 模組實用教學 | Python" />
+    
+    
+    <link rel="stylesheet" href="/css/style.css" />
+    
+    <link href=' /css/blonde.min.css' rel="stylesheet" type="text/css" media="print"
+        onload="this.media=' all'">
+    
+
+
+
+<meta name="description" content="學習 Python itertools 模組的常用函式：count、cycle、chain、islice、product、permutations、combinations，讓你更高效地處理迭代操作。">
+<meta property="og:site_name" content="BenzHub">
+<meta property="og:description" content="學習 Python itertools 模組的常用函式：count、cycle、chain、islice、product、permutations、combinations，讓你更高效地處理迭代操作。">
+<meta property="og:url" content="http://localhost:1313/post/python/034-itertools-module/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="">
+
+<link rel="canonical" href="http://localhost:1313/post/python/034-itertools-module/">
+
+<meta name="twitter:description" content="學習 Python itertools 模組的常用函式：count、cycle、chain、islice、product、permutations、combinations，讓你更高效地處理迭代操作。">
+<meta property="article:published_time" content="2026-04-24T00:00:00&#43;00:00">
+<meta property="article:updated_time" content="2026-04-24T00:00:00&#43;00:00">
+
+
+
+
+
+    
+<meta property="og:image" content="http://localhost:1313/img/python/034-itertools-Module.png">
+<meta property="og:image:url" content="http://localhost:1313/img/python/034-itertools-Module.png">
+    
+
+    
+    <link rel="stylesheet" href='/css/custom.css'>
+    <i class="dark hidden"></i>
+</head>
+<body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class="site-nav" id="siteNav">
+    <div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full">
+        
+        <a href="http://localhost:1313/" class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">
+            BenzHub
+        </a>
+
+        
+        <div class="hidden md:flex items-center gap-6">
+            
+            <a href="/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                Home
+            </a>
+            
+            <a href="/about/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                About
+            </a>
+            
+            <a href="/contact/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                Contact
+            </a>
+            
+            <a href="/resourses/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                Resourses
+            </a>
+            
+
+            
+            <div class="flex items-center gap-2">
+                <form class="flex items-center" role="search" method="get" action="https://google.com/search" id="navSearchForm">
+                    <input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50"
+                        type="search" placeholder="Search..." name="q" aria-label="Search" id="navSearchInput">
+                    <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
+                </form>
+                <button onclick="toggleNavSearch()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+                    <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                    </svg>
+                </button>
+            </div>
+
+            
+            <span class="text-zinc-200 dark:text-zinc-700">|</span>
+
+            
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon2" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+        </div>
+
+        
+        <div class="flex md:hidden items-center gap-1">
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+            <button id="hamburgerbtn" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Menu">
+                <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    
+    <div class="mobile-menu md:hidden" id="mobileMenu">
+        
+        <a href="/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            Home
+        </a>
+        
+        <a href="/about/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            About
+        </a>
+        
+        <a href="/contact/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            Contact
+        </a>
+        
+        <a href="/resourses/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            Resourses
+        </a>
+        
+        <form class="mt-2" role="search" method="get" action="https://google.com/search">
+            <input class="search-input" type="search" placeholder="Search..." name="q" aria-label="Search">
+            <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
+        </form>
+    </div>
+</nav>
+
+<script>
+    
+    document.getElementById('hamburgerbtn').addEventListener('click', function () {
+        document.getElementById('mobileMenu').classList.toggle('active');
+    });
+
+    
+    window.addEventListener('scroll', function () {
+        var nav = document.getElementById('siteNav');
+        if (window.scrollY > 50) {
+            nav.classList.add('scrolled');
+        } else {
+            nav.classList.remove('scrolled');
+        }
+    });
+
+    
+    function toggleNavSearch() {
+        var input = document.getElementById('navSearchInput');
+        input.classList.toggle('expanded');
+        if (input.classList.contains('expanded')) {
+            input.focus();
+        }
+    }
+
+    
+    document.addEventListener('click', function (e) {
+        var form = document.getElementById('navSearchForm');
+        var input = document.getElementById('navSearchInput');
+        if (form && input && !form.contains(e.target) && !e.target.closest('[aria-label="Toggle Search"]')) {
+            input.classList.remove('expanded');
+        }
+    });
+</script>
+<div class="nav-spacer"></div>
+    <div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id="content">
+        <div class="lg:mx-5">
+<div class="grid grid-cols-3 gap-6">
+  
+  <div class="col-span-3 lg:col-span-2">
+  
+      
+      <div class="post-detail fade-in my-4">
+        <h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Python itertools 模組實用教學 | Python</h1>
+        <div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4">
+            <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/04/24
+            </span>
+        </div>
+        
+        <div class="flex flex-wrap gap-1.5 mb-5">
+            
+            <a href='http://localhost:1313/tags/python' class="tag-pill no-underline">python</a>
+            
+        </div>
+        
+        
+        <img class="py-4 m-auto rounded-lg thumb-img" src="http://localhost:1313/img/python/034-itertools-Module.png">
+        
+        
+        <div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote>
+<p><strong>Python</strong> 的 <strong>itertools</strong> 模組提供了一系列高效的迭代器工具，讓你在處理迴圈與組合運算時更加簡潔有力。無論是無限序列、排列組合，還是多個可迭代物件的串接，<strong>itertools</strong> 都能幫你輕鬆完成。</p>
+</blockquote>
+<h3 id="什麼是-itertools">什麼是 itertools？</h3>
+<p><strong>itertools</strong> 是 <strong>Python</strong> 標準函式庫中專門處理迭代操作的模組。它提供的函式都回傳迭代器（Iterator），不會一次產生所有結果，因此在處理大量資料時非常節省記憶體。使用前需要先匯入：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> itertools
+</span></span></code></pre></div><h3 id="無限迭代器countcyclerepeat">無限迭代器：count、cycle、repeat</h3>
+<p><strong>itertools</strong> 提供三個能產生無限序列的迭代器，使用時務必搭配中斷條件，避免無窮迴圈。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> itertools <span style="color:#f92672">import</span> count, cycle, repeat
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># count(start, step) — 從 start 開始，每次加 step</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> num <span style="color:#f92672">in</span> count(<span style="color:#ae81ff">10</span>, <span style="color:#ae81ff">3</span>):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> num <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">20</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">break</span>
+</span></span><span style="display:flex;"><span>    print(num, end<span style="color:#f92672">=</span><span style="color:#e6db74">&#34; &#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出：10 13 16 19</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># cycle(iterable) — 無限循環可迭代物件</span>
+</span></span><span style="display:flex;"><span>counter <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> item <span style="color:#f92672">in</span> cycle([<span style="color:#e6db74">&#34;A&#34;</span>, <span style="color:#e6db74">&#34;B&#34;</span>, <span style="color:#e6db74">&#34;C&#34;</span>]):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> counter <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">6</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">break</span>
+</span></span><span style="display:flex;"><span>    print(item, end<span style="color:#f92672">=</span><span style="color:#e6db74">&#34; &#34;</span>)
+</span></span><span style="display:flex;"><span>    counter <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出：A B C A B C</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># repeat(value, times) — 重複產生指定值</span>
+</span></span><span style="display:flex;"><span>list(repeat(<span style="color:#e6db74">&#34;Hello&#34;</span>, <span style="color:#ae81ff">3</span>))
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出：[&#39;Hello&#39;, &#39;Hello&#39;, &#39;Hello&#39;]</span>
+</span></span></code></pre></div><h3 id="用-chain-串接多個可迭代物件">用 chain() 串接多個可迭代物件</h3>
+<p><code>chain()</code> 可以將多個可迭代物件串成一個連續的迭代器，就像把多條鏈子接在一起：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> itertools <span style="color:#f92672">import</span> chain
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>list1 <span style="color:#f92672">=</span> [<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>]
+</span></span><span style="display:flex;"><span>list2 <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#34;a&#34;</span>, <span style="color:#e6db74">&#34;b&#34;</span>]
+</span></span><span style="display:flex;"><span>list3 <span style="color:#f92672">=</span> [<span style="color:#66d9ef">True</span>, <span style="color:#66d9ef">False</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>result <span style="color:#f92672">=</span> list(chain(list1, list2, list3))
+</span></span><span style="display:flex;"><span>print(result)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出：[1, 2, 3, &#39;a&#39;, &#39;b&#39;, True, False]</span>
+</span></span></code></pre></div><h3 id="用-islice-切片迭代器">用 islice() 切片迭代器</h3>
+<p>一般的切片語法（如 <code>[1:5]</code>）無法用在迭代器上，<code>islice()</code> 可以解決這個問題：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> itertools <span style="color:#f92672">import</span> islice, count
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 從無限計數器中取出第 5 到第 9 個元素</span>
+</span></span><span style="display:flex;"><span>result <span style="color:#f92672">=</span> list(islice(count(<span style="color:#ae81ff">0</span>), <span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">10</span>))
+</span></span><span style="display:flex;"><span>print(result)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出：[5, 6, 7, 8, 9]</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 取前 5 個元素</span>
+</span></span><span style="display:flex;"><span>result <span style="color:#f92672">=</span> list(islice(range(<span style="color:#ae81ff">100</span>), <span style="color:#ae81ff">5</span>))
+</span></span><span style="display:flex;"><span>print(result)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出：[0, 1, 2, 3, 4]</span>
+</span></span></code></pre></div><h3 id="排列組合工具">排列組合工具</h3>
+<p><strong>itertools</strong> 提供了三個處理排列組合的函式，在數學運算與資料分析中非常實用。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> itertools <span style="color:#f92672">import</span> product, permutations, combinations
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># product() — 笛卡爾積（Cartesian Product）</span>
+</span></span><span style="display:flex;"><span>result <span style="color:#f92672">=</span> list(product(<span style="color:#e6db74">&#34;AB&#34;</span>, <span style="color:#e6db74">&#34;12&#34;</span>))
+</span></span><span style="display:flex;"><span>print(result)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出：[(&#39;A&#39;, &#39;1&#39;), (&#39;A&#39;, &#39;2&#39;), (&#39;B&#39;, &#39;1&#39;), (&#39;B&#39;, &#39;2&#39;)]</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># permutations() — 排列（順序有差）</span>
+</span></span><span style="display:flex;"><span>result <span style="color:#f92672">=</span> list(permutations(<span style="color:#e6db74">&#34;ABC&#34;</span>, <span style="color:#ae81ff">2</span>))
+</span></span><span style="display:flex;"><span>print(result)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出：[(&#39;A&#39;, &#39;B&#39;), (&#39;A&#39;, &#39;C&#39;), (&#39;B&#39;, &#39;A&#39;), (&#39;B&#39;, &#39;C&#39;), (&#39;C&#39;, &#39;A&#39;), (&#39;C&#39;, &#39;B&#39;)]</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># combinations() — 組合（順序無差）</span>
+</span></span><span style="display:flex;"><span>result <span style="color:#f92672">=</span> list(combinations(<span style="color:#e6db74">&#34;ABC&#34;</span>, <span style="color:#ae81ff">2</span>))
+</span></span><span style="display:flex;"><span>print(result)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出：[(&#39;A&#39;, &#39;B&#39;), (&#39;A&#39;, &#39;C&#39;), (&#39;B&#39;, &#39;C&#39;)]</span>
+</span></span></code></pre></div><p><code>permutations()</code> 在意順序，所以 <code>('A', 'B')</code> 與 <code>('B', 'A')</code> 是不同結果；<code>combinations()</code> 不在意順序，所以只會出現一次。</p>
+<h3 id="用-groupby-分組資料">用 groupby() 分組資料</h3>
+<p><code>groupby()</code> 可以將連續相同鍵值的元素分為一組。使用前需要先排序，否則相同的鍵值若不連續，會被分成多組：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> itertools <span style="color:#f92672">import</span> groupby
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 按成績等級分組</span>
+</span></span><span style="display:flex;"><span>students <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    (<span style="color:#e6db74">&#34;小明&#34;</span>, <span style="color:#e6db74">&#34;A&#34;</span>), (<span style="color:#e6db74">&#34;小華&#34;</span>, <span style="color:#e6db74">&#34;B&#34;</span>), (<span style="color:#e6db74">&#34;小美&#34;</span>, <span style="color:#e6db74">&#34;A&#34;</span>),
+</span></span><span style="display:flex;"><span>    (<span style="color:#e6db74">&#34;小強&#34;</span>, <span style="color:#e6db74">&#34;B&#34;</span>), (<span style="color:#e6db74">&#34;小芳&#34;</span>, <span style="color:#e6db74">&#34;A&#34;</span>)
+</span></span><span style="display:flex;"><span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 先依等級排序</span>
+</span></span><span style="display:flex;"><span>students<span style="color:#f92672">.</span>sort(key<span style="color:#f92672">=</span><span style="color:#66d9ef">lambda</span> x: x[<span style="color:#ae81ff">1</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> grade, group <span style="color:#f92672">in</span> groupby(students, key<span style="color:#f92672">=</span><span style="color:#66d9ef">lambda</span> x: x[<span style="color:#ae81ff">1</span>]):
+</span></span><span style="display:flex;"><span>    names <span style="color:#f92672">=</span> [name <span style="color:#66d9ef">for</span> name, _ <span style="color:#f92672">in</span> group]
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>grade<span style="color:#e6db74">}</span><span style="color:#e6db74">: </span><span style="color:#e6db74">{</span>names<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出：</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># A: [&#39;小明&#39;, &#39;小美&#39;, &#39;小芳&#39;]</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># B: [&#39;小華&#39;, &#39;小強&#39;]</span>
+</span></span></code></pre></div><h3 id="實用範例產生密碼組合">實用範例：產生密碼組合</h3>
+<p>結合 <strong>itertools</strong> 的多個函式，可以輕鬆產生各種組合：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> itertools <span style="color:#f92672">import</span> product
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 產生所有 4 位數字密碼（示範前 5 組）</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> itertools <span style="color:#f92672">import</span> islice
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>digits <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;0123456789&#34;</span>
+</span></span><span style="display:flex;"><span>passwords <span style="color:#f92672">=</span> product(digits, repeat<span style="color:#f92672">=</span><span style="color:#ae81ff">4</span>)
+</span></span><span style="display:flex;"><span>first_five <span style="color:#f92672">=</span> list(islice(passwords, <span style="color:#ae81ff">5</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> p <span style="color:#f92672">in</span> first_five:
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#34;&#34;</span><span style="color:#f92672">.</span>join(p))
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出：</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 0000</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 0001</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 0002</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 0003</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 0004</span>
+</span></span></code></pre></div><h3 id="總結">總結</h3>
+<p><strong>itertools</strong> 模組是 <strong>Python</strong> 中處理迭代操作的強大工具箱。本文介紹了無限迭代器（<code>count</code>、<code>cycle</code>、<code>repeat</code>）、串接工具（<code>chain</code>）、切片工具（<code>islice</code>）、排列組合（<code>product</code>、<code>permutations</code>、<code>combinations</code>）以及分組工具（<code>groupby</code>）。善用這些工具，可以讓你的程式碼更簡潔、更有效率。希望這篇文章能幫助你在日常開發中活用 <strong>itertools</strong> 模組。</p>
+
+<p>如果你想進一步了解迭代器的基本概念，請參考 <a href="/post/python/029-iterators/" class="text-blue-500 font-bold no-underline">Python 迭代器教學</a>。</p>
+
+
+<p>關於生成器的用法與應用，請閱讀 <a href="/post/python/030-generators/" class="text-blue-500 font-bold no-underline">Python 生成器教學</a>。</p></div>
+        
+        
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            
+            <a href="http://localhost:1313/post/python/032-lambda-higher-order-functions/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; Previous</span>
+                <span class="text-sm font-medium">Python Lambda 與高階函式（Higher-Order Functions） | Python</span>
+            </a>
+            
+          </div>
+          <div>
+            
+            <a href="http://localhost:1313/post/python/035-functools-module/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">Next &rarr;</span>
+                <span class="text-sm font-medium">Python functools 模組常用工具教學 | Python</span>
+            </a>
+            
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        
+      </div>
+    </div>
+    
+    <div class="hidden lg:block lg:col-span-1">
+    
+    
+            
+            <div class="widget fade-in">
+    <p class="widget-title">Search</p>
+    <form role="search" method="get" action="https://google.com/search">
+        <input class="search-input" type="search" placeholder="Search articles..." name="q" aria-label="Search">
+        <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
+    </form>
+</div>
+
+        
+            
+            
+
+        
+            
+            
+<div class="widget fade-in">
+    <p class="widget-title">Tags</p>
+    <div class="flex flex-wrap gap-1.5">
+        <a href='/tags/css'>
+            <span class="tag-pill">css</span>
+        </a>
+        <a href='/tags/design-pattern'>
+            <span class="tag-pill">design-pattern</span>
+        </a>
+        <a href='/tags/django'>
+            <span class="tag-pill">django</span>
+        </a>
+        <a href='/tags/flutter'>
+            <span class="tag-pill">flutter</span>
+        </a>
+        <a href='/tags/fnm'>
+            <span class="tag-pill">fnm</span>
+        </a>
+        <a href='/tags/git'>
+            <span class="tag-pill">git</span>
+        </a>
+        <a href='/tags/html'>
+            <span class="tag-pill">html</span>
+        </a>
+        <a href='/tags/javascript'>
+            <span class="tag-pill">javascript</span>
+        </a>
+        <a href='/tags/linux'>
+            <span class="tag-pill">linux</span>
+        </a>
+        <a href='/tags/networking'>
+            <span class="tag-pill">networking</span>
+        </a>
+        <a href='/tags/nodejs'>
+            <span class="tag-pill">nodejs</span>
+        </a>
+        <a href='/tags/npm'>
+            <span class="tag-pill">npm</span>
+        </a>
+        <a href='/tags/nvm'>
+            <span class="tag-pill">nvm</span>
+        </a>
+        <a href='/tags/postgresql'>
+            <span class="tag-pill">postgresql</span>
+        </a>
+        <a href='/tags/python'>
+            <span class="tag-pill">python</span>
+        </a>
+        <a href='/tags/react'>
+            <span class="tag-pill">react</span>
+        </a>
+        <a href='/tags/react-native'>
+            <span class="tag-pill">react native</span>
+        </a>
+        <a href='/tags/seo'>
+            <span class="tag-pill">seo</span>
+        </a>
+        <a href='/tags/tools'>
+            <span class="tag-pill">tools</span>
+        </a>
+        <a href='/tags/typescript'>
+            <span class="tag-pill">typescript</span>
+        </a>
+    </div>
+</div>
+
+
+        
+            
+            
+
+<div class="widget fade-in">
+    <p class="widget-title">Recent Posts</p>
+    <div class="flex flex-col gap-1">
+        <a href="/post/python/033-collections-module/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Python collections 模組常用工具教學 | Python</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/04/24
+            </p>
+        </a>
+        <a href="/post/python/035-functools-module/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Python functools 模組常用工具教學 | Python</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/04/24
+            </p>
+        </a>
+        <a href="/post/python/034-itertools-module/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Python itertools 模組實用教學 | Python</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/04/24
+            </p>
+        </a>
+        <a href="/post/python/032-lambda-higher-order-functions/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Python Lambda 與高階函式（Higher-Order Functions） | Python</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/04/24
+            </p>
+        </a>
+        <a href="/post/python/026-context-manager/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Python 上下文管理器（Context Manager）教學 | Python</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/04/24
+            </p>
+        </a>
+    </div>
+</div>
+
+        
+    
+</div>
+
+    
+</div>
+
+        </div>
+    </div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]">
+    
+    <p>&copy; 2026 <a href="http://localhost:1313/" class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p>
+</footer>
+
+
+<script>
+    (function (window, document) {
+        function main() {
+            var ad = document.createElement('script');
+            ad.async = true;
+            ad.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606';
+            ad.crossOrigin = "anonymous";
+            var sc = document.getElementsByTagName('script')[0];
+            sc.parentNode.insertBefore(ad, sc);
+        }
+        var lazyLoad = false;
+        function onLazyLoad() {
+            if (lazyLoad === false) {
+                lazyLoad = true;
+                window.removeEventListener('scroll', onLazyLoad);
+                window.removeEventListener('mousemove', onLazyLoad);
+                window.removeEventListener('mousedown', onLazyLoad);
+                window.removeEventListener('touchstart', onLazyLoad);
+                window.removeEventListener('keydown', onLazyLoad);
+                main();
+            }
+        }
+        window.addEventListener('scroll', onLazyLoad);
+        window.addEventListener('mousemove', onLazyLoad);
+        window.addEventListener('mousedown', onLazyLoad);
+        window.addEventListener('touchstart', onLazyLoad);
+        window.addEventListener('keydown', onLazyLoad);
+        window.addEventListener('load', function () {
+            if (window.pageYOffset) {
+                onLazyLoad();
+                window.setTimeout(onLazyLoad, 3000);
+            }
+        });
+    })(window, document);
+</script>
+
+
+<script>
+    
+    var icon = document.getElementById("icon");
+    var icon2 = document.getElementById("icon2");
+    if (document.documentElement.classList.contains("dark") || localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+        if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+    function toggleDarkMode() {
+        if (document.documentElement.classList.contains('dark')) {
+            if (icon) { icon.classList.remove("icon-sun"); icon.classList.add("icon-moon"); }
+            if (icon2) { icon2.classList.remove("icon-sun"); icon2.classList.add("icon-moon"); }
+            document.documentElement.classList.remove('dark');
+            localStorage.theme = 'light';
+        } else {
+            if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+            if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+            document.documentElement.classList.add('dark');
+            localStorage.theme = 'dark';
+        }
+    }
+
+    
+    document.addEventListener('DOMContentLoaded', function () {
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.fade-in').forEach(function (el) {
+            observer.observe(el);
+        });
+    });
+</script>
+</body>
+
+</html>
