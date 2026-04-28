@@ -1,552 +1,113 @@
-<!DOCTYPE html>
-
-<html lang="en">
-<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><title>BenzHub | Python 型別提示（Type Hints）入門教學 | Python</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="apple-touch-icon" sizes="180x180" href='/favicon/apple-touch-icon.png'>
-    <link rel="icon" type="image/png" sizes="32x32" href='/favicon/favicon-32x32.png'>
-    <link rel="icon" type="image/png" sizes="16x16" href='/favicon/favicon-16x16.png'>
-    <link rel="manifest" href='/favicon/site.webmanifest' />
-    <link rel="mask-icon" href=' /favicon/safari-pinned-tab.svg' color="#5bbad5" />
-    <link rel="shortcut icon" href='/favicon/favicon.ico' />
-    <meta name="theme-color" content="#fafafa">
-    <meta property="og:title" content="BenzHub | Python 型別提示（Type Hints）入門教學 | Python" />
-    
-    
-    <link rel="stylesheet" href="/css/style.css" />
-    
-    <link href=' /css/blonde.min.css' rel="stylesheet" type="text/css" media="print"
-        onload="this.media=' all'">
-    
-
-
-
-<meta name="description" content="了解 Python 型別提示（Type Hints）的基本語法與使用方式。學習如何為函式參數、回傳值和變數添加型別註解，提升程式碼的可讀性與維護性。">
-<meta property="og:site_name" content="BenzHub">
-<meta property="og:description" content="了解 Python 型別提示（Type Hints）的基本語法與使用方式。學習如何為函式參數、回傳值和變數添加型別註解，提升程式碼的可讀性與維護性。">
-<meta property="og:url" content="http://localhost:1313/post/python/031-type-hints/">
-<meta property="og:type" content="website">
-<meta property="og:locale" content="en_US">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="">
-
-<link rel="canonical" href="http://localhost:1313/post/python/031-type-hints/">
-
-<meta name="twitter:description" content="了解 Python 型別提示（Type Hints）的基本語法與使用方式。學習如何為函式參數、回傳值和變數添加型別註解，提升程式碼的可讀性與維護性。">
-<meta property="article:published_time" content="2026-04-24T00:00:00&#43;00:00">
-<meta property="article:updated_time" content="2026-04-24T00:00:00&#43;00:00">
-
-
-
-
-
-    
-<meta property="og:image" content="http://localhost:1313/img/python/031-Type-Hints.png">
-<meta property="og:image:url" content="http://localhost:1313/img/python/031-Type-Hints.png">
-    
-
-    
-    <link rel="stylesheet" href='/css/custom.css'>
-    <i class="dark hidden"></i>
-</head>
-<body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class="site-nav" id="siteNav">
-    <div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full">
-        
-        <a href="http://localhost:1313/" class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">
-            BenzHub
-        </a>
-
-        
-        <div class="hidden md:flex items-center gap-6">
-            
-            <a href="/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                Home
-            </a>
-            
-            <a href="/about/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                About
-            </a>
-            
-            <a href="/contact/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                Contact
-            </a>
-            
-            <a href="/resourses/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                Resourses
-            </a>
-            
-
-            
-            <div class="flex items-center gap-2">
-                <form class="flex items-center" role="search" method="get" action="https://google.com/search" id="navSearchForm">
-                    <input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50"
-                        type="search" placeholder="Search..." name="q" aria-label="Search" id="navSearchInput">
-                    <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
-                </form>
-                <button onclick="toggleNavSearch()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
-                    <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-                    </svg>
-                </button>
-            </div>
-
-            
-            <span class="text-zinc-200 dark:text-zinc-700">|</span>
-
-            
-            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-                <i id="icon2" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
-            </button>
-        </div>
-
-        
-        <div class="flex md:hidden items-center gap-1">
-            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-                <i id="icon" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
-            </button>
-            <button id="hamburgerbtn" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Menu">
-                <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
-            </button>
-        </div>
-    </div>
-
-    
-    <div class="mobile-menu md:hidden" id="mobileMenu">
-        
-        <a href="/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            Home
-        </a>
-        
-        <a href="/about/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            About
-        </a>
-        
-        <a href="/contact/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            Contact
-        </a>
-        
-        <a href="/resourses/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            Resourses
-        </a>
-        
-        <form class="mt-2" role="search" method="get" action="https://google.com/search">
-            <input class="search-input" type="search" placeholder="Search..." name="q" aria-label="Search">
-            <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
-        </form>
-    </div>
-</nav>
-
-<script>
-    
-    document.getElementById('hamburgerbtn').addEventListener('click', function () {
-        document.getElementById('mobileMenu').classList.toggle('active');
-    });
-
-    
-    window.addEventListener('scroll', function () {
-        var nav = document.getElementById('siteNav');
-        if (window.scrollY > 50) {
-            nav.classList.add('scrolled');
-        } else {
-            nav.classList.remove('scrolled');
-        }
-    });
-
-    
-    function toggleNavSearch() {
-        var input = document.getElementById('navSearchInput');
-        input.classList.toggle('expanded');
-        if (input.classList.contains('expanded')) {
-            input.focus();
-        }
-    }
-
-    
-    document.addEventListener('click', function (e) {
-        var form = document.getElementById('navSearchForm');
-        var input = document.getElementById('navSearchInput');
-        if (form && input && !form.contains(e.target) && !e.target.closest('[aria-label="Toggle Search"]')) {
-            input.classList.remove('expanded');
-        }
-    });
-</script>
-<div class="nav-spacer"></div>
-    <div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id="content">
-        <div class="lg:mx-5">
-<div class="grid grid-cols-3 gap-6">
-  
-  <div class="col-span-3 lg:col-span-2">
-  
-      
-      <div class="post-detail fade-in my-4">
-        <h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Python 型別提示（Type Hints）入門教學 | Python</h1>
-        <div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4">
-            <span class="flex items-center gap-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/04/24
-            </span>
-        </div>
-        
-        <div class="flex flex-wrap gap-1.5 mb-5">
-            
-            <a href='http://localhost:1313/tags/python' class="tag-pill no-underline">python</a>
-            
-        </div>
-        
-        
-        <img class="py-4 m-auto rounded-lg thumb-img" src="http://localhost:1313/img/python/031-Type-Hints.png">
-        
-        
-        <div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote>
-<p><strong>Python</strong> 是一門動態型別語言，變數不需要事先宣告型別。然而，隨著專案規模增長，缺乏型別資訊會讓程式碼難以維護。<strong>型別提示（Type Hints）</strong> 自 Python 3.5 引入後，讓開發者能為變數、函式參數和回傳值加上型別註解，大幅提升可讀性與 IDE 支援。</p>
-</blockquote>
-<h3 id="為什麼需要型別提示">為什麼需要型別提示？</h3>
-<p>型別提示不會在執行時強制檢查型別，但它帶來了許多好處：</p>
-<ul>
-<li><strong>提升可讀性</strong>：一眼就能看出函式接受什麼參數、回傳什麼值</li>
-<li><strong>IDE 支援</strong>：編輯器能提供更精準的自動補全與錯誤提示</li>
-<li><strong>減少 Bug</strong>：搭配靜態型別檢查工具（如 mypy）能在執行前發現型別錯誤</li>
-</ul>
-<h3 id="基本語法">基本語法</h3>
-<p>為變數標註型別使用冒號 <code>:</code>，為函式回傳值標註型別使用箭頭 <code>-&gt;</code>：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>name: str <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Alice&#34;</span>
-</span></span><span style="display:flex;"><span>age: int <span style="color:#f92672">=</span> <span style="color:#ae81ff">30</span>
-</span></span><span style="display:flex;"><span>score: float <span style="color:#f92672">=</span> <span style="color:#ae81ff">95.5</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">greet</span>(name: str) <span style="color:#f92672">-&gt;</span> str:
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Hello, </span><span style="color:#e6db74">{</span>name<span style="color:#e6db74">}</span><span style="color:#e6db74">!&#34;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">add</span>(a: int, b: int) <span style="color:#f92672">-&gt;</span> int:
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> a <span style="color:#f92672">+</span> b
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>print(greet(<span style="color:#e6db74">&#34;Bob&#34;</span>))  <span style="color:#75715e"># 輸出：Hello, Bob!</span>
-</span></span></code></pre></div><h3 id="常見的容器型別">常見的容器型別</h3>
-<p>Python 3.9+ 可以直接使用小寫的內建型別名稱來標註容器型別：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>names: list[str] <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#34;Alice&#34;</span>, <span style="color:#e6db74">&#34;Bob&#34;</span>]
-</span></span><span style="display:flex;"><span>scores: dict[str, int] <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#34;Alice&#34;</span>: <span style="color:#ae81ff">95</span>, <span style="color:#e6db74">&#34;Bob&#34;</span>: <span style="color:#ae81ff">88</span>}
-</span></span><span style="display:flex;"><span>point: tuple[int, int] <span style="color:#f92672">=</span> (<span style="color:#ae81ff">10</span>, <span style="color:#ae81ff">20</span>)
-</span></span><span style="display:flex;"><span>tags: set[str] <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#34;python&#34;</span>, <span style="color:#e6db74">&#34;tutorial&#34;</span>}
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_average</span>(numbers: list[float]) <span style="color:#f92672">-&gt;</span> float:
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> sum(numbers) <span style="color:#f92672">/</span> len(numbers)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>print(get_average([<span style="color:#ae81ff">85.0</span>, <span style="color:#ae81ff">90.5</span>, <span style="color:#ae81ff">78.0</span>]))  <span style="color:#75715e"># 輸出：84.5</span>
-</span></span></code></pre></div><h3 id="optional-與-union">Optional 與 Union</h3>
-<p>當一個值可能是某個型別或 <code>None</code> 時，使用 <code>Optional</code>；當值可能是多種型別之一時，使用 <code>Union</code>：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> typing <span style="color:#f92672">import</span> Optional, Union
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">find_user</span>(user_id: int) <span style="color:#f92672">-&gt;</span> Optional[str]:
-</span></span><span style="display:flex;"><span>    users <span style="color:#f92672">=</span> {<span style="color:#ae81ff">1</span>: <span style="color:#e6db74">&#34;Alice&#34;</span>, <span style="color:#ae81ff">2</span>: <span style="color:#e6db74">&#34;Bob&#34;</span>}
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> users<span style="color:#f92672">.</span>get(user_id)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">process</span>(value: Union[int, str]) <span style="color:#f92672">-&gt;</span> str:
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> str(value)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Python 3.10+ 可以用 | 替代</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">process_new</span>(value: int <span style="color:#f92672">|</span> str) <span style="color:#f92672">-&gt;</span> str:
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> str(value)
-</span></span></code></pre></div><h3 id="typing-模組常用型別">typing 模組常用型別</h3>
-<p><code>typing</code> 模組提供更多進階型別，例如 <code>Callable</code> 可標註函式型別：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> typing <span style="color:#f92672">import</span> Callable
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">apply</span>(func: Callable[[int], int], value: int) <span style="color:#f92672">-&gt;</span> int:
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> func(value)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>result <span style="color:#f92672">=</span> apply(<span style="color:#66d9ef">lambda</span> x: x <span style="color:#f92672">*</span> <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">5</span>)
-</span></span><span style="display:flex;"><span>print(result)  <span style="color:#75715e"># 輸出：10</span>
-</span></span></code></pre></div><h3 id="型別提示不會強制型別">型別提示不會強制型別</h3>
-<p><strong>Python</strong> 的型別提示只是「提示」，不會在執行時檢查。若想在開發階段發現型別錯誤，可使用靜態型別檢查工具 <strong>mypy</strong>，在終端執行 <code>mypy your_script.py</code> 即可。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">add</span>(a: int, b: int) <span style="color:#f92672">-&gt;</span> int:
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> a <span style="color:#f92672">+</span> b
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 傳入字串也不會報錯（執行時不檢查型別）</span>
-</span></span><span style="display:flex;"><span>result <span style="color:#f92672">=</span> add(<span style="color:#e6db74">&#34;Hello, &#34;</span>, <span style="color:#e6db74">&#34;World!&#34;</span>)
-</span></span><span style="display:flex;"><span>print(result)  <span style="color:#75715e"># 輸出：Hello, World!</span>
-</span></span></code></pre></div><h3 id="實用範例為類別添加型別提示">實用範例：為類別添加型別提示</h3>
-<p>型別提示也能應用在類別（Class）的屬性與方法上：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Student</span>:
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__init__</span>(self, name: str, grades: list[int]) <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">None</span>:
-</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>name: str <span style="color:#f92672">=</span> name
-</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>grades: list[int] <span style="color:#f92672">=</span> grades
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">average</span>(self) <span style="color:#f92672">-&gt;</span> float:
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> sum(self<span style="color:#f92672">.</span>grades) <span style="color:#f92672">/</span> len(self<span style="color:#f92672">.</span>grades)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>student <span style="color:#f92672">=</span> Student(<span style="color:#e6db74">&#34;Alice&#34;</span>, [<span style="color:#ae81ff">85</span>, <span style="color:#ae81ff">92</span>, <span style="color:#ae81ff">78</span>])
-</span></span><span style="display:flex;"><span>print(student<span style="color:#f92672">.</span>average())  <span style="color:#75715e"># 輸出：85.0</span>
-</span></span></code></pre></div><h3 id="總結">總結</h3>
-<p>型別提示（Type Hints）是 <strong>Python</strong> 中提升程式碼品質的重要工具。透過為變數、函式參數和回傳值添加型別註解，程式碼更容易閱讀與維護。搭配 IDE 的智慧提示和 mypy 等靜態檢查工具，更能在開發階段提早發現潛在錯誤。希望這篇文章能幫助你養成標註型別的好習慣。</p>
-
-<p>型別提示常用於函式定義，建議先熟悉 <a href="/post/python/017-functions/" class="text-blue-500 font-bold no-underline">Python 函數（Functions）入門指南</a>。若想了解類別中的型別應用，可參考 <a href="/post/python/021-oop/" class="text-blue-500 font-bold no-underline">Python 物件導向程式設計</a>。</p></div>
-        
-        
-      </div>
-
-      
-      <div class="post-detail fade-in my-4">
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            
-            <a href="http://localhost:1313/post/python/028-modules-packages/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
-                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; Previous</span>
-                <span class="text-sm font-medium">Python 模組與套件（Modules &amp; Packages）入門 | Python</span>
-            </a>
-            
-          </div>
-          <div>
-            
-            <a href="http://localhost:1313/post/python/026-context-manager/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
-                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">Next &rarr;</span>
-                <span class="text-sm font-medium">Python 上下文管理器（Context Manager）教學 | Python</span>
-            </a>
-            
-          </div>
-        </div>
-      </div>
-
-      
-      <div class="post-detail fade-in my-4">
-        
-      </div>
-    </div>
-    
-    <div class="hidden lg:block lg:col-span-1">
-    
-    
-            
-            <div class="widget fade-in">
-    <p class="widget-title">Search</p>
-    <form role="search" method="get" action="https://google.com/search">
-        <input class="search-input" type="search" placeholder="Search articles..." name="q" aria-label="Search">
-        <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
-    </form>
-</div>
-
-        
-            
-            
-
-        
-            
-            
-<div class="widget fade-in">
-    <p class="widget-title">Tags</p>
-    <div class="flex flex-wrap gap-1.5">
-        <a href='/tags/css'>
-            <span class="tag-pill">css</span>
-        </a>
-        <a href='/tags/design-pattern'>
-            <span class="tag-pill">design-pattern</span>
-        </a>
-        <a href='/tags/django'>
-            <span class="tag-pill">django</span>
-        </a>
-        <a href='/tags/flutter'>
-            <span class="tag-pill">flutter</span>
-        </a>
-        <a href='/tags/fnm'>
-            <span class="tag-pill">fnm</span>
-        </a>
-        <a href='/tags/git'>
-            <span class="tag-pill">git</span>
-        </a>
-        <a href='/tags/html'>
-            <span class="tag-pill">html</span>
-        </a>
-        <a href='/tags/javascript'>
-            <span class="tag-pill">javascript</span>
-        </a>
-        <a href='/tags/linux'>
-            <span class="tag-pill">linux</span>
-        </a>
-        <a href='/tags/networking'>
-            <span class="tag-pill">networking</span>
-        </a>
-        <a href='/tags/nodejs'>
-            <span class="tag-pill">nodejs</span>
-        </a>
-        <a href='/tags/npm'>
-            <span class="tag-pill">npm</span>
-        </a>
-        <a href='/tags/nvm'>
-            <span class="tag-pill">nvm</span>
-        </a>
-        <a href='/tags/postgresql'>
-            <span class="tag-pill">postgresql</span>
-        </a>
-        <a href='/tags/python'>
-            <span class="tag-pill">python</span>
-        </a>
-        <a href='/tags/react'>
-            <span class="tag-pill">react</span>
-        </a>
-        <a href='/tags/react-native'>
-            <span class="tag-pill">react native</span>
-        </a>
-        <a href='/tags/seo'>
-            <span class="tag-pill">seo</span>
-        </a>
-        <a href='/tags/tools'>
-            <span class="tag-pill">tools</span>
-        </a>
-        <a href='/tags/typescript'>
-            <span class="tag-pill">typescript</span>
-        </a>
-    </div>
-</div>
-
-
-        
-            
-            
-
-<div class="widget fade-in">
-    <p class="widget-title">Recent Posts</p>
-    <div class="flex flex-col gap-1">
-        <a href="/post/python/033-collections-module/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Python collections 模組常用工具教學 | Python</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/04/24
-            </p>
-        </a>
-        <a href="/post/python/035-functools-module/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Python functools 模組常用工具教學 | Python</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/04/24
-            </p>
-        </a>
-        <a href="/post/python/034-itertools-module/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Python itertools 模組實用教學 | Python</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/04/24
-            </p>
-        </a>
-        <a href="/post/python/032-lambda-higher-order-functions/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Python Lambda 與高階函式（Higher-Order Functions） | Python</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/04/24
-            </p>
-        </a>
-        <a href="/post/python/026-context-manager/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Python 上下文管理器（Context Manager）教學 | Python</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/04/24
-            </p>
-        </a>
-    </div>
-</div>
-
-        
-    
-</div>
-
-    
-</div>
-
-        </div>
-    </div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]">
-    
-    <p>&copy; 2026 <a href="http://localhost:1313/" class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p>
-</footer>
-
-
-<script>
-    (function (window, document) {
-        function main() {
-            var ad = document.createElement('script');
-            ad.async = true;
-            ad.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606';
-            ad.crossOrigin = "anonymous";
-            var sc = document.getElementsByTagName('script')[0];
-            sc.parentNode.insertBefore(ad, sc);
-        }
-        var lazyLoad = false;
-        function onLazyLoad() {
-            if (lazyLoad === false) {
-                lazyLoad = true;
-                window.removeEventListener('scroll', onLazyLoad);
-                window.removeEventListener('mousemove', onLazyLoad);
-                window.removeEventListener('mousedown', onLazyLoad);
-                window.removeEventListener('touchstart', onLazyLoad);
-                window.removeEventListener('keydown', onLazyLoad);
-                main();
-            }
-        }
-        window.addEventListener('scroll', onLazyLoad);
-        window.addEventListener('mousemove', onLazyLoad);
-        window.addEventListener('mousedown', onLazyLoad);
-        window.addEventListener('touchstart', onLazyLoad);
-        window.addEventListener('keydown', onLazyLoad);
-        window.addEventListener('load', function () {
-            if (window.pageYOffset) {
-                onLazyLoad();
-                window.setTimeout(onLazyLoad, 3000);
-            }
-        });
-    })(window, document);
-</script>
-
-
-<script>
-    
-    var icon = document.getElementById("icon");
-    var icon2 = document.getElementById("icon2");
-    if (document.documentElement.classList.contains("dark") || localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
-        if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
-        document.documentElement.classList.add('dark');
-    } else {
-        document.documentElement.classList.remove('dark');
-    }
-    function toggleDarkMode() {
-        if (document.documentElement.classList.contains('dark')) {
-            if (icon) { icon.classList.remove("icon-sun"); icon.classList.add("icon-moon"); }
-            if (icon2) { icon2.classList.remove("icon-sun"); icon2.classList.add("icon-moon"); }
-            document.documentElement.classList.remove('dark');
-            localStorage.theme = 'light';
-        } else {
-            if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
-            if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
-            document.documentElement.classList.add('dark');
-            localStorage.theme = 'dark';
-        }
-    }
-
-    
-    document.addEventListener('DOMContentLoaded', function () {
-        var observer = new IntersectionObserver(function (entries) {
-            entries.forEach(function (entry) {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.1 });
-
-        document.querySelectorAll('.fade-in').forEach(function (el) {
-            observer.observe(el);
-        });
-    });
-</script>
-</body>
-
-</html>
+<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>Python 型別提示（Type Hints）入門教學 | Python | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="Python 型別提示（Type Hints）入門教學 | Python | BenzHub"><link rel=stylesheet href="/css/style.min.9eea99a462867e850ea87d603e8b86ff70281cdd26a08cb8d9620a7812f5f9b6.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="了解 Python 型別提示（Type Hints）的基本語法與使用方式。學習如何為函式參數、回傳值和變數添加型別註解，提升程式碼的可讀性與維護性。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="了解 Python 型別提示（Type Hints）的基本語法與使用方式。學習如何為函式參數、回傳值和變數添加型別註解，提升程式碼的可讀性與維護性。"><meta property="og:url" content="https://benzhub.github.io/post/python/031-type-hints/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/python/031-type-hints/><meta name=twitter:description content="了解 Python 型別提示（Type Hints）的基本語法與使用方式。學習如何為函式參數、回傳值和變數添加型別註解，提升程式碼的可讀性與維護性。"><meta property="article:published_time" content="2026-04-28T00:00:00+00:00"><meta property="article:updated_time" content="2026-04-28T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/python/031-Type-Hints.png"><meta property="og:image:url" content="https://benzhub.github.io/img/python/031-Type-Hints.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/python/031-type-hints/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/python/031-type-hints/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"Python 型別提示（Type Hints）入門教學 | Python","description":"了解 Python 型別提示（Type Hints）的基本語法與使用方式。學習如何為函式參數、回傳值和變數添加型別註解，提升程式碼的可讀性與維護性。","author":{"@type":"Person","name":"BenzHub","url":"https:\/\/benzhub.github.io\/about"},"datePublished":"2026-04-28T00:00:00\u002b00:00","dateModified":"2026-04-28T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/python\/031-Type-Hints.png","publisher":{"@type":"Organization","name":"BenzHub","url":"https:\/\/benzhub.github.io\/"},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/python\/031-type-hints\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"BenzHub","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"Posts","item":"https:\/\/benzhub.github.io\/post\/"},{"@type":"ListItem","position":3,"name":"Python 型別提示（Type Hints）入門教學 | Python"}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Python 型別提示（Type Hints）入門教學 | Python</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/04/28</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/python class="tag-pill no-underline">python</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/python/031-Type-Hints.png><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p><strong>Python</strong> 是一門動態型別語言，變數不需要事先宣告型別。然而，隨著專案規模增長，缺乏型別資訊會讓程式碼難以維護。<strong>型別提示（Type Hints）</strong> 自 Python 3.5 引入後，讓開發者能為變數、函式參數和回傳值加上型別註解，大幅提升可讀性與 IDE 支援。</p></blockquote><h3 id=為什麼需要型別提示>為什麼需要型別提示？</h3><p>型別提示不會在執行時強制檢查型別，但它帶來了許多好處：</p><ul><li><strong>提升可讀性</strong>：一眼就能看出函式接受什麼參數、回傳什麼值</li><li><strong>IDE 支援</strong>：編輯器能提供更精準的自動補全與錯誤提示</li><li><strong>減少 Bug</strong>：搭配靜態型別檢查工具（如 mypy）能在執行前發現型別錯誤</li></ul><h3 id=基本語法>基本語法</h3><p>為變數標註型別使用冒號 <code>:</code>，為函式回傳值標註型別使用箭頭 <code>-></code>：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span>name: str <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;Alice&#34;</span>
+</span></span><span style=display:flex><span>age: int <span style=color:#f92672>=</span> <span style=color:#ae81ff>30</span>
+</span></span><span style=display:flex><span>score: float <span style=color:#f92672>=</span> <span style=color:#ae81ff>95.5</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>greet</span>(name: str) <span style=color:#f92672>-&gt;</span> str:
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;Hello, </span><span style=color:#e6db74>{</span>name<span style=color:#e6db74>}</span><span style=color:#e6db74>!&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>add</span>(a: int, b: int) <span style=color:#f92672>-&gt;</span> int:
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> a <span style=color:#f92672>+</span> b
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>print(greet(<span style=color:#e6db74>&#34;Bob&#34;</span>))  <span style=color:#75715e># 輸出：Hello, Bob!</span>
+</span></span></code></pre></div><h3 id=常見的容器型別>常見的容器型別</h3><p>Python 3.9+ 可以直接使用小寫的內建型別名稱來標註容器型別：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span>names: list[str] <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#34;Alice&#34;</span>, <span style=color:#e6db74>&#34;Bob&#34;</span>]
+</span></span><span style=display:flex><span>scores: dict[str, int] <span style=color:#f92672>=</span> {<span style=color:#e6db74>&#34;Alice&#34;</span>: <span style=color:#ae81ff>95</span>, <span style=color:#e6db74>&#34;Bob&#34;</span>: <span style=color:#ae81ff>88</span>}
+</span></span><span style=display:flex><span>point: tuple[int, int] <span style=color:#f92672>=</span> (<span style=color:#ae81ff>10</span>, <span style=color:#ae81ff>20</span>)
+</span></span><span style=display:flex><span>tags: set[str] <span style=color:#f92672>=</span> {<span style=color:#e6db74>&#34;python&#34;</span>, <span style=color:#e6db74>&#34;tutorial&#34;</span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>get_average</span>(numbers: list[float]) <span style=color:#f92672>-&gt;</span> float:
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> sum(numbers) <span style=color:#f92672>/</span> len(numbers)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>print(get_average([<span style=color:#ae81ff>85.0</span>, <span style=color:#ae81ff>90.5</span>, <span style=color:#ae81ff>78.0</span>]))  <span style=color:#75715e># 輸出：84.5</span>
+</span></span></code></pre></div><h3 id=optional-與-union>Optional 與 Union</h3><p>當一個值可能是某個型別或 <code>None</code> 時，使用 <code>Optional</code>；當值可能是多種型別之一時，使用 <code>Union</code>：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> typing <span style=color:#f92672>import</span> Optional, Union
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>find_user</span>(user_id: int) <span style=color:#f92672>-&gt;</span> Optional[str]:
+</span></span><span style=display:flex><span>    users <span style=color:#f92672>=</span> {<span style=color:#ae81ff>1</span>: <span style=color:#e6db74>&#34;Alice&#34;</span>, <span style=color:#ae81ff>2</span>: <span style=color:#e6db74>&#34;Bob&#34;</span>}
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> users<span style=color:#f92672>.</span>get(user_id)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>process</span>(value: Union[int, str]) <span style=color:#f92672>-&gt;</span> str:
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> str(value)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Python 3.10+ 可以用 | 替代</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>process_new</span>(value: int <span style=color:#f92672>|</span> str) <span style=color:#f92672>-&gt;</span> str:
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> str(value)
+</span></span></code></pre></div><h3 id=typing-模組常用型別>typing 模組常用型別</h3><p><code>typing</code> 模組提供更多進階型別，例如 <code>Callable</code> 可標註函式型別：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> typing <span style=color:#f92672>import</span> Callable
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>apply</span>(func: Callable[[int], int], value: int) <span style=color:#f92672>-&gt;</span> int:
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> func(value)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>result <span style=color:#f92672>=</span> apply(<span style=color:#66d9ef>lambda</span> x: x <span style=color:#f92672>*</span> <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>5</span>)
+</span></span><span style=display:flex><span>print(result)  <span style=color:#75715e># 輸出：10</span>
+</span></span></code></pre></div><h3 id=型別提示不會強制型別>型別提示不會強制型別</h3><p><strong>Python</strong> 的型別提示只是「提示」，不會在執行時檢查。若想在開發階段發現型別錯誤，可使用靜態型別檢查工具 <strong>mypy</strong>，在終端執行 <code>mypy your_script.py</code> 即可。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>add</span>(a: int, b: int) <span style=color:#f92672>-&gt;</span> int:
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> a <span style=color:#f92672>+</span> b
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 傳入字串也不會報錯（執行時不檢查型別）</span>
+</span></span><span style=display:flex><span>result <span style=color:#f92672>=</span> add(<span style=color:#e6db74>&#34;Hello, &#34;</span>, <span style=color:#e6db74>&#34;World!&#34;</span>)
+</span></span><span style=display:flex><span>print(result)  <span style=color:#75715e># 輸出：Hello, World!</span>
+</span></span></code></pre></div><h3 id=實用範例為類別添加型別提示>實用範例：為類別添加型別提示</h3><p>型別提示也能應用在類別（Class）的屬性與方法上：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Student</span>:
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>__init__</span>(self, name: str, grades: list[int]) <span style=color:#f92672>-&gt;</span> <span style=color:#66d9ef>None</span>:
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>name: str <span style=color:#f92672>=</span> name
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>grades: list[int] <span style=color:#f92672>=</span> grades
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>average</span>(self) <span style=color:#f92672>-&gt;</span> float:
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> sum(self<span style=color:#f92672>.</span>grades) <span style=color:#f92672>/</span> len(self<span style=color:#f92672>.</span>grades)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>student <span style=color:#f92672>=</span> Student(<span style=color:#e6db74>&#34;Alice&#34;</span>, [<span style=color:#ae81ff>85</span>, <span style=color:#ae81ff>92</span>, <span style=color:#ae81ff>78</span>])
+</span></span><span style=display:flex><span>print(student<span style=color:#f92672>.</span>average())  <span style=color:#75715e># 輸出：85.0</span>
+</span></span></code></pre></div><h3 id=總結>總結</h3><p>型別提示（Type Hints）是 <strong>Python</strong> 中提升程式碼品質的重要工具。透過為變數、函式參數和回傳值添加型別註解，程式碼更容易閱讀與維護。搭配 IDE 的智慧提示和 mypy 等靜態檢查工具，更能在開發階段提早發現潛在錯誤。希望這篇文章能幫助你養成標註型別的好習慣。</p><p>型別提示常用於函式定義，建議先熟悉 <a href=/post/python/017-functions/ class="text-blue-500 font-bold no-underline">Python 函數（Functions）入門指南</a>。若想了解類別中的型別應用，可參考 <a href=/post/python/021-oop/ class="text-blue-500 font-bold no-underline">Python 物件導向程式設計</a>。</p></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/networking/003-what-is-gateway/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+<span class="text-sm font-medium">Gateway 是什麼？網路閘道器完整教學</span></a></div><div><a href=https://benzhub.github.io/post/python/032-lambda-higher-order-functions/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+<span class="text-sm font-medium">Python Lambda 與高階函式（Higher-Order Functions） | Python</span></a></div></div></div><div class="post-detail fade-in my-4"></div></div><div class="hidden lg:block lg:col-span-1"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/css><span class=tag-pill>css</span>
+</a><a href=/tags/design-pattern><span class=tag-pill>design-pattern</span>
+</a><a href=/tags/django><span class=tag-pill>django</span>
+</a><a href=/tags/flutter><span class=tag-pill>flutter</span>
+</a><a href=/tags/fnm><span class=tag-pill>fnm</span>
+</a><a href=/tags/git><span class=tag-pill>git</span>
+</a><a href=/tags/html><span class=tag-pill>html</span>
+</a><a href=/tags/javascript><span class=tag-pill>javascript</span>
+</a><a href=/tags/linux><span class=tag-pill>linux</span>
+</a><a href=/tags/networking><span class=tag-pill>networking</span>
+</a><a href=/tags/nodejs><span class=tag-pill>nodejs</span>
+</a><a href=/tags/npm><span class=tag-pill>npm</span>
+</a><a href=/tags/nvm><span class=tag-pill>nvm</span>
+</a><a href=/tags/postgresql><span class=tag-pill>postgresql</span>
+</a><a href=/tags/python><span class=tag-pill>python</span>
+</a><a href=/tags/react><span class=tag-pill>react</span>
+</a><a href=/tags/react-native><span class=tag-pill>react native</span>
+</a><a href=/tags/seo><span class=tag-pill>seo</span>
+</a><a href=/tags/tools><span class=tag-pill>tools</span>
+</a><a href=/tags/typescript><span class=tag-pill>typescript</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/python/033-collections-module/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Python collections 模組常用工具教學 | Python</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/04/28</p></a><a href=/post/python/032-lambda-higher-order-functions/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Python Lambda 與高階函式（Higher-Order Functions） | Python</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/04/28</p></a><a href=/post/python/031-type-hints/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Python 型別提示（Type Hints）入門教學 | Python</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/04/28</p></a><a href=/post/networking/003-what-is-gateway/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Gateway 是什麼？網路閘道器完整教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/04/27</p></a><a href=/post/python/030-generators/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Python 生成器（Generators）教學指南 | Python</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/04/27</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>

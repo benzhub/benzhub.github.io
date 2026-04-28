@@ -1,539 +1,106 @@
-<!DOCTYPE html>
-
-<html lang="en">
-<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><title>BenzHub | Python Lambda 與高階函式（Higher-Order Functions） | Python</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="apple-touch-icon" sizes="180x180" href='/favicon/apple-touch-icon.png'>
-    <link rel="icon" type="image/png" sizes="32x32" href='/favicon/favicon-32x32.png'>
-    <link rel="icon" type="image/png" sizes="16x16" href='/favicon/favicon-16x16.png'>
-    <link rel="manifest" href='/favicon/site.webmanifest' />
-    <link rel="mask-icon" href=' /favicon/safari-pinned-tab.svg' color="#5bbad5" />
-    <link rel="shortcut icon" href='/favicon/favicon.ico' />
-    <meta name="theme-color" content="#fafafa">
-    <meta property="og:title" content="BenzHub | Python Lambda 與高階函式（Higher-Order Functions） | Python" />
-    
-    
-    <link rel="stylesheet" href="/css/style.css" />
-    
-    <link href=' /css/blonde.min.css' rel="stylesheet" type="text/css" media="print"
-        onload="this.media=' all'">
-    
-
-
-
-<meta name="description" content="學習 Python 的 Lambda 匿名函式與高階函式用法。掌握 map()、filter()、sorted() 的 key 參數，以及閉包（Closure）的基本概念，寫出更簡潔的 Python 程式碼。">
-<meta property="og:site_name" content="BenzHub">
-<meta property="og:description" content="學習 Python 的 Lambda 匿名函式與高階函式用法。掌握 map()、filter()、sorted() 的 key 參數，以及閉包（Closure）的基本概念，寫出更簡潔的 Python 程式碼。">
-<meta property="og:url" content="http://localhost:1313/post/python/032-lambda-higher-order-functions/">
-<meta property="og:type" content="website">
-<meta property="og:locale" content="en_US">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="">
-
-<link rel="canonical" href="http://localhost:1313/post/python/032-lambda-higher-order-functions/">
-
-<meta name="twitter:description" content="學習 Python 的 Lambda 匿名函式與高階函式用法。掌握 map()、filter()、sorted() 的 key 參數，以及閉包（Closure）的基本概念，寫出更簡潔的 Python 程式碼。">
-<meta property="article:published_time" content="2026-04-24T00:00:00&#43;00:00">
-<meta property="article:updated_time" content="2026-04-24T00:00:00&#43;00:00">
-
-
-
-
-
-    
-<meta property="og:image" content="http://localhost:1313/img/python/032-Lambda-Higher-Order-Functions.png">
-<meta property="og:image:url" content="http://localhost:1313/img/python/032-Lambda-Higher-Order-Functions.png">
-    
-
-    
-    <link rel="stylesheet" href='/css/custom.css'>
-    <i class="dark hidden"></i>
-</head>
-<body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class="site-nav" id="siteNav">
-    <div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full">
-        
-        <a href="http://localhost:1313/" class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">
-            BenzHub
-        </a>
-
-        
-        <div class="hidden md:flex items-center gap-6">
-            
-            <a href="/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                Home
-            </a>
-            
-            <a href="/about/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                About
-            </a>
-            
-            <a href="/contact/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                Contact
-            </a>
-            
-            <a href="/resourses/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                Resourses
-            </a>
-            
-
-            
-            <div class="flex items-center gap-2">
-                <form class="flex items-center" role="search" method="get" action="https://google.com/search" id="navSearchForm">
-                    <input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50"
-                        type="search" placeholder="Search..." name="q" aria-label="Search" id="navSearchInput">
-                    <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
-                </form>
-                <button onclick="toggleNavSearch()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
-                    <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-                    </svg>
-                </button>
-            </div>
-
-            
-            <span class="text-zinc-200 dark:text-zinc-700">|</span>
-
-            
-            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-                <i id="icon2" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
-            </button>
-        </div>
-
-        
-        <div class="flex md:hidden items-center gap-1">
-            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-                <i id="icon" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
-            </button>
-            <button id="hamburgerbtn" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Menu">
-                <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
-            </button>
-        </div>
-    </div>
-
-    
-    <div class="mobile-menu md:hidden" id="mobileMenu">
-        
-        <a href="/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            Home
-        </a>
-        
-        <a href="/about/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            About
-        </a>
-        
-        <a href="/contact/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            Contact
-        </a>
-        
-        <a href="/resourses/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            Resourses
-        </a>
-        
-        <form class="mt-2" role="search" method="get" action="https://google.com/search">
-            <input class="search-input" type="search" placeholder="Search..." name="q" aria-label="Search">
-            <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
-        </form>
-    </div>
-</nav>
-
-<script>
-    
-    document.getElementById('hamburgerbtn').addEventListener('click', function () {
-        document.getElementById('mobileMenu').classList.toggle('active');
-    });
-
-    
-    window.addEventListener('scroll', function () {
-        var nav = document.getElementById('siteNav');
-        if (window.scrollY > 50) {
-            nav.classList.add('scrolled');
-        } else {
-            nav.classList.remove('scrolled');
-        }
-    });
-
-    
-    function toggleNavSearch() {
-        var input = document.getElementById('navSearchInput');
-        input.classList.toggle('expanded');
-        if (input.classList.contains('expanded')) {
-            input.focus();
-        }
-    }
-
-    
-    document.addEventListener('click', function (e) {
-        var form = document.getElementById('navSearchForm');
-        var input = document.getElementById('navSearchInput');
-        if (form && input && !form.contains(e.target) && !e.target.closest('[aria-label="Toggle Search"]')) {
-            input.classList.remove('expanded');
-        }
-    });
-</script>
-<div class="nav-spacer"></div>
-    <div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id="content">
-        <div class="lg:mx-5">
-<div class="grid grid-cols-3 gap-6">
-  
-  <div class="col-span-3 lg:col-span-2">
-  
-      
-      <div class="post-detail fade-in my-4">
-        <h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Python Lambda 與高階函式（Higher-Order Functions） | Python</h1>
-        <div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4">
-            <span class="flex items-center gap-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/04/24
-            </span>
-        </div>
-        
-        <div class="flex flex-wrap gap-1.5 mb-5">
-            
-            <a href='http://localhost:1313/tags/python' class="tag-pill no-underline">python</a>
-            
-        </div>
-        
-        
-        <img class="py-4 m-auto rounded-lg thumb-img" src="http://localhost:1313/img/python/032-Lambda-Higher-Order-Functions.png">
-        
-        
-        <div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote>
-<p>在 <strong>Python</strong> 中，函式是一等公民（First-Class Citizen），可以像變數一樣被傳遞與回傳。<strong>Lambda</strong> 匿名函式讓你用一行就能定義簡短函式，而 <strong>高階函式（Higher-Order Functions）</strong> 如 <code>map()</code>、<code>filter()</code> 和 <code>sorted()</code> 則能接受函式作為參數，讓程式碼更加簡潔。</p>
-</blockquote>
-<h3 id="lambda-匿名函式">Lambda 匿名函式</h3>
-<p>Lambda 是不需要 <code>def</code> 定義名稱的匿名函式，語法為 <code>lambda 參數: 表達式</code>，只能包含一個表達式並自動回傳結果：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>square <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> x: x <span style="color:#f92672">**</span> <span style="color:#ae81ff">2</span>
-</span></span><span style="display:flex;"><span>print(square(<span style="color:#ae81ff">5</span>))  <span style="color:#75715e"># 輸出：25</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>add <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> x, y: x <span style="color:#f92672">+</span> y
-</span></span><span style="display:flex;"><span>print(add(<span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">4</span>))  <span style="color:#75715e"># 輸出：7</span>
-</span></span></code></pre></div><p>Lambda 適合用在需要簡短函式且只使用一次的場景。如果邏輯較複雜，建議使用 <code>def</code> 定義具名函式以提升可讀性。</p>
-<h3 id="map-函式">map() 函式</h3>
-<p><code>map()</code> 會將指定的函式套用到可迭代物件（Iterable）的每一個元素上，回傳一個新的迭代器：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>numbers <span style="color:#f92672">=</span> [<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">5</span>]
-</span></span><span style="display:flex;"><span>squared <span style="color:#f92672">=</span> list(map(<span style="color:#66d9ef">lambda</span> x: x <span style="color:#f92672">**</span> <span style="color:#ae81ff">2</span>, numbers))
-</span></span><span style="display:flex;"><span>print(squared)  <span style="color:#75715e"># 輸出：[1, 4, 9, 16, 25]</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">to_celsius</span>(f):
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> round((f <span style="color:#f92672">-</span> <span style="color:#ae81ff">32</span>) <span style="color:#f92672">*</span> <span style="color:#ae81ff">5</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">9</span>, <span style="color:#ae81ff">1</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>celsius <span style="color:#f92672">=</span> list(map(to_celsius, [<span style="color:#ae81ff">98.6</span>, <span style="color:#ae81ff">212</span>, <span style="color:#ae81ff">32</span>]))
-</span></span><span style="display:flex;"><span>print(celsius)  <span style="color:#75715e"># 輸出：[37.0, 100.0, 0.0]</span>
-</span></span></code></pre></div><h3 id="filter-函式">filter() 函式</h3>
-<p><code>filter()</code> 會根據條件函式過濾元素，只保留讓函式回傳 <code>True</code> 的元素：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>numbers <span style="color:#f92672">=</span> [<span style="color:#ae81ff">1</span>, <span style="color:#f92672">-</span><span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>, <span style="color:#f92672">-</span><span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">5</span>, <span style="color:#f92672">-</span><span style="color:#ae81ff">6</span>]
-</span></span><span style="display:flex;"><span>positives <span style="color:#f92672">=</span> list(filter(<span style="color:#66d9ef">lambda</span> x: x <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>, numbers))
-</span></span><span style="display:flex;"><span>print(positives)  <span style="color:#75715e"># 輸出：[1, 3, 5]</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>words <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#34;hello&#34;</span>, <span style="color:#e6db74">&#34;&#34;</span>, <span style="color:#e6db74">&#34;world&#34;</span>, <span style="color:#e6db74">&#34;&#34;</span>, <span style="color:#e6db74">&#34;python&#34;</span>]
-</span></span><span style="display:flex;"><span>non_empty <span style="color:#f92672">=</span> list(filter(<span style="color:#66d9ef">None</span>, words))
-</span></span><span style="display:flex;"><span>print(non_empty)  <span style="color:#75715e"># 輸出：[&#39;hello&#39;, &#39;world&#39;, &#39;python&#39;]</span>
-</span></span></code></pre></div><h3 id="sorted-與-key-參數">sorted() 與 key 參數</h3>
-<p><code>sorted()</code> 的 <code>key</code> 參數接受一個函式來決定排序依據，這是 Lambda 最常見的應用場景：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>words <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#34;python&#34;</span>, <span style="color:#e6db74">&#34;is&#34;</span>, <span style="color:#e6db74">&#34;a&#34;</span>, <span style="color:#e6db74">&#34;great&#34;</span>, <span style="color:#e6db74">&#34;language&#34;</span>]
-</span></span><span style="display:flex;"><span>print(sorted(words, key<span style="color:#f92672">=</span><span style="color:#66d9ef">lambda</span> w: len(w)))
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出：[&#39;a&#39;, &#39;is&#39;, &#39;great&#39;, &#39;python&#39;, &#39;language&#39;]</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>students <span style="color:#f92672">=</span> [
-</span></span><span style="display:flex;"><span>    {<span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;Alice&#34;</span>, <span style="color:#e6db74">&#34;score&#34;</span>: <span style="color:#ae81ff">85</span>},
-</span></span><span style="display:flex;"><span>    {<span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;Bob&#34;</span>, <span style="color:#e6db74">&#34;score&#34;</span>: <span style="color:#ae81ff">92</span>},
-</span></span><span style="display:flex;"><span>    {<span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;Charlie&#34;</span>, <span style="color:#e6db74">&#34;score&#34;</span>: <span style="color:#ae81ff">78</span>},
-</span></span><span style="display:flex;"><span>]
-</span></span><span style="display:flex;"><span>by_score <span style="color:#f92672">=</span> sorted(students, key<span style="color:#f92672">=</span><span style="color:#66d9ef">lambda</span> s: s[<span style="color:#e6db74">&#34;score&#34;</span>], reverse<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> s <span style="color:#f92672">in</span> by_score:
-</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">{</span>s[<span style="color:#e6db74">&#34;name&#34;</span>]<span style="color:#e6db74">}</span><span style="color:#e6db74">: </span><span style="color:#e6db74">{</span>s[<span style="color:#e6db74">&#34;score&#34;</span>]<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span>)
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出：Bob: 92, Alice: 85, Charlie: 78</span>
-</span></span></code></pre></div><h3 id="閉包closure">閉包（Closure）</h3>
-<p>閉包（Closure）是指內部函式能「記住」外部函式的變數，即使外部函式已經執行完畢：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">multiplier</span>(n):
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">multiply</span>(x):
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> x <span style="color:#f92672">*</span> n
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> multiply
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>double <span style="color:#f92672">=</span> multiplier(<span style="color:#ae81ff">2</span>)
-</span></span><span style="display:flex;"><span>triple <span style="color:#f92672">=</span> multiplier(<span style="color:#ae81ff">3</span>)
-</span></span><span style="display:flex;"><span>print(double(<span style="color:#ae81ff">5</span>))  <span style="color:#75715e"># 輸出：10</span>
-</span></span><span style="display:flex;"><span>print(triple(<span style="color:#ae81ff">5</span>))  <span style="color:#75715e"># 輸出：15</span>
-</span></span></code></pre></div><h3 id="functoolsreduce">functools.reduce()</h3>
-<p><code>functools.reduce()</code> 會對元素進行累積運算，逐步合併為一個值：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> functools <span style="color:#f92672">import</span> reduce
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>numbers <span style="color:#f92672">=</span> [<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">5</span>]
-</span></span><span style="display:flex;"><span>product <span style="color:#f92672">=</span> reduce(<span style="color:#66d9ef">lambda</span> a, b: a <span style="color:#f92672">*</span> b, numbers)
-</span></span><span style="display:flex;"><span>print(product)  <span style="color:#75715e"># 輸出：120</span>
-</span></span></code></pre></div><h3 id="總結">總結</h3>
-<p><strong>Lambda</strong> 匿名函式與高階函式是 <strong>Python</strong> 函式式程式設計的核心工具。<code>map()</code> 用於轉換元素、<code>filter()</code> 用於過濾元素、<code>sorted()</code> 搭配 <code>key</code> 可靈活排序，而閉包（Closure）讓函式能攜帶狀態。合理運用這些工具能讓程式碼更簡潔，但過於複雜的邏輯仍建議使用具名函式或串列推導式來實現。</p>
-
-<p>Lambda 與高階函式建立在函式基礎之上，建議先閱讀 <a href="/post/python/017-functions/" class="text-blue-500 font-bold no-underline">Python 函數（Functions）入門指南</a>。許多高階函式的效果也能用串列推導式達成，可參考 <a href="/post/python/013-list-comprehensions/" class="text-blue-500 font-bold no-underline">Python 串列推導式教學</a>。</p></div>
-        
-        
-      </div>
-
-      
-      <div class="post-detail fade-in my-4">
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            
-            <a href="http://localhost:1313/post/python/026-context-manager/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
-                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; Previous</span>
-                <span class="text-sm font-medium">Python 上下文管理器（Context Manager）教學 | Python</span>
-            </a>
-            
-          </div>
-          <div>
-            
-            <a href="http://localhost:1313/post/python/034-itertools-module/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
-                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">Next &rarr;</span>
-                <span class="text-sm font-medium">Python itertools 模組實用教學 | Python</span>
-            </a>
-            
-          </div>
-        </div>
-      </div>
-
-      
-      <div class="post-detail fade-in my-4">
-        
-      </div>
-    </div>
-    
-    <div class="hidden lg:block lg:col-span-1">
-    
-    
-            
-            <div class="widget fade-in">
-    <p class="widget-title">Search</p>
-    <form role="search" method="get" action="https://google.com/search">
-        <input class="search-input" type="search" placeholder="Search articles..." name="q" aria-label="Search">
-        <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
-    </form>
-</div>
-
-        
-            
-            
-
-        
-            
-            
-<div class="widget fade-in">
-    <p class="widget-title">Tags</p>
-    <div class="flex flex-wrap gap-1.5">
-        <a href='/tags/css'>
-            <span class="tag-pill">css</span>
-        </a>
-        <a href='/tags/design-pattern'>
-            <span class="tag-pill">design-pattern</span>
-        </a>
-        <a href='/tags/django'>
-            <span class="tag-pill">django</span>
-        </a>
-        <a href='/tags/flutter'>
-            <span class="tag-pill">flutter</span>
-        </a>
-        <a href='/tags/fnm'>
-            <span class="tag-pill">fnm</span>
-        </a>
-        <a href='/tags/git'>
-            <span class="tag-pill">git</span>
-        </a>
-        <a href='/tags/html'>
-            <span class="tag-pill">html</span>
-        </a>
-        <a href='/tags/javascript'>
-            <span class="tag-pill">javascript</span>
-        </a>
-        <a href='/tags/linux'>
-            <span class="tag-pill">linux</span>
-        </a>
-        <a href='/tags/networking'>
-            <span class="tag-pill">networking</span>
-        </a>
-        <a href='/tags/nodejs'>
-            <span class="tag-pill">nodejs</span>
-        </a>
-        <a href='/tags/npm'>
-            <span class="tag-pill">npm</span>
-        </a>
-        <a href='/tags/nvm'>
-            <span class="tag-pill">nvm</span>
-        </a>
-        <a href='/tags/postgresql'>
-            <span class="tag-pill">postgresql</span>
-        </a>
-        <a href='/tags/python'>
-            <span class="tag-pill">python</span>
-        </a>
-        <a href='/tags/react'>
-            <span class="tag-pill">react</span>
-        </a>
-        <a href='/tags/react-native'>
-            <span class="tag-pill">react native</span>
-        </a>
-        <a href='/tags/seo'>
-            <span class="tag-pill">seo</span>
-        </a>
-        <a href='/tags/tools'>
-            <span class="tag-pill">tools</span>
-        </a>
-        <a href='/tags/typescript'>
-            <span class="tag-pill">typescript</span>
-        </a>
-    </div>
-</div>
-
-
-        
-            
-            
-
-<div class="widget fade-in">
-    <p class="widget-title">Recent Posts</p>
-    <div class="flex flex-col gap-1">
-        <a href="/post/python/033-collections-module/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Python collections 模組常用工具教學 | Python</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/04/24
-            </p>
-        </a>
-        <a href="/post/python/035-functools-module/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Python functools 模組常用工具教學 | Python</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/04/24
-            </p>
-        </a>
-        <a href="/post/python/034-itertools-module/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Python itertools 模組實用教學 | Python</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/04/24
-            </p>
-        </a>
-        <a href="/post/python/032-lambda-higher-order-functions/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Python Lambda 與高階函式（Higher-Order Functions） | Python</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/04/24
-            </p>
-        </a>
-        <a href="/post/python/026-context-manager/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Python 上下文管理器（Context Manager）教學 | Python</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/04/24
-            </p>
-        </a>
-    </div>
-</div>
-
-        
-    
-</div>
-
-    
-</div>
-
-        </div>
-    </div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]">
-    
-    <p>&copy; 2026 <a href="http://localhost:1313/" class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p>
-</footer>
-
-
-<script>
-    (function (window, document) {
-        function main() {
-            var ad = document.createElement('script');
-            ad.async = true;
-            ad.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606';
-            ad.crossOrigin = "anonymous";
-            var sc = document.getElementsByTagName('script')[0];
-            sc.parentNode.insertBefore(ad, sc);
-        }
-        var lazyLoad = false;
-        function onLazyLoad() {
-            if (lazyLoad === false) {
-                lazyLoad = true;
-                window.removeEventListener('scroll', onLazyLoad);
-                window.removeEventListener('mousemove', onLazyLoad);
-                window.removeEventListener('mousedown', onLazyLoad);
-                window.removeEventListener('touchstart', onLazyLoad);
-                window.removeEventListener('keydown', onLazyLoad);
-                main();
-            }
-        }
-        window.addEventListener('scroll', onLazyLoad);
-        window.addEventListener('mousemove', onLazyLoad);
-        window.addEventListener('mousedown', onLazyLoad);
-        window.addEventListener('touchstart', onLazyLoad);
-        window.addEventListener('keydown', onLazyLoad);
-        window.addEventListener('load', function () {
-            if (window.pageYOffset) {
-                onLazyLoad();
-                window.setTimeout(onLazyLoad, 3000);
-            }
-        });
-    })(window, document);
-</script>
-
-
-<script>
-    
-    var icon = document.getElementById("icon");
-    var icon2 = document.getElementById("icon2");
-    if (document.documentElement.classList.contains("dark") || localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
-        if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
-        document.documentElement.classList.add('dark');
-    } else {
-        document.documentElement.classList.remove('dark');
-    }
-    function toggleDarkMode() {
-        if (document.documentElement.classList.contains('dark')) {
-            if (icon) { icon.classList.remove("icon-sun"); icon.classList.add("icon-moon"); }
-            if (icon2) { icon2.classList.remove("icon-sun"); icon2.classList.add("icon-moon"); }
-            document.documentElement.classList.remove('dark');
-            localStorage.theme = 'light';
-        } else {
-            if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
-            if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
-            document.documentElement.classList.add('dark');
-            localStorage.theme = 'dark';
-        }
-    }
-
-    
-    document.addEventListener('DOMContentLoaded', function () {
-        var observer = new IntersectionObserver(function (entries) {
-            entries.forEach(function (entry) {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.1 });
-
-        document.querySelectorAll('.fade-in').forEach(function (el) {
-            observer.observe(el);
-        });
-    });
-</script>
-</body>
-
-</html>
+<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>Python Lambda 與高階函式（Higher-Order Functions） | Python | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="Python Lambda 與高階函式（Higher-Order Functions） | Python | BenzHub"><link rel=stylesheet href="/css/style.min.9eea99a462867e850ea87d603e8b86ff70281cdd26a08cb8d9620a7812f5f9b6.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="學習 Python 的 Lambda 匿名函式與高階函式用法。掌握 map()、filter()、sorted() 的 key 參數，以及閉包（Closure）的基本概念，寫出更簡潔的 Python 程式碼。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="學習 Python 的 Lambda 匿名函式與高階函式用法。掌握 map()、filter()、sorted() 的 key 參數，以及閉包（Closure）的基本概念，寫出更簡潔的 Python 程式碼。"><meta property="og:url" content="https://benzhub.github.io/post/python/032-lambda-higher-order-functions/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/python/032-lambda-higher-order-functions/><meta name=twitter:description content="學習 Python 的 Lambda 匿名函式與高階函式用法。掌握 map()、filter()、sorted() 的 key 參數，以及閉包（Closure）的基本概念，寫出更簡潔的 Python 程式碼。"><meta property="article:published_time" content="2026-04-28T00:00:00+00:00"><meta property="article:updated_time" content="2026-04-28T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/python/032-Lambda-Higher-Order-Functions.png"><meta property="og:image:url" content="https://benzhub.github.io/img/python/032-Lambda-Higher-Order-Functions.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/python/032-lambda-higher-order-functions/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/python/032-lambda-higher-order-functions/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"Python Lambda 與高階函式（Higher-Order Functions） | Python","description":"學習 Python 的 Lambda 匿名函式與高階函式用法。掌握 map()、filter()、sorted() 的 key 參數，以及閉包（Closure）的基本概念，寫出更簡潔的 Python 程式碼。","author":{"@type":"Person","name":"BenzHub","url":"https:\/\/benzhub.github.io\/about"},"datePublished":"2026-04-28T00:00:00\u002b00:00","dateModified":"2026-04-28T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/python\/032-Lambda-Higher-Order-Functions.png","publisher":{"@type":"Organization","name":"BenzHub","url":"https:\/\/benzhub.github.io\/"},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/python\/032-lambda-higher-order-functions\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"BenzHub","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"Posts","item":"https:\/\/benzhub.github.io\/post\/"},{"@type":"ListItem","position":3,"name":"Python Lambda 與高階函式（Higher-Order Functions） | Python"}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Python Lambda 與高階函式（Higher-Order Functions） | Python</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/04/28</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/python class="tag-pill no-underline">python</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/python/032-Lambda-Higher-Order-Functions.png><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p>在 <strong>Python</strong> 中，函式是一等公民（First-Class Citizen），可以像變數一樣被傳遞與回傳。<strong>Lambda</strong> 匿名函式讓你用一行就能定義簡短函式，而 <strong>高階函式（Higher-Order Functions）</strong> 如 <code>map()</code>、<code>filter()</code> 和 <code>sorted()</code> 則能接受函式作為參數，讓程式碼更加簡潔。</p></blockquote><h3 id=lambda-匿名函式>Lambda 匿名函式</h3><p>Lambda 是不需要 <code>def</code> 定義名稱的匿名函式，語法為 <code>lambda 參數: 表達式</code>，只能包含一個表達式並自動回傳結果：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span>square <span style=color:#f92672>=</span> <span style=color:#66d9ef>lambda</span> x: x <span style=color:#f92672>**</span> <span style=color:#ae81ff>2</span>
+</span></span><span style=display:flex><span>print(square(<span style=color:#ae81ff>5</span>))  <span style=color:#75715e># 輸出：25</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>add <span style=color:#f92672>=</span> <span style=color:#66d9ef>lambda</span> x, y: x <span style=color:#f92672>+</span> y
+</span></span><span style=display:flex><span>print(add(<span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>4</span>))  <span style=color:#75715e># 輸出：7</span>
+</span></span></code></pre></div><p>Lambda 適合用在需要簡短函式且只使用一次的場景。如果邏輯較複雜，建議使用 <code>def</code> 定義具名函式以提升可讀性。</p><h3 id=map-函式>map() 函式</h3><p><code>map()</code> 會將指定的函式套用到可迭代物件（Iterable）的每一個元素上，回傳一個新的迭代器：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span>numbers <span style=color:#f92672>=</span> [<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>4</span>, <span style=color:#ae81ff>5</span>]
+</span></span><span style=display:flex><span>squared <span style=color:#f92672>=</span> list(map(<span style=color:#66d9ef>lambda</span> x: x <span style=color:#f92672>**</span> <span style=color:#ae81ff>2</span>, numbers))
+</span></span><span style=display:flex><span>print(squared)  <span style=color:#75715e># 輸出：[1, 4, 9, 16, 25]</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>to_celsius</span>(f):
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> round((f <span style=color:#f92672>-</span> <span style=color:#ae81ff>32</span>) <span style=color:#f92672>*</span> <span style=color:#ae81ff>5</span> <span style=color:#f92672>/</span> <span style=color:#ae81ff>9</span>, <span style=color:#ae81ff>1</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>celsius <span style=color:#f92672>=</span> list(map(to_celsius, [<span style=color:#ae81ff>98.6</span>, <span style=color:#ae81ff>212</span>, <span style=color:#ae81ff>32</span>]))
+</span></span><span style=display:flex><span>print(celsius)  <span style=color:#75715e># 輸出：[37.0, 100.0, 0.0]</span>
+</span></span></code></pre></div><h3 id=filter-函式>filter() 函式</h3><p><code>filter()</code> 會根據條件函式過濾元素，只保留讓函式回傳 <code>True</code> 的元素：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span>numbers <span style=color:#f92672>=</span> [<span style=color:#ae81ff>1</span>, <span style=color:#f92672>-</span><span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>, <span style=color:#f92672>-</span><span style=color:#ae81ff>4</span>, <span style=color:#ae81ff>5</span>, <span style=color:#f92672>-</span><span style=color:#ae81ff>6</span>]
+</span></span><span style=display:flex><span>positives <span style=color:#f92672>=</span> list(filter(<span style=color:#66d9ef>lambda</span> x: x <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>, numbers))
+</span></span><span style=display:flex><span>print(positives)  <span style=color:#75715e># 輸出：[1, 3, 5]</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>words <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#34;hello&#34;</span>, <span style=color:#e6db74>&#34;&#34;</span>, <span style=color:#e6db74>&#34;world&#34;</span>, <span style=color:#e6db74>&#34;&#34;</span>, <span style=color:#e6db74>&#34;python&#34;</span>]
+</span></span><span style=display:flex><span>non_empty <span style=color:#f92672>=</span> list(filter(<span style=color:#66d9ef>None</span>, words))
+</span></span><span style=display:flex><span>print(non_empty)  <span style=color:#75715e># 輸出：[&#39;hello&#39;, &#39;world&#39;, &#39;python&#39;]</span>
+</span></span></code></pre></div><h3 id=sorted-與-key-參數>sorted() 與 key 參數</h3><p><code>sorted()</code> 的 <code>key</code> 參數接受一個函式來決定排序依據，這是 Lambda 最常見的應用場景：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span>words <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#34;python&#34;</span>, <span style=color:#e6db74>&#34;is&#34;</span>, <span style=color:#e6db74>&#34;a&#34;</span>, <span style=color:#e6db74>&#34;great&#34;</span>, <span style=color:#e6db74>&#34;language&#34;</span>]
+</span></span><span style=display:flex><span>print(sorted(words, key<span style=color:#f92672>=</span><span style=color:#66d9ef>lambda</span> w: len(w)))
+</span></span><span style=display:flex><span><span style=color:#75715e># 輸出：[&#39;a&#39;, &#39;is&#39;, &#39;great&#39;, &#39;python&#39;, &#39;language&#39;]</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>students <span style=color:#f92672>=</span> [
+</span></span><span style=display:flex><span>    {<span style=color:#e6db74>&#34;name&#34;</span>: <span style=color:#e6db74>&#34;Alice&#34;</span>, <span style=color:#e6db74>&#34;score&#34;</span>: <span style=color:#ae81ff>85</span>},
+</span></span><span style=display:flex><span>    {<span style=color:#e6db74>&#34;name&#34;</span>: <span style=color:#e6db74>&#34;Bob&#34;</span>, <span style=color:#e6db74>&#34;score&#34;</span>: <span style=color:#ae81ff>92</span>},
+</span></span><span style=display:flex><span>    {<span style=color:#e6db74>&#34;name&#34;</span>: <span style=color:#e6db74>&#34;Charlie&#34;</span>, <span style=color:#e6db74>&#34;score&#34;</span>: <span style=color:#ae81ff>78</span>},
+</span></span><span style=display:flex><span>]
+</span></span><span style=display:flex><span>by_score <span style=color:#f92672>=</span> sorted(students, key<span style=color:#f92672>=</span><span style=color:#66d9ef>lambda</span> s: s[<span style=color:#e6db74>&#34;score&#34;</span>], reverse<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>for</span> s <span style=color:#f92672>in</span> by_score:
+</span></span><span style=display:flex><span>    print(<span style=color:#e6db74>f</span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>{</span>s[<span style=color:#e6db74>&#34;name&#34;</span>]<span style=color:#e6db74>}</span><span style=color:#e6db74>: </span><span style=color:#e6db74>{</span>s[<span style=color:#e6db74>&#34;score&#34;</span>]<span style=color:#e6db74>}</span><span style=color:#e6db74>&#39;</span>)
+</span></span><span style=display:flex><span><span style=color:#75715e># 輸出：Bob: 92, Alice: 85, Charlie: 78</span>
+</span></span></code></pre></div><h3 id=閉包closure>閉包（Closure）</h3><p>閉包（Closure）是指內部函式能「記住」外部函式的變數，即使外部函式已經執行完畢：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>multiplier</span>(n):
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>multiply</span>(x):
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> x <span style=color:#f92672>*</span> n
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> multiply
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>double <span style=color:#f92672>=</span> multiplier(<span style=color:#ae81ff>2</span>)
+</span></span><span style=display:flex><span>triple <span style=color:#f92672>=</span> multiplier(<span style=color:#ae81ff>3</span>)
+</span></span><span style=display:flex><span>print(double(<span style=color:#ae81ff>5</span>))  <span style=color:#75715e># 輸出：10</span>
+</span></span><span style=display:flex><span>print(triple(<span style=color:#ae81ff>5</span>))  <span style=color:#75715e># 輸出：15</span>
+</span></span></code></pre></div><h3 id=functoolsreduce>functools.reduce()</h3><p><code>functools.reduce()</code> 會對元素進行累積運算，逐步合併為一個值：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> functools <span style=color:#f92672>import</span> reduce
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>numbers <span style=color:#f92672>=</span> [<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>4</span>, <span style=color:#ae81ff>5</span>]
+</span></span><span style=display:flex><span>product <span style=color:#f92672>=</span> reduce(<span style=color:#66d9ef>lambda</span> a, b: a <span style=color:#f92672>*</span> b, numbers)
+</span></span><span style=display:flex><span>print(product)  <span style=color:#75715e># 輸出：120</span>
+</span></span></code></pre></div><h3 id=總結>總結</h3><p><strong>Lambda</strong> 匿名函式與高階函式是 <strong>Python</strong> 函式式程式設計的核心工具。<code>map()</code> 用於轉換元素、<code>filter()</code> 用於過濾元素、<code>sorted()</code> 搭配 <code>key</code> 可靈活排序，而閉包（Closure）讓函式能攜帶狀態。合理運用這些工具能讓程式碼更簡潔，但過於複雜的邏輯仍建議使用具名函式或串列推導式來實現。</p><p>Lambda 與高階函式建立在函式基礎之上，建議先閱讀 <a href=/post/python/017-functions/ class="text-blue-500 font-bold no-underline">Python 函數（Functions）入門指南</a>。許多高階函式的效果也能用串列推導式達成，可參考 <a href=/post/python/013-list-comprehensions/ class="text-blue-500 font-bold no-underline">Python 串列推導式教學</a>。</p></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/python/031-type-hints/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+<span class="text-sm font-medium">Python 型別提示（Type Hints）入門教學 | Python</span></a></div><div><a href=https://benzhub.github.io/post/python/033-collections-module/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+<span class="text-sm font-medium">Python collections 模組常用工具教學 | Python</span></a></div></div></div><div class="post-detail fade-in my-4"></div></div><div class="hidden lg:block lg:col-span-1"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/css><span class=tag-pill>css</span>
+</a><a href=/tags/design-pattern><span class=tag-pill>design-pattern</span>
+</a><a href=/tags/django><span class=tag-pill>django</span>
+</a><a href=/tags/flutter><span class=tag-pill>flutter</span>
+</a><a href=/tags/fnm><span class=tag-pill>fnm</span>
+</a><a href=/tags/git><span class=tag-pill>git</span>
+</a><a href=/tags/html><span class=tag-pill>html</span>
+</a><a href=/tags/javascript><span class=tag-pill>javascript</span>
+</a><a href=/tags/linux><span class=tag-pill>linux</span>
+</a><a href=/tags/networking><span class=tag-pill>networking</span>
+</a><a href=/tags/nodejs><span class=tag-pill>nodejs</span>
+</a><a href=/tags/npm><span class=tag-pill>npm</span>
+</a><a href=/tags/nvm><span class=tag-pill>nvm</span>
+</a><a href=/tags/postgresql><span class=tag-pill>postgresql</span>
+</a><a href=/tags/python><span class=tag-pill>python</span>
+</a><a href=/tags/react><span class=tag-pill>react</span>
+</a><a href=/tags/react-native><span class=tag-pill>react native</span>
+</a><a href=/tags/seo><span class=tag-pill>seo</span>
+</a><a href=/tags/tools><span class=tag-pill>tools</span>
+</a><a href=/tags/typescript><span class=tag-pill>typescript</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/python/033-collections-module/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Python collections 模組常用工具教學 | Python</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/04/28</p></a><a href=/post/python/032-lambda-higher-order-functions/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Python Lambda 與高階函式（Higher-Order Functions） | Python</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/04/28</p></a><a href=/post/python/031-type-hints/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Python 型別提示（Type Hints）入門教學 | Python</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/04/28</p></a><a href=/post/networking/003-what-is-gateway/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Gateway 是什麼？網路閘道器完整教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/04/27</p></a><a href=/post/python/030-generators/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Python 生成器（Generators）教學指南 | Python</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/04/27</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>
