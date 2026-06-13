@@ -1,0 +1,388 @@
+<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>系統目錄與統計視圖：PostgreSQL 的自我描述資料庫 | PostgreSQL | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="系統目錄與統計視圖：PostgreSQL 的自我描述資料庫 | PostgreSQL | BenzHub"><link rel=stylesheet href="/css/style.min.9eea99a462867e850ea87d603e8b86ff70281cdd26a08cb8d9620a7812f5f9b6.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="深入解析 PostgreSQL 系統目錄（pg_catalog）與動態統計視圖（pg_stat_*），涵蓋 pg_class、pg_attribute、pg_stats 等核心目錄、pg_stat_statements 效能診斷、pg_stat_io（PG16+）精細 I/O 統計，以及 Information Schema 與 System Catalogs 的差異。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="深入解析 PostgreSQL 系統目錄（pg_catalog）與動態統計視圖（pg_stat_*），涵蓋 pg_class、pg_attribute、pg_stats 等核心目錄、pg_stat_statements 效能診斷、pg_stat_io（PG16+）精細 I/O 統計，以及 Information Schema 與 System Catalogs 的差異。"><meta property="og:url" content="https://benzhub.github.io/post/postgresql/007-system-catalog/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/postgresql/007-system-catalog/><meta name=twitter:description content="深入解析 PostgreSQL 系統目錄（pg_catalog）與動態統計視圖（pg_stat_*），涵蓋 pg_class、pg_attribute、pg_stats 等核心目錄、pg_stat_statements 效能診斷、pg_stat_io（PG16+）精細 I/O 統計，以及 Information Schema 與 System Catalogs 的差異。"><meta property="article:published_time" content="2026-06-13T00:00:00+00:00"><meta property="article:updated_time" content="2026-06-13T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/postgresql/007-System-Catalog.png"><meta property="og:image:url" content="https://benzhub.github.io/img/postgresql/007-System-Catalog.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/postgresql/007-system-catalog/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/postgresql/007-system-catalog/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"系統目錄與統計視圖：PostgreSQL 的自我描述資料庫 | PostgreSQL\"","description":"\"深入解析 PostgreSQL 系統目錄（pg_catalog）與動態統計視圖（pg_stat_*），涵蓋 pg_class、pg_attribute、pg_stats 等核心目錄、pg_stat_statements 效能診斷、pg_stat_io（PG16+）精細 I/O 統計，以及 Information Schema 與 System Catalogs 的差異。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-06-13T00:00:00\u002b00:00","dateModified":"2026-06-13T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/postgresql\/007-System-Catalog.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/postgresql\/007-system-catalog\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Posts\"","item":"https:\/\/benzhub.github.io\/post\/"},{"@type":"ListItem","position":3,"name":"\"系統目錄與統計視圖：PostgreSQL 的自我描述資料庫 | PostgreSQL\""}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">系統目錄與統計視圖：PostgreSQL 的自我描述資料庫 | PostgreSQL</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/13</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/postgresql class="tag-pill no-underline">postgresql</a>
+<a href=/tags/system-catalog class="tag-pill no-underline">system-catalog</a>
+<a href=/tags/pg-stat class="tag-pill no-underline">pg-stat</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/postgresql/007-System-Catalog.png alt="系統目錄與統計視圖：PostgreSQL 的自我描述資料庫 | PostgreSQL"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p><strong>系統目錄（System Catalogs）</strong> 是 <strong>PostgreSQL</strong> 的「自我描述」元資料資料庫。所有資料庫物件的定義都儲存在 <code>pg_catalog</code> schema 中。<strong>PostgreSQL</strong> 是 catalog-driven 系統——查詢規劃、型別解析、權限檢查，全都靠查詢系統目錄來驅動。搭配 <strong>pg_stat_</strong>* 動態統計視圖，DBA 可以即時掌握資料庫的健康狀態與效能瓶頸。</p></blockquote><h3 id=什麼是系統目錄>什麼是系統目錄</h3><p>系統目錄是一組特殊的資料表與視圖，記錄了資料庫的所有元資料。每個資料庫都有自己的系統目錄副本，位於 <code>pg_catalog</code> schema 下。當你執行 <code>CREATE TABLE</code>、<code>CREATE INDEX</code>、<code>GRANT</code> 等 DDL 指令時，<strong>PostgreSQL</strong> 實際上是在修改這些系統目錄表。</p><pre tabindex=0><code>使用者發出 DDL 指令
+        │
+        ▼
+┌─────────────────┐
+│  Parser/Planner  │
+└────────┬────────┘
+         │ 查詢 pg_catalog
+         ▼
+┌─────────────────────────────────────────────┐
+│                pg_catalog                    │
+│  ┌──────────┐  ┌──────────┐  ┌───────────┐  │
+│  │ pg_class  │  │pg_attrib-│  │  pg_index  │  │
+│  │(relations)│  │   ute    │  │ (indexes)  │  │
+│  └──────────┘  └──────────┘  └───────────┘  │
+│  ┌──────────┐  ┌──────────┐  ┌───────────┐  │
+│  │pg_namespa│  │ pg_type  │  │  pg_proc   │  │
+│  │ce(schema)│  │ (types)  │  │(functions) │  │
+│  └──────────┘  └──────────┘  └───────────┘  │
+└─────────────────────────────────────────────┘
+</code></pre><h3 id=核心系統目錄分類>核心系統目錄分類</h3><h4 id=物件定義類>物件定義類</h4><p>這類目錄記錄資料庫內所有可命名的物件：</p><table><thead><tr><th>目錄名稱</th><th>說明</th></tr></thead><tbody><tr><td><code>pg_class</code></td><td>所有 relation（資料表、索引、序列、視圖、物化視圖等），<code>relkind</code> 欄位區分類型</td></tr><tr><td><code>pg_attribute</code></td><td>所有 relation 的欄位定義，每列代表一個欄位（含系統欄位）</td></tr><tr><td><code>pg_index</code></td><td>索引的詳細定義（索引方法、欄位、條件式）</td></tr><tr><td><code>pg_namespace</code></td><td>Schema（命名空間）定義</td></tr><tr><td><code>pg_database</code></td><td>叢集層級的資料庫清單（共享於所有資料庫）</td></tr><tr><td><code>pg_type</code></td><td>所有資料型別定義（基本型別、複合型別、列舉型別、domain）</td></tr><tr><td><code>pg_proc</code></td><td>所有函式與程序的定義</td></tr><tr><td><code>pg_constraint</code></td><td>主鍵、外鍵、唯一、Check 約束</td></tr></tbody></table><p><code>pg_class</code> 的 <code>relkind</code> 欄位值對應：</p><pre tabindex=0><code>relkind 值   物件類型
+-----------  ----------
+&#39;r&#39;          普通資料表（ordinary table）
+&#39;i&#39;          索引（index）
+&#39;S&#39;          序列（sequence）
+&#39;v&#39;          視圖（view）
+&#39;m&#39;          物化視圖（materialized view）
+&#39;t&#39;          TOAST 資料表
+&#39;f&#39;          外部資料表（foreign table）
+&#39;p&#39;          分區資料表（partitioned table）
+&#39;I&#39;          分區索引（partitioned index）
+</code></pre><h4 id=權限與角色類>權限與角色類</h4><table><thead><tr><th>目錄名稱</th><th>說明</th></tr></thead><tbody><tr><td><code>pg_authid</code></td><td>所有角色與使用者定義，含密碼雜湊（叢集共享）</td></tr><tr><td><code>pg_auth_members</code></td><td>角色成員關係（誰屬於哪個角色）</td></tr><tr><td><code>pg_default_acl</code></td><td>物件的預設存取控制清單</td></tr></tbody></table><h4 id=統計資訊類>統計資訊類</h4><p>規劃器使用這些統計資訊來估算查詢成本：</p><table><thead><tr><th>目錄名稱</th><th>說明</th></tr></thead><tbody><tr><td><code>pg_statistic</code></td><td>欄位統計（直方圖、最常見值等），由 <code>ANALYZE</code> 更新</td></tr><tr><td><code>pg_stats</code></td><td><code>pg_statistic</code> 的可讀性視圖，一般用這個</td></tr><tr><td><code>pg_statistic_ext</code></td><td>擴展統計定義（跨欄位相關性統計）</td></tr></tbody></table><h4 id=設定類>設定類</h4><table><thead><tr><th>目錄名稱</th><th>說明</th></tr></thead><tbody><tr><td><code>pg_settings</code></td><td>所有 GUC 參數的當前設定值</td></tr><tr><td><code>pg_file_settings</code></td><td><code>postgresql.conf</code> 與 <code>postgresql.auto.conf</code> 的原始設定</td></tr><tr><td><code>pg_hba_file_rules</code></td><td><code>pg_hba.conf</code> 的解析結果（PG10+）</td></tr></tbody></table><h3 id=information-schema-vs-system-catalogs>Information Schema vs System Catalogs</h3><p><strong>PostgreSQL</strong> 提供兩種查詢元資料的方式：</p><pre tabindex=0><code>Information Schema              System Catalogs
+─────────────────               ───────────────
+SQL 標準定義                    PostgreSQL 特有
+跨資料庫可攜                    PostgreSQL 專用
+視圖形式（較慢）                 直接存取（較快）
+功能受限                        功能完整
+欄位名稱通用                    欄位名稱簡短（如 relname）
+
+適合：                          適合：
+- 需跨資料庫相容的工具           - PostgreSQL 專用工具
+- 標準 SQL 教學                 - 效能監控
+- 一般性查詢                    - 深度診斷
+                                - psql meta-commands 底層
+</code></pre><h3 id=psql-meta-commands-的底層機制>psql Meta-Commands 的底層機制</h3><p>psql 的 <code>\d</code> 系列指令本質上是預設查詢 <code>pg_catalog</code> 的 SQL 語句：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- \d tablename 等同於查詢：
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>    a.attname <span style=color:#66d9ef>AS</span> <span style=color:#e6db74>&#34;Column&#34;</span>,
+</span></span><span style=display:flex><span>    pg_catalog.format_type(a.atttypid, a.atttypmod) <span style=color:#66d9ef>AS</span> <span style=color:#e6db74>&#34;Type&#34;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>CASE</span> <span style=color:#66d9ef>WHEN</span> a.attnotnull <span style=color:#66d9ef>THEN</span> <span style=color:#e6db74>&#39;not null&#39;</span> <span style=color:#66d9ef>ELSE</span> <span style=color:#e6db74>&#39;&#39;</span> <span style=color:#66d9ef>END</span> <span style=color:#66d9ef>AS</span> <span style=color:#e6db74>&#34;Nullable&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_catalog.pg_attribute a
+</span></span><span style=display:flex><span><span style=color:#66d9ef>JOIN</span> pg_catalog.pg_class <span style=color:#66d9ef>c</span> <span style=color:#66d9ef>ON</span> <span style=color:#66d9ef>c</span>.oid <span style=color:#f92672>=</span> a.attrelid
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> <span style=color:#66d9ef>c</span>.relname <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;your_table&#39;</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>AND</span> a.attnum <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>AND</span> <span style=color:#66d9ef>NOT</span> a.attisdropped
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> a.attnum;
+</span></span></code></pre></div><p>在 psql 中可以用 <code>\set ECHO_HIDDEN on</code> 來看 meta-command 實際執行的 SQL。</p><h3 id=查詢資料表基本資訊>查詢資料表基本資訊</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 查詢特定資料表的基本資訊（pg_class）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>c</span>.oid,
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>c</span>.relname        <span style=color:#66d9ef>AS</span> <span style=color:#66d9ef>table_name</span>,
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>c</span>.relkind,
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>c</span>.relpages,
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>c</span>.reltuples::bigint <span style=color:#66d9ef>AS</span> estimated_rows,
+</span></span><span style=display:flex><span>    n.nspname        <span style=color:#66d9ef>AS</span> <span style=color:#66d9ef>schema_name</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_class <span style=color:#66d9ef>c</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>JOIN</span> pg_namespace n <span style=color:#66d9ef>ON</span> n.oid <span style=color:#f92672>=</span> <span style=color:#66d9ef>c</span>.relnamespace
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> <span style=color:#66d9ef>c</span>.relname <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;users&#39;</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>AND</span> n.nspname <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;public&#39;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 查詢資料表的欄位詳細資訊（pg_attribute）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>    attnum,
+</span></span><span style=display:flex><span>    attname               <span style=color:#66d9ef>AS</span> <span style=color:#66d9ef>column_name</span>,
+</span></span><span style=display:flex><span>    atttypid::regtype     <span style=color:#66d9ef>AS</span> data_type,
+</span></span><span style=display:flex><span>    attnotnull            <span style=color:#66d9ef>AS</span> not_null,
+</span></span><span style=display:flex><span>    atthasdef             <span style=color:#66d9ef>AS</span> has_default
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_attribute
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> attrelid <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;public.users&#39;</span>::regclass
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>AND</span> attnum <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>          <span style=color:#75715e>-- 排除系統欄位（attnum &lt;= 0）
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>AND</span> <span style=color:#66d9ef>NOT</span> attisdropped    <span style=color:#75715e>-- 排除已刪除欄位
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> attnum;
+</span></span></code></pre></div><h3 id=查詢索引詳細資訊>查詢索引詳細資訊</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 查詢資料表的所有索引
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>    i.relname                <span style=color:#66d9ef>AS</span> index_name,
+</span></span><span style=display:flex><span>    ix.indisprimary          <span style=color:#66d9ef>AS</span> is_primary,
+</span></span><span style=display:flex><span>    ix.indisunique           <span style=color:#66d9ef>AS</span> is_unique,
+</span></span><span style=display:flex><span>    ix.indisvalid            <span style=color:#66d9ef>AS</span> is_valid,
+</span></span><span style=display:flex><span>    array_to_string(
+</span></span><span style=display:flex><span>        array_agg(a.attname <span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> k.<span style=color:#66d9ef>ordinality</span>),
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;, &#39;</span>
+</span></span><span style=display:flex><span>    )                        <span style=color:#66d9ef>AS</span> columns,
+</span></span><span style=display:flex><span>    am.amname                <span style=color:#66d9ef>AS</span> index_method
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_index ix
+</span></span><span style=display:flex><span><span style=color:#66d9ef>JOIN</span> pg_class t <span style=color:#66d9ef>ON</span> t.oid <span style=color:#f92672>=</span> ix.indrelid
+</span></span><span style=display:flex><span><span style=color:#66d9ef>JOIN</span> pg_class i <span style=color:#66d9ef>ON</span> i.oid <span style=color:#f92672>=</span> ix.indexrelid
+</span></span><span style=display:flex><span><span style=color:#66d9ef>JOIN</span> pg_am am <span style=color:#66d9ef>ON</span> am.oid <span style=color:#f92672>=</span> i.relam
+</span></span><span style=display:flex><span><span style=color:#66d9ef>JOIN</span> <span style=color:#66d9ef>LATERAL</span> <span style=color:#66d9ef>unnest</span>(ix.indkey) <span style=color:#66d9ef>WITH</span> <span style=color:#66d9ef>ORDINALITY</span> <span style=color:#66d9ef>AS</span> k(attnum, <span style=color:#66d9ef>ordinality</span>)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>ON</span> <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>JOIN</span> pg_attribute a <span style=color:#66d9ef>ON</span> a.attrelid <span style=color:#f92672>=</span> t.oid <span style=color:#66d9ef>AND</span> a.attnum <span style=color:#f92672>=</span> k.attnum
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> t.relname <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;users&#39;</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>AND</span> t.relnamespace <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;public&#39;</span>::regnamespace
+</span></span><span style=display:flex><span><span style=color:#66d9ef>GROUP</span> <span style=color:#66d9ef>BY</span> i.relname, ix.indisprimary, ix.indisunique, ix.indisvalid, am.amname
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> i.relname;
+</span></span></code></pre></div><h3 id=查詢欄位統計資訊>查詢欄位統計資訊</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 使用 pg_stats 視圖（比直接查 pg_statistic 更易讀）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>    attname            <span style=color:#66d9ef>AS</span> <span style=color:#66d9ef>column_name</span>,
+</span></span><span style=display:flex><span>    null_frac          <span style=color:#66d9ef>AS</span> null_fraction,
+</span></span><span style=display:flex><span>    avg_width          <span style=color:#66d9ef>AS</span> avg_byte_width,
+</span></span><span style=display:flex><span>    n_distinct,        <span style=color:#75715e>-- 正數=確切值，負數=佔總行數比例
+</span></span></span><span style=display:flex><span>    most_common_vals   <span style=color:#66d9ef>AS</span> mcv,
+</span></span><span style=display:flex><span>    most_common_freqs  <span style=color:#66d9ef>AS</span> mcf,
+</span></span><span style=display:flex><span>    correlation        <span style=color:#75715e>-- 欄位值與實體位置的相關性（-1到1）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stats
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> tablename <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;users&#39;</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>AND</span> schemaname <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;public&#39;</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>AND</span> attname <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;email&#39;</span>;
+</span></span></code></pre></div><p><code>correlation</code> 值接近 1 或 -1 代表資料物理排序與邏輯排序接近，Index Scan 效率較高；接近 0 則代表資料分散，Bitmap Scan 可能更適合。</p><h3 id=動態統計視圖pg_stat_-家族>動態統計視圖（pg_stat_* 家族）</h3><p><strong>PostgreSQL</strong> 提供一套豐富的動態統計視圖，用於監控資料庫執行時的各種狀態：</p><pre tabindex=0><code>pg_stat_* 視圖家族
+│
+├── 活動監控（Activity Monitoring）
+│   ├── pg_stat_activity           每個後端程序的當前狀態
+│   ├── pg_stat_progress_vacuum    VACUUM 進度（PG9.6+）
+│   ├── pg_stat_progress_analyze   ANALYZE 進度（PG12+）
+│   └── pg_stat_progress_create_index  CREATE INDEX 進度（PG12+）
+│
+├── 資料庫層級
+│   ├── pg_stat_database           累積統計（commits/rollbacks/reads/hits）
+│   └── pg_stat_database_conflicts Standby 衝突統計
+│
+├── 資料表層級
+│   ├── pg_stat_user_tables        DML 統計、dead tuples、vacuum 時間
+│   └── pg_statio_user_tables      I/O 統計（buffer hits/reads）
+│
+├── 索引層級
+│   ├── pg_stat_user_indexes       掃描次數（idx_scan = 0 代表未使用）
+│   └── pg_statio_user_indexes     索引 I/O 統計
+│
+├── 複寫
+│   ├── pg_stat_replication        WAL 發送狀態
+│   └── pg_stat_wal_receiver       WAL 接收狀態
+│
+└── 背景程序
+    ├── pg_stat_bgwriter           Background Writer 統計
+    ├── pg_stat_wal                WAL 統計（PG14+）
+    ├── pg_stat_io                 Per-backend-type I/O 統計（PG16+）
+    └── pg_stat_checkpointer       Checkpointer 統計（PG17+）
+</code></pre><h3 id=監控執行中的查詢>監控執行中的查詢</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 查詢當前所有活躍的後端程序
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>    pid,
+</span></span><span style=display:flex><span>    usename          <span style=color:#66d9ef>AS</span> username,
+</span></span><span style=display:flex><span>    application_name,
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>state</span>,
+</span></span><span style=display:flex><span>    wait_event_type,
+</span></span><span style=display:flex><span>    wait_event,
+</span></span><span style=display:flex><span>    now() <span style=color:#f92672>-</span> query_start <span style=color:#66d9ef>AS</span> duration,
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>left</span>(query, <span style=color:#ae81ff>100</span>) <span style=color:#66d9ef>AS</span> query_snippet
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stat_activity
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> <span style=color:#66d9ef>state</span> <span style=color:#f92672>!=</span> <span style=color:#e6db74>&#39;idle&#39;</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>AND</span> pid <span style=color:#f92672>!=</span> pg_backend_pid()  <span style=color:#75715e>-- 排除自己
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> query_start;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 找出執行超過 5 分鐘的查詢
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>    pid,
+</span></span><span style=display:flex><span>    usename,
+</span></span><span style=display:flex><span>    now() <span style=color:#f92672>-</span> query_start <span style=color:#66d9ef>AS</span> duration,
+</span></span><span style=display:flex><span>    query
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stat_activity
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> <span style=color:#66d9ef>state</span> <span style=color:#f92672>!=</span> <span style=color:#e6db74>&#39;idle&#39;</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>AND</span> query_start <span style=color:#f92672>&lt;</span> now() <span style=color:#f92672>-</span> interval <span style=color:#e6db74>&#39;5 minutes&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> duration <span style=color:#66d9ef>DESC</span>;
+</span></span></code></pre></div><h3 id=監控資料表健康狀態>監控資料表健康狀態</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 資料表健康監控：dead tuples、vacuum 時間、DML 統計
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>    schemaname,
+</span></span><span style=display:flex><span>    relname                  <span style=color:#66d9ef>AS</span> <span style=color:#66d9ef>table_name</span>,
+</span></span><span style=display:flex><span>    n_live_tup               <span style=color:#66d9ef>AS</span> live_tuples,
+</span></span><span style=display:flex><span>    n_dead_tup               <span style=color:#66d9ef>AS</span> dead_tuples,
+</span></span><span style=display:flex><span>    round(<span style=color:#ae81ff>100</span>.<span style=color:#ae81ff>0</span> <span style=color:#f92672>*</span> n_dead_tup <span style=color:#f92672>/</span> <span style=color:#66d9ef>nullif</span>(n_live_tup <span style=color:#f92672>+</span> n_dead_tup, <span style=color:#ae81ff>0</span>), <span style=color:#ae81ff>2</span>) <span style=color:#66d9ef>AS</span> dead_pct,
+</span></span><span style=display:flex><span>    last_autovacuum,
+</span></span><span style=display:flex><span>    last_autoanalyze,
+</span></span><span style=display:flex><span>    seq_scan,
+</span></span><span style=display:flex><span>    idx_scan,
+</span></span><span style=display:flex><span>    n_tup_hot_upd            <span style=color:#75715e>-- HOT UPDATE 比例越高越好
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stat_user_tables
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> n_dead_tup <span style=color:#66d9ef>DESC</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LIMIT</span> <span style=color:#ae81ff>20</span>;
+</span></span></code></pre></div><h3 id=找出未使用的索引>找出未使用的索引</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 找出從未被掃描的索引（idx_scan = 0）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>    schemaname,
+</span></span><span style=display:flex><span>    relname        <span style=color:#66d9ef>AS</span> <span style=color:#66d9ef>table_name</span>,
+</span></span><span style=display:flex><span>    indexrelname   <span style=color:#66d9ef>AS</span> index_name,
+</span></span><span style=display:flex><span>    idx_scan       <span style=color:#66d9ef>AS</span> times_used,
+</span></span><span style=display:flex><span>    pg_size_pretty(pg_relation_size(indexrelid)) <span style=color:#66d9ef>AS</span> index_size
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stat_user_indexes
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> idx_scan <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>AND</span> schemaname <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;public&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> pg_relation_size(indexrelid) <span style=color:#66d9ef>DESC</span>;
+</span></span></code></pre></div><p>未使用的索引不僅佔用磁碟空間，還會拖慢 INSERT/UPDATE/DELETE 效能，因為每次 DML 都需要同步維護索引。</p><h3 id=buffer-cache-命中率>Buffer Cache 命中率</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 資料庫整體的 Buffer Cache 命中率
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>    datname,
+</span></span><span style=display:flex><span>    blks_read,
+</span></span><span style=display:flex><span>    blks_hit,
+</span></span><span style=display:flex><span>    round(<span style=color:#ae81ff>100</span>.<span style=color:#ae81ff>0</span> <span style=color:#f92672>*</span> blks_hit <span style=color:#f92672>/</span> <span style=color:#66d9ef>nullif</span>(blks_hit <span style=color:#f92672>+</span> blks_read, <span style=color:#ae81ff>0</span>), <span style=color:#ae81ff>2</span>) <span style=color:#66d9ef>AS</span> cache_hit_pct,
+</span></span><span style=display:flex><span>    temp_files,
+</span></span><span style=display:flex><span>    deadlocks
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stat_database
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> datname <span style=color:#f92672>=</span> current_database();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 個別資料表的 Buffer Cache 命中率
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>    relname,
+</span></span><span style=display:flex><span>    heap_blks_read,
+</span></span><span style=display:flex><span>    heap_blks_hit,
+</span></span><span style=display:flex><span>    round(<span style=color:#ae81ff>100</span>.<span style=color:#ae81ff>0</span> <span style=color:#f92672>*</span> heap_blks_hit <span style=color:#f92672>/</span> <span style=color:#66d9ef>nullif</span>(heap_blks_hit <span style=color:#f92672>+</span> heap_blks_read, <span style=color:#ae81ff>0</span>), <span style=color:#ae81ff>2</span>) <span style=color:#66d9ef>AS</span> cache_hit_pct
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_statio_user_tables
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> heap_blks_read <span style=color:#f92672>+</span> heap_blks_hit <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> heap_blks_read <span style=color:#66d9ef>DESC</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LIMIT</span> <span style=color:#ae81ff>20</span>;
+</span></span></code></pre></div><h3 id=查詢-guc-設定>查詢 GUC 設定</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 搜尋與 VACUUM 相關的所有設定
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>    name,
+</span></span><span style=display:flex><span>    setting,
+</span></span><span style=display:flex><span>    unit,
+</span></span><span style=display:flex><span>    context,         <span style=color:#75715e>-- 何時生效：user/superuser/sighup/postmaster
+</span></span></span><span style=display:flex><span>    boot_val,        <span style=color:#75715e>-- 預設值
+</span></span></span><span style=display:flex><span>    pending_restart  <span style=color:#75715e>-- 是否需要重啟才能生效
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_settings
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> name <span style=color:#66d9ef>LIKE</span> <span style=color:#e6db74>&#39;%vacuum%&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> name;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 查看非預設的設定（被明確修改過的）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> name, setting, unit, <span style=color:#66d9ef>source</span>, sourcefile
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_settings
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> <span style=color:#66d9ef>source</span> <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>IN</span> (<span style=color:#e6db74>&#39;default&#39;</span>, <span style=color:#e6db74>&#39;override&#39;</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> name;
+</span></span></code></pre></div><h3 id=pg_stat_statements最強效能診斷擴展>pg_stat_statements：最強效能診斷擴展</h3><p><code>pg_stat_statements</code> 是生產環境必裝的擴展，追蹤所有 SQL 的執行統計：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 啟用步驟（需要 superuser）
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 1. postgresql.conf 加入：
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- shared_preload_libraries = &#39;pg_stat_statements&#39;
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 2. 重啟後建立擴展
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> EXTENSION <span style=color:#66d9ef>IF</span> <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>EXISTS</span> pg_stat_statements;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 找出最耗時的前 10 個查詢
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>    userid::regrole        <span style=color:#66d9ef>AS</span> username,
+</span></span><span style=display:flex><span>    calls,
+</span></span><span style=display:flex><span>    round(total_exec_time::numeric, <span style=color:#ae81ff>2</span>)  <span style=color:#66d9ef>AS</span> total_ms,
+</span></span><span style=display:flex><span>    round(mean_exec_time::numeric, <span style=color:#ae81ff>2</span>)   <span style=color:#66d9ef>AS</span> mean_ms,
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>rows</span>,
+</span></span><span style=display:flex><span>    round(<span style=color:#ae81ff>100</span>.<span style=color:#ae81ff>0</span> <span style=color:#f92672>*</span> total_exec_time <span style=color:#f92672>/</span> <span style=color:#66d9ef>sum</span>(total_exec_time) OVER (), <span style=color:#ae81ff>2</span>) <span style=color:#66d9ef>AS</span> pct_of_total,
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>left</span>(query, <span style=color:#ae81ff>120</span>)       <span style=color:#66d9ef>AS</span> query_snippet
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stat_statements
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> total_exec_time <span style=color:#66d9ef>DESC</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LIMIT</span> <span style=color:#ae81ff>10</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 找出 I/O 最密集的查詢
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>    calls,
+</span></span><span style=display:flex><span>    round(blk_read_time::numeric, <span style=color:#ae81ff>2</span>)  <span style=color:#66d9ef>AS</span> blk_read_ms,
+</span></span><span style=display:flex><span>    round(blk_write_time::numeric, <span style=color:#ae81ff>2</span>) <span style=color:#66d9ef>AS</span> blk_write_ms,
+</span></span><span style=display:flex><span>    shared_blks_read,
+</span></span><span style=display:flex><span>    shared_blks_hit,
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>left</span>(query, <span style=color:#ae81ff>100</span>) <span style=color:#66d9ef>AS</span> query_snippet
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stat_statements
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> calls <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>100</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> (blk_read_time <span style=color:#f92672>+</span> blk_write_time) <span style=color:#66d9ef>DESC</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LIMIT</span> <span style=color:#ae81ff>10</span>;
+</span></span></code></pre></div><h3 id=pg_stat_io精細-io-統計pg16>pg_stat_io：精細 I/O 統計（PG16+）</h3><p>PG16 引入的 <code>pg_stat_io</code> 提供 per-backend-type 的精細 I/O 統計，可區分不同類型的後端程序的 I/O 行為：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 查詢各後端類型的 I/O 統計
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>    backend_type,
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>object</span>,       <span style=color:#75715e>-- relation/temp_relation/wal 等
+</span></span></span><span style=display:flex><span>    context,      <span style=color:#75715e>-- normal/vacuum/bulkread/bulkwrite
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>reads</span>,
+</span></span><span style=display:flex><span>    read_time,
+</span></span><span style=display:flex><span>    writes,
+</span></span><span style=display:flex><span>    write_time,
+</span></span><span style=display:flex><span>    hits          <span style=color:#75715e>-- buffer 命中次數
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stat_io
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> backend_type, <span style=color:#66d9ef>object</span>, context;
+</span></span></code></pre></div><h3 id=pg15-統計架構重構>PG15 統計架構重構</h3><p>PG15 之前，統計收集器是獨立的後端程序，透過 UDP 接收統計更新，有固定延遲。PG15 移除 stats collector daemon，改為使用 shared memory：</p><pre tabindex=0><code>PG14 以前：
+  Backend → UDP/Unix Socket → Stats Collector Daemon → 寫入檔案
+  （延遲約 500ms-1s，高壓下有 UDP 丟包問題）
+
+PG15 以後：
+  Backend → Shared Memory → 直接讀取
+  （延遲大幅降低，無丟包問題）
+</code></pre><p>這讓 <code>pg_stat_activity</code> 等視圖更即時，但 crash 後統計資料會遺失。</p><h3 id=自訂統計目標>自訂統計目標</h3><p>規劃器的估算精度依賴 <code>pg_stats</code> 的統計資訊，預設統計目標為 100。調高可讓規劃器做出更精準的決策：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 提高特定欄位的統計目標（適合高基數欄位）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>TABLE</span> orders <span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>COLUMN</span> customer_id <span style=color:#66d9ef>SET</span> <span style=color:#66d9ef>STATISTICS</span> <span style=color:#ae81ff>1000</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 降低不重要欄位的統計目標以加速 ANALYZE
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>TABLE</span> logs <span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>COLUMN</span> raw_message <span style=color:#66d9ef>SET</span> <span style=color:#66d9ef>STATISTICS</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 更新統計後確認效果
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ANALYZE</span> orders;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> n_distinct, correlation <span style=color:#66d9ef>FROM</span> pg_stats
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> tablename <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;orders&#39;</span> <span style=color:#66d9ef>AND</span> attname <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;customer_id&#39;</span>;
+</span></span></code></pre></div><h3 id=擴展統計資訊multi-column-statistics>擴展統計資訊（Multi-Column Statistics）</h3><p>當多個欄位之間有相關性時，規劃器可能嚴重低估或高估結果集大小。PG10+ 支援跨欄位統計：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 建立跨欄位擴展統計（記錄相關性）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>STATISTICS</span> orders_status_region <span style=color:#66d9ef>ON</span> status, region <span style=color:#66d9ef>FROM</span> orders;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 收集統計
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ANALYZE</span> orders;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 查看擴展統計定義
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> stxname, stxkeys, stxkind <span style=color:#66d9ef>FROM</span> pg_statistic_ext;
+</span></span></code></pre></div><h3 id=常見陷阱>常見陷阱</h3><h4 id=永遠不要直接修改系統目錄表>永遠不要直接修改系統目錄表</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 錯誤：會破壞資料庫一致性
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>UPDATE</span> pg_class <span style=color:#66d9ef>SET</span> relname <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;new_name&#39;</span> <span style=color:#66d9ef>WHERE</span> relname <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;old_name&#39;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 正確：使用 DDL 指令
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>TABLE</span> old_name <span style=color:#66d9ef>RENAME</span> <span style=color:#66d9ef>TO</span> new_name;
+</span></span></code></pre></div><h4 id=pg_classreltuples-是估計值>pg_class.reltuples 是估計值</h4><p><code>reltuples</code> 在 <code>ANALYZE</code> 時更新，不是精確計數。需要精確行數時使用 <code>SELECT count(*)</code>（但開銷大）。</p><h4 id=重置動態統計>重置動態統計</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 重置當前資料庫的所有統計
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> pg_stat_reset();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 重置全域統計
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> pg_stat_reset_shared(<span style=color:#e6db74>&#39;bgwriter&#39;</span>);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> pg_stat_reset_shared(<span style=color:#e6db74>&#39;wal&#39;</span>);        <span style=color:#75715e>-- PG14+
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 重置單一資料表的統計
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> pg_stat_reset_single_table_counters(<span style=color:#e6db74>&#39;public.orders&#39;</span>::regclass);
+</span></span></code></pre></div><h3 id=物件大小查詢>物件大小查詢</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 使用 regclass 型別轉換（比字串拼接更安全）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>    relname,
+</span></span><span style=display:flex><span>    pg_size_pretty(pg_total_relation_size(oid)) <span style=color:#66d9ef>AS</span> total_size,
+</span></span><span style=display:flex><span>    pg_size_pretty(pg_relation_size(oid))       <span style=color:#66d9ef>AS</span> table_size,
+</span></span><span style=display:flex><span>    pg_size_pretty(pg_indexes_size(oid))        <span style=color:#66d9ef>AS</span> indexes_size
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_class
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> relname <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;orders&#39;</span>;
+</span></span></code></pre></div><h3 id=版本演進重點>版本演進重點</h3><table><thead><tr><th>PG 版本</th><th>重要新增</th></tr></thead><tbody><tr><td>PG 9.6</td><td><code>pg_stat_progress_vacuum</code></td></tr><tr><td>PG 10</td><td><code>pg_stat_subscription</code>（邏輯複寫訂閱）</td></tr><tr><td>PG 14</td><td><code>pg_stat_wal</code>、<code>pg_stat_progress_copy</code></td></tr><tr><td>PG 15</td><td>統計架構重構：從 UDP 改為 shared memory</td></tr><tr><td>PG 16</td><td><code>pg_stat_io</code>（per-backend-type I/O 統計）</td></tr><tr><td>PG 17</td><td><code>pg_stat_checkpointer</code>（從 <code>pg_stat_bgwriter</code> 獨立）</td></tr></tbody></table><h3 id=總結>總結</h3><p><strong>系統目錄</strong> 與 <strong>動態統計視圖</strong> 是 PostgreSQL 監控與診斷的兩大支柱：</p><ul><li><strong>pg_catalog</strong> 記錄了所有資料庫物件的定義，是 PostgreSQL catalog-driven 架構的核心</li><li><strong>pg_stats</strong> 提供規劃器所需的統計資訊，直接影響查詢計畫的品質</li><li><strong>pg_stat_</strong>* 家族提供即時的執行狀態監控，從活動查詢到 I/O 統計，應有盡有</li><li><strong>pg_stat_statements</strong> 是生產環境必裝的效能診斷擴展</li><li>PG15 的統計架構重構消除了 UDP 延遲問題，讓監控更即時</li></ul><p>下一篇，我們將深入探討 <strong>儲存引擎</strong>——PostgreSQL 如何在磁碟上組織 Heap、Page 與 TOAST 資料。</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
+</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/postgresql/006-vacuum/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">VACUUM 機制：PostgreSQL 空間回收與防膨脹的關鍵 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/12</span>
+</a><a href=https://benzhub.github.io/post/postgresql/005-buffer-management/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Buffer Management：PostgreSQL 如何用 Clock-Sweep 管理記憶體 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/11</span>
+</a><a href=https://benzhub.github.io/post/postgresql/004-wal/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">WAL 預寫式日誌：PostgreSQL 資料安全的守護者 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/10</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/ai-insights/010-ai-tool-anxiety/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+<span class="text-sm font-medium">AI 工具焦慮症候群：當全世界都在追新工具，你該怎麼辦？ | AI Insights</span></a></div><div><a href=https://benzhub.github.io/post/ai-insights/011-openclaw-vs-hermes/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+<span class="text-sm font-medium">OpenClaw vs Hermes：當 AI 工具變成免洗筷，你還要追嗎？ | AI Insights</span></a></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
+</a><a href=/tags/ai><span class=tag-pill>ai</span>
+</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
+</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
+</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
+</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
+</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
+</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
+</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
+</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
+</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
+</a><a href=/tags/api><span class=tag-pill>api</span>
+</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
+</a><a href=/tags/autovacuum><span class=tag-pill>autovacuum</span>
+</a><a href=/tags/buffer-management><span class=tag-pill>buffer-management</span>
+</a><a href=/tags/claude-code><span class=tag-pill>claude code</span>
+</a><a href=/tags/claude-design><span class=tag-pill>claude design</span>
+</a><a href=/tags/codex><span class=tag-pill>codex</span>
+</a><a href=/tags/concurrency><span class=tag-pill>concurrency</span>
+</a><a href=/tags/context-%E6%B1%A1%E6%9F%93><span class=tag-pill>context 污染</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/django/024-drf-views-apiview-viewset/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">DRF Views：APIView 與 ViewSet 完全解析 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/13</p></a><a href=/post/ai-insights/011-openclaw-vs-hermes/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">OpenClaw vs Hermes：當 AI 工具變成免洗筷，你還要追嗎？ | AI Insights</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/13</p></a><a href=/post/postgresql/007-system-catalog/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">系統目錄與統計視圖：PostgreSQL 的自我描述資料庫 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/13</p></a><a href=/post/ai-insights/010-ai-tool-anxiety/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">AI 工具焦慮症候群：當全世界都在追新工具，你該怎麼辦？ | AI Insights</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/12</p></a><a href=/post/django/023-drf-serializers-advanced/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">DRF Serializers 進階：巢狀序列化與自訂方法 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/12</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>
