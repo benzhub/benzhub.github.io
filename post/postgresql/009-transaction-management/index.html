@@ -1,0 +1,277 @@
+<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>Transaction 管理：PostgreSQL 的 ACID 實現與進階控制 | PostgreSQL | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="Transaction 管理：PostgreSQL 的 ACID 實現與進階控制 | PostgreSQL | BenzHub"><link rel=stylesheet href="/css/style.min.9eea99a462867e850ea87d603e8b86ff70281cdd26a08cb8d9620a7812f5f9b6.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="深入解析 PostgreSQL 的交易管理機制，涵蓋 ACID 屬性的底層實現、Transaction 狀態機、SAVEPOINT 部分回滾、Two-Phase Commit 分散式交易、Advisory Lock 應用層鎖、Deadlock 偵測，以及 Connection Pooler 對 Transaction 的影響。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="深入解析 PostgreSQL 的交易管理機制，涵蓋 ACID 屬性的底層實現、Transaction 狀態機、SAVEPOINT 部分回滾、Two-Phase Commit 分散式交易、Advisory Lock 應用層鎖、Deadlock 偵測，以及 Connection Pooler 對 Transaction 的影響。"><meta property="og:url" content="https://benzhub.github.io/post/postgresql/009-transaction-management/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/postgresql/009-transaction-management/><meta name=twitter:description content="深入解析 PostgreSQL 的交易管理機制，涵蓋 ACID 屬性的底層實現、Transaction 狀態機、SAVEPOINT 部分回滾、Two-Phase Commit 分散式交易、Advisory Lock 應用層鎖、Deadlock 偵測，以及 Connection Pooler 對 Transaction 的影響。"><meta property="article:published_time" content="2026-06-15T00:00:00+00:00"><meta property="article:updated_time" content="2026-06-15T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/postgresql/009-Transaction-Management.png"><meta property="og:image:url" content="https://benzhub.github.io/img/postgresql/009-Transaction-Management.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/postgresql/009-transaction-management/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/postgresql/009-transaction-management/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"Transaction 管理：PostgreSQL 的 ACID 實現與進階控制 | PostgreSQL\"","description":"\"深入解析 PostgreSQL 的交易管理機制，涵蓋 ACID 屬性的底層實現、Transaction 狀態機、SAVEPOINT 部分回滾、Two-Phase Commit 分散式交易、Advisory Lock 應用層鎖、Deadlock 偵測，以及 Connection Pooler 對 Transaction 的影響。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-06-15T00:00:00\u002b00:00","dateModified":"2026-06-15T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/postgresql\/009-Transaction-Management.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/postgresql\/009-transaction-management\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/postgresql\/"},{"@type":"ListItem","position":3,"name":"\"Transaction 管理：PostgreSQL 的 ACID 實現與進階控制 | PostgreSQL\""}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Transaction 管理：PostgreSQL 的 ACID 實現與進階控制 | PostgreSQL</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/15</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/postgresql class="tag-pill no-underline">postgresql</a>
+<a href=/tags/transaction class="tag-pill no-underline">transaction</a>
+<a href=/tags/acid class="tag-pill no-underline">acid</a>
+<a href=/tags/savepoint class="tag-pill no-underline">savepoint</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/postgresql/009-Transaction-Management.png alt="Transaction 管理：PostgreSQL 的 ACID 實現與進階控制 | PostgreSQL"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p><strong>Transaction（交易）</strong> 是資料庫操作的基本單位，確保一組操作要麼全部成功，要麼全部失敗。<strong>PostgreSQL</strong> 對 ACID 屬性的實現是業界標竿，同時提供 <strong>SAVEPOINT</strong>、<strong>Two-Phase Commit</strong>、<strong>Advisory Lock</strong> 等進階控制機制，讓開發者在複雜業務場景中也能精準掌控資料一致性。</p></blockquote><h3 id=acid-在-postgresql-中的實現>ACID 在 PostgreSQL 中的實現</h3><h4 id=atomicity原子性>Atomicity（原子性）</h4><p>一個 Transaction 內的所有操作要麼全部提交，要麼全部回滾。<strong>PostgreSQL</strong> 透過 WAL 和 MVCC 共同保證：</p><ul><li><strong>WAL</strong> 確保在 Crash Recovery 時能重放（redo）或撤銷操作</li><li><strong>MVCC</strong> 確保中間狀態對其他 Transaction 不可見</li></ul><h4 id=consistency一致性>Consistency（一致性）</h4><p>Transaction 前後資料必須滿足所有定義的約束：</p><ul><li>CHECK Constraints：行級資料驗證</li><li>Foreign Key Constraints：參照完整性</li><li>UNIQUE / NOT NULL：欄位約束</li><li>Triggers：複雜的業務邏輯驗證</li><li>Deferrable Constraints：可延遲到 Transaction 結束時驗證</li></ul><h4 id=durability持久性>Durability（持久性）</h4><p>COMMIT 成功後，資料必須在任何故障後仍能恢復：</p><pre tabindex=0><code>WAL 確保 Durability 的流程：
+
+  SQL 操作
+     │
+     ▼
+  修改 Shared Buffer（記憶體）
+     │
+     ▼
+  寫入 WAL Buffer
+     │
+     ▼  COMMIT 時
+  WAL flushed to disk ← fsync 確保真正落盤
+     │
+     ▼
+  回應 client：COMMIT 成功
+     │（之後）
+     ▼
+  Checkpointer 定期將 dirty pages 寫入 data files
+</code></pre><p><code>synchronous_commit</code> 參數控制效能與持久性的平衡。</p><h3 id=transaction-狀態機>Transaction 狀態機</h3><pre tabindex=0><code>idle ──BEGIN──→ active ──SQL──→ active
+                  │
+                  ├──COMMIT──────────────→ idle
+                  │
+                  ├──ROLLBACK────────────→ idle
+                  │
+                  └──SQL Error──→ aborted
+                                    │
+                                    └──ROLLBACK──→ idle
+</code></pre><p><strong>重要</strong>：進入 <code>aborted</code> 狀態後，只能執行 <code>ROLLBACK</code>，其他 SQL 均報錯：</p><pre tabindex=0><code>ERROR: current transaction is aborted, commands ignored until
+       end of transaction block
+</code></pre><p><strong>Autocommit</strong>：PostgreSQL 預設 autocommit 模式。若不顯式 <code>BEGIN</code>，每條 SQL 自動包裝在隱式 Transaction 中並立即提交。</p><h3 id=transaction-基本操作>Transaction 基本操作</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 基本 Transaction
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>UPDATE</span> accounts <span style=color:#66d9ef>SET</span> balance <span style=color:#f92672>=</span> balance <span style=color:#f92672>-</span> <span style=color:#ae81ff>100</span> <span style=color:#66d9ef>WHERE</span> id <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>UPDATE</span> accounts <span style=color:#66d9ef>SET</span> balance <span style=color:#f92672>=</span> balance <span style=color:#f92672>+</span> <span style=color:#ae81ff>100</span> <span style=color:#66d9ef>WHERE</span> id <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>COMMIT</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 帶回滾的 Transaction
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>UPDATE</span> orders <span style=color:#66d9ef>SET</span> status <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;processing&#39;</span> <span style=color:#66d9ef>WHERE</span> id <span style=color:#f92672>=</span> <span style=color:#ae81ff>42</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 某些錯誤條件
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ROLLBACK</span>;  <span style=color:#75715e>-- 撤銷所有修改
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 指定隔離等級
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span> <span style=color:#66d9ef>ISOLATION</span> <span style=color:#66d9ef>LEVEL</span> <span style=color:#66d9ef>SERIALIZABLE</span> <span style=color:#66d9ef>READ</span> <span style=color:#66d9ef>WRITE</span>;
+</span></span></code></pre></div><h3 id=savepoint部分回滾>SAVEPOINT：部分回滾</h3><p><strong>SAVEPOINT</strong> 允許在 Transaction 內設置檢查點，出錯時只回滾到該檢查點，而非整個 Transaction：</p><pre tabindex=0><code>BEGIN
+  │
+  ├─ INSERT A ─ (成功)
+  │
+  ├─ SAVEPOINT sp1 ← 設定檢查點
+  │
+  ├─ INSERT B ─ (成功)
+  ├─ UPDATE C ─ (失敗)
+  │
+  ├─ ROLLBACK TO SAVEPOINT sp1 ← A 保留，B/C 撤銷
+  │
+  ├─ INSERT D ─ (成功，替代 B/C)
+  │
+  └─ COMMIT ← 只提交 A 和 D
+</code></pre><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> orders (user_id, amount) <span style=color:#66d9ef>VALUES</span> (<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>500</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>SAVEPOINT before_items;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> order_items (order_id, product_id, qty) <span style=color:#66d9ef>VALUES</span> (<span style=color:#ae81ff>1001</span>, <span style=color:#ae81ff>5</span>, <span style=color:#ae81ff>2</span>);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> order_items (order_id, product_id, qty) <span style=color:#66d9ef>VALUES</span> (<span style=color:#ae81ff>1001</span>, <span style=color:#ae81ff>99</span>, <span style=color:#ae81ff>1</span>);
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 假設 product_id=99 不存在，觸發 FK violation
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ROLLBACK</span> <span style=color:#66d9ef>TO</span> SAVEPOINT before_items;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- order_items 的插入撤銷，但 orders 的 INSERT 保留
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> order_items (order_id, product_id, qty) <span style=color:#66d9ef>VALUES</span> (<span style=color:#ae81ff>1001</span>, <span style=color:#ae81ff>7</span>, <span style=color:#ae81ff>3</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>COMMIT</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 最終結果：orders(1001) 和 order_items(1001, 7, 3) 均提交
+</span></span></span></code></pre></div><p>SAVEPOINT 可以嵌套，但要注意效能：大量 SAVEPOINT（如循環中使用）會顯著影響效能，因為每個 Subtransaction 需要在 <code>pg_subtrans/</code> 記錄狀態。</p><h3 id=two-phase-commit2pc>Two-Phase Commit（2PC）</h3><p>Two-Phase Commit 用於跨多個資源管理器的分散式 Transaction：</p><pre tabindex=0><code>Phase 1: PREPARE
+  應用程式 → PostgreSQL: PREPARE TRANSACTION &#39;txid-1&#39;
+  應用程式 → 另一個資源: PREPARE
+  （所有資源回應「ready」）
+
+Phase 2: COMMIT / ROLLBACK
+  應用程式 → PostgreSQL: COMMIT PREPARED &#39;txid-1&#39;
+  應用程式 → 另一個資源: COMMIT
+</code></pre><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 需先設定 max_prepared_transactions &gt; 0
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- Phase 1：準備
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>UPDATE</span> inventory <span style=color:#66d9ef>SET</span> quantity <span style=color:#f92672>=</span> quantity <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span> <span style=color:#66d9ef>WHERE</span> sku <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;PROD-001&#39;</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>PREPARE</span> <span style=color:#66d9ef>TRANSACTION</span> <span style=color:#e6db74>&#39;order-txn-001&#39;</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- Transaction 進入 prepared 狀態，可跨 crash 恢復
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- Phase 2：確認提交
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>COMMIT</span> PREPARED <span style=color:#e6db74>&#39;order-txn-001&#39;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 或回滾
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- ROLLBACK PREPARED &#39;order-txn-001&#39;;
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 監控 prepared transactions（重要！）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> gid, prepared, <span style=color:#66d9ef>owner</span>, <span style=color:#66d9ef>database</span>, age(<span style=color:#66d9ef>transaction</span>) <span style=color:#66d9ef>AS</span> xid_age
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_prepared_xacts;
+</span></span></code></pre></div><p><strong>注意</strong>：遺忘的 Prepared Transaction 會阻止 VACUUM 推進 xid_horizon，需要定期監控。</p><h3 id=advisory-lock應用層分散式鎖>Advisory Lock：應用層分散式鎖</h3><p><strong>Advisory Lock</strong> 是 PostgreSQL 提供的輕量級應用層鎖，不依附於任何資料庫物件：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- Transaction-level Advisory Lock（推薦：transaction 結束自動釋放）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> pg_try_advisory_xact_lock(hashtext(<span style=color:#e6db74>&#39;cron-job:daily-report&#39;</span>));
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 返回 true = 獲取成功，false = 已被其他 session 持有
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>DO</span> <span style=color:#960050;background-color:#1e0010>$$</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>DECLARE</span>
+</span></span><span style=display:flex><span>    got_lock BOOLEAN;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>    got_lock :<span style=color:#f92672>=</span> pg_try_advisory_xact_lock(hashtext(<span style=color:#e6db74>&#39;cron-job:daily-report&#39;</span>));
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>IF</span> <span style=color:#66d9ef>NOT</span> got_lock <span style=color:#66d9ef>THEN</span>
+</span></span><span style=display:flex><span>        RAISE NOTICE <span style=color:#e6db74>&#39;Another instance is running, skipping.&#39;</span>;
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>RETURN</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>END</span> <span style=color:#66d9ef>IF</span>;
+</span></span><span style=display:flex><span>    <span style=color:#75715e>-- 執行任務...
+</span></span></span><span style=display:flex><span>    PERFORM process_daily_report();
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span>;
+</span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>$$</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>COMMIT</span>;  <span style=color:#75715e>-- 鎖自動釋放
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 查看當前持有的 Advisory Locks
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> pid, locktype, objid, <span style=color:#66d9ef>mode</span>, <span style=color:#66d9ef>granted</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_locks
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> locktype <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;advisory&#39;</span>;
+</span></span></code></pre></div><table><thead><tr><th>類型</th><th>函數</th><th>釋放時機</th></tr></thead><tbody><tr><td>Transaction-level</td><td><code>pg_advisory_xact_lock(key)</code></td><td>Transaction 結束</td></tr><tr><td>Session-level</td><td><code>pg_advisory_lock(key)</code></td><td>手動 unlock 或 session 結束</td></tr><tr><td>共享鎖</td><td><code>pg_advisory_lock_shared(key)</code></td><td>允許多個 reader</td></tr><tr><td>非阻塞</td><td><code>pg_try_advisory_xact_lock(key)</code></td><td>立即返回 true/false</td></tr></tbody></table><h3 id=deadlock-detection>Deadlock Detection</h3><p><strong>PostgreSQL</strong> 維護一個 <strong>Wait-For Graph</strong>，定期（由 <code>deadlock_timeout</code> 控制，預設 1 秒）檢查環狀等待：</p><pre tabindex=0><code>TX1                          TX2
+ │                            │
+ ├─ LOCK row A（成功）        ├─ LOCK row B（成功）
+ │                            │
+ ├─ LOCK row B（等待 TX2）    ├─ LOCK row A（等待 TX1）
+ │                            │
+ └─ Wait-For Graph：
+    TX1 → TX2
+    TX2 → TX1  ← 環！偵測到 Deadlock
+    PostgreSQL 回滾其中一個 TX 並報錯：
+    ERROR: deadlock detected
+</code></pre><h3 id=設定超時保護>設定超時保護</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- idle in transaction 超時（推薦生產環境設定）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>SYSTEM</span> <span style=color:#66d9ef>SET</span> idle_in_transaction_session_timeout <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;5min&#39;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 單條 SQL 最大執行時間
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>SYSTEM</span> <span style=color:#66d9ef>SET</span> statement_timeout <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;30s&#39;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 等待鎖的超時
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>SYSTEM</span> <span style=color:#66d9ef>SET</span> lock_timeout <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;10s&#39;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 套用設定
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> pg_reload_conf();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 在角色層級設定（針對特定應用帳號）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>ROLE</span> app_user <span style=color:#66d9ef>SET</span> statement_timeout <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;30s&#39;</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>ROLE</span> app_user <span style=color:#66d9ef>SET</span> idle_in_transaction_session_timeout <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;5min&#39;</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>ROLE</span> app_user <span style=color:#66d9ef>SET</span> lock_timeout <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;5s&#39;</span>;
+</span></span></code></pre></div><h3 id=監控-transaction-狀態>監控 Transaction 狀態</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 查看所有非 idle 的 session
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>    pid,
+</span></span><span style=display:flex><span>    usename,
+</span></span><span style=display:flex><span>    application_name,
+</span></span><span style=display:flex><span>    now() <span style=color:#f92672>-</span> xact_start <span style=color:#66d9ef>AS</span> xact_duration,
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>state</span>,
+</span></span><span style=display:flex><span>    wait_event_type,
+</span></span><span style=display:flex><span>    wait_event,
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>left</span>(query, <span style=color:#ae81ff>100</span>) <span style=color:#66d9ef>AS</span> query_snippet
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stat_activity
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> <span style=color:#66d9ef>state</span> <span style=color:#f92672>!=</span> <span style=color:#e6db74>&#39;idle&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> xact_start NULLS <span style=color:#66d9ef>LAST</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 找出長時間運行的 Transaction（超過 5 分鐘）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> pid, <span style=color:#66d9ef>state</span>, xact_start, now() <span style=color:#f92672>-</span> xact_start <span style=color:#66d9ef>AS</span> age, query
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stat_activity
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> xact_start <span style=color:#f92672>&lt;</span> now() <span style=color:#f92672>-</span> interval <span style=color:#e6db74>&#39;5 minutes&#39;</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>AND</span> <span style=color:#66d9ef>state</span> <span style=color:#f92672>!=</span> <span style=color:#e6db74>&#39;idle&#39;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 終止問題 session
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> pg_cancel_backend(pid);     <span style=color:#75715e>-- 取消當前查詢（溫和）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> pg_terminate_backend(pid);  <span style=color:#75715e>-- 強制終止
+</span></span></span></code></pre></div><h3 id=connection-pooler-對-transaction-的影響>Connection Pooler 對 Transaction 的影響</h3><p><strong>PgBouncer</strong> 在 Transaction Pooling 模式下，每條 SQL 可能由不同的 backend 連線執行：</p><pre tabindex=0><code>PgBouncer Transaction Pooling 的限制：
+
+  SESSION-LEVEL Advisory Locks、TEMPORARY TABLE、
+  SET LOCAL 設定等跨 statement 的 session 狀態
+  無法保證在同一 backend！
+
+  解決方案：
+  - 使用 TRANSACTION-level 的 Advisory Lock
+  - 避免在 pool 模式下使用 session-level 功能
+  - 或使用 session pooling（效能較差但行為一致）
+</code></pre><h3 id=deferrable-constraints>Deferrable Constraints</h3><p>處理循環依賴時，可延遲外鍵檢查到 Transaction 結束：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 建立可延遲的外鍵
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>TABLE</span> order_items
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>ADD</span> <span style=color:#66d9ef>CONSTRAINT</span> fk_order
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>FOREIGN</span> <span style=color:#66d9ef>KEY</span> (order_id) <span style=color:#66d9ef>REFERENCES</span> orders(id)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>DEFERRABLE</span> <span style=color:#66d9ef>INITIALLY</span> <span style=color:#66d9ef>DEFERRED</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 在 Transaction 中動態設定
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SET</span> <span style=color:#66d9ef>CONSTRAINTS</span> fk_order <span style=color:#66d9ef>DEFERRED</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 現在可以先插入 order_items，再插入 orders
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>COMMIT</span>;  <span style=color:#75715e>-- 此時才檢查 FK
+</span></span></span></code></pre></div><h3 id=常見陷阱>常見陷阱</h3><h4 id=autocommit-誤解>Autocommit 誤解</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- psql 預設每條 SQL autocommit，以下不是一個 Transaction！
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>UPDATE</span> accounts <span style=color:#66d9ef>SET</span> balance <span style=color:#f92672>=</span> balance <span style=color:#f92672>-</span> <span style=color:#ae81ff>100</span> <span style=color:#66d9ef>WHERE</span> id <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;  <span style=color:#75715e>-- 立即提交
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>UPDATE</span> accounts <span style=color:#66d9ef>SET</span> balance <span style=color:#f92672>=</span> balance <span style=color:#f92672>+</span> <span style=color:#ae81ff>100</span> <span style=color:#66d9ef>WHERE</span> id <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>;  <span style=color:#75715e>-- 立即提交
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 如果第二條失敗，第一條已無法回滾！
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 正確做法：
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>UPDATE</span> accounts <span style=color:#66d9ef>SET</span> balance <span style=color:#f92672>=</span> balance <span style=color:#f92672>-</span> <span style=color:#ae81ff>100</span> <span style=color:#66d9ef>WHERE</span> id <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>UPDATE</span> accounts <span style=color:#66d9ef>SET</span> balance <span style=color:#f92672>=</span> balance <span style=color:#f92672>+</span> <span style=color:#ae81ff>100</span> <span style=color:#66d9ef>WHERE</span> id <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>COMMIT</span>;
+</span></span></code></pre></div><h4 id=忘記-commit-的後果>忘記 COMMIT 的後果</h4><ul><li><code>idle in transaction</code> 的 session 持有鎖，阻塞其他操作</li><li>阻礙 VACUUM，導致 Dead Tuple 堆積</li><li>解決方案：設定 <code>idle_in_transaction_session_timeout</code></li></ul><h3 id=總結>總結</h3><p><strong>Transaction 管理</strong> 是 PostgreSQL 資料一致性的核心保障：</p><ul><li><strong>ACID</strong> 透過 WAL（原子性、持久性）、MVCC（隔離性）、約束（一致性）共同實現</li><li><strong>SAVEPOINT</strong> 提供部分回滾能力，但要注意 Subtransaction 的效能開銷</li><li><strong>Two-Phase Commit</strong> 實現跨資源的分散式 Transaction，但 Prepared Transaction 需要監控</li><li><strong>Advisory Lock</strong> 是輕量級的應用層分散式鎖，推薦使用 Transaction-level 版本</li><li><strong>Deadlock Detection</strong> 透過 Wait-For Graph 自動偵測並解決死鎖</li><li>生產環境務必設定 <code>idle_in_transaction_session_timeout</code>、<code>statement_timeout</code>、<code>lock_timeout</code></li></ul><p>下一篇，我們將深入探討 <strong>並行控制與鎖機制</strong>——PostgreSQL 如何透過多層次鎖設計協調並行存取。</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
+</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/postgresql/008-storage-engine/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">儲存引擎與頁面結構：PostgreSQL 資料在磁碟上的組織方式 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/14</span>
+</a><a href=https://benzhub.github.io/post/postgresql/007-system-catalog/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">系統目錄與統計視圖：PostgreSQL 的自我描述資料庫 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/13</span>
+</a><a href=https://benzhub.github.io/post/postgresql/006-vacuum/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">VACUUM 機制：PostgreSQL 空間回收與防膨脹的關鍵 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/12</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/postgresql/008-storage-engine/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+<span class="text-sm font-medium">儲存引擎與頁面結構：PostgreSQL 資料在磁碟上的組織方式 | PostgreSQL</span></a></div><div></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
+</a><a href=/tags/acid><span class=tag-pill>acid</span>
+</a><a href=/tags/ai><span class=tag-pill>ai</span>
+</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
+</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
+</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
+</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
+</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
+</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
+</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
+</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
+</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
+</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
+</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
+</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
+</a><a href=/tags/api><span class=tag-pill>api</span>
+</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
+</a><a href=/tags/autovacuum><span class=tag-pill>autovacuum</span>
+</a><a href=/tags/big-o><span class=tag-pill>big o</span>
+</a><a href=/tags/buffer-management><span class=tag-pill>buffer-management</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (9)</span>
+</a><a href=/post/javascript/><span class=tag-pill>JavaScript (64)</span>
+</a><a href=/post/django/><span class=tag-pill>Django (26)</span>
+</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
+</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
+</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
+</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
+</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/django/026-drf-authentication/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">DRF 認證機制：Token、JWT 與 Session 認證 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/15</p></a><a href=/post/postgresql/009-transaction-management/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Transaction 管理：PostgreSQL 的 ACID 實現與進階控制 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/15</p></a><a href=/post/javascript/data-structures--algorithms/002-array-string/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">陣列與字串 — Array 操作技巧與字串處理完整指南 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/15</p></a><a href=/post/ai-insights/013-ai-freelancing-trap/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">AI 接單賺錢的套路分析：練功可以，但別把時間賣便宜了 | AI Insights</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/14</p></a><a href=/post/javascript/data-structures--algorithms/001-bigo-complexity/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Big O 與複雜度分析 — 時間複雜度、空間複雜度完整教學 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/14</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>
