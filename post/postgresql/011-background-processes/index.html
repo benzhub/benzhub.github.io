@@ -1,0 +1,322 @@
+<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>背景進程：PostgreSQL 的幕後工作者們 | PostgreSQL | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="背景進程：PostgreSQL 的幕後工作者們 | PostgreSQL | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="深入解析 PostgreSQL 的多進程架構與所有背景進程，涵蓋 Postmaster 主進程、Background Writer、WAL Writer、Checkpointer、Autovacuum Launcher/Worker、WAL Sender/Receiver、Stats Collector 架構演進（PG15 Shared Memory 改版），以及 Backend Process 生命週期與進程間通訊機制。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="深入解析 PostgreSQL 的多進程架構與所有背景進程，涵蓋 Postmaster 主進程、Background Writer、WAL Writer、Checkpointer、Autovacuum Launcher/Worker、WAL Sender/Receiver、Stats Collector 架構演進（PG15 Shared Memory 改版），以及 Backend Process 生命週期與進程間通訊機制。"><meta property="og:url" content="https://benzhub.github.io/post/postgresql/011-background-processes/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/postgresql/011-background-processes/><meta name=twitter:description content="深入解析 PostgreSQL 的多進程架構與所有背景進程，涵蓋 Postmaster 主進程、Background Writer、WAL Writer、Checkpointer、Autovacuum Launcher/Worker、WAL Sender/Receiver、Stats Collector 架構演進（PG15 Shared Memory 改版），以及 Backend Process 生命週期與進程間通訊機制。"><meta property="article:published_time" content="2026-06-17T00:00:00+00:00"><meta property="article:updated_time" content="2026-06-17T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/postgresql/011-Background-Processes.png"><meta property="og:image:url" content="https://benzhub.github.io/img/postgresql/011-Background-Processes.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/postgresql/011-background-processes/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/postgresql/011-background-processes/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"背景進程：PostgreSQL 的幕後工作者們 | PostgreSQL\"","description":"\"深入解析 PostgreSQL 的多進程架構與所有背景進程，涵蓋 Postmaster 主進程、Background Writer、WAL Writer、Checkpointer、Autovacuum Launcher/Worker、WAL Sender/Receiver、Stats Collector 架構演進（PG15 Shared Memory 改版），以及 Backend Process 生命週期與進程間通訊機制。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-06-17T00:00:00\u002b00:00","dateModified":"2026-06-17T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/postgresql\/011-Background-Processes.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/postgresql\/011-background-processes\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/postgresql\/"},{"@type":"ListItem","position":3,"name":"\"背景進程：PostgreSQL 的幕後工作者們 | PostgreSQL\""}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">背景進程：PostgreSQL 的幕後工作者們 | PostgreSQL</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/17</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/postgresql class="tag-pill no-underline">postgresql</a>
+<a href=/tags/background-processes class="tag-pill no-underline">background-processes</a>
+<a href=/tags/postmaster class="tag-pill no-underline">postmaster</a>
+<a href=/tags/autovacuum class="tag-pill no-underline">autovacuum</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/postgresql/011-Background-Processes.png alt="背景進程：PostgreSQL 的幕後工作者們 | PostgreSQL"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p><strong>PostgreSQL</strong> 是多進程架構，除了處理客戶端請求的 Backend Process，還有一批背景進程（Background Processes）負責維護資料庫的健康。理解 <strong>Postmaster</strong>、<strong>Checkpointer</strong>、<strong>Background Writer</strong>、<strong>Autovacuum</strong> 等進程的職責、觸發條件與調校參數，是效能調校與穩定性維護的核心知識。</p></blockquote><h3 id=postmaster萬物之起點>Postmaster：萬物之起點</h3><p><strong>Postmaster</strong> 是 PostgreSQL 的主進程，負責：</p><ol><li><strong>監聽連線</strong>：預設監聽 TCP port 5432（及 Unix domain socket）</li><li><strong>接受連線</strong>：每當有新連線進來，<code>fork()</code> 出一個新的 Backend Process</li><li><strong>管理 Shared Memory</strong>：啟動時初始化並掛載共享記憶體段</li><li><strong>監控子進程</strong>：定期檢查子進程狀態，若有異常採取行動</li><li><strong>管理信號</strong>：接收 SIGHUP 重新載入設定、SIGTERM/SIGINT 啟動 shutdown</li></ol><pre tabindex=0><code>系統啟動時的進程樹：
+
+init/systemd
+    └── postmaster（監聽 port 5432）
+            ├── postgres: checkpointer
+            ├── postgres: background writer
+            ├── postgres: walwriter
+            ├── postgres: autovacuum launcher
+            ├── postgres: logical replication launcher
+            ├── postgres: stats collector（PG14 以前）
+            ├── postgres: backend (client: app@db)   ← 每個連線
+            ├── postgres: backend (client: app@db)
+            └── postgres: autovacuum worker           ← 由 launcher 啟動
+</code></pre><h4 id=postmaster-的崩潰處理策略>Postmaster 的崩潰處理策略</h4><pre tabindex=0><code>Backend Process 崩潰（SIGSEGV）時：
+
+  → Postmaster 偵測到（wait()）
+  → 向所有其他 Backend 發送 SIGTERM（要求正常退出）
+  → 等待所有進程退出
+  → 重新啟動所有 Background Workers
+  → 執行 crash recovery（重放 WAL）
+  → 接受新連線
+</code></pre><p>這就是為什麼 <code>kill -9</code> 一個 Backend 可能導致整個 cluster 重啟。PG16+ 改進了此行為：若崩潰的 Backend 未持有任何 shared lock 或 WAL insert lock，Postmaster 可以不重啟整個 cluster。</p><h3 id=背景進程完整架構>背景進程完整架構</h3><pre tabindex=0><code>PostgreSQL 背景進程架構：
+
+┌───────────────────────────────────────────────────────┐
+│                      Postmaster                        │
+│                   （監聽 port 5432）                    │
+└───────┬───────────────────────────────────────────────┘
+        │ fork()
+        │
+  ┌─────┴────────────────────────────────────────────────┐
+  │                                                       │
+  │  資料持久性進程組                                      │
+  │  ┌─────────────────┐  ┌─────────────────┐            │
+  │  │   WAL Writer     │  │  Checkpointer    │            │
+  │  │  WAL buffer→磁碟 │  │ 定期建立 checkpoint│           │
+  │  └─────────────────┘  └─────────────────┘            │
+  │                                                       │
+  │  緩衝區管理進程組                                      │
+  │  ┌─────────────────┐                                  │
+  │  │ Background Writer│                                  │
+  │  │ dirty buffer→磁碟│                                  │
+  │  └─────────────────┘                                  │
+  │                                                       │
+  │  自動維護進程組                                        │
+  │  ┌──────────────────┐  ┌───────────────────────┐     │
+  │  │ Autovacuum        │→│ Autovacuum Worker × N  │     │
+  │  │ Launcher          │  │ (VACUUM + ANALYZE)     │     │
+  │  └──────────────────┘  └───────────────────────┘     │
+  │                                                       │
+  │  複寫進程組                                            │
+  │  ┌──────────────────┐  ┌───────────────────────┐     │
+  │  │   WAL Sender      │  │   WAL Receiver         │     │
+  │  │ (Primary 側)      │  │ (Standby 側)           │     │
+  │  └──────────────────┘  └───────────────────────┘     │
+  └──────────────────────────────────────────────────────┘
+</code></pre><h3 id=background-writerbgwriter>Background Writer（bgwriter）</h3><p><strong>職責</strong>：定期將 Shared Buffers 中的 dirty buffers（已修改但尚未寫回磁碟的 page）寫出到磁碟，減輕 Checkpoint 時的 I/O 集中衝擊。</p><p><strong>工作原理</strong>：</p><ul><li>每隔 <code>bgwriter_delay</code>（預設 200ms）掃描一輪</li><li>每輪最多寫出 <code>bgwriter_lru_maxpages</code>（預設 100）個 dirty pages</li><li>優先寫出最近最少使用（LRU）的 dirty pages</li></ul><pre tabindex=0><code>沒有 bgwriter 的情況：
+  INSERT 大量資料 → Shared Buffers 全滿
+  → Backend 必須先將 dirty page 寫磁碟 → 延遲加劇
+
+有 bgwriter 的情況：
+  bgwriter 持續在背景清理 dirty pages
+  → Shared Buffers 總有乾淨的可替換頁
+  → Backend 直接替換，無需等待磁碟寫入
+</code></pre><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 監控 bgwriter 效率
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>    buffers_clean,         <span style=color:#75715e>-- bgwriter 主動清理的 buffers
+</span></span></span><span style=display:flex><span>    maxwritten_clean,      <span style=color:#75715e>-- bgwriter 因超過上限而停止的次數
+</span></span></span><span style=display:flex><span>    buffers_backend,       <span style=color:#75715e>-- Backend 自己被迫清理的 buffers（應盡量低）
+</span></span></span><span style=display:flex><span>    buffers_backend_fsync  <span style=color:#75715e>-- Backend 執行 fsync 的次數（應為 0）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stat_bgwriter;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 健康評估：
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- buffers_backend 應遠小於 buffers_clean
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- maxwritten_clean &gt; 0 → 增加 bgwriter_lru_maxpages
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- buffers_backend_fsync &gt; 0 → 嚴重！立即調查 I/O 瓶頸
+</span></span></span></code></pre></div><h3 id=wal-writer>WAL Writer</h3><p><strong>職責</strong>：定期將 WAL buffers 中的內容 flush 到磁碟 WAL 檔案。</p><ul><li>每隔 <code>wal_writer_delay</code>（預設 200ms）執行一次 flush</li><li><code>wal_writer_flush_after</code>：WAL buffer 積累超過此量（預設 1MB）立即 flush</li></ul><p><strong>與 Backend 的分工</strong>：不是所有 WAL 寫入都由 WAL Writer 完成。<code>COMMIT</code> 時（若 <code>synchronous_commit=on</code>），Backend 自己觸發 WAL flush。WAL Writer 的主要貢獻是降低高頻小交易下的 I/O 次數（batching 效果）。</p><h3 id=checkpointer>Checkpointer</h3><p><strong>職責</strong>：定期執行 Checkpoint——確保 Shared Buffers 中所有 dirty pages 都寫回磁碟。Checkpoint 是 Crash Recovery 的「起點」。</p><pre tabindex=0><code>Checkpoint 執行流程：
+
+1. 在 WAL 中插入 CHECKPOINT_BEGIN 記錄
+2. 掃描 Shared Buffers
+3. 將所有 dirty buffers 寫出到磁碟（分批，避免 I/O 峰值）
+4. 等待所有寫出操作完成（fsync）
+5. 在 WAL 中插入 CHECKPOINT_END 記錄
+6. 更新 pg_control 檔案
+</code></pre><h4 id=兩種-checkpoint-類型>兩種 Checkpoint 類型</h4><table><thead><tr><th>類型</th><th>觸發條件</th><th>特性</th></tr></thead><tbody><tr><td>定時（timed）</td><td>每隔 <code>checkpoint_timeout</code>（預設 5 分鐘）</td><td>正常維護，分批執行</td></tr><tr><td>要求式（required）</td><td>WAL 超過 <code>max_wal_size</code>（預設 1GB）</td><td>更緊急，可能造成 I/O 峰值</td></tr></tbody></table><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 監控 Checkpoint 頻率
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>    checkpoints_timed,       <span style=color:#75715e>-- 定時觸發的 checkpoint 數
+</span></span></span><span style=display:flex><span>    checkpoints_req,         <span style=color:#75715e>-- WAL 大小觸發的 checkpoint 數
+</span></span></span><span style=display:flex><span>    checkpoint_write_time,   <span style=color:#75715e>-- 寫入磁碟的時間 (ms)
+</span></span></span><span style=display:flex><span>    checkpoint_sync_time     <span style=color:#75715e>-- fsync 的時間 (ms)
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stat_bgwriter;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- checkpoints_req / (checkpoints_timed + checkpoints_req) 應 &lt; 10%
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 若過高，增加 max_wal_size 或 checkpoint_timeout
+</span></span></span></code></pre></div><p><code>checkpoint_completion_target=0.9</code> 的意義：Checkpoint 應該在下一個 Checkpoint 預期開始前的 90% 時間內完成，將 I/O 分散開來。</p><h3 id=autovacuum-launcher--workers>Autovacuum Launcher / Workers</h3><p><strong>Launcher</strong> 週期性喚醒（每 <code>autovacuum_naptime</code>，預設 1 分鐘），掃描 <code>pg_stat_user_tables</code> 找出需要 VACUUM 或 ANALYZE 的表，然後 fork Worker 處理。</p><p>同時最多 <code>autovacuum_max_workers</code>（預設 3）個 Worker 運行。</p><h4 id=觸發條件>觸發條件</h4><pre tabindex=0><code>VACUUM 觸發：
+  dead tuple 數量 &gt; autovacuum_vacuum_threshold（預設 50）
+                  + autovacuum_vacuum_scale_factor（預設 0.2）× 表的 row 數
+
+  例：100 萬 row 的表 → 50 + 0.2 × 1,000,000 = 200,050 dead tuples
+
+ANALYZE 觸發：
+  修改的 tuple 數量 &gt; autovacuum_analyze_threshold（預設 50）
+                    + autovacuum_analyze_scale_factor（預設 0.1）× 表的 row 數
+</code></pre><p><strong>大表的問題</strong>：1 億 row 的表需要 2000 萬個 dead tuple 才觸發 VACUUM，可能導致嚴重的表膨脹。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 對特定大表調低觸發條件
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>TABLE</span> large_orders <span style=color:#66d9ef>SET</span> (
+</span></span><span style=display:flex><span>    autovacuum_vacuum_scale_factor <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>.<span style=color:#ae81ff>01</span>,
+</span></span><span style=display:flex><span>    autovacuum_analyze_scale_factor <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>.<span style=color:#ae81ff>005</span>,
+</span></span><span style=display:flex><span>    autovacuum_vacuum_threshold <span style=color:#f92672>=</span> <span style=color:#ae81ff>1000</span>
+</span></span><span style=display:flex><span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 查看 Autovacuum 目前正在處理哪些表
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> pid,
+</span></span><span style=display:flex><span>       datname,
+</span></span><span style=display:flex><span>       relid::regclass <span style=color:#66d9ef>AS</span> <span style=color:#66d9ef>table_name</span>,
+</span></span><span style=display:flex><span>       phase,
+</span></span><span style=display:flex><span>       heap_blks_scanned,
+</span></span><span style=display:flex><span>       heap_blks_total,
+</span></span><span style=display:flex><span>       ROUND(heap_blks_scanned::numeric <span style=color:#f92672>/</span> <span style=color:#66d9ef>NULLIF</span>(heap_blks_total, <span style=color:#ae81ff>0</span>) <span style=color:#f92672>*</span> <span style=color:#ae81ff>100</span>, <span style=color:#ae81ff>1</span>) <span style=color:#66d9ef>AS</span> progress_pct
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stat_progress_vacuum;
+</span></span></code></pre></div><h3 id=wal-sender--wal-receiver>WAL Sender / WAL Receiver</h3><p><strong>WAL Sender</strong> 在 Primary 側運行，將 WAL stream 傳送給 Standby。<strong>WAL Receiver</strong> 在 Standby 側接收 WAL stream 並應用到本地。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 在 Primary 查看 WAL sender 狀態
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> pid, application_name, client_addr, <span style=color:#66d9ef>state</span>,
+</span></span><span style=display:flex><span>       sent_lsn, write_lsn, flush_lsn, replay_lsn,
+</span></span><span style=display:flex><span>       pg_wal_lsn_diff(sent_lsn, replay_lsn) <span style=color:#66d9ef>AS</span> replication_lag_bytes
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stat_replication;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 在 Standby 查看 WAL receiver 狀態
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> status, received_lsn,
+</span></span><span style=display:flex><span>       last_msg_send_time, last_msg_receipt_time
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stat_wal_receiver;
+</span></span></code></pre></div><h3 id=stats-collector-架構演進>Stats Collector 架構演進</h3><h4 id=pg14-以前>PG14 以前</h4><p>Stats Collector 是獨立進程，透過 UDP 接收統計更新：</p><pre tabindex=0><code>Backend → UDP socket → Stats Collector Process → 臨時檔案
+                                                   ↑
+                                              其他 backend 讀取
+</code></pre><p>問題：stats 有延遲、進程重啟時可能遺失。</p><h4 id=pg15-重大改變>PG15+ 重大改變</h4><p>完全移除 Stats Collector 進程，改用 Shared Memory 存放統計資訊：</p><pre tabindex=0><code>Backend → Shared Memory（直接更新統計結構）
+                ↑↓
+         所有 backend 直接讀取
+         Checkpoint 時持久化到磁碟
+</code></pre><p>好處：統計資訊即時、啟動更快、不再有 stats 遺失問題。</p><h3 id=backend-process-生命週期>Backend Process 生命週期</h3><pre tabindex=0><code>Client 發起連線
+       │
+       ▼
+Postmaster accept() TCP 連線
+       │ fork()
+       ▼
+Backend Process 啟動
+  1. 附掛 Shared Memory
+  2. 讀取 pg_hba.conf 驗證連線
+  3. 執行認證（密碼/GSSAPI/Kerberos 等）
+  4. 載入初始 session 設定
+       │
+       ▼
+進入查詢循環
+  ┌─────────────────────────────┐
+  │  接收 SQL                    │
+  │  → Parser（語法分析）         │
+  │  → Analyzer（語意分析）       │
+  │  → Rewriter（規則重寫）       │
+  │  → Planner（生成執行計劃）    │
+  │  → Executor（執行）           │
+  │  → 回傳結果給 Client          │
+  └─────────────────────────────┘
+       │（收到 Terminate 或 TCP 斷線）
+       ▼
+Backend Process 清理
+  1. Rollback 任何未提交交易
+  2. 釋放 lock
+  3. 分離 Shared Memory
+  4. 退出（exit()）
+</code></pre><h3 id=監控-backend-連線狀態>監控 Backend 連線狀態</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 查看所有連線的詳細狀態
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> pid, usename, datname, application_name,
+</span></span><span style=display:flex><span>       client_addr, <span style=color:#66d9ef>state</span>,
+</span></span><span style=display:flex><span>       wait_event_type, wait_event,
+</span></span><span style=display:flex><span>       <span style=color:#66d9ef>LEFT</span>(query, <span style=color:#ae81ff>100</span>) <span style=color:#66d9ef>AS</span> query_preview,
+</span></span><span style=display:flex><span>       NOW() <span style=color:#f92672>-</span> query_start <span style=color:#66d9ef>AS</span> query_duration
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stat_activity
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> backend_type <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;client backend&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> query_start <span style=color:#66d9ef>DESC</span> NULLS <span style=color:#66d9ef>LAST</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 找出 idle in transaction（佔住 lock 的危險連線）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> pid, usename, <span style=color:#66d9ef>state</span>,
+</span></span><span style=display:flex><span>       NOW() <span style=color:#f92672>-</span> state_change <span style=color:#66d9ef>AS</span> idle_duration, query
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stat_activity
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> <span style=color:#66d9ef>state</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;idle in transaction&#39;</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>AND</span> state_change <span style=color:#f92672>&lt;</span> NOW() <span style=color:#f92672>-</span> INTERVAL <span style=color:#e6db74>&#39;5 minutes&#39;</span>;
+</span></span></code></pre></div><h3 id=終止連線>終止連線</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 正常取消一個查詢（不斷開連線）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> pg_cancel_backend(<span style=color:#ae81ff>12345</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 強制斷開一個連線（SIGTERM）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> pg_terminate_backend(<span style=color:#ae81ff>12345</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 批量終止 idle in transaction 超過 10 分鐘的連線
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> pg_terminate_backend(pid)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stat_activity
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> <span style=color:#66d9ef>state</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;idle in transaction&#39;</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>AND</span> state_change <span style=color:#f92672>&lt;</span> NOW() <span style=color:#f92672>-</span> INTERVAL <span style=color:#e6db74>&#39;10 minutes&#39;</span>;
+</span></span></code></pre></div><h3 id=background-workers-apipg93>Background Workers API（PG9.3+）</h3><p>PostgreSQL 提供 Background Workers API，允許 Extension 以背景進程形式運行：</p><table><thead><tr><th>Extension</th><th>使用 Background Worker</th></tr></thead><tbody><tr><td>pg_cron</td><td>定時執行 SQL 任務</td></tr><tr><td>pglogical</td><td>邏輯複寫</td></tr><tr><td>TimescaleDB</td><td>自動壓縮、連續聚合更新</td></tr><tr><td>pg_partman</td><td>自動分區管理</td></tr></tbody></table><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 查看已註冊的 background workers
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> pid, backend_type, <span style=color:#66d9ef>state</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stat_activity
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> backend_type <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>IN</span> (<span style=color:#e6db74>&#39;client backend&#39;</span>, <span style=color:#e6db74>&#39;autovacuum worker&#39;</span>);
+</span></span></code></pre></div><h3 id=進程間通訊機制>進程間通訊機制</h3><pre tabindex=0><code>通訊機制概覽：
+
+┌──────────────────────────────────────────────┐
+│              Shared Memory                     │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐      │
+│  │ LWLock   │ │ ProcArray│ │WAL Buffer│      │
+│  │ (輕量鎖) │ │(進程狀態)│ │          │      │
+│  └──────────┘ └──────────┘ └──────────┘      │
+└──────────────────────────────────────────────┘
+
+Signal（OS 信號）：
+  SIGHUP  → 重新載入設定（pg_hba.conf, postgresql.conf）
+  SIGTERM → 要求正常退出（smart shutdown）
+  SIGINT  → pg_cancel_backend（取消查詢）
+</code></pre><h3 id=xid-wraparound-監控>XID Wraparound 監控</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 查看距離 XID wraparound 還有多遠（最高優先級！）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> datname,
+</span></span><span style=display:flex><span>       age(datfrozenxid) <span style=color:#66d9ef>AS</span> xid_age,
+</span></span><span style=display:flex><span>       <span style=color:#ae81ff>2147483648</span> <span style=color:#f92672>-</span> age(datfrozenxid) <span style=color:#66d9ef>AS</span> xids_until_wraparound
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_database
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> xid_age <span style=color:#66d9ef>DESC</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- xid_age 接近 2 億時要警戒
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- PostgreSQL 會停止接受新寫入直到 VACUUM 完成
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 建議在 1.5 億時發出警報
+</span></span></span></code></pre></div><h3 id=常見陷阱>常見陷阱</h3><h4 id=kill--9-導致-cluster-重啟>kill -9 導致 cluster 重啟</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 安全的方式：讓 PostgreSQL 自己處理</span>
+</span></span><span style=display:flex><span>psql -c <span style=color:#e6db74>&#34;SELECT pg_terminate_backend(12345);&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 或用 SIGTERM</span>
+</span></span><span style=display:flex><span>kill -SIGTERM <span style=color:#ae81ff>12345</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 危險：直接 kill -9 可能觸發 cluster restart</span>
+</span></span><span style=display:flex><span>kill -9 <span style=color:#ae81ff>12345</span>  <span style=color:#75715e># 不建議！</span>
+</span></span></code></pre></div><h4 id=autovacuum_max_workers-不足>autovacuum_max_workers 不足</h4><p>預設只有 3 個 Worker，若同時有多個大表需要 VACUUM，會造成積壓。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 查看是否有 VACUUM 積壓
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> schemaname <span style=color:#f92672>||</span> <span style=color:#e6db74>&#39;.&#39;</span> <span style=color:#f92672>||</span> relname <span style=color:#66d9ef>AS</span> <span style=color:#66d9ef>table_name</span>,
+</span></span><span style=display:flex><span>       n_dead_tup,
+</span></span><span style=display:flex><span>       last_autovacuum,
+</span></span><span style=display:flex><span>       NOW() <span style=color:#f92672>-</span> last_autovacuum <span style=color:#66d9ef>AS</span> since_last_vacuum
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stat_user_tables
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> n_dead_tup <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>10000</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>AND</span> (last_autovacuum <span style=color:#66d9ef>IS</span> <span style=color:#66d9ef>NULL</span>
+</span></span><span style=display:flex><span>       <span style=color:#66d9ef>OR</span> last_autovacuum <span style=color:#f92672>&lt;</span> NOW() <span style=color:#f92672>-</span> INTERVAL <span style=color:#e6db74>&#39;1 hour&#39;</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> n_dead_tup <span style=color:#66d9ef>DESC</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 若有積壓，增加 worker 數（需重啟）
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- postgresql.conf: autovacuum_max_workers = 6
+</span></span></span></code></pre></div><h3 id=standby-上的進程模型>Standby 上的進程模型</h3><pre tabindex=0><code>Standby 的進程樹：
+
+postmaster（monitoring for local connections）
+    ├── postgres: startup         ← 執行 streaming apply
+    ├── postgres: walreceiver     ← 從 Primary 接收 WAL
+    ├── postgres: checkpointer
+    ├── postgres: background writer
+    └── postgres: backend (read-only) × N
+</code></pre><p>Standby 上的查詢是 read-only（Hot Standby），WAL Receiver 不斷從 Primary 接收 WAL 並交給 startup 進程 apply。</p><h3 id=總結>總結</h3><p><strong>背景進程</strong> 是 PostgreSQL 穩定運行的幕後功臣：</p><ul><li><strong>Postmaster</strong> 是萬物之起點，負責連線管理與子進程監控</li><li><strong>Background Writer</strong> 持續清理 dirty buffers，避免 Backend 被迫同步寫磁碟</li><li><strong>WAL Writer</strong> 批量 flush WAL，降低高頻小交易的 I/O 次數</li><li><strong>Checkpointer</strong> 建立 Crash Recovery 的起點，透過 <code>checkpoint_completion_target</code> 分散 I/O</li><li><strong>Autovacuum</strong> 自動維護表的健康，大表需調低 <code>scale_factor</code> 避免膨脹</li><li><strong>PG15</strong> 移除 Stats Collector 進程，改用 Shared Memory 直接存取統計資訊</li><li>監控 <code>buffers_backend_fsync</code>（應為 0）和 XID age（應 &lt; 1.5 億）是生產環境的關鍵指標</li></ul><p>下一篇，我們將進入 SQL 與資料操作系列，從 <strong>資料型別</strong>——PostgreSQL 豐富的型別系統開始。</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
+</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/postgresql/006-vacuum/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">VACUUM 機制：PostgreSQL 空間回收與防膨脹的關鍵 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/12</span>
+</a><a href=https://benzhub.github.io/post/postgresql/010-concurrency-control/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">並行控制與鎖機制：PostgreSQL 如何協調多用戶同時存取 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/16</span>
+</a><a href=https://benzhub.github.io/post/postgresql/009-transaction-management/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Transaction 管理：PostgreSQL 的 ACID 實現與進階控制 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/15</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/postgresql/010-concurrency-control/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+<span class="text-sm font-medium">並行控制與鎖機制：PostgreSQL 如何協調多用戶同時存取 | PostgreSQL</span></a></div><div></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
+</a><a href=/tags/acid><span class=tag-pill>acid</span>
+</a><a href=/tags/ai><span class=tag-pill>ai</span>
+</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
+</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
+</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
+</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
+</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
+</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
+</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
+</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
+</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
+</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
+</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
+</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
+</a><a href=/tags/api><span class=tag-pill>api</span>
+</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
+</a><a href=/tags/autovacuum><span class=tag-pill>autovacuum</span>
+</a><a href=/tags/background-processes><span class=tag-pill>background-processes</span>
+</a><a href=/tags/big-o><span class=tag-pill>big o</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (11)</span>
+</a><a href=/post/javascript/><span class=tag-pill>JavaScript (66)</span>
+</a><a href=/post/django/><span class=tag-pill>Django (28)</span>
+</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
+</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
+</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
+</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
+</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/django/028-django-middleware/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Middleware 中介軟體原理與實作 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/17</p></a><a href=/post/postgresql/011-background-processes/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">背景進程：PostgreSQL 的幕後工作者們 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/17</p></a><a href=/post/javascript/data-structures--algorithms/004-stack-queue/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">堆疊與佇列 — Stack、Queue、Deque 完整教學與實作 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/17</p></a><a href=/post/django/027-drf-permissions-throttling/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">DRF 權限控制與 API 限流完全指南 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/16</p></a><a href=/post/postgresql/010-concurrency-control/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">並行控制與鎖機制：PostgreSQL 如何協調多用戶同時存取 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/16</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>
