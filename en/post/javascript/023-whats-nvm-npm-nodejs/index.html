@@ -1,202 +1,1391 @@
-<!doctype html><html lang=en><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>NVM vs NPM vs Node.js: What's the Difference? Complete Guide | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="NVM vs NPM vs Node.js: What's the Difference? Complete Guide | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="Understand the difference between NVM, NPM, and Node.js. NVM manages Node versions, NPM manages packages, Node.js is the runtime. Includes installation flow, version switching, npm ci vs install, and .nvmrc setup."><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="Understand the difference between NVM, NPM, and Node.js. NVM manages Node versions, NPM manages packages, Node.js is the runtime. Includes installation flow, version switching, npm ci vs install, and .nvmrc setup."><meta property="og:url" content="https://benzhub.github.io/en/post/javascript/023-whats-nvm-npm-nodejs/"><meta property="og:type" content="article"><meta property="og:locale" content="en_US"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/en/post/javascript/023-whats-nvm-npm-nodejs/><meta name=twitter:description content="Understand the difference between NVM, NPM, and Node.js. NVM manages Node versions, NPM manages packages, Node.js is the runtime. Includes installation flow, version switching, npm ci vs install, and .nvmrc setup."><meta property="article:published_time" content="2024-01-01T00:00:00+00:00"><meta property="article:updated_time" content="2026-05-16T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/javascript/023-What%27s-nvm-npm-Nodejs.png"><meta property="og:image:url" content="https://benzhub.github.io/img/javascript/023-What%27s-nvm-npm-Nodejs.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
-<link rel=alternate hreflang=en href=https://benzhub.github.io/en/post/javascript/023-whats-nvm-npm-nodejs/><link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/javascript/023-whats-nvm-npm-nodejs/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/en/post/javascript/023-whats-nvm-npm-nodejs/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"NVM vs NPM vs Node.js: What's the Difference? Complete Guide\"","description":"\"Understand the difference between NVM, NPM, and Node.js. NVM manages Node versions, NPM manages packages, Node.js is the runtime. Includes installation flow, version switching, npm ci vs install, and .nvmrc setup.\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/en\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2024-01-01T00:00:00\u002b00:00","dateModified":"2026-05-16T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/javascript\/023-What%27s-nvm-npm-Nodejs.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/en\/post\/javascript\/023-whats-nvm-npm-nodejs\/"},"inLanguage":"en"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Posts\"","item":"https:\/\/benzhub.github.io\/en\/post\/"},{"@type":"ListItem","position":3,"name":"\"NVM vs NPM vs Node.js: What's the Difference? Complete Guide\""}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"\"What is the difference between NVM, NPM, and Node.js?\"","acceptedAnswer":{"@type":"Answer","text":"\"Node.js is the JavaScript runtime engine. NPM (Node Package Manager) is the package manager that installs automatically with Node.js. NVM (Node Version Manager) manages multiple Node.js versions on the same machine. Install order: NVM → Node.js → NPM (auto-installed).\""}},{"@type":"Question","name":"\"Do I need NVM if I only use one Node.js version?\"","acceptedAnswer":{"@type":"Answer","text":"\"NVM is still recommended. It avoids system permission issues, makes upgrading painless (nvm install 20 \\u0026\\u0026 nvm alias default 20), and ensures you can easily switch if a project requires a different version.\""}},{"@type":"Question","name":"\"What is the difference between npm install and npm ci?\"","acceptedAnswer":{"@type":"Answer","text":"\"npm install reads package.json, resolves versions, and updates package-lock.json. npm ci strictly follows package-lock.json (deletes node_modules first), ensuring reproducible builds. Use npm ci in CI/CD pipelines for consistency and speed.\""}},{"@type":"Question","name":"\"What is npx and how is it different from npm?\"","acceptedAnswer":{"@type":"Answer","text":"\"npm installs packages. npx executes package binaries without global installation (e.g., npx create-next-app). It checks local node_modules/.bin first, then downloads temporarily and cleans up. Ideal for CLI tools you use infrequently.\""}},{"@type":"Question","name":"\"Should I use CommonJS or ES Modules?\"","acceptedAnswer":{"@type":"Answer","text":"\"New projects should use ES Modules (set type: 'module' in package.json). ES Modules support tree-shaking and top-level await. Legacy projects can stay on CommonJS (require/module.exports) for compatibility.\""}}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/en/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">Home
-</a><a href=/en/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">About
-</a><a href=/en/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">Contact
-</a><a href=/en/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">Resources</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder="Search articles..." name=q aria-label=Search id=navSearchInput>
-<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
-<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-<span>🌐</span>
-<span>English</span>
-<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><a href=https://benzhub.github.io/post/javascript/023-whats-nvm-npm-nodejs/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">繁體中文</a>
-<span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ English</span>
-<a href=https://benzhub.github.io/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><a href=https://benzhub.github.io/post/javascript/023-whats-nvm-npm-nodejs/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">繁體中文</a>
-<span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">English</span>
-<a href=https://benzhub.github.io/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
-</button>
-<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
-<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/en/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">Home
-</a><a href=/en/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">About
-</a><a href=/en/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">Contact
-</a><a href=/en/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">Resources</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder="Search articles..." name=q aria-label=Search>
-<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-<span>🌐</span>
-<span>English</span>
-<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><a href=https://benzhub.github.io/post/javascript/023-whats-nvm-npm-nodejs/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">繁體中文</a>
-<span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ English</span>
-<a href=https://benzhub.github.io/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><a href=https://benzhub.github.io/post/javascript/023-whats-nvm-npm-nodejs/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">繁體中文</a>
-<span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">English</span>
-<a href=https://benzhub.github.io/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">NVM vs NPM vs Node.js: What's the Difference? Complete Guide</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2024/01/01
-</span><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001.0 004.582 9m0 0H9m11 11v-5h-.581m0 0A8.003 8.003.0 014.062 13m15.357 2H15"/></svg>
-2026/05/16</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/en/tags/javascript class="tag-pill no-underline">javascript</a>
-<a href=/en/tags/nodejs class="tag-pill no-underline">nodejs</a>
-<a href=/en/tags/npm class="tag-pill no-underline">npm</a>
-<a href=/en/tags/nvm class="tag-pill no-underline">nvm</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/javascript/023-What%27s-nvm-npm-Nodejs.png alt="NVM vs NPM vs Node.js: What's the Difference? Complete Guide"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p>When starting out with JavaScript development, you will inevitably encounter three terms: <strong>NVM</strong>, <strong>NPM</strong>, and <strong>Node.js</strong>. In short, Node.js is the JavaScript runtime, NPM is the package manager that ships with Node.js, and NVM is a version manager that lets you install and switch between multiple Node.js versions on the same machine. This article breaks down NVM vs NPM vs Node.js in detail, including the correct installation flow, essential commands, and best practices for team collaboration.</p></blockquote><h2 id=nvm-vs-npm-vs-nodejs--quick-overview>NVM vs NPM vs Node.js — Quick Overview</h2><p>Before diving into each tool individually, here is a side-by-side comparison table that clarifies the role of NVM, NPM, and Node.js:</p><table><thead><tr><th>Aspect</th><th>Node.js</th><th>NPM</th><th>NVM</th></tr></thead><tbody><tr><td><strong>What it is</strong></td><td>JavaScript runtime environment</td><td>Package manager</td><td>Node.js version manager</td></tr><tr><td><strong>Primary purpose</strong></td><td>Execute JavaScript on the server</td><td>Install, manage, and publish packages</td><td>Install and switch between Node.js versions</td></tr><tr><td><strong>Installation</strong></td><td>Download from nodejs.org or install via NVM</td><td>Auto-installed with Node.js</td><td>Install via curl script or Homebrew</td></tr><tr><td><strong>Key commands</strong></td><td><code>node</code>, <code>node -v</code></td><td><code>npm install</code>, <code>npm run</code></td><td><code>nvm install</code>, <code>nvm use</code></td></tr><tr><td><strong>Config files</strong></td><td>None (uses env variables)</td><td><code>package.json</code>, <code>.npmrc</code></td><td><code>.nvmrc</code></td></tr><tr><td><strong>Install location</strong></td><td><code>/usr/local/bin/node</code> or <code>~/.nvm/versions/</code></td><td>Ships with Node.js; global packages in npm root</td><td><code>~/.nvm/</code></td></tr></tbody></table><p>A simple analogy:</p><ul><li><strong>Node.js</strong> is the engine (lets JavaScript run outside the browser)</li><li><strong>NPM</strong> is the fuel station (provides packages/libraries)</li><li><strong>NVM</strong> is the garage (stores and manages multiple engine versions)</li></ul><hr><h2 id=what-is-nodejs>What Is Node.js?</h2><p><strong>Node.js</strong> is an open-source, cross-platform runtime environment built on Google Chrome&rsquo;s V8 JavaScript engine. It enables JavaScript to run outside the browser — on servers, desktops, and IoT devices.</p><h3 id=the-v8-engine>The V8 Engine</h3><p>V8 is Google&rsquo;s high-performance JavaScript engine, originally built to speed up JavaScript execution in Chrome. Its core innovation is <strong>JIT (Just-In-Time) compilation</strong>, which compiles JavaScript directly to machine code at runtime rather than interpreting it line by line. Node.js extracts V8 from the browser, allowing JavaScript code to execute natively on any operating system.</p><h3 id=why-use-nodejs-for-backend-development>Why Use Node.js for Backend Development?</h3><p>Before Node.js, backend development required languages like PHP, Java, Python, or Ruby. Frontend engineers who wanted to build server-side logic had to learn an entirely different language. Node.js lets developers use a single language — JavaScript — for both client and server code, dramatically lowering the barrier to full-stack development.</p><p>Node.js also introduces <strong>non-blocking I/O</strong> and an <strong>event-driven</strong> architecture. Traditional multi-threaded servers block a thread while waiting for database queries or file reads. Node.js uses a single-threaded event loop that continues processing other requests during I/O waits, making it ideal for high-concurrency applications like real-time chat, streaming services, and API gateways.</p><h3 id=lts-vs-current-release-strategy>LTS vs Current Release Strategy</h3><p>Node.js maintains two release channels:</p><table><thead><tr><th>Channel</th><th>Description</th><th>Recommended for</th></tr></thead><tbody><tr><td><strong>LTS (Long Term Support)</strong></td><td>Stable, with extended bug-fix support (18 months Active + 12 months Maintenance)</td><td>Production, enterprise projects</td></tr><tr><td><strong>Current</strong></td><td>Latest features, new major version every 6 months, less battle-tested</td><td>Development, experimenting with new APIs</td></tr></tbody></table><p>Even-numbered major versions (18, 20, 22) become LTS releases. Odd-numbered versions (19, 21) receive short-term maintenance only. <strong>Always use LTS for production workloads.</strong></p><h3 id=common-nodejs-use-cases>Common Node.js Use Cases</h3><ul><li><strong>API servers</strong> — Build RESTful or GraphQL APIs with Express.js, Fastify, or Hono.</li><li><strong>CLI tools</strong> — Tools like ESLint, Webpack, and Vite are all built on Node.js.</li><li><strong>SSR (Server-Side Rendering)</strong> — Frameworks like Next.js and Nuxt render pages on the server for better SEO.</li><li><strong>Real-time applications</strong> — WebSocket-based chat, notifications, and collaborative editing.</li><li><strong>Microservices</strong> — Node.js&rsquo;s lightweight footprint is ideal for containerized microservice architectures.</li></ul><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># Check current Node.js version</span>
-</span></span><span style=display:flex><span>node -v
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># Start the REPL (interactive mode)</span>
-</span></span><span style=display:flex><span>node
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># Run a JavaScript file</span>
-</span></span><span style=display:flex><span>node index.js
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># List Node.js built-in modules</span>
-</span></span><span style=display:flex><span>node -e <span style=color:#e6db74>&#34;console.log(require(&#39;module&#39;).builtinModules)&#34;</span>
-</span></span></code></pre></div><hr><h2 id=what-is-npm-node-package-manager>What Is NPM (Node Package Manager)?</h2><p><strong>NPM (Node Package Manager)</strong> is the default package manager for Node.js and is installed automatically alongside it. NPM provides a command-line interface for installing, updating, and managing third-party packages, as well as a public registry — the world&rsquo;s largest open-source software repository with over <strong>2 million packages</strong> as of 2024.</p><h3 id=essential-npm-commands>Essential npm Commands</h3><table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody><tr><td><code>npm init</code></td><td>Initialize a new project and create <code>package.json</code></td></tr><tr><td><code>npm init -y</code></td><td>Initialize with default values (skip prompts)</td></tr><tr><td><code>npm install</code></td><td>Install all dependencies from <code>package.json</code></td></tr><tr><td><code>npm install &lt;pkg></code></td><td>Install a package and add to <code>dependencies</code></td></tr><tr><td><code>npm install &lt;pkg> --save-dev</code></td><td>Install and add to <code>devDependencies</code></td></tr><tr><td><code>npm install -g &lt;pkg></code></td><td>Install a package globally</td></tr><tr><td><code>npm uninstall &lt;pkg></code></td><td>Remove a package</td></tr><tr><td><code>npm update</code></td><td>Update all packages to the latest allowed version</td></tr><tr><td><code>npm run &lt;script></code></td><td>Run a script defined in <code>package.json</code></td></tr><tr><td><code>npm list</code></td><td>List installed packages</td></tr><tr><td><code>npm outdated</code></td><td>Show packages with newer versions available</td></tr></tbody></table><h3 id=packagejson-and-package-lockjson>package.json and package-lock.json</h3><p><strong><code>package.json</code></strong> is the project manifest. It records the project name, version, scripts, and dependency version ranges.</p><p><strong><code>package-lock.json</code></strong> is an auto-generated lock file that pins the exact resolved version of every package (including transitive dependencies). It guarantees that different machines and CI/CD environments reproduce the identical dependency tree.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-json data-lang=json><span style=display:flex><span>{
-</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;name&#34;</span>: <span style=color:#e6db74>&#34;my-project&#34;</span>,
-</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;version&#34;</span>: <span style=color:#e6db74>&#34;1.0.0&#34;</span>,
-</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;scripts&#34;</span>: {
-</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;start&#34;</span>: <span style=color:#e6db74>&#34;node index.js&#34;</span>,
-</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;dev&#34;</span>: <span style=color:#e6db74>&#34;nodemon index.js&#34;</span>,
-</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;build&#34;</span>: <span style=color:#e6db74>&#34;webpack --mode production&#34;</span>,
-</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;test&#34;</span>: <span style=color:#e6db74>&#34;jest&#34;</span>
-</span></span><span style=display:flex><span>  },
-</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;dependencies&#34;</span>: {
-</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;express&#34;</span>: <span style=color:#e6db74>&#34;^4.18.2&#34;</span>
-</span></span><span style=display:flex><span>  },
-</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;devDependencies&#34;</span>: {
-</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;nodemon&#34;</span>: <span style=color:#e6db74>&#34;^3.0.1&#34;</span>,
-</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;jest&#34;</span>: <span style=color:#e6db74>&#34;^29.7.0&#34;</span>
-</span></span><span style=display:flex><span>  }
-</span></span><span style=display:flex><span>}
-</span></span></code></pre></div><h3 id=dependencies-vs-devdependencies>dependencies vs devDependencies</h3><ul><li><strong><code>dependencies</code></strong> — Packages required at <strong>runtime</strong> in production (e.g., express, react, axios).</li><li><strong><code>devDependencies</code></strong> — Packages needed only during <strong>development</strong> (e.g., jest, webpack, prettier). These are excluded when deploying with <code>npm install --production</code>.</li></ul><h3 id=semantic-versioning-semver>Semantic Versioning (SemVer)</h3><p>NPM follows the <strong>SemVer</strong> specification: <code>MAJOR.MINOR.PATCH</code>.</p><ul><li><strong>MAJOR</strong> — Incompatible API changes (breaking)</li><li><strong>MINOR</strong> — New backward-compatible features</li><li><strong>PATCH</strong> — Backward-compatible bug fixes</li></ul><p>Version range symbols in <code>package.json</code>:</p><table><thead><tr><th>Symbol</th><th>Example</th><th>Meaning</th></tr></thead><tbody><tr><td><code>^</code> (caret)</td><td><code>^4.18.2</code></td><td>Allows updates within <code>4.x.x</code> (does not cross major)</td></tr><tr><td><code>~</code> (tilde)</td><td><code>~4.18.2</code></td><td>Allows updates within <code>4.18.x</code> (does not cross minor)</td></tr><tr><td><code>*</code> (wildcard)</td><td><code>*</code></td><td>Any version (not recommended for production)</td></tr><tr><td>None</td><td><code>4.18.2</code></td><td>Exact pinned version</td></tr></tbody></table><hr><h2 id=what-is-nvm-node-version-manager>What Is NVM (Node Version Manager)?</h2><p><strong>NVM (Node Version Manager)</strong> is a tool that lets you install and manage multiple Node.js versions on a single machine and switch between them with a single command.</p><h3 id=why-manage-multiple-nodejs-versions>Why Manage Multiple Node.js Versions?</h3><p>In real-world development, you often maintain several projects simultaneously:</p><ul><li>Project A requires Node.js 16 (a legacy dependency does not support newer versions)</li><li>Project B uses Node.js 20 LTS</li><li>Project C needs Node.js 22 to test new runtime features</li></ul><p>Without a version manager, switching Node.js versions means uninstalling and reinstalling — a tedious and error-prone process. NVM makes version switching instant.</p><h3 id=how-nvm-works>How NVM Works</h3><p>NVM installs each Node.js version under the user&rsquo;s home directory (<code>~/.nvm/versions/</code>). Each version has its own <code>node</code> and <code>npm</code> binaries, completely isolated from one another. When you run <code>nvm use &lt;version></code>, NVM updates your shell&rsquo;s <code>PATH</code> to point to the selected version&rsquo;s binaries.</p><p>Because NVM operates in user space, you never need <code>sudo</code> for installations — eliminating an entire class of permission issues.</p><h3 id=nvm-essential-commands>NVM Essential Commands</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># Check NVM version</span>
-</span></span><span style=display:flex><span>nvm --version
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># List all available remote versions</span>
-</span></span><span style=display:flex><span>nvm ls-remote
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># List only LTS versions</span>
-</span></span><span style=display:flex><span>nvm ls-remote --lts
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># Install the latest LTS version</span>
-</span></span><span style=display:flex><span>nvm install --lts
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># Install a specific version</span>
-</span></span><span style=display:flex><span>nvm install 20.10.0
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># List locally installed versions</span>
-</span></span><span style=display:flex><span>nvm ls
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># Switch to a specific version</span>
-</span></span><span style=display:flex><span>nvm use <span style=color:#ae81ff>20</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># Switch to the latest LTS</span>
-</span></span><span style=display:flex><span>nvm use --lts
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># Set default version (used by new shell sessions)</span>
-</span></span><span style=display:flex><span>nvm alias default <span style=color:#ae81ff>20</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># Show the currently active version</span>
-</span></span><span style=display:flex><span>nvm current
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># Uninstall a specific version</span>
-</span></span><span style=display:flex><span>nvm uninstall <span style=color:#ae81ff>16</span>
-</span></span></code></pre></div><hr><h2 id=installation-flow-the-right-order>Installation Flow: The Right Order</h2><p>The recommended installation sequence is: <strong>NVM first → Use NVM to install Node.js → NPM comes bundled automatically</strong>.</p><p>Avoid downloading Node.js directly from the official website. That approach makes version switching difficult and can cause global permission conflicts.</p><h3 id=step-1-install-nvm>Step 1: Install NVM</h3><p><strong>macOS / Linux:</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># Install NVM using the official script (check GitHub for latest version)</span>
-</span></span><span style=display:flex><span>curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># Reload your shell configuration</span>
-</span></span><span style=display:flex><span>source ~/.bashrc   <span style=color:#75715e># For Bash</span>
-</span></span><span style=display:flex><span>source ~/.zshrc    <span style=color:#75715e># For Zsh (macOS default)</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># Verify installation</span>
-</span></span><span style=display:flex><span>nvm --version
-</span></span></code></pre></div><p>The install script automatically adds NVM initialization code to your <code>.bashrc</code> or <code>.zshrc</code>.</p><p><strong>Windows:</strong></p><p>Windows users should use <a href=https://github.com/coreybutler/nvm-windows>nvm-windows</a>, a separate project with similar commands but a native Windows implementation.</p><h3 id=step-2-install-nodejs-via-nvm>Step 2: Install Node.js via NVM</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># Install the latest LTS version (recommended)</span>
-</span></span><span style=display:flex><span>nvm install --lts
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># Install a specific major version</span>
-</span></span><span style=display:flex><span>nvm install <span style=color:#ae81ff>20</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># Set it as the default</span>
-</span></span><span style=display:flex><span>nvm alias default <span style=color:#ae81ff>20</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># Verify</span>
-</span></span><span style=display:flex><span>node -v
-</span></span><span style=display:flex><span>npm -v
-</span></span></code></pre></div><h3 id=step-3-npm-is-automatically-installed>Step 3: NPM Is Automatically Installed</h3><p>Once Node.js is installed, NPM is ready to use — no extra steps required:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># Check npm version</span>
-</span></span><span style=display:flex><span>npm -v
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># Optionally update npm to the latest</span>
-</span></span><span style=display:flex><span>npm install -g npm@latest
-</span></span></code></pre></div><hr><h2 id=npm-install-vs-npm-ci>npm install vs npm ci</h2><p>Both commands install dependencies, but they serve different purposes:</p><table><thead><tr><th>Aspect</th><th><code>npm install</code></th><th><code>npm ci</code></th></tr></thead><tbody><tr><td>Source of truth</td><td>package.json + lock file</td><td>Lock file only</td></tr><tr><td>Lock file mismatch</td><td>Updates lock file</td><td>Throws error and exits</td></tr><tr><td>node_modules</td><td>Incremental update (preserves existing)</td><td>Deletes and reinstalls from scratch</td></tr><tr><td>Best for</td><td>Development</td><td>CI/CD pipelines</td></tr><tr><td>Reproducibility</td><td>May vary if lock file updates</td><td>Fully reproducible</td></tr></tbody></table><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># Development — install and potentially update lock file</span>
-</span></span><span style=display:flex><span>npm install
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># CI/CD pipeline — strict, reproducible install</span>
-</span></span><span style=display:flex><span>npm ci
-</span></span></code></pre></div><p><strong>Team best practice:</strong> Use <code>npm install</code> during development and commit any <code>package-lock.json</code> changes. In CI/CD, always use <code>npm ci</code> to guarantee deployment consistency.</p><h3 id=what-about-npx>What About npx?</h3><p><code>npx</code> ships with NPM 5.2+ and executes package binaries <strong>without requiring global installation</strong>:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># Scaffold a new Next.js app without installing create-next-app globally</span>
-</span></span><span style=display:flex><span>npx create-next-app my-app
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># Run the project-local version of ESLint</span>
-</span></span><span style=display:flex><span>npx eslint .
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># Test your script against a specific Node.js version</span>
-</span></span><span style=display:flex><span>npx node@18 script.js
-</span></span></code></pre></div><p><strong>npx lookup order:</strong></p><ol><li>Check local <code>node_modules/.bin/</code> for the binary</li><li>If not found, download temporarily, execute, then clean up</li></ol><p>This eliminates version conflicts from global installs and avoids permanently installing tools you rarely use.</p><hr><h2 id=commonjs-vs-es-modules>CommonJS vs ES Modules</h2><p>Node.js supports two module systems. Understanding the differences is essential for architecting new projects and reading open-source code.</p><table><thead><tr><th>Aspect</th><th>CommonJS (CJS)</th><th>ES Modules (ESM)</th></tr></thead><tbody><tr><td><strong>Import syntax</strong></td><td><code>const m = require('./m')</code></td><td><code>import m from './m'</code></td></tr><tr><td><strong>Export syntax</strong></td><td><code>module.exports = ...</code></td><td><code>export default ...</code> / <code>export { }</code></td></tr><tr><td><strong>Loading</strong></td><td>Synchronous</td><td>Asynchronous</td></tr><tr><td><strong>Resolution timing</strong></td><td>Runtime</td><td>Static analysis (compile time)</td></tr><tr><td><strong>Tree shaking</strong></td><td>Not supported</td><td>Supported (bundlers remove unused code)</td></tr><tr><td><strong>Top-level await</strong></td><td>Not supported</td><td>Supported</td></tr><tr><td><strong>Conditional imports</strong></td><td>Anywhere (<code>if</code> blocks)</td><td>Only via dynamic <code>import()</code></td></tr><tr><td><strong>Browser support</strong></td><td>Not supported (requires bundling)</td><td>Native <code>&lt;script type="module"></code></td></tr><tr><td><strong>Recommendation</strong></td><td>Legacy project maintenance</td><td>Use for all new projects</td></tr></tbody></table><h3 id=how-to-enable-es-modules>How to Enable ES Modules</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-json data-lang=json><span style=display:flex><span><span style=color:#75715e>// package.json — add &#34;type&#34;: &#34;module&#34;
-</span></span></span><span style=display:flex><span>{
-</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;name&#34;</span>: <span style=color:#e6db74>&#34;my-project&#34;</span>,
-</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;type&#34;</span>: <span style=color:#e6db74>&#34;module&#34;</span>
-</span></span><span style=display:flex><span>}
-</span></span></code></pre></div><p>With this setting, all <code>.js</code> files use ESM by default. If specific files need CommonJS, use the <code>.cjs</code> extension.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-js data-lang=js><span style=display:flex><span><span style=color:#75715e>// ESM syntax example
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>import</span> <span style=color:#a6e22e>express</span> <span style=color:#a6e22e>from</span> <span style=color:#e6db74>&#39;express&#39;</span>;
-</span></span><span style=display:flex><span><span style=color:#66d9ef>import</span> { <span style=color:#a6e22e>readFile</span> } <span style=color:#a6e22e>from</span> <span style=color:#e6db74>&#39;fs/promises&#39;</span>;
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>export</span> <span style=color:#66d9ef>function</span> <span style=color:#a6e22e>handler</span>(<span style=color:#a6e22e>req</span>, <span style=color:#a6e22e>res</span>) {
-</span></span><span style=display:flex><span>  <span style=color:#75715e>// ...
-</span></span></span><span style=display:flex><span>}
-</span></span></code></pre></div><hr><h2 id=using-nvmrc-for-team-consistency>Using .nvmrc for Team Consistency</h2><p>A <code>.nvmrc</code> file is a simple text file placed at the project root containing the required Node.js version. When team members clone the repository, they run <code>nvm use</code> in the project directory, and NVM automatically reads <code>.nvmrc</code> and switches to the correct version.</p><h3 id=setting-up-nvmrc>Setting Up .nvmrc</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># Create .nvmrc with the desired version</span>
-</span></span><span style=display:flex><span>echo <span style=color:#e6db74>&#34;20.10.0&#34;</span> &gt; .nvmrc
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># Or use an alias</span>
-</span></span><span style=display:flex><span>echo <span style=color:#e6db74>&#34;lts/iron&#34;</span> &gt; .nvmrc
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># Commit it to version control</span>
-</span></span><span style=display:flex><span>git add .nvmrc
-</span></span></code></pre></div><h3 id=automatic-version-switching>Automatic Version Switching</h3><p>You can configure your shell to automatically run <code>nvm use</code> when you <code>cd</code> into a directory containing a <code>.nvmrc</code> file. Add this to your <code>~/.zshrc</code>:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># Auto-switch Node.js version on directory change</span>
-</span></span><span style=display:flex><span>autoload -U add-zsh-hook
-</span></span><span style=display:flex><span>load-nvmrc<span style=color:#f92672>()</span> <span style=color:#f92672>{</span>
-</span></span><span style=display:flex><span>  local nvmrc_path<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;</span><span style=color:#66d9ef>$(</span>nvm_find_nvmrc<span style=color:#66d9ef>)</span><span style=color:#e6db74>&#34;</span>
-</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> <span style=color:#f92672>[</span> -n <span style=color:#e6db74>&#34;</span>$nvmrc_path<span style=color:#e6db74>&#34;</span> <span style=color:#f92672>]</span>; <span style=color:#66d9ef>then</span>
-</span></span><span style=display:flex><span>    local nvmrc_node_version<span style=color:#f92672>=</span><span style=color:#66d9ef>$(</span>nvm version <span style=color:#e6db74>&#34;</span><span style=color:#66d9ef>$(</span>cat <span style=color:#e6db74>&#34;</span><span style=color:#e6db74>${</span>nvmrc_path<span style=color:#e6db74>}</span><span style=color:#e6db74>&#34;</span><span style=color:#66d9ef>)</span><span style=color:#e6db74>&#34;</span><span style=color:#66d9ef>)</span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> <span style=color:#f92672>[</span> <span style=color:#e6db74>&#34;</span>$nvmrc_node_version<span style=color:#e6db74>&#34;</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;N/A&#34;</span> <span style=color:#f92672>]</span>; <span style=color:#66d9ef>then</span>
-</span></span><span style=display:flex><span>      nvm install
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>elif</span> <span style=color:#f92672>[</span> <span style=color:#e6db74>&#34;</span>$nvmrc_node_version<span style=color:#e6db74>&#34;</span> !<span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;</span><span style=color:#66d9ef>$(</span>nvm version<span style=color:#66d9ef>)</span><span style=color:#e6db74>&#34;</span> <span style=color:#f92672>]</span>; <span style=color:#66d9ef>then</span>
-</span></span><span style=display:flex><span>      nvm use
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>fi</span>
-</span></span><span style=display:flex><span>  <span style=color:#66d9ef>fi</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>}</span>
-</span></span><span style=display:flex><span>add-zsh-hook chpwd load-nvmrc
-</span></span><span style=display:flex><span>load-nvmrc
-</span></span></code></pre></div><h3 id=nvmrc-in-cicd>.nvmrc in CI/CD</h3><p>Most CI/CD platforms (GitHub Actions, GitLab CI, CircleCI) support <code>.nvmrc</code> natively or via setup actions:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#75715e># GitHub Actions example</span>
-</span></span><span style=display:flex><span>- <span style=color:#f92672>uses</span>: <span style=color:#ae81ff>actions/setup-node@v4</span>
-</span></span><span style=display:flex><span>  <span style=color:#f92672>with</span>:
-</span></span><span style=display:flex><span>    <span style=color:#f92672>node-version-file</span>: <span style=color:#e6db74>&#39;.nvmrc&#39;</span>
-</span></span></code></pre></div><p>This ensures your CI environment runs the exact same Node.js version as your development machines — no more &ldquo;works on my machine&rdquo; issues.</p><hr><h2 id=summary>Summary</h2><p>Understanding the relationship between NVM, NPM, and Node.js is fundamental for any JavaScript developer:</p><ol><li><strong>Install NVM first</strong> — it gives you full control over Node.js versions without permission headaches.</li><li><strong>Use NVM to install Node.js</strong> — pick the LTS version for production stability.</li><li><strong>NPM comes free with Node.js</strong> — use it to manage project dependencies, run scripts, and publish packages.</li><li><strong>Add a <code>.nvmrc</code></strong> to every project for team and CI/CD consistency.</li><li><strong>Use <code>npm ci</code></strong> in automated pipelines for reproducible builds.</li><li><strong>Prefer ES Modules</strong> for new projects to benefit from tree shaking and modern syntax.</li></ol><p>By following this installation flow and understanding the distinct roles of each tool, you will avoid common pitfalls and set up a reliable, maintainable JavaScript development environment.</p><hr><p>Further reading:</p><ul><li><a href=/en/post/javascript/052-whats-nvm/>What Is NVM?</a></li><li><a href=/en/post/javascript/054-whats-the-reason-you-must-use-nvm/>Why You Need NVM</a></li><li><a href=/en/post/javascript/056-fnm-commands/>fnm: Fast Node Manager Guide</a></li></ul></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/en/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
-</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">Software developer passionate about technology. Sharing programming experiences and learning notes.</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/en/post/linux/004-install-zsh/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; Previous</span>
-<span class="text-sm font-medium">Set Up a Beautiful and Powerful Zsh for Linux | Linux</span></a></div><div><a href=https://benzhub.github.io/en/post/htmlcss/010-html-character-entity/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">Next &rarr;</span>
-<span class="text-sm font-medium">HTML Character Entities: Complete Reference Guide</span></a></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=en crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>Search</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder="Search articles..." name=q aria-label=Search>
-<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>Tags</p><div class="flex flex-wrap gap-1.5"><a href=/en/tags/ai><span class=tag-pill>ai</span>
-</a><a href=/en/tags/ai-insights><span class=tag-pill>ai-insights</span>
-</a><a href=/en/tags/api><span class=tag-pill>api</span>
-</a><a href=/en/tags/automation><span class=tag-pill>automation</span>
-</a><a href=/en/tags/claude-code><span class=tag-pill>claude code</span>
-</a><a href=/en/tags/cron><span class=tag-pill>cron</span>
-</a><a href=/en/tags/cursor><span class=tag-pill>cursor</span>
-</a><a href=/en/tags/database><span class=tag-pill>database</span>
-</a><a href=/en/tags/debugging><span class=tag-pill>debugging</span>
-</a><a href=/en/tags/design-pattern><span class=tag-pill>design-pattern</span>
-</a><a href=/en/tags/devops><span class=tag-pill>devops</span>
-</a><a href=/en/tags/django><span class=tag-pill>django</span>
-</a><a href=/en/tags/flutter><span class=tag-pill>flutter</span>
-</a><a href=/en/tags/fnm><span class=tag-pill>fnm</span>
-</a><a href=/en/tags/git><span class=tag-pill>git</span>
-</a><a href=/en/tags/github-copilot><span class=tag-pill>github copilot</span>
-</a><a href=/en/tags/harness-engineering><span class=tag-pill>harness engineering</span>
-</a><a href=/en/tags/html><span class=tag-pill>html</span>
-</a><a href=/en/tags/javascript><span class=tag-pill>javascript</span>
-</a><a href=/en/tags/linux><span class=tag-pill>linux</span></a></div></div><div class="widget fade-in"><p class=widget-title>Article Series</p><div class="flex flex-wrap gap-1.5"></div></div><div class="widget fade-in"><p class=widget-title>Recent Posts</p><div class="flex flex-col gap-1"><a href=/en/post/linux/027-cron-job-not-running/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Cron Job Not Running? 10 Fixes for Common Cron Issues</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/05/16</p></a><a href=/en/post/linux/025-cron-every-5-minutes/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">How to Run a Cron Job Every 5 Minutes (and Other Intervals)</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/05/15</p></a><a href=/en/post/linux/026-systemd-timer-vs-cron/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Systemd Timer vs Cron: Which Linux Scheduler Should You Use?</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/05/15</p></a><a href=/en/post/linux/024-crontab-syntax/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Crontab Syntax Explained: The Complete Time Format Guide</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/05/14</p></a><a href=/en/post/linux/023-crontab-examples/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">30+ Crontab Examples for Every Use Case | Linux Cron Scheduling</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/05/13</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>
+<!DOCTYPE html>
+
+<html lang="en">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><title>NVM vs NPM vs Node.js: What&#39;s the Difference? Complete Guide | BenzHub</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="apple-touch-icon" sizes="180x180" href='/favicon/apple-touch-icon.png'>
+    <link rel="icon" type="image/png" sizes="32x32" href='/favicon/favicon-32x32.png'>
+    <link rel="icon" type="image/png" sizes="16x16" href='/favicon/favicon-16x16.png'>
+    <link rel="manifest" href='/favicon/site.webmanifest' />
+    <link rel="mask-icon" href=' /favicon/safari-pinned-tab.svg' color="#5bbad5" />
+    <link rel="shortcut icon" href='/favicon/favicon.ico' />
+    <meta name="theme-color" content="#fafafa">
+    <meta property="og:title" content="NVM vs NPM vs Node.js: What&#39;s the Difference? Complete Guide | BenzHub" />
+    
+    
+    <link rel="stylesheet" href="/css/style.css" />
+    
+    <link href=' /css/blonde.min.css' rel="stylesheet" type="text/css" media="print"
+        onload="this.media=' all'">
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+
+<meta name="description" content="Understand the difference between NVM, NPM, and Node.js. NVM manages Node versions, NPM manages packages, Node.js is the runtime. Includes installation flow, version switching, npm ci vs install, and .nvmrc setup.">
+<meta property="og:site_name" content="BenzHub">
+<meta property="og:description" content="Understand the difference between NVM, NPM, and Node.js. NVM manages Node versions, NPM manages packages, Node.js is the runtime. Includes installation flow, version switching, npm ci vs install, and .nvmrc setup.">
+<meta property="og:url" content="http://localhost:1313/en/post/javascript/023-whats-nvm-npm-nodejs/">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="">
+
+<link rel="canonical" href="http://localhost:1313/en/post/javascript/023-whats-nvm-npm-nodejs/">
+
+<meta name="twitter:description" content="Understand the difference between NVM, NPM, and Node.js. NVM manages Node versions, NPM manages packages, Node.js is the runtime. Includes installation flow, version switching, npm ci vs install, and .nvmrc setup.">
+<meta property="article:published_time" content="2024-01-01T00:00:00&#43;00:00">
+<meta property="article:updated_time" content="2026-05-16T00:00:00&#43;00:00">
+
+
+
+
+
+    
+<meta property="og:image" content="http://localhost:1313/img/javascript/023-What%27s-nvm-npm-Nodejs.png">
+<meta property="og:image:url" content="http://localhost:1313/img/javascript/023-What%27s-nvm-npm-Nodejs.png">
+    
+
+    
+    <link rel="stylesheet" href='/css/custom.css'>
+    <i class="dark hidden"></i>
+    
+<link rel="alternate" hreflang="en" href="http://localhost:1313/en/post/javascript/023-whats-nvm-npm-nodejs/" />
+
+<link rel="alternate" hreflang="zh-TW" href="http://localhost:1313/post/javascript/023-whats-nvm-npm-nodejs/" />
+
+<link rel="alternate" hreflang="x-default" href="http://localhost:1313/en/post/javascript/023-whats-nvm-npm-nodejs/" />
+
+    
+
+
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "\"NVM vs NPM vs Node.js: What's the Difference? Complete Guide\"",
+  "description": "\"Understand the difference between NVM, NPM, and Node.js. NVM manages Node versions, NPM manages packages, Node.js is the runtime. Includes installation flow, version switching, npm ci vs install, and .nvmrc setup.\"",
+  "author": {
+    "@type": "Person",
+    "name": "\"BenzHub\"",
+    "url": "http:\/\/localhost:1313\/en\/about",
+    "jobTitle": "\"Software Developer\"",
+    "sameAs": [
+      "\"https://github.com/benzhub\""
+    ]
+  },
+  "datePublished": "2024-01-01T00:00:00\u002b00:00",
+  "dateModified": "2026-05-16T00:00:00\u002b00:00",
+  "image": "http:\/\/localhost:1313\/img\/javascript\/023-What%27s-nvm-npm-Nodejs.png",
+  "publisher": {
+    "@type": "Organization",
+    "name": "\"BenzHub\"",
+    "url": "\"http://localhost:1313/\"",
+    "sameAs": [
+      "\"https://github.com/benzhub\""
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http:\/\/localhost:1313\/en\/post\/javascript\/023-whats-nvm-npm-nodejs\/"
+  },
+  "inLanguage": "en"
+}
+</script>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "\"BenzHub\"",
+      "item": "http:\/\/localhost:1313\/"
+    }
+    
+    
+      
+      
+    ,{
+      "@type": "ListItem",
+      "position": 2,
+      "name": "\"Posts\"",
+      "item": "http:\/\/localhost:1313\/en\/post\/"
+    }
+      
+      
+    
+    ,{
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "\"NVM vs NPM vs Node.js: What's the Difference? Complete Guide\""
+    }
+  ]
+}
+</script>
+
+
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    
+    
+    {
+      "@type": "Question",
+      "name": "\"What is the difference between NVM, NPM, and Node.js?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Node.js is the JavaScript runtime engine. NPM (Node Package Manager) is the package manager that installs automatically with Node.js. NVM (Node Version Manager) manages multiple Node.js versions on the same machine. Install order: NVM → Node.js → NPM (auto-installed).\""
+      }
+    }
+    
+    ,
+    {
+      "@type": "Question",
+      "name": "\"Do I need NVM if I only use one Node.js version?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"NVM is still recommended. It avoids system permission issues, makes upgrading painless (nvm install 20 \\u0026\\u0026 nvm alias default 20), and ensures you can easily switch if a project requires a different version.\""
+      }
+    }
+    
+    ,
+    {
+      "@type": "Question",
+      "name": "\"What is the difference between npm install and npm ci?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"npm install reads package.json, resolves versions, and updates package-lock.json. npm ci strictly follows package-lock.json (deletes node_modules first), ensuring reproducible builds. Use npm ci in CI/CD pipelines for consistency and speed.\""
+      }
+    }
+    
+    ,
+    {
+      "@type": "Question",
+      "name": "\"What is npx and how is it different from npm?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"npm installs packages. npx executes package binaries without global installation (e.g., npx create-next-app). It checks local node_modules/.bin first, then downloads temporarily and cleans up. Ideal for CLI tools you use infrequently.\""
+      }
+    }
+    
+    ,
+    {
+      "@type": "Question",
+      "name": "\"Should I use CommonJS or ES Modules?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"New projects should use ES Modules (set type: 'module' in package.json). ES Modules support tree-shaking and top-level await. Legacy projects can stay on CommonJS (require/module.exports) for compatibility.\""
+      }
+    }
+    
+  ]
+}
+</script>
+
+
+
+
+
+</head>
+<body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class="site-nav" id="siteNav">
+    <div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full">
+        
+        <a href="http://localhost:1313/" class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">
+            BenzHub
+        </a>
+
+        
+        <div class="hidden md:flex items-center gap-6">
+            
+            <a href="/en/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                Home
+            </a>
+            
+            <a href="/en/about/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                About
+            </a>
+            
+            <a href="/en/contact/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                Contact
+            </a>
+            
+            <a href="/en/resourses/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                Resources
+            </a>
+            
+
+            
+            <div class="flex items-center gap-2">
+                <form class="flex items-center" role="search" method="get" action="https://google.com/search" id="navSearchForm">
+                    <input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50"
+                        type="search" placeholder="Search articles..." name="q" aria-label="Search" id="navSearchInput">
+                    <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
+                </form>
+                <button onclick="toggleNavSearch()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+                    <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                    </svg>
+                </button>
+            </div>
+
+            
+            <span class="text-zinc-200 dark:text-zinc-700">|</span>
+
+            
+            
+
+
+    
+
+
+
+<div class="lang-switcher relative hidden md:block">
+    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+        <span>🌐</span>
+        <span>English</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
+        
+            
+                
+                
+                <a href="http://localhost:1313/post/javascript/023-whats-nvm-npm-nodejs/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">繁體中文</a>
+                
+            
+        
+            
+            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ English</span>
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
+    <div class="flex gap-2">
+        
+            
+                
+                
+                <a href="http://localhost:1313/post/javascript/023-whats-nvm-npm-nodejs/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">繁體中文</a>
+                
+            
+        
+            
+            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">English</span>
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+            
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon2" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+        </div>
+
+        
+        <div class="flex md:hidden items-center gap-1">
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+            <button id="hamburgerbtn" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Menu">
+                <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    
+    <div class="mobile-menu md:hidden" id="mobileMenu">
+        
+        <a href="/en/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            Home
+        </a>
+        
+        <a href="/en/about/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            About
+        </a>
+        
+        <a href="/en/contact/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            Contact
+        </a>
+        
+        <a href="/en/resourses/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            Resources
+        </a>
+        
+        <form class="mt-2" role="search" method="get" action="https://google.com/search">
+            <input class="search-input" type="search" placeholder="Search articles..." name="q" aria-label="Search">
+            <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
+        </form>
+        
+        
+
+
+    
+
+
+
+<div class="lang-switcher relative hidden md:block">
+    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+        <span>🌐</span>
+        <span>English</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
+        
+            
+                
+                
+                <a href="http://localhost:1313/post/javascript/023-whats-nvm-npm-nodejs/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">繁體中文</a>
+                
+            
+        
+            
+            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ English</span>
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
+    <div class="flex gap-2">
+        
+            
+                
+                
+                <a href="http://localhost:1313/post/javascript/023-whats-nvm-npm-nodejs/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">繁體中文</a>
+                
+            
+        
+            
+            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">English</span>
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+    </div>
+</nav>
+
+<script>
+    
+    document.getElementById('hamburgerbtn').addEventListener('click', function () {
+        document.getElementById('mobileMenu').classList.toggle('active');
+    });
+
+    
+    window.addEventListener('scroll', function () {
+        var nav = document.getElementById('siteNav');
+        if (window.scrollY > 50) {
+            nav.classList.add('scrolled');
+        } else {
+            nav.classList.remove('scrolled');
+        }
+    });
+
+    
+    function toggleNavSearch() {
+        var input = document.getElementById('navSearchInput');
+        input.classList.toggle('expanded');
+        if (input.classList.contains('expanded')) {
+            input.focus();
+        }
+    }
+
+    
+    function toggleLangMenu() {
+        var dropdown = document.getElementById('langDropdown');
+        dropdown.classList.toggle('hidden');
+    }
+
+    
+    document.addEventListener('click', function (e) {
+        
+        var form = document.getElementById('navSearchForm');
+        var input = document.getElementById('navSearchInput');
+        if (form && input && !form.contains(e.target) && !e.target.closest('[aria-label="Toggle Search"]')) {
+            input.classList.remove('expanded');
+        }
+        
+        var langSwitcher = e.target.closest('.lang-switcher');
+        if (!langSwitcher) {
+            var dropdown = document.getElementById('langDropdown');
+            if (dropdown) dropdown.classList.add('hidden');
+        }
+    });
+</script>
+<div class="nav-spacer"></div>
+    <div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id="content">
+        <div class="lg:mx-5">
+<div class="grid grid-cols-3 gap-6">
+  
+  <div class="col-span-3 lg:col-span-2">
+  
+      
+      <div class="post-detail fade-in my-4">
+        <h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">NVM vs NPM vs Node.js: What&#39;s the Difference? Complete Guide</h1>
+        <div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4">
+            <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2024/01/01
+            </span>
+            
+            <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                2026/05/16
+            </span>
+            
+        </div>
+        
+        <div class="flex flex-wrap gap-1.5 mb-5">
+            
+            <a href='/en/tags/javascript' class="tag-pill no-underline">javascript</a>
+            
+            <a href='/en/tags/nodejs' class="tag-pill no-underline">nodejs</a>
+            
+            <a href='/en/tags/npm' class="tag-pill no-underline">npm</a>
+            
+            <a href='/en/tags/nvm' class="tag-pill no-underline">nvm</a>
+            
+        </div>
+        
+        
+        <img class="py-4 m-auto rounded-lg thumb-img" src="http://localhost:1313/img/javascript/023-What%27s-nvm-npm-Nodejs.png" alt="NVM vs NPM vs Node.js: What&#39;s the Difference? Complete Guide">
+        
+        
+        <div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote>
+<p>When starting out with JavaScript development, you will inevitably encounter three terms: <strong>NVM</strong>, <strong>NPM</strong>, and <strong>Node.js</strong>. In short, Node.js is the JavaScript runtime, NPM is the package manager that ships with Node.js, and NVM is a version manager that lets you install and switch between multiple Node.js versions on the same machine. This article breaks down NVM vs NPM vs Node.js in detail, including the correct installation flow, essential commands, and best practices for team collaboration.</p>
+</blockquote>
+<h2 id="nvm-vs-npm-vs-nodejs--quick-overview">NVM vs NPM vs Node.js — Quick Overview</h2>
+<p>Before diving into each tool individually, here is a side-by-side comparison table that clarifies the role of NVM, NPM, and Node.js:</p>
+<table>
+	<thead>
+			<tr>
+					<th>Aspect</th>
+					<th>Node.js</th>
+					<th>NPM</th>
+					<th>NVM</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><strong>What it is</strong></td>
+					<td>JavaScript runtime environment</td>
+					<td>Package manager</td>
+					<td>Node.js version manager</td>
+			</tr>
+			<tr>
+					<td><strong>Primary purpose</strong></td>
+					<td>Execute JavaScript on the server</td>
+					<td>Install, manage, and publish packages</td>
+					<td>Install and switch between Node.js versions</td>
+			</tr>
+			<tr>
+					<td><strong>Installation</strong></td>
+					<td>Download from nodejs.org or install via NVM</td>
+					<td>Auto-installed with Node.js</td>
+					<td>Install via curl script or Homebrew</td>
+			</tr>
+			<tr>
+					<td><strong>Key commands</strong></td>
+					<td><code>node</code>, <code>node -v</code></td>
+					<td><code>npm install</code>, <code>npm run</code></td>
+					<td><code>nvm install</code>, <code>nvm use</code></td>
+			</tr>
+			<tr>
+					<td><strong>Config files</strong></td>
+					<td>None (uses env variables)</td>
+					<td><code>package.json</code>, <code>.npmrc</code></td>
+					<td><code>.nvmrc</code></td>
+			</tr>
+			<tr>
+					<td><strong>Install location</strong></td>
+					<td><code>/usr/local/bin/node</code> or <code>~/.nvm/versions/</code></td>
+					<td>Ships with Node.js; global packages in npm root</td>
+					<td><code>~/.nvm/</code></td>
+			</tr>
+	</tbody>
+</table>
+<p>A simple analogy:</p>
+<ul>
+<li><strong>Node.js</strong> is the engine (lets JavaScript run outside the browser)</li>
+<li><strong>NPM</strong> is the fuel station (provides packages/libraries)</li>
+<li><strong>NVM</strong> is the garage (stores and manages multiple engine versions)</li>
+</ul>
+<hr>
+<h2 id="what-is-nodejs">What Is Node.js?</h2>
+<p><strong>Node.js</strong> is an open-source, cross-platform runtime environment built on Google Chrome&rsquo;s V8 JavaScript engine. It enables JavaScript to run outside the browser — on servers, desktops, and IoT devices.</p>
+<h3 id="the-v8-engine">The V8 Engine</h3>
+<p>V8 is Google&rsquo;s high-performance JavaScript engine, originally built to speed up JavaScript execution in Chrome. Its core innovation is <strong>JIT (Just-In-Time) compilation</strong>, which compiles JavaScript directly to machine code at runtime rather than interpreting it line by line. Node.js extracts V8 from the browser, allowing JavaScript code to execute natively on any operating system.</p>
+<h3 id="why-use-nodejs-for-backend-development">Why Use Node.js for Backend Development?</h3>
+<p>Before Node.js, backend development required languages like PHP, Java, Python, or Ruby. Frontend engineers who wanted to build server-side logic had to learn an entirely different language. Node.js lets developers use a single language — JavaScript — for both client and server code, dramatically lowering the barrier to full-stack development.</p>
+<p>Node.js also introduces <strong>non-blocking I/O</strong> and an <strong>event-driven</strong> architecture. Traditional multi-threaded servers block a thread while waiting for database queries or file reads. Node.js uses a single-threaded event loop that continues processing other requests during I/O waits, making it ideal for high-concurrency applications like real-time chat, streaming services, and API gateways.</p>
+<h3 id="lts-vs-current-release-strategy">LTS vs Current Release Strategy</h3>
+<p>Node.js maintains two release channels:</p>
+<table>
+	<thead>
+			<tr>
+					<th>Channel</th>
+					<th>Description</th>
+					<th>Recommended for</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><strong>LTS (Long Term Support)</strong></td>
+					<td>Stable, with extended bug-fix support (18 months Active + 12 months Maintenance)</td>
+					<td>Production, enterprise projects</td>
+			</tr>
+			<tr>
+					<td><strong>Current</strong></td>
+					<td>Latest features, new major version every 6 months, less battle-tested</td>
+					<td>Development, experimenting with new APIs</td>
+			</tr>
+	</tbody>
+</table>
+<p>Even-numbered major versions (18, 20, 22) become LTS releases. Odd-numbered versions (19, 21) receive short-term maintenance only. <strong>Always use LTS for production workloads.</strong></p>
+<h3 id="common-nodejs-use-cases">Common Node.js Use Cases</h3>
+<ul>
+<li><strong>API servers</strong> — Build RESTful or GraphQL APIs with Express.js, Fastify, or Hono.</li>
+<li><strong>CLI tools</strong> — Tools like ESLint, Webpack, and Vite are all built on Node.js.</li>
+<li><strong>SSR (Server-Side Rendering)</strong> — Frameworks like Next.js and Nuxt render pages on the server for better SEO.</li>
+<li><strong>Real-time applications</strong> — WebSocket-based chat, notifications, and collaborative editing.</li>
+<li><strong>Microservices</strong> — Node.js&rsquo;s lightweight footprint is ideal for containerized microservice architectures.</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Check current Node.js version</span>
+</span></span><span style="display:flex;"><span>node -v
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Start the REPL (interactive mode)</span>
+</span></span><span style="display:flex;"><span>node
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Run a JavaScript file</span>
+</span></span><span style="display:flex;"><span>node index.js
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># List Node.js built-in modules</span>
+</span></span><span style="display:flex;"><span>node -e <span style="color:#e6db74">&#34;console.log(require(&#39;module&#39;).builtinModules)&#34;</span>
+</span></span></code></pre></div><hr>
+<h2 id="what-is-npm-node-package-manager">What Is NPM (Node Package Manager)?</h2>
+<p><strong>NPM (Node Package Manager)</strong> is the default package manager for Node.js and is installed automatically alongside it. NPM provides a command-line interface for installing, updating, and managing third-party packages, as well as a public registry — the world&rsquo;s largest open-source software repository with over <strong>2 million packages</strong> as of 2024.</p>
+<h3 id="essential-npm-commands">Essential npm Commands</h3>
+<table>
+	<thead>
+			<tr>
+					<th>Command</th>
+					<th>Description</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>npm init</code></td>
+					<td>Initialize a new project and create <code>package.json</code></td>
+			</tr>
+			<tr>
+					<td><code>npm init -y</code></td>
+					<td>Initialize with default values (skip prompts)</td>
+			</tr>
+			<tr>
+					<td><code>npm install</code></td>
+					<td>Install all dependencies from <code>package.json</code></td>
+			</tr>
+			<tr>
+					<td><code>npm install &lt;pkg&gt;</code></td>
+					<td>Install a package and add to <code>dependencies</code></td>
+			</tr>
+			<tr>
+					<td><code>npm install &lt;pkg&gt; --save-dev</code></td>
+					<td>Install and add to <code>devDependencies</code></td>
+			</tr>
+			<tr>
+					<td><code>npm install -g &lt;pkg&gt;</code></td>
+					<td>Install a package globally</td>
+			</tr>
+			<tr>
+					<td><code>npm uninstall &lt;pkg&gt;</code></td>
+					<td>Remove a package</td>
+			</tr>
+			<tr>
+					<td><code>npm update</code></td>
+					<td>Update all packages to the latest allowed version</td>
+			</tr>
+			<tr>
+					<td><code>npm run &lt;script&gt;</code></td>
+					<td>Run a script defined in <code>package.json</code></td>
+			</tr>
+			<tr>
+					<td><code>npm list</code></td>
+					<td>List installed packages</td>
+			</tr>
+			<tr>
+					<td><code>npm outdated</code></td>
+					<td>Show packages with newer versions available</td>
+			</tr>
+	</tbody>
+</table>
+<h3 id="packagejson-and-package-lockjson">package.json and package-lock.json</h3>
+<p><strong><code>package.json</code></strong> is the project manifest. It records the project name, version, scripts, and dependency version ranges.</p>
+<p><strong><code>package-lock.json</code></strong> is an auto-generated lock file that pins the exact resolved version of every package (including transitive dependencies). It guarantees that different machines and CI/CD environments reproduce the identical dependency tree.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;my-project&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;version&#34;</span>: <span style="color:#e6db74">&#34;1.0.0&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;scripts&#34;</span>: {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;start&#34;</span>: <span style="color:#e6db74">&#34;node index.js&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;dev&#34;</span>: <span style="color:#e6db74">&#34;nodemon index.js&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;build&#34;</span>: <span style="color:#e6db74">&#34;webpack --mode production&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;test&#34;</span>: <span style="color:#e6db74">&#34;jest&#34;</span>
+</span></span><span style="display:flex;"><span>  },
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;dependencies&#34;</span>: {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;express&#34;</span>: <span style="color:#e6db74">&#34;^4.18.2&#34;</span>
+</span></span><span style="display:flex;"><span>  },
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;devDependencies&#34;</span>: {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;nodemon&#34;</span>: <span style="color:#e6db74">&#34;^3.0.1&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;jest&#34;</span>: <span style="color:#e6db74">&#34;^29.7.0&#34;</span>
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="dependencies-vs-devdependencies">dependencies vs devDependencies</h3>
+<ul>
+<li><strong><code>dependencies</code></strong> — Packages required at <strong>runtime</strong> in production (e.g., express, react, axios).</li>
+<li><strong><code>devDependencies</code></strong> — Packages needed only during <strong>development</strong> (e.g., jest, webpack, prettier). These are excluded when deploying with <code>npm install --production</code>.</li>
+</ul>
+<h3 id="semantic-versioning-semver">Semantic Versioning (SemVer)</h3>
+<p>NPM follows the <strong>SemVer</strong> specification: <code>MAJOR.MINOR.PATCH</code>.</p>
+<ul>
+<li><strong>MAJOR</strong> — Incompatible API changes (breaking)</li>
+<li><strong>MINOR</strong> — New backward-compatible features</li>
+<li><strong>PATCH</strong> — Backward-compatible bug fixes</li>
+</ul>
+<p>Version range symbols in <code>package.json</code>:</p>
+<table>
+	<thead>
+			<tr>
+					<th>Symbol</th>
+					<th>Example</th>
+					<th>Meaning</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>^</code> (caret)</td>
+					<td><code>^4.18.2</code></td>
+					<td>Allows updates within <code>4.x.x</code> (does not cross major)</td>
+			</tr>
+			<tr>
+					<td><code>~</code> (tilde)</td>
+					<td><code>~4.18.2</code></td>
+					<td>Allows updates within <code>4.18.x</code> (does not cross minor)</td>
+			</tr>
+			<tr>
+					<td><code>*</code> (wildcard)</td>
+					<td><code>*</code></td>
+					<td>Any version (not recommended for production)</td>
+			</tr>
+			<tr>
+					<td>None</td>
+					<td><code>4.18.2</code></td>
+					<td>Exact pinned version</td>
+			</tr>
+	</tbody>
+</table>
+<hr>
+<h2 id="what-is-nvm-node-version-manager">What Is NVM (Node Version Manager)?</h2>
+<p><strong>NVM (Node Version Manager)</strong> is a tool that lets you install and manage multiple Node.js versions on a single machine and switch between them with a single command.</p>
+<h3 id="why-manage-multiple-nodejs-versions">Why Manage Multiple Node.js Versions?</h3>
+<p>In real-world development, you often maintain several projects simultaneously:</p>
+<ul>
+<li>Project A requires Node.js 16 (a legacy dependency does not support newer versions)</li>
+<li>Project B uses Node.js 20 LTS</li>
+<li>Project C needs Node.js 22 to test new runtime features</li>
+</ul>
+<p>Without a version manager, switching Node.js versions means uninstalling and reinstalling — a tedious and error-prone process. NVM makes version switching instant.</p>
+<h3 id="how-nvm-works">How NVM Works</h3>
+<p>NVM installs each Node.js version under the user&rsquo;s home directory (<code>~/.nvm/versions/</code>). Each version has its own <code>node</code> and <code>npm</code> binaries, completely isolated from one another. When you run <code>nvm use &lt;version&gt;</code>, NVM updates your shell&rsquo;s <code>PATH</code> to point to the selected version&rsquo;s binaries.</p>
+<p>Because NVM operates in user space, you never need <code>sudo</code> for installations — eliminating an entire class of permission issues.</p>
+<h3 id="nvm-essential-commands">NVM Essential Commands</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Check NVM version</span>
+</span></span><span style="display:flex;"><span>nvm --version
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># List all available remote versions</span>
+</span></span><span style="display:flex;"><span>nvm ls-remote
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># List only LTS versions</span>
+</span></span><span style="display:flex;"><span>nvm ls-remote --lts
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Install the latest LTS version</span>
+</span></span><span style="display:flex;"><span>nvm install --lts
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Install a specific version</span>
+</span></span><span style="display:flex;"><span>nvm install 20.10.0
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># List locally installed versions</span>
+</span></span><span style="display:flex;"><span>nvm ls
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Switch to a specific version</span>
+</span></span><span style="display:flex;"><span>nvm use <span style="color:#ae81ff">20</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Switch to the latest LTS</span>
+</span></span><span style="display:flex;"><span>nvm use --lts
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Set default version (used by new shell sessions)</span>
+</span></span><span style="display:flex;"><span>nvm alias default <span style="color:#ae81ff">20</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Show the currently active version</span>
+</span></span><span style="display:flex;"><span>nvm current
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Uninstall a specific version</span>
+</span></span><span style="display:flex;"><span>nvm uninstall <span style="color:#ae81ff">16</span>
+</span></span></code></pre></div><hr>
+<h2 id="installation-flow-the-right-order">Installation Flow: The Right Order</h2>
+<p>The recommended installation sequence is: <strong>NVM first → Use NVM to install Node.js → NPM comes bundled automatically</strong>.</p>
+<p>Avoid downloading Node.js directly from the official website. That approach makes version switching difficult and can cause global permission conflicts.</p>
+<h3 id="step-1-install-nvm">Step 1: Install NVM</h3>
+<p><strong>macOS / Linux:</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Install NVM using the official script (check GitHub for latest version)</span>
+</span></span><span style="display:flex;"><span>curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Reload your shell configuration</span>
+</span></span><span style="display:flex;"><span>source ~/.bashrc   <span style="color:#75715e"># For Bash</span>
+</span></span><span style="display:flex;"><span>source ~/.zshrc    <span style="color:#75715e"># For Zsh (macOS default)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Verify installation</span>
+</span></span><span style="display:flex;"><span>nvm --version
+</span></span></code></pre></div><p>The install script automatically adds NVM initialization code to your <code>.bashrc</code> or <code>.zshrc</code>.</p>
+<p><strong>Windows:</strong></p>
+<p>Windows users should use <a href="https://github.com/coreybutler/nvm-windows">nvm-windows</a>, a separate project with similar commands but a native Windows implementation.</p>
+<h3 id="step-2-install-nodejs-via-nvm">Step 2: Install Node.js via NVM</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Install the latest LTS version (recommended)</span>
+</span></span><span style="display:flex;"><span>nvm install --lts
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Install a specific major version</span>
+</span></span><span style="display:flex;"><span>nvm install <span style="color:#ae81ff">20</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Set it as the default</span>
+</span></span><span style="display:flex;"><span>nvm alias default <span style="color:#ae81ff">20</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Verify</span>
+</span></span><span style="display:flex;"><span>node -v
+</span></span><span style="display:flex;"><span>npm -v
+</span></span></code></pre></div><h3 id="step-3-npm-is-automatically-installed">Step 3: NPM Is Automatically Installed</h3>
+<p>Once Node.js is installed, NPM is ready to use — no extra steps required:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Check npm version</span>
+</span></span><span style="display:flex;"><span>npm -v
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Optionally update npm to the latest</span>
+</span></span><span style="display:flex;"><span>npm install -g npm@latest
+</span></span></code></pre></div><hr>
+<h2 id="npm-install-vs-npm-ci">npm install vs npm ci</h2>
+<p>Both commands install dependencies, but they serve different purposes:</p>
+<table>
+	<thead>
+			<tr>
+					<th>Aspect</th>
+					<th><code>npm install</code></th>
+					<th><code>npm ci</code></th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Source of truth</td>
+					<td>package.json + lock file</td>
+					<td>Lock file only</td>
+			</tr>
+			<tr>
+					<td>Lock file mismatch</td>
+					<td>Updates lock file</td>
+					<td>Throws error and exits</td>
+			</tr>
+			<tr>
+					<td>node_modules</td>
+					<td>Incremental update (preserves existing)</td>
+					<td>Deletes and reinstalls from scratch</td>
+			</tr>
+			<tr>
+					<td>Best for</td>
+					<td>Development</td>
+					<td>CI/CD pipelines</td>
+			</tr>
+			<tr>
+					<td>Reproducibility</td>
+					<td>May vary if lock file updates</td>
+					<td>Fully reproducible</td>
+			</tr>
+	</tbody>
+</table>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Development — install and potentially update lock file</span>
+</span></span><span style="display:flex;"><span>npm install
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># CI/CD pipeline — strict, reproducible install</span>
+</span></span><span style="display:flex;"><span>npm ci
+</span></span></code></pre></div><p><strong>Team best practice:</strong> Use <code>npm install</code> during development and commit any <code>package-lock.json</code> changes. In CI/CD, always use <code>npm ci</code> to guarantee deployment consistency.</p>
+<h3 id="what-about-npx">What About npx?</h3>
+<p><code>npx</code> ships with NPM 5.2+ and executes package binaries <strong>without requiring global installation</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Scaffold a new Next.js app without installing create-next-app globally</span>
+</span></span><span style="display:flex;"><span>npx create-next-app my-app
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Run the project-local version of ESLint</span>
+</span></span><span style="display:flex;"><span>npx eslint .
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Test your script against a specific Node.js version</span>
+</span></span><span style="display:flex;"><span>npx node@18 script.js
+</span></span></code></pre></div><p><strong>npx lookup order:</strong></p>
+<ol>
+<li>Check local <code>node_modules/.bin/</code> for the binary</li>
+<li>If not found, download temporarily, execute, then clean up</li>
+</ol>
+<p>This eliminates version conflicts from global installs and avoids permanently installing tools you rarely use.</p>
+<hr>
+<h2 id="commonjs-vs-es-modules">CommonJS vs ES Modules</h2>
+<p>Node.js supports two module systems. Understanding the differences is essential for architecting new projects and reading open-source code.</p>
+<table>
+	<thead>
+			<tr>
+					<th>Aspect</th>
+					<th>CommonJS (CJS)</th>
+					<th>ES Modules (ESM)</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><strong>Import syntax</strong></td>
+					<td><code>const m = require('./m')</code></td>
+					<td><code>import m from './m'</code></td>
+			</tr>
+			<tr>
+					<td><strong>Export syntax</strong></td>
+					<td><code>module.exports = ...</code></td>
+					<td><code>export default ...</code> / <code>export { }</code></td>
+			</tr>
+			<tr>
+					<td><strong>Loading</strong></td>
+					<td>Synchronous</td>
+					<td>Asynchronous</td>
+			</tr>
+			<tr>
+					<td><strong>Resolution timing</strong></td>
+					<td>Runtime</td>
+					<td>Static analysis (compile time)</td>
+			</tr>
+			<tr>
+					<td><strong>Tree shaking</strong></td>
+					<td>Not supported</td>
+					<td>Supported (bundlers remove unused code)</td>
+			</tr>
+			<tr>
+					<td><strong>Top-level await</strong></td>
+					<td>Not supported</td>
+					<td>Supported</td>
+			</tr>
+			<tr>
+					<td><strong>Conditional imports</strong></td>
+					<td>Anywhere (<code>if</code> blocks)</td>
+					<td>Only via dynamic <code>import()</code></td>
+			</tr>
+			<tr>
+					<td><strong>Browser support</strong></td>
+					<td>Not supported (requires bundling)</td>
+					<td>Native <code>&lt;script type=&quot;module&quot;&gt;</code></td>
+			</tr>
+			<tr>
+					<td><strong>Recommendation</strong></td>
+					<td>Legacy project maintenance</td>
+					<td>Use for all new projects</td>
+			</tr>
+	</tbody>
+</table>
+<h3 id="how-to-enable-es-modules">How to Enable ES Modules</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-json" data-lang="json"><span style="display:flex;"><span><span style="color:#75715e">// package.json — add &#34;type&#34;: &#34;module&#34;
+</span></span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;my-project&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;module&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>With this setting, all <code>.js</code> files use ESM by default. If specific files need CommonJS, use the <code>.cjs</code> extension.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75715e">// ESM syntax example
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">import</span> <span style="color:#a6e22e">express</span> <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;express&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">import</span> { <span style="color:#a6e22e">readFile</span> } <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;fs/promises&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">handler</span>(<span style="color:#a6e22e">req</span>, <span style="color:#a6e22e">res</span>) {
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// ...
+</span></span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><hr>
+<h2 id="using-nvmrc-for-team-consistency">Using .nvmrc for Team Consistency</h2>
+<p>A <code>.nvmrc</code> file is a simple text file placed at the project root containing the required Node.js version. When team members clone the repository, they run <code>nvm use</code> in the project directory, and NVM automatically reads <code>.nvmrc</code> and switches to the correct version.</p>
+<h3 id="setting-up-nvmrc">Setting Up .nvmrc</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Create .nvmrc with the desired version</span>
+</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;20.10.0&#34;</span> &gt; .nvmrc
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Or use an alias</span>
+</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;lts/iron&#34;</span> &gt; .nvmrc
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Commit it to version control</span>
+</span></span><span style="display:flex;"><span>git add .nvmrc
+</span></span></code></pre></div><h3 id="automatic-version-switching">Automatic Version Switching</h3>
+<p>You can configure your shell to automatically run <code>nvm use</code> when you <code>cd</code> into a directory containing a <code>.nvmrc</code> file. Add this to your <code>~/.zshrc</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Auto-switch Node.js version on directory change</span>
+</span></span><span style="display:flex;"><span>autoload -U add-zsh-hook
+</span></span><span style="display:flex;"><span>load-nvmrc<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>  local nvmrc_path<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">$(</span>nvm_find_nvmrc<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> <span style="color:#f92672">[</span> -n <span style="color:#e6db74">&#34;</span>$nvmrc_path<span style="color:#e6db74">&#34;</span> <span style="color:#f92672">]</span>; <span style="color:#66d9ef">then</span>
+</span></span><span style="display:flex;"><span>    local nvmrc_node_version<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>nvm version <span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">$(</span>cat <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>nvmrc_path<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#f92672">[</span> <span style="color:#e6db74">&#34;</span>$nvmrc_node_version<span style="color:#e6db74">&#34;</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;N/A&#34;</span> <span style="color:#f92672">]</span>; <span style="color:#66d9ef">then</span>
+</span></span><span style="display:flex;"><span>      nvm install
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">elif</span> <span style="color:#f92672">[</span> <span style="color:#e6db74">&#34;</span>$nvmrc_node_version<span style="color:#e6db74">&#34;</span> !<span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">$(</span>nvm version<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">]</span>; <span style="color:#66d9ef">then</span>
+</span></span><span style="display:flex;"><span>      nvm use
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fi</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">fi</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>add-zsh-hook chpwd load-nvmrc
+</span></span><span style="display:flex;"><span>load-nvmrc
+</span></span></code></pre></div><h3 id="nvmrc-in-cicd">.nvmrc in CI/CD</h3>
+<p>Most CI/CD platforms (GitHub Actions, GitLab CI, CircleCI) support <code>.nvmrc</code> natively or via setup actions:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e"># GitHub Actions example</span>
+</span></span><span style="display:flex;"><span>- <span style="color:#f92672">uses</span>: <span style="color:#ae81ff">actions/setup-node@v4</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">with</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">node-version-file</span>: <span style="color:#e6db74">&#39;.nvmrc&#39;</span>
+</span></span></code></pre></div><p>This ensures your CI environment runs the exact same Node.js version as your development machines — no more &ldquo;works on my machine&rdquo; issues.</p>
+<hr>
+<h2 id="summary">Summary</h2>
+<p>Understanding the relationship between NVM, NPM, and Node.js is fundamental for any JavaScript developer:</p>
+<ol>
+<li><strong>Install NVM first</strong> — it gives you full control over Node.js versions without permission headaches.</li>
+<li><strong>Use NVM to install Node.js</strong> — pick the LTS version for production stability.</li>
+<li><strong>NPM comes free with Node.js</strong> — use it to manage project dependencies, run scripts, and publish packages.</li>
+<li><strong>Add a <code>.nvmrc</code></strong> to every project for team and CI/CD consistency.</li>
+<li><strong>Use <code>npm ci</code></strong> in automated pipelines for reproducible builds.</li>
+<li><strong>Prefer ES Modules</strong> for new projects to benefit from tree shaking and modern syntax.</li>
+</ol>
+<p>By following this installation flow and understanding the distinct roles of each tool, you will avoid common pitfalls and set up a reliable, maintainable JavaScript development environment.</p>
+<hr>
+<p>Further reading:</p>
+<ul>
+<li><a href="/en/post/javascript/052-whats-nvm/">What Is NVM?</a></li>
+<li><a href="/en/post/javascript/054-whats-the-reason-you-must-use-nvm/">Why You Need NVM</a></li>
+<li><a href="/en/post/javascript/056-fnm-commands/">fnm: Fast Node Manager Guide</a></li>
+</ul></div>
+        
+        
+
+        
+        <div class="mt-8">
+          
+<div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose">
+  <div>
+    <div class="flex items-center gap-2 mb-1">
+      <a href="/en/about" class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">
+        BenZ
+      </a>
+      
+      <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span>
+      
+    </div>
+    <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">
+      Software developer passionate about technology. Sharing programming experiences and learning notes.
+    </p>
+    <div class="flex items-center gap-3">
+      
+      <a href="https://github.com/benzhub" target="_blank" rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label="GitHub">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      
+      
+      
+    </div>
+  </div>
+</div>
+
+        </div>
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        
+
+
+
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            
+            <a href="http://localhost:1313/en/post/linux/004-install-zsh/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; Previous</span>
+                <span class="text-sm font-medium">Set Up a Beautiful and Powerful Zsh for Linux | Linux</span>
+            </a>
+            
+          </div>
+          <div>
+            
+            <a href="http://localhost:1313/en/post/htmlcss/010-html-character-entity/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">Next &rarr;</span>
+                <span class="text-sm font-medium">HTML Character Entities: Complete Reference Guide</span>
+            </a>
+            
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        
+<script src="https://giscus.app/client.js"
+        data-repo="benzhub/benzhub.github.io"
+        data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM="
+        data-category="Announcements"
+        data-category-id="MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme="preferred_color_scheme"
+        data-lang="en"
+        crossorigin="anonymous"
+        async>
+</script>
+
+
+      </div>
+    </div>
+    
+    <div class="hidden lg:block lg:col-span-1 mt-4">
+    
+    
+            
+            <div class="widget fade-in">
+    <p class="widget-title">Search</p>
+    <form role="search" method="get" action="https://google.com/search">
+        <input class="search-input" type="search" placeholder="Search articles..." name="q" aria-label="Search">
+        <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
+    </form>
+</div>
+
+        
+            
+            
+
+        
+            
+            
+<div class="widget fade-in">
+    <p class="widget-title">Tags</p>
+    <div class="flex flex-wrap gap-1.5">
+        <a href='/en/tags/ai'>
+            <span class="tag-pill">ai</span>
+        </a>
+        <a href='/en/tags/ai-insights'>
+            <span class="tag-pill">ai-insights</span>
+        </a>
+        <a href='/en/tags/api'>
+            <span class="tag-pill">api</span>
+        </a>
+        <a href='/en/tags/automation'>
+            <span class="tag-pill">automation</span>
+        </a>
+        <a href='/en/tags/claude-code'>
+            <span class="tag-pill">claude code</span>
+        </a>
+        <a href='/en/tags/cron'>
+            <span class="tag-pill">cron</span>
+        </a>
+        <a href='/en/tags/cursor'>
+            <span class="tag-pill">cursor</span>
+        </a>
+        <a href='/en/tags/database'>
+            <span class="tag-pill">database</span>
+        </a>
+        <a href='/en/tags/debugging'>
+            <span class="tag-pill">debugging</span>
+        </a>
+        <a href='/en/tags/design-pattern'>
+            <span class="tag-pill">design-pattern</span>
+        </a>
+        <a href='/en/tags/devops'>
+            <span class="tag-pill">devops</span>
+        </a>
+        <a href='/en/tags/django'>
+            <span class="tag-pill">django</span>
+        </a>
+        <a href='/en/tags/flutter'>
+            <span class="tag-pill">flutter</span>
+        </a>
+        <a href='/en/tags/fnm'>
+            <span class="tag-pill">fnm</span>
+        </a>
+        <a href='/en/tags/git'>
+            <span class="tag-pill">git</span>
+        </a>
+        <a href='/en/tags/github-copilot'>
+            <span class="tag-pill">github copilot</span>
+        </a>
+        <a href='/en/tags/harness-engineering'>
+            <span class="tag-pill">harness engineering</span>
+        </a>
+        <a href='/en/tags/html'>
+            <span class="tag-pill">html</span>
+        </a>
+        <a href='/en/tags/javascript'>
+            <span class="tag-pill">javascript</span>
+        </a>
+        <a href='/en/tags/linux'>
+            <span class="tag-pill">linux</span>
+        </a>
+    </div>
+</div>
+
+
+        
+            
+            
+<div class="widget fade-in">
+    <p class="widget-title">Article Series</p>
+    <div class="flex flex-wrap gap-1.5">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </div>
+</div>
+
+
+        
+            
+            
+
+<div class="widget fade-in">
+    <p class="widget-title">Recent Posts</p>
+    <div class="flex flex-col gap-1">
+        <a href="/en/post/linux/027-cron-job-not-running/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Cron Job Not Running? 10 Fixes for Common Cron Issues</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/05/16
+            </p>
+        </a>
+        <a href="/en/post/linux/025-cron-every-5-minutes/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">How to Run a Cron Job Every 5 Minutes (and Other Intervals)</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/05/15
+            </p>
+        </a>
+        <a href="/en/post/linux/026-systemd-timer-vs-cron/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Systemd Timer vs Cron: Which Linux Scheduler Should You Use?</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/05/15
+            </p>
+        </a>
+        <a href="/en/post/linux/024-crontab-syntax/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Crontab Syntax Explained: The Complete Time Format Guide</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/05/14
+            </p>
+        </a>
+        <a href="/en/post/linux/023-crontab-examples/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">30&#43; Crontab Examples for Every Use Case | Linux Cron Scheduling</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/05/13
+            </p>
+        </a>
+    </div>
+</div>
+
+        
+    
+</div>
+
+    
+</div>
+
+        </div>
+    </div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]">
+    
+    <p>&copy; 2026 <a href="http://localhost:1313/" class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p>
+</footer>
+
+
+<script>
+    (function (window, document) {
+        function main() {
+            var ad = document.createElement('script');
+            ad.async = true;
+            ad.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606';
+            ad.crossOrigin = "anonymous";
+            var sc = document.getElementsByTagName('script')[0];
+            sc.parentNode.insertBefore(ad, sc);
+        }
+        var lazyLoad = false;
+        function onLazyLoad() {
+            if (lazyLoad === false) {
+                lazyLoad = true;
+                window.removeEventListener('scroll', onLazyLoad);
+                window.removeEventListener('mousemove', onLazyLoad);
+                window.removeEventListener('mousedown', onLazyLoad);
+                window.removeEventListener('touchstart', onLazyLoad);
+                window.removeEventListener('keydown', onLazyLoad);
+                main();
+            }
+        }
+        window.addEventListener('scroll', onLazyLoad);
+        window.addEventListener('mousemove', onLazyLoad);
+        window.addEventListener('mousedown', onLazyLoad);
+        window.addEventListener('touchstart', onLazyLoad);
+        window.addEventListener('keydown', onLazyLoad);
+        window.addEventListener('load', function () {
+            if (window.pageYOffset) {
+                onLazyLoad();
+                window.setTimeout(onLazyLoad, 3000);
+            }
+        });
+    })(window, document);
+</script>
+
+
+<script>
+    
+    var icon = document.getElementById("icon");
+    var icon2 = document.getElementById("icon2");
+    if (document.documentElement.classList.contains("dark") || localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+        if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+    function toggleDarkMode() {
+        if (document.documentElement.classList.contains('dark')) {
+            if (icon) { icon.classList.remove("icon-sun"); icon.classList.add("icon-moon"); }
+            if (icon2) { icon2.classList.remove("icon-sun"); icon2.classList.add("icon-moon"); }
+            document.documentElement.classList.remove('dark');
+            localStorage.theme = 'light';
+        } else {
+            if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+            if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+            document.documentElement.classList.add('dark');
+            localStorage.theme = 'dark';
+        }
+    }
+
+    
+    document.addEventListener('DOMContentLoaded', function () {
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0 });
+
+        document.querySelectorAll('.fade-in').forEach(function (el) {
+            observer.observe(el);
+        });
+    });
+</script>
+</body>
+
+</html>

@@ -1,383 +1,1388 @@
-<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>Django Authentication 使用者認證系統完全指南 | Django 教學 | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="Django Authentication 使用者認證系統完全指南 | Django 教學 | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="完整解析 Django Authentication 使用者認證系統，涵蓋 User 模型、authenticate/login/logout 函數、@login_required 裝飾器、LoginView/LogoutView CBV、密碼管理與重設流程，以及註冊功能實作，打造安全的登入登出機制。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="完整解析 Django Authentication 使用者認證系統，涵蓋 User 模型、authenticate/login/logout 函數、@login_required 裝飾器、LoginView/LogoutView CBV、密碼管理與重設流程，以及註冊功能實作，打造安全的登入登出機制。"><meta property="og:url" content="https://benzhub.github.io/post/django/029-django-authentication/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/django/029-django-authentication/><meta name=twitter:description content="完整解析 Django Authentication 使用者認證系統，涵蓋 User 模型、authenticate/login/logout 函數、@login_required 裝飾器、LoginView/LogoutView CBV、密碼管理與重設流程，以及註冊功能實作，打造安全的登入登出機制。"><meta property="article:published_time" content="2026-06-18T00:00:00+00:00"><meta property="article:updated_time" content="2026-05-24T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/django/029-Django-Authentication.png"><meta property="og:image:url" content="https://benzhub.github.io/img/django/029-Django-Authentication.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
-<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/django/029-django-authentication/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/django/029-django-authentication/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"Django Authentication 使用者認證系統完全指南 | Django 教學\"","description":"\"完整解析 Django Authentication 使用者認證系統，涵蓋 User 模型、authenticate/login/logout 函數、@login_required 裝飾器、LoginView/LogoutView CBV、密碼管理與重設流程，以及註冊功能實作，打造安全的登入登出機制。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-06-18T00:00:00\u002b00:00","dateModified":"2026-05-24T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/django\/029-Django-Authentication.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/django\/029-django-authentication\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/django\/"},{"@type":"ListItem","position":3,"name":"\"Django Authentication 使用者認證系統完全指南 | Django 教學\""}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"\"Django 的 authenticate() 和 login() 有什麼差別？\"","acceptedAnswer":{"@type":"Answer","text":"\"authenticate() 負責驗證使用者的帳號與密碼是否正確，驗證成功會回傳 User 物件，失敗則回傳 None。login() 則是在驗證成功後，將使用者資訊寫入 Session，讓後續請求能透過 Cookie 辨識已登入狀態。兩者必須搭配使用：先 authenticate 驗證身份，再 login 建立登入狀態。\""}},{"@type":"Question","name":"\"@login_required 裝飾器的運作原理是什麼？\"","acceptedAnswer":{"@type":"Answer","text":"\"@login_required 會在 View 執行前檢查 request.user.is_authenticated 是否為 True。如果使用者未登入，會自動重導向到 LOGIN_URL 指定的登入頁面（預設為 /accounts/login/），並在 URL 加上 ?next= 參數記錄原始頁面路徑，讓使用者登入後能自動返回原先要造訪的頁面。\""}},{"@type":"Question","name":"\"Django 內建的密碼重設流程包含哪些步驟？\"","acceptedAnswer":{"@type":"Answer","text":"\"Django 密碼重設流程包含四個步驟：第一，使用者在 PasswordResetView 頁面輸入 Email。第二，系統產生一次性 token 並寄送重設連結到信箱。第三，使用者點擊連結進入 PasswordResetConfirmView 頁面設定新密碼。第四，密碼更新成功後顯示 PasswordResetCompleteView 完成頁面。整個流程透過四個內建 View 即可完成，token 具有時效性且只能使用一次。\""}}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
-</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
-</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
-</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
-<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
-<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-<span>🌐</span>
-<span>繁體中文</span>
-<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
-<a href=https://benzhub.github.io/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-<a href=https://benzhub.github.io/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
-<a href=https://benzhub.github.io/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-<a href=https://benzhub.github.io/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
-</button>
-<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
-<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
-</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
-</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
-</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
-<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-<span>🌐</span>
-<span>繁體中文</span>
-<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
-<a href=https://benzhub.github.io/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-<a href=https://benzhub.github.io/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
-<a href=https://benzhub.github.io/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-<a href=https://benzhub.github.io/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Django Authentication 使用者認證系統完全指南 | Django 教學</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/18
-</span><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001.0 004.582 9m0 0H9m11 11v-5h-.581m0 0A8.003 8.003.0 014.062 13m15.357 2H15"/></svg>
-2026/05/24</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/python class="tag-pill no-underline">python</a>
-<a href=/tags/django class="tag-pill no-underline">django</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/django/029-Django-Authentication.png alt="Django Authentication 使用者認證系統完全指南 | Django 教學"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p>幾乎所有的 Web 應用程式都需要處理使用者身份驗證。Django 內建了一套功能完善的 <strong>Authentication（認證）</strong> 系統，從 <strong>User 模型</strong> 、 <strong>登入登出</strong> 函數、到 <strong>密碼管理</strong> 與 <strong>密碼重設</strong> 流程，全部開箱即用。本篇將帶你全面了解 Django 認證系統的每個環節，並實作一套完整的使用者認證功能。</p></blockquote><h3 id=django-認證系統概覽>Django 認證系統概覽</h3><p>Django 的認證系統由 <code>django.contrib.auth</code> 模組提供，它整合了 <strong>認證（Authentication）</strong> 與 <strong>授權（Authorization）</strong> 兩大功能：</p><ul><li><strong>認證（Authentication）</strong>：驗證「你是誰」——使用者是否為合法帳號</li><li><strong>授權（Authorization）</strong>：決定「你能做什麼」——使用者擁有哪些權限</li></ul><p>要使用認證系統，確認 <code>settings.py</code> 中已包含以下設定：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># settings.py</span>
-</span></span><span style=display:flex><span>INSTALLED_APPS <span style=color:#f92672>=</span> [
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.auth&#39;</span>,            <span style=color:#75715e># 認證框架核心</span>
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.contenttypes&#39;</span>,    <span style=color:#75715e># 權限系統依賴</span>
-</span></span><span style=display:flex><span>    <span style=color:#75715e># ...</span>
-</span></span><span style=display:flex><span>]
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>MIDDLEWARE <span style=color:#f92672>=</span> [
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.sessions.middleware.SessionMiddleware&#39;</span>,       <span style=color:#75715e># Session 支援</span>
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.auth.middleware.AuthenticationMiddleware&#39;</span>,    <span style=color:#75715e># 將 user 掛到 request</span>
-</span></span><span style=display:flex><span>    <span style=color:#75715e># ...</span>
-</span></span><span style=display:flex><span>]
-</span></span></code></pre></div><p>認證系統的核心元件：</p><table><thead><tr><th>元件</th><th>說明</th></tr></thead><tbody><tr><td><code>User</code></td><td>內建使用者模型，提供帳號、密碼、Email 等欄位</td></tr><tr><td><code>Permission</code></td><td>Model 層級的權限（add、change、delete、view）</td></tr><tr><td><code>Group</code></td><td>權限的集合，可批次指派給使用者</td></tr><tr><td><code>Session</code></td><td>基於 Session 的登入狀態維護機制</td></tr></tbody></table><hr><h3 id=user-模型欄位>User 模型欄位</h3><p>Django 的內建 <code>User</code> 模型（<code>django.contrib.auth.models.User</code>）提供了以下欄位：</p><table><thead><tr><th>欄位</th><th>類型</th><th>說明</th></tr></thead><tbody><tr><td><code>username</code></td><td>CharField</td><td>使用者名稱（唯一）</td></tr><tr><td><code>password</code></td><td>CharField</td><td>雜湊後的密碼</td></tr><tr><td><code>email</code></td><td>EmailField</td><td>電子郵件</td></tr><tr><td><code>first_name</code></td><td>CharField</td><td>名</td></tr><tr><td><code>last_name</code></td><td>CharField</td><td>姓</td></tr><tr><td><code>is_active</code></td><td>BooleanField</td><td>帳號是否啟用</td></tr><tr><td><code>is_staff</code></td><td>BooleanField</td><td>是否可登入 Admin 後台</td></tr><tr><td><code>is_superuser</code></td><td>BooleanField</td><td>是否為超級使用者</td></tr><tr><td><code>last_login</code></td><td>DateTimeField</td><td>最後登入時間</td></tr><tr><td><code>date_joined</code></td><td>DateTimeField</td><td>帳號建立時間</td></tr></tbody></table><p>常用的方法：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> django.contrib.auth.models <span style=color:#f92672>import</span> User
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 建立一般使用者</span>
-</span></span><span style=display:flex><span>user <span style=color:#f92672>=</span> User<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>create_user(
-</span></span><span style=display:flex><span>    username<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;alice&#39;</span>,
-</span></span><span style=display:flex><span>    email<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;alice@example.com&#39;</span>,
-</span></span><span style=display:flex><span>    password<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;secure_password123&#39;</span>  <span style=color:#75715e># 自動雜湊處理</span>
-</span></span><span style=display:flex><span>)
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 建立超級使用者</span>
-</span></span><span style=display:flex><span>admin <span style=color:#f92672>=</span> User<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>create_superuser(
-</span></span><span style=display:flex><span>    username<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;admin&#39;</span>,
-</span></span><span style=display:flex><span>    email<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;admin@example.com&#39;</span>,
-</span></span><span style=display:flex><span>    password<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;admin_password123&#39;</span>
-</span></span><span style=display:flex><span>)
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 檢查使用者屬性</span>
-</span></span><span style=display:flex><span>user<span style=color:#f92672>.</span>is_authenticated  <span style=color:#75715e># True（已登入的使用者永遠為 True）</span>
-</span></span><span style=display:flex><span>user<span style=color:#f92672>.</span>is_anonymous      <span style=color:#75715e># False</span>
-</span></span><span style=display:flex><span>user<span style=color:#f92672>.</span>get_full_name()   <span style=color:#75715e># 回傳 &#34;first_name last_name&#34;</span>
-</span></span><span style=display:flex><span>user<span style=color:#f92672>.</span>get_short_name()  <span style=color:#75715e># 回傳 &#34;first_name&#34;</span>
-</span></span></code></pre></div><hr><h3 id=authenticate--login--logout-函數>authenticate / login / logout 函數</h3><p>Django 提供三個核心函數來處理認證流程，它們位於 <code>django.contrib.auth</code> 模組中。</p><h4 id=authenticate驗證帳號密碼>authenticate()——驗證帳號密碼</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> django.contrib.auth <span style=color:#f92672>import</span> authenticate
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 驗證使用者憑證</span>
-</span></span><span style=display:flex><span>user <span style=color:#f92672>=</span> authenticate(request, username<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;alice&#39;</span>, password<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;secure_password123&#39;</span>)
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>if</span> user <span style=color:#f92672>is</span> <span style=color:#f92672>not</span> <span style=color:#66d9ef>None</span>:
-</span></span><span style=display:flex><span>    <span style=color:#75715e># 驗證成功，user 是一個 User 物件</span>
-</span></span><span style=display:flex><span>    print(<span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;歡迎，</span><span style=color:#e6db74>{</span>user<span style=color:#f92672>.</span>username<span style=color:#e6db74>}</span><span style=color:#e6db74>！&#34;</span>)
-</span></span><span style=display:flex><span><span style=color:#66d9ef>else</span>:
-</span></span><span style=display:flex><span>    <span style=color:#75715e># 驗證失敗（帳號不存在或密碼錯誤）</span>
-</span></span><span style=display:flex><span>    print(<span style=color:#e6db74>&#34;帳號或密碼錯誤&#34;</span>)
-</span></span></code></pre></div><p><code>authenticate()</code> 會依序嘗試 <code>settings.py</code> 中 <code>AUTHENTICATION_BACKENDS</code> 列出的所有認證後端，任一成功即回傳 User 物件。</p><h4 id=login建立登入狀態>login()——建立登入狀態</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> django.contrib.auth <span style=color:#f92672>import</span> login
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 驗證成功後，建立 Session 登入狀態</span>
-</span></span><span style=display:flex><span>login(request, user)
-</span></span><span style=display:flex><span><span style=color:#75715e># 此時 Session 中已記錄使用者資訊</span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 後續請求的 request.user 會自動指向此使用者</span>
-</span></span></code></pre></div><p><code>login()</code> 做的事情是：將 User 的 ID 寫入 Session，並在 Response 中設定 <code>sessionid</code> Cookie，後續請求就能透過 Cookie 識別使用者身份。</p><h4 id=logout登出>logout()——登出</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> django.contrib.auth <span style=color:#f92672>import</span> logout
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 清除 Session，登出使用者</span>
-</span></span><span style=display:flex><span>logout(request)
-</span></span><span style=display:flex><span><span style=color:#75715e># 此時 request.user 會變成 AnonymousUser</span>
-</span></span></code></pre></div><h4 id=完整登入-view-範例>完整登入 View 範例</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># views.py</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.contrib.auth <span style=color:#f92672>import</span> authenticate, login, logout
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.shortcuts <span style=color:#f92672>import</span> render, redirect
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>login_view</span>(request):
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> request<span style=color:#f92672>.</span>method <span style=color:#f92672>==</span> <span style=color:#e6db74>&#39;POST&#39;</span>:
-</span></span><span style=display:flex><span>        username <span style=color:#f92672>=</span> request<span style=color:#f92672>.</span>POST[<span style=color:#e6db74>&#39;username&#39;</span>]
-</span></span><span style=display:flex><span>        password <span style=color:#f92672>=</span> request<span style=color:#f92672>.</span>POST[<span style=color:#e6db74>&#39;password&#39;</span>]
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>        <span style=color:#75715e># 第一步：驗證帳號密碼</span>
-</span></span><span style=display:flex><span>        user <span style=color:#f92672>=</span> authenticate(request, username<span style=color:#f92672>=</span>username, password<span style=color:#f92672>=</span>password)
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> user <span style=color:#f92672>is</span> <span style=color:#f92672>not</span> <span style=color:#66d9ef>None</span>:
-</span></span><span style=display:flex><span>            <span style=color:#75715e># 第二步：建立登入狀態</span>
-</span></span><span style=display:flex><span>            login(request, user)
-</span></span><span style=display:flex><span>            <span style=color:#75715e># 第三步：重導向到原始頁面或首頁</span>
-</span></span><span style=display:flex><span>            next_url <span style=color:#f92672>=</span> request<span style=color:#f92672>.</span>GET<span style=color:#f92672>.</span>get(<span style=color:#e6db74>&#39;next&#39;</span>, <span style=color:#e6db74>&#39;/&#39;</span>)
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> redirect(next_url)
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>else</span>:
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> render(request, <span style=color:#e6db74>&#39;accounts/login.html&#39;</span>, {
-</span></span><span style=display:flex><span>                <span style=color:#e6db74>&#39;error&#39;</span>: <span style=color:#e6db74>&#39;帳號或密碼錯誤&#39;</span>
-</span></span><span style=display:flex><span>            })
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> render(request, <span style=color:#e6db74>&#39;accounts/login.html&#39;</span>)
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>logout_view</span>(request):
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> request<span style=color:#f92672>.</span>method <span style=color:#f92672>==</span> <span style=color:#e6db74>&#39;POST&#39;</span>:
-</span></span><span style=display:flex><span>        logout(request)
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> redirect(<span style=color:#e6db74>&#39;login&#39;</span>)
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> redirect(<span style=color:#e6db74>&#39;/&#39;</span>)
-</span></span></code></pre></div><hr><h3 id=login_required-裝飾器>@login_required 裝飾器</h3><p><strong>@login_required</strong> 是最常用的認證裝飾器，它會在 View 執行前自動檢查使用者是否已登入。未登入的使用者會被重導向到登入頁面。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> django.contrib.auth.decorators <span style=color:#f92672>import</span> login_required
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#a6e22e>@login_required</span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>dashboard</span>(request):
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;只有已登入的使用者才能存取此頁面&#34;&#34;&#34;</span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> render(request, <span style=color:#e6db74>&#39;accounts/dashboard.html&#39;</span>, {
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;user&#39;</span>: request<span style=color:#f92672>.</span>user
-</span></span><span style=display:flex><span>    })
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 自訂登入頁面 URL</span>
-</span></span><span style=display:flex><span><span style=color:#a6e22e>@login_required</span>(login_url<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;/custom-login/&#39;</span>)
-</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>profile</span>(request):
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> render(request, <span style=color:#e6db74>&#39;accounts/profile.html&#39;</span>)
-</span></span></code></pre></div><p>重導向行為：</p><ol><li>未登入使用者造訪 <code>/dashboard/</code></li><li>被重導向到 <code>LOGIN_URL</code>（預設 <code>/accounts/login/</code>），URL 帶有 <code>?next=/dashboard/</code></li><li>使用者登入成功後，自動跳回 <code>/dashboard/</code></li></ol><p>在 <code>settings.py</code> 中設定相關的重導向 URL：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># settings.py</span>
-</span></span><span style=display:flex><span>LOGIN_URL <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;/accounts/login/&#39;</span>            <span style=color:#75715e># 未登入時重導向的目標</span>
-</span></span><span style=display:flex><span>LOGIN_REDIRECT_URL <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;/dashboard/&#39;</span>        <span style=color:#75715e># 登入成功後的預設重導向</span>
-</span></span><span style=display:flex><span>LOGOUT_REDIRECT_URL <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;/&#39;</span>                 <span style=color:#75715e># 登出後的重導向目標</span>
-</span></span></code></pre></div><h4 id=在-cbv-中使用-loginrequiredmixin>在 CBV 中使用 LoginRequiredMixin</h4><p>如果你使用 <strong>Class-Based Views（CBV）</strong> ，可以使用 <code>LoginRequiredMixin</code>：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> django.contrib.auth.mixins <span style=color:#f92672>import</span> LoginRequiredMixin
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.views.generic <span style=color:#f92672>import</span> TemplateView
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>DashboardView</span>(LoginRequiredMixin, TemplateView):
-</span></span><span style=display:flex><span>    template_name <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;accounts/dashboard.html&#39;</span>
-</span></span><span style=display:flex><span>    login_url <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;/accounts/login/&#39;</span>  <span style=color:#75715e># 可選，預設使用 settings.LOGIN_URL</span>
-</span></span></code></pre></div><p>注意：<code>LoginRequiredMixin</code> 必須放在 <strong>第一個</strong> 繼承位置，才能正確攔截未登入的請求。</p><hr><h3 id=loginview--logoutview-cbv>LoginView / LogoutView CBV</h3><p>Django 提供了內建的 <strong>LoginView</strong> 和 <strong>LogoutView</strong> ，讓你不用自己寫認證邏輯，只需要設定 URL 和模板即可。</p><h4 id=loginview>LoginView</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># urls.py</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.contrib.auth.views <span style=color:#f92672>import</span> LoginView
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>urlpatterns <span style=color:#f92672>=</span> [
-</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;accounts/login/&#39;</span>, LoginView<span style=color:#f92672>.</span>as_view(
-</span></span><span style=display:flex><span>        template_name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;accounts/login.html&#39;</span>,     <span style=color:#75715e># 自訂模板</span>
-</span></span><span style=display:flex><span>        redirect_authenticated_user<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>,         <span style=color:#75715e># 已登入使用者自動跳轉</span>
-</span></span><span style=display:flex><span>    ), name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;login&#39;</span>),
-</span></span><span style=display:flex><span>]
-</span></span></code></pre></div><p>對應的模板只需要提供一個 form：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-django data-lang=django><span style=display:flex><span><span style=color:#75715e>{# templates/accounts/login.html #}</span>
-</span></span><span style=display:flex><span>&lt;h2&gt;登入&lt;/h2&gt;
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>{%</span> <span style=color:#66d9ef>if</span> form.errors <span style=color:#75715e>%}</span>
-</span></span><span style=display:flex><span>  &lt;p style=&#34;color: red;&#34;&gt;帳號或密碼錯誤，請重試。&lt;/p&gt;
-</span></span><span style=display:flex><span><span style=color:#75715e>{%</span> <span style=color:#66d9ef>endif</span> <span style=color:#75715e>%}</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>&lt;form method=&#34;post&#34;&gt;
-</span></span><span style=display:flex><span>  <span style=color:#75715e>{%</span> <span style=color:#66d9ef>csrf_token</span> <span style=color:#75715e>%}</span>
-</span></span><span style=display:flex><span>  <span style=color:#75715e>{{</span> form.as_p <span style=color:#75715e>}}</span>
-</span></span><span style=display:flex><span>  &lt;button type=&#34;submit&#34;&gt;登入&lt;/button&gt;
-</span></span><span style=display:flex><span>&lt;/form&gt;
-</span></span></code></pre></div><h4 id=logoutview>LogoutView</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># urls.py</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.contrib.auth.views <span style=color:#f92672>import</span> LogoutView
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>urlpatterns <span style=color:#f92672>=</span> [
-</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;accounts/logout/&#39;</span>, LogoutView<span style=color:#f92672>.</span>as_view(
-</span></span><span style=display:flex><span>        next_page<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;/&#39;</span>,  <span style=color:#75715e># 登出後重導向到首頁</span>
-</span></span><span style=display:flex><span>    ), name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;logout&#39;</span>),
-</span></span><span style=display:flex><span>]
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-django data-lang=django><span style=display:flex><span><span style=color:#75715e>{# 在模板中使用 POST 請求登出 #}</span>
-</span></span><span style=display:flex><span>&lt;form method=&#34;post&#34; action=&#34;<span style=color:#75715e>{%</span> <span style=color:#66d9ef>url</span> <span style=color:#e6db74>&#39;logout&#39;</span> <span style=color:#75715e>%}</span>&#34;&gt;
-</span></span><span style=display:flex><span>  <span style=color:#75715e>{%</span> <span style=color:#66d9ef>csrf_token</span> <span style=color:#75715e>%}</span>
-</span></span><span style=display:flex><span>  &lt;button type=&#34;submit&#34;&gt;登出&lt;/button&gt;
-</span></span><span style=display:flex><span>&lt;/form&gt;
-</span></span></code></pre></div><p>Django 4.1 以後，LogoutView 預設只接受 POST 請求，不再支援 GET 登出，這是為了防止 <strong>CSRF 攻擊（跨站請求偽造）</strong> 。</p><hr><h3 id=密碼管理>密碼管理</h3><p>Django 提供了完善的密碼管理機制，包括密碼的設定、驗證與雜湊處理。</p><h4 id=set_password-與-check_password>set_password() 與 check_password()</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> django.contrib.auth.models <span style=color:#f92672>import</span> User
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>user <span style=color:#f92672>=</span> User<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>get(username<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;alice&#39;</span>)
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 設定新密碼（自動雜湊，不是存明碼）</span>
-</span></span><span style=display:flex><span>user<span style=color:#f92672>.</span>set_password(<span style=color:#e6db74>&#39;new_secure_password&#39;</span>)
-</span></span><span style=display:flex><span>user<span style=color:#f92672>.</span>save()  <span style=color:#75715e># 記得要呼叫 save()</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 驗證密碼是否正確</span>
-</span></span><span style=display:flex><span>user<span style=color:#f92672>.</span>check_password(<span style=color:#e6db74>&#39;new_secure_password&#39;</span>)   <span style=color:#75715e># True</span>
-</span></span><span style=display:flex><span>user<span style=color:#f92672>.</span>check_password(<span style=color:#e6db74>&#39;wrong_password&#39;</span>)         <span style=color:#75715e># False</span>
-</span></span></code></pre></div><p><strong>重要提醒</strong>：永遠不要直接賦值 <code>user.password = '...'</code>，這樣會存入明碼。必須使用 <code>set_password()</code> 方法，它會自動進行雜湊處理。</p><h4 id=密碼雜湊機制>密碼雜湊機制</h4><p>Django 使用 <strong>PBKDF2</strong> 演算法作為預設的密碼雜湊方式，儲存格式為 <code>&lt;algorithm>$&lt;iterations>$&lt;salt>$&lt;hash></code>：</p><pre tabindex=0><code>pbkdf2_sha256$600000$randomsalt$hashed_value_here
-</code></pre><p>你可以在 <code>settings.py</code> 中自訂使用的雜湊演算法：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># settings.py</span>
-</span></span><span style=display:flex><span>PASSWORD_HASHERS <span style=color:#f92672>=</span> [
-</span></span><span style=display:flex><span>    <span style=color:#75715e># 第一個為新密碼的預設演算法</span>
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.auth.hashers.PBKDF2PasswordHasher&#39;</span>,       <span style=color:#75715e># 預設</span>
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher&#39;</span>,
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.auth.hashers.Argon2PasswordHasher&#39;</span>,        <span style=color:#75715e># 推薦（需 pip install argon2-cffi）</span>
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.auth.hashers.BCryptSHA256PasswordHasher&#39;</span>,  <span style=color:#75715e># 需 pip install bcrypt</span>
-</span></span><span style=display:flex><span>]
-</span></span></code></pre></div><h4 id=密碼驗證器>密碼驗證器</h4><p>Django 內建四個密碼驗證器，確保使用者設定的密碼符合安全標準：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># settings.py</span>
-</span></span><span style=display:flex><span>AUTH_PASSWORD_VALIDATORS <span style=color:#f92672>=</span> [
-</span></span><span style=display:flex><span>    {
-</span></span><span style=display:flex><span>        <span style=color:#75715e># 密碼不能與使用者屬性（username、email 等）太相似</span>
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;NAME&#39;</span>: <span style=color:#e6db74>&#39;django.contrib.auth.password_validation.UserAttributeSimilarityValidator&#39;</span>,
-</span></span><span style=display:flex><span>    },
-</span></span><span style=display:flex><span>    {
-</span></span><span style=display:flex><span>        <span style=color:#75715e># 密碼最短長度</span>
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;NAME&#39;</span>: <span style=color:#e6db74>&#39;django.contrib.auth.password_validation.MinimumLengthValidator&#39;</span>,
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;OPTIONS&#39;</span>: {<span style=color:#e6db74>&#39;min_length&#39;</span>: <span style=color:#ae81ff>8</span>},
-</span></span><span style=display:flex><span>    },
-</span></span><span style=display:flex><span>    {
-</span></span><span style=display:flex><span>        <span style=color:#75715e># 密碼不能是常見弱密碼（內建 20,000 組常見密碼清單）</span>
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;NAME&#39;</span>: <span style=color:#e6db74>&#39;django.contrib.auth.password_validation.CommonPasswordValidator&#39;</span>,
-</span></span><span style=display:flex><span>    },
-</span></span><span style=display:flex><span>    {
-</span></span><span style=display:flex><span>        <span style=color:#75715e># 密碼不能全部是數字</span>
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;NAME&#39;</span>: <span style=color:#e6db74>&#39;django.contrib.auth.password_validation.NumericPasswordValidator&#39;</span>,
-</span></span><span style=display:flex><span>    },
-</span></span><span style=display:flex><span>]
-</span></span></code></pre></div><hr><h3 id=密碼重設流程>密碼重設流程</h3><p>Django 內建完整的密碼重設（Password Reset）流程，由四個 View 組成。你只需設定 URL 與模板，無需自己處理 token 產生與驗證邏輯。</p><h4 id=設定四個-url>設定四個 URL</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># urls.py</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.contrib.auth <span style=color:#f92672>import</span> views <span style=color:#66d9ef>as</span> auth_views
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>urlpatterns <span style=color:#f92672>=</span> [
-</span></span><span style=display:flex><span>    <span style=color:#75715e># 第一步：輸入 Email 頁面</span>
-</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;password-reset/&#39;</span>, auth_views<span style=color:#f92672>.</span>PasswordResetView<span style=color:#f92672>.</span>as_view(
-</span></span><span style=display:flex><span>        template_name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;accounts/password_reset.html&#39;</span>,
-</span></span><span style=display:flex><span>        email_template_name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;accounts/password_reset_email.html&#39;</span>,
-</span></span><span style=display:flex><span>        subject_template_name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;accounts/password_reset_subject.txt&#39;</span>,
-</span></span><span style=display:flex><span>        success_url<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;/password-reset/done/&#39;</span>,
-</span></span><span style=display:flex><span>    ), name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;password_reset&#39;</span>),
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#75715e># 第二步：Email 已寄出的提示頁面</span>
-</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;password-reset/done/&#39;</span>, auth_views<span style=color:#f92672>.</span>PasswordResetDoneView<span style=color:#f92672>.</span>as_view(
-</span></span><span style=display:flex><span>        template_name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;accounts/password_reset_done.html&#39;</span>,
-</span></span><span style=display:flex><span>    ), name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;password_reset_done&#39;</span>),
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#75715e># 第三步：點擊連結後的重設表單頁面</span>
-</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;password-reset-confirm/&lt;uidb64&gt;/&lt;token&gt;/&#39;</span>, auth_views<span style=color:#f92672>.</span>PasswordResetConfirmView<span style=color:#f92672>.</span>as_view(
-</span></span><span style=display:flex><span>        template_name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;accounts/password_reset_confirm.html&#39;</span>,
-</span></span><span style=display:flex><span>        success_url<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;/password-reset-complete/&#39;</span>,
-</span></span><span style=display:flex><span>    ), name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;password_reset_confirm&#39;</span>),
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#75715e># 第四步：重設完成的提示頁面</span>
-</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;password-reset-complete/&#39;</span>, auth_views<span style=color:#f92672>.</span>PasswordResetCompleteView<span style=color:#f92672>.</span>as_view(
-</span></span><span style=display:flex><span>        template_name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;accounts/password_reset_complete.html&#39;</span>,
-</span></span><span style=display:flex><span>    ), name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;password_reset_complete&#39;</span>),
-</span></span><span style=display:flex><span>]
-</span></span></code></pre></div><h4 id=對應模板>對應模板</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-django data-lang=django><span style=display:flex><span><span style=color:#75715e>{# templates/accounts/password_reset.html #}</span>
-</span></span><span style=display:flex><span>&lt;h2&gt;重設密碼&lt;/h2&gt;
-</span></span><span style=display:flex><span>&lt;p&gt;請輸入您的 Email，我們將寄送密碼重設連結。&lt;/p&gt;
-</span></span><span style=display:flex><span>&lt;form method=&#34;post&#34;&gt;
-</span></span><span style=display:flex><span>  <span style=color:#75715e>{%</span> <span style=color:#66d9ef>csrf_token</span> <span style=color:#75715e>%}</span>
-</span></span><span style=display:flex><span>  <span style=color:#75715e>{{</span> form.as_p <span style=color:#75715e>}}</span>
-</span></span><span style=display:flex><span>  &lt;button type=&#34;submit&#34;&gt;寄送重設連結&lt;/button&gt;
-</span></span><span style=display:flex><span>&lt;/form&gt;
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-django data-lang=django><span style=display:flex><span><span style=color:#75715e>{# templates/accounts/password_reset_email.html（Email 內容模板）#}</span>
-</span></span><span style=display:flex><span>您好 <span style=color:#75715e>{{</span> user.get_username <span style=color:#75715e>}}</span>，
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>請點擊以下連結重設您的密碼：
-</span></span><span style=display:flex><span><span style=color:#75715e>{{</span> protocol <span style=color:#75715e>}}</span>://<span style=color:#75715e>{{</span> domain <span style=color:#75715e>}}{%</span> <span style=color:#66d9ef>url</span> <span style=color:#e6db74>&#39;password_reset_confirm&#39;</span> uidb64<span style=color:#f92672>=</span>uid token<span style=color:#f92672>=</span>token <span style=color:#75715e>%}</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>此連結僅可使用一次，若您未要求重設密碼，請忽略此信件。
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-django data-lang=django><span style=display:flex><span><span style=color:#75715e>{# templates/accounts/password_reset_confirm.html #}</span>
-</span></span><span style=display:flex><span>&lt;h2&gt;設定新密碼&lt;/h2&gt;
-</span></span><span style=display:flex><span><span style=color:#75715e>{%</span> <span style=color:#66d9ef>if</span> validlink <span style=color:#75715e>%}</span>
-</span></span><span style=display:flex><span>  &lt;form method=&#34;post&#34;&gt;
-</span></span><span style=display:flex><span>    <span style=color:#75715e>{%</span> <span style=color:#66d9ef>csrf_token</span> <span style=color:#75715e>%}</span>
-</span></span><span style=display:flex><span>    <span style=color:#75715e>{{</span> form.as_p <span style=color:#75715e>}}</span>
-</span></span><span style=display:flex><span>    &lt;button type=&#34;submit&#34;&gt;確認新密碼&lt;/button&gt;
-</span></span><span style=display:flex><span>  &lt;/form&gt;
-</span></span><span style=display:flex><span><span style=color:#75715e>{%</span> <span style=color:#66d9ef>else</span> <span style=color:#75715e>%}</span>
-</span></span><span style=display:flex><span>  &lt;p&gt;此重設連結已失效，請重新申請。&lt;/p&gt;
-</span></span><span style=display:flex><span><span style=color:#75715e>{%</span> <span style=color:#66d9ef>endif</span> <span style=color:#75715e>%}</span>
-</span></span></code></pre></div><hr><h3 id=註冊功能實作>註冊功能實作</h3><p>Django 沒有提供內建的註冊 View，但提供了 <code>UserCreationForm</code> 表單類別，讓你快速實作使用者註冊功能。</p><h4 id=使用-usercreationform>使用 UserCreationForm</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># views.py</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.contrib.auth.forms <span style=color:#f92672>import</span> UserCreationForm
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.contrib.auth <span style=color:#f92672>import</span> login
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.shortcuts <span style=color:#f92672>import</span> render, redirect
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>register_view</span>(request):
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> request<span style=color:#f92672>.</span>method <span style=color:#f92672>==</span> <span style=color:#e6db74>&#39;POST&#39;</span>:
-</span></span><span style=display:flex><span>        form <span style=color:#f92672>=</span> UserCreationForm(request<span style=color:#f92672>.</span>POST)
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> form<span style=color:#f92672>.</span>is_valid():
-</span></span><span style=display:flex><span>            <span style=color:#75715e># 儲存新使用者</span>
-</span></span><span style=display:flex><span>            user <span style=color:#f92672>=</span> form<span style=color:#f92672>.</span>save()
-</span></span><span style=display:flex><span>            <span style=color:#75715e># 註冊成功後自動登入</span>
-</span></span><span style=display:flex><span>            login(request, user)
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> redirect(<span style=color:#e6db74>&#39;dashboard&#39;</span>)
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>else</span>:
-</span></span><span style=display:flex><span>        form <span style=color:#f92672>=</span> UserCreationForm()
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> render(request, <span style=color:#e6db74>&#39;accounts/register.html&#39;</span>, {<span style=color:#e6db74>&#39;form&#39;</span>: form})
-</span></span></code></pre></div><h4 id=擴展-usercreationform-加入-email-欄位>擴展 UserCreationForm 加入 Email 欄位</h4><p>預設的 <code>UserCreationForm</code> 只有 username 和 password 欄位。若需要 Email 欄位，可以繼承並擴展：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># forms.py</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.contrib.auth.forms <span style=color:#f92672>import</span> UserCreationForm
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.contrib.auth.models <span style=color:#f92672>import</span> User
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django <span style=color:#f92672>import</span> forms
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>CustomUserCreationForm</span>(UserCreationForm):
-</span></span><span style=display:flex><span>    email <span style=color:#f92672>=</span> forms<span style=color:#f92672>.</span>EmailField(
-</span></span><span style=display:flex><span>        required<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>,
-</span></span><span style=display:flex><span>        help_text<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;請輸入有效的電子郵件地址&#39;</span>
-</span></span><span style=display:flex><span>    )
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Meta</span>:
-</span></span><span style=display:flex><span>        model <span style=color:#f92672>=</span> User
-</span></span><span style=display:flex><span>        fields <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#39;username&#39;</span>, <span style=color:#e6db74>&#39;email&#39;</span>, <span style=color:#e6db74>&#39;password1&#39;</span>, <span style=color:#e6db74>&#39;password2&#39;</span>]
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>clean_email</span>(self):
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;檢查 Email 是否已被使用&#34;&#34;&#34;</span>
-</span></span><span style=display:flex><span>        email <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>cleaned_data<span style=color:#f92672>.</span>get(<span style=color:#e6db74>&#39;email&#39;</span>)
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> User<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>filter(email<span style=color:#f92672>=</span>email)<span style=color:#f92672>.</span>exists():
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>raise</span> forms<span style=color:#f92672>.</span>ValidationError(<span style=color:#e6db74>&#39;此 Email 已被註冊&#39;</span>)
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> email
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>save</span>(self, commit<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>):
-</span></span><span style=display:flex><span>        user <span style=color:#f92672>=</span> super()<span style=color:#f92672>.</span>save(commit<span style=color:#f92672>=</span><span style=color:#66d9ef>False</span>)
-</span></span><span style=display:flex><span>        user<span style=color:#f92672>.</span>email <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>cleaned_data[<span style=color:#e6db74>&#39;email&#39;</span>]
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> commit:
-</span></span><span style=display:flex><span>            user<span style=color:#f92672>.</span>save()
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> user
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># views.py</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> .forms <span style=color:#f92672>import</span> CustomUserCreationForm
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>register_view</span>(request):
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> request<span style=color:#f92672>.</span>method <span style=color:#f92672>==</span> <span style=color:#e6db74>&#39;POST&#39;</span>:
-</span></span><span style=display:flex><span>        form <span style=color:#f92672>=</span> CustomUserCreationForm(request<span style=color:#f92672>.</span>POST)
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> form<span style=color:#f92672>.</span>is_valid():
-</span></span><span style=display:flex><span>            user <span style=color:#f92672>=</span> form<span style=color:#f92672>.</span>save()
-</span></span><span style=display:flex><span>            login(request, user)
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> redirect(<span style=color:#e6db74>&#39;dashboard&#39;</span>)
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>else</span>:
-</span></span><span style=display:flex><span>        form <span style=color:#f92672>=</span> CustomUserCreationForm()
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> render(request, <span style=color:#e6db74>&#39;accounts/register.html&#39;</span>, {<span style=color:#e6db74>&#39;form&#39;</span>: form})
-</span></span></code></pre></div><p>對應的模板：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-django data-lang=django><span style=display:flex><span><span style=color:#75715e>{# templates/accounts/register.html #}</span>
-</span></span><span style=display:flex><span>&lt;h2&gt;建立帳號&lt;/h2&gt;
-</span></span><span style=display:flex><span>&lt;form method=&#34;post&#34;&gt;
-</span></span><span style=display:flex><span>  <span style=color:#75715e>{%</span> <span style=color:#66d9ef>csrf_token</span> <span style=color:#75715e>%}</span>
-</span></span><span style=display:flex><span>  <span style=color:#75715e>{{</span> form.as_p <span style=color:#75715e>}}</span>
-</span></span><span style=display:flex><span>  &lt;button type=&#34;submit&#34;&gt;註冊&lt;/button&gt;
-</span></span><span style=display:flex><span>&lt;/form&gt;
-</span></span><span style=display:flex><span>&lt;p&gt;已有帳號？&lt;a href=&#34;<span style=color:#75715e>{%</span> <span style=color:#66d9ef>url</span> <span style=color:#e6db74>&#39;login&#39;</span> <span style=color:#75715e>%}</span>&#34;&gt;前往登入&lt;/a&gt;&lt;/p&gt;
-</span></span></code></pre></div><hr><h3 id=session-安全性設定>Session 安全性設定</h3><p>認證系統依賴 <strong>Session</strong> 維護登入狀態，確保 Session 的安全性非常重要：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># settings.py</span>
-</span></span><span style=display:flex><span>SESSION_COOKIE_HTTPONLY <span style=color:#f92672>=</span> <span style=color:#66d9ef>True</span>       <span style=color:#75715e># 防止 JavaScript 讀取 Cookie</span>
-</span></span><span style=display:flex><span>SESSION_COOKIE_SECURE <span style=color:#f92672>=</span> <span style=color:#66d9ef>True</span>         <span style=color:#75715e># 只透過 HTTPS 傳送（生產環境）</span>
-</span></span><span style=display:flex><span>SESSION_COOKIE_SAMESITE <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;Lax&#39;</span>     <span style=color:#75715e># 防止 CSRF 攻擊</span>
-</span></span><span style=display:flex><span>SESSION_COOKIE_AGE <span style=color:#f92672>=</span> <span style=color:#ae81ff>1209600</span>         <span style=color:#75715e># Session 有效期 14 天（單位：秒）</span>
-</span></span><span style=display:flex><span>SESSION_EXPIRE_AT_BROWSER_CLOSE <span style=color:#f92672>=</span> <span style=color:#66d9ef>False</span>  <span style=color:#75715e># 關閉瀏覽器後 Session 不失效</span>
-</span></span></code></pre></div><hr><h3 id=總結>總結</h3><p>Django 的 Authentication 系統功能完善且開箱即用，大幅降低了實作使用者認證的工作量。以下整理本篇的核心要點：</p><ol><li><strong>認證系統架構</strong> 整合了 User 模型、Permission、Group 與 Session，提供從登入到權限控制的完整解決方案</li><li><strong>authenticate / login / logout</strong> 三個核心函數各司其職——驗證憑證、建立登入狀態、清除 Session</li><li><strong>@login_required</strong> 裝飾器與 <strong>LoginRequiredMixin</strong> 讓存取控制變得簡單，搭配 <code>LOGIN_URL</code> 設定可自訂重導向行為</li><li><strong>LoginView / LogoutView</strong> 是 Django 內建的認證 CBV，只需設定模板和 URL 就能快速上線</li><li><strong>密碼管理</strong> 透過 <code>set_password</code> 和 <code>check_password</code> 處理，Django 自動進行雜湊，永遠不存明碼</li><li><strong>密碼重設流程</strong> 由四個內建 View 組成，包含 token 產生與驗證，只需撰寫模板即可使用</li><li><strong>註冊功能</strong> 透過 <code>UserCreationForm</code> 快速實作，可繼承擴展以加入自訂欄位</li></ol><p>掌握了認證系統後，下一篇我們將深入探討 <strong>自訂使用者模型（Custom User Model）</strong> ，學習如何透過 <code>AbstractUser</code> 和 <code>AbstractBaseUser</code> 打造符合業務需求的使用者模型。</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
-</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/django/028-django-middleware/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django Middleware 中介軟體原理與實作 | Django 教學</span>
-<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/17</span>
-</a><a href=https://benzhub.github.io/post/django/027-drf-permissions-throttling/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">DRF 權限控制與 API 限流完全指南 | Django 教學</span>
-<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/16</span>
-</a><a href=https://benzhub.github.io/post/django/026-drf-authentication/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">DRF 認證機制：Token、JWT 與 Session 認證 | Django 教學</span>
-<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/15</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/django/028-django-middleware/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
-<span class="text-sm font-medium">Django Middleware 中介軟體原理與實作 | Django 教學</span></a></div><div></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
-<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
-</a><a href=/tags/acid><span class=tag-pill>acid</span>
-</a><a href=/tags/ai><span class=tag-pill>ai</span>
-</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
-</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
-</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
-</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
-</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
-</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
-</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
-</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
-</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
-</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
-</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
-</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
-</a><a href=/tags/api><span class=tag-pill>api</span>
-</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
-</a><a href=/tags/autovacuum><span class=tag-pill>autovacuum</span>
-</a><a href=/tags/background-processes><span class=tag-pill>background-processes</span>
-</a><a href=/tags/big-o><span class=tag-pill>big o</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (12)</span>
-</a><a href=/post/javascript/><span class=tag-pill>JavaScript (67)</span>
-</a><a href=/post/django/><span class=tag-pill>Django (29)</span>
-</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
-</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
-</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
-</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
-</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/django/029-django-authentication/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Authentication 使用者認證系統完全指南 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/18</p></a><a href=/post/postgresql/012-data-types/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/18</p></a><a href=/post/javascript/data-structures--algorithms/005-hash-table/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">雜湊表 — Hash Table 原理、碰撞處理與實作完整指南 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/18</p></a><a href=/post/django/028-django-middleware/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Middleware 中介軟體原理與實作 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/17</p></a><a href=/post/postgresql/011-background-processes/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">背景進程：PostgreSQL 的幕後工作者們 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/17</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>
+<!DOCTYPE html>
+
+<html lang="zh-TW">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><title>Django Authentication 使用者認證系統完全指南 | Django 教學 | BenzHub</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="apple-touch-icon" sizes="180x180" href='/favicon/apple-touch-icon.png'>
+    <link rel="icon" type="image/png" sizes="32x32" href='/favicon/favicon-32x32.png'>
+    <link rel="icon" type="image/png" sizes="16x16" href='/favicon/favicon-16x16.png'>
+    <link rel="manifest" href='/favicon/site.webmanifest' />
+    <link rel="mask-icon" href=' /favicon/safari-pinned-tab.svg' color="#5bbad5" />
+    <link rel="shortcut icon" href='/favicon/favicon.ico' />
+    <meta name="theme-color" content="#fafafa">
+    <meta property="og:title" content="Django Authentication 使用者認證系統完全指南 | Django 教學 | BenzHub" />
+    
+    
+    <link rel="stylesheet" href="/css/style.css" />
+    
+    <link href=' /css/blonde.min.css' rel="stylesheet" type="text/css" media="print"
+        onload="this.media=' all'">
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+
+<meta name="description" content="完整解析 Django Authentication 使用者認證系統，涵蓋 User 模型、authenticate/login/logout 函數、@login_required 裝飾器、LoginView/LogoutView CBV、密碼管理與重設流程，以及註冊功能實作，打造安全的登入登出機制。">
+<meta property="og:site_name" content="BenzHub">
+<meta property="og:description" content="完整解析 Django Authentication 使用者認證系統，涵蓋 User 模型、authenticate/login/logout 函數、@login_required 裝飾器、LoginView/LogoutView CBV、密碼管理與重設流程，以及註冊功能實作，打造安全的登入登出機制。">
+<meta property="og:url" content="http://localhost:1313/post/django/029-django-authentication/">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="zh_TW">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="">
+
+<link rel="canonical" href="http://localhost:1313/post/django/029-django-authentication/">
+
+<meta name="twitter:description" content="完整解析 Django Authentication 使用者認證系統，涵蓋 User 模型、authenticate/login/logout 函數、@login_required 裝飾器、LoginView/LogoutView CBV、密碼管理與重設流程，以及註冊功能實作，打造安全的登入登出機制。">
+<meta property="article:published_time" content="2026-06-18T00:00:00&#43;00:00">
+<meta property="article:updated_time" content="2026-05-24T00:00:00&#43;00:00">
+
+
+
+
+
+    
+<meta property="og:image" content="http://localhost:1313/img/django/029-Django-Authentication.png">
+<meta property="og:image:url" content="http://localhost:1313/img/django/029-Django-Authentication.png">
+    
+
+    
+    <link rel="stylesheet" href='/css/custom.css'>
+    <i class="dark hidden"></i>
+    
+<link rel="alternate" hreflang="zh-TW" href="http://localhost:1313/post/django/029-django-authentication/" />
+
+<link rel="alternate" hreflang="x-default" href="http://localhost:1313/post/django/029-django-authentication/" />
+
+    
+
+
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "\"Django Authentication 使用者認證系統完全指南 | Django 教學\"",
+  "description": "\"完整解析 Django Authentication 使用者認證系統，涵蓋 User 模型、authenticate/login/logout 函數、@login_required 裝飾器、LoginView/LogoutView CBV、密碼管理與重設流程，以及註冊功能實作，打造安全的登入登出機制。\"",
+  "author": {
+    "@type": "Person",
+    "name": "\"BenzHub\"",
+    "url": "http:\/\/localhost:1313\/about",
+    "jobTitle": "\"Software Developer\"",
+    "sameAs": [
+      "\"https://github.com/benzhub\""
+    ]
+  },
+  "datePublished": "2026-06-18T00:00:00\u002b00:00",
+  "dateModified": "2026-05-24T00:00:00\u002b00:00",
+  "image": "http:\/\/localhost:1313\/img\/django\/029-Django-Authentication.png",
+  "publisher": {
+    "@type": "Organization",
+    "name": "\"BenzHub\"",
+    "url": "\"http://localhost:1313/\"",
+    "sameAs": [
+      "\"https://github.com/benzhub\""
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http:\/\/localhost:1313\/post\/django\/029-django-authentication\/"
+  },
+  "inLanguage": "zh-TW"
+}
+</script>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "\"BenzHub\"",
+      "item": "http:\/\/localhost:1313\/"
+    }
+    
+    
+      
+      
+    ,{
+      "@type": "ListItem",
+      "position": 2,
+      "name": "\"Blog\"",
+      "item": "http:\/\/localhost:1313\/post\/django\/"
+    }
+      
+      
+    
+    ,{
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "\"Django Authentication 使用者認證系統完全指南 | Django 教學\""
+    }
+  ]
+}
+</script>
+
+
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    
+    
+    {
+      "@type": "Question",
+      "name": "\"Django 的 authenticate() 和 login() 有什麼差別？\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"authenticate() 負責驗證使用者的帳號與密碼是否正確，驗證成功會回傳 User 物件，失敗則回傳 None。login() 則是在驗證成功後，將使用者資訊寫入 Session，讓後續請求能透過 Cookie 辨識已登入狀態。兩者必須搭配使用：先 authenticate 驗證身份，再 login 建立登入狀態。\""
+      }
+    }
+    
+    ,
+    {
+      "@type": "Question",
+      "name": "\"@login_required 裝飾器的運作原理是什麼？\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"@login_required 會在 View 執行前檢查 request.user.is_authenticated 是否為 True。如果使用者未登入，會自動重導向到 LOGIN_URL 指定的登入頁面（預設為 /accounts/login/），並在 URL 加上 ?next= 參數記錄原始頁面路徑，讓使用者登入後能自動返回原先要造訪的頁面。\""
+      }
+    }
+    
+    ,
+    {
+      "@type": "Question",
+      "name": "\"Django 內建的密碼重設流程包含哪些步驟？\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Django 密碼重設流程包含四個步驟：第一，使用者在 PasswordResetView 頁面輸入 Email。第二，系統產生一次性 token 並寄送重設連結到信箱。第三，使用者點擊連結進入 PasswordResetConfirmView 頁面設定新密碼。第四，密碼更新成功後顯示 PasswordResetCompleteView 完成頁面。整個流程透過四個內建 View 即可完成，token 具有時效性且只能使用一次。\""
+      }
+    }
+    
+  ]
+}
+</script>
+
+
+
+
+
+</head>
+<body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class="site-nav" id="siteNav">
+    <div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full">
+        
+        <a href="http://localhost:1313/" class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">
+            BenzHub
+        </a>
+
+        
+        <div class="hidden md:flex items-center gap-6">
+            
+            <a href="/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                首頁
+            </a>
+            
+            <a href="/about/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                關於
+            </a>
+            
+            <a href="/contact/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                聯絡
+            </a>
+            
+            <a href="/resourses/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                資源
+            </a>
+            
+
+            
+            <div class="flex items-center gap-2">
+                <form class="flex items-center" role="search" method="get" action="https://google.com/search" id="navSearchForm">
+                    <input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50"
+                        type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋" id="navSearchInput">
+                    <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
+                </form>
+                <button onclick="toggleNavSearch()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+                    <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                    </svg>
+                </button>
+            </div>
+
+            
+            <span class="text-zinc-200 dark:text-zinc-700">|</span>
+
+            
+            
+
+
+
+
+<div class="lang-switcher relative hidden md:block">
+    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+        <span>🌐</span>
+        <span>繁體中文</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
+        
+            
+            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
+    <div class="flex gap-2">
+        
+            
+            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+            
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon2" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+        </div>
+
+        
+        <div class="flex md:hidden items-center gap-1">
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+            <button id="hamburgerbtn" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Menu">
+                <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    
+    <div class="mobile-menu md:hidden" id="mobileMenu">
+        
+        <a href="/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            首頁
+        </a>
+        
+        <a href="/about/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            關於
+        </a>
+        
+        <a href="/contact/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            聯絡
+        </a>
+        
+        <a href="/resourses/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            資源
+        </a>
+        
+        <form class="mt-2" role="search" method="get" action="https://google.com/search">
+            <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
+            <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
+        </form>
+        
+        
+
+
+
+
+<div class="lang-switcher relative hidden md:block">
+    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+        <span>🌐</span>
+        <span>繁體中文</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
+        
+            
+            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
+    <div class="flex gap-2">
+        
+            
+            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+    </div>
+</nav>
+
+<script>
+    
+    document.getElementById('hamburgerbtn').addEventListener('click', function () {
+        document.getElementById('mobileMenu').classList.toggle('active');
+    });
+
+    
+    window.addEventListener('scroll', function () {
+        var nav = document.getElementById('siteNav');
+        if (window.scrollY > 50) {
+            nav.classList.add('scrolled');
+        } else {
+            nav.classList.remove('scrolled');
+        }
+    });
+
+    
+    function toggleNavSearch() {
+        var input = document.getElementById('navSearchInput');
+        input.classList.toggle('expanded');
+        if (input.classList.contains('expanded')) {
+            input.focus();
+        }
+    }
+
+    
+    function toggleLangMenu() {
+        var dropdown = document.getElementById('langDropdown');
+        dropdown.classList.toggle('hidden');
+    }
+
+    
+    document.addEventListener('click', function (e) {
+        
+        var form = document.getElementById('navSearchForm');
+        var input = document.getElementById('navSearchInput');
+        if (form && input && !form.contains(e.target) && !e.target.closest('[aria-label="Toggle Search"]')) {
+            input.classList.remove('expanded');
+        }
+        
+        var langSwitcher = e.target.closest('.lang-switcher');
+        if (!langSwitcher) {
+            var dropdown = document.getElementById('langDropdown');
+            if (dropdown) dropdown.classList.add('hidden');
+        }
+    });
+</script>
+<div class="nav-spacer"></div>
+    <div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id="content">
+        <div class="lg:mx-5">
+<div class="grid grid-cols-3 gap-6">
+  
+  <div class="col-span-3 lg:col-span-2">
+  
+      
+      <div class="post-detail fade-in my-4">
+        <h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Django Authentication 使用者認證系統完全指南 | Django 教學</h1>
+        <div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4">
+            <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/18
+            </span>
+            
+            <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                2026/05/24
+            </span>
+            
+        </div>
+        
+        <div class="flex flex-wrap gap-1.5 mb-5">
+            
+            <a href='/tags/python' class="tag-pill no-underline">python</a>
+            
+            <a href='/tags/django' class="tag-pill no-underline">django</a>
+            
+        </div>
+        
+        
+        <img class="py-4 m-auto rounded-lg thumb-img" src="http://localhost:1313/img/django/029-Django-Authentication.png" alt="Django Authentication 使用者認證系統完全指南 | Django 教學">
+        
+        
+        <div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote>
+<p>幾乎所有的 Web 應用程式都需要處理使用者身份驗證。Django 內建了一套功能完善的 <strong>Authentication（認證）</strong> 系統，從 <strong>User 模型</strong> 、 <strong>登入登出</strong> 函數、到 <strong>密碼管理</strong> 與 <strong>密碼重設</strong> 流程，全部開箱即用。本篇將帶你全面了解 Django 認證系統的每個環節，並實作一套完整的使用者認證功能。</p>
+</blockquote>
+<h3 id="django-認證系統概覽">Django 認證系統概覽</h3>
+<p>Django 的認證系統由 <code>django.contrib.auth</code> 模組提供，它整合了 <strong>認證（Authentication）</strong> 與 <strong>授權（Authorization）</strong> 兩大功能：</p>
+<ul>
+<li><strong>認證（Authentication）</strong>：驗證「你是誰」——使用者是否為合法帳號</li>
+<li><strong>授權（Authorization）</strong>：決定「你能做什麼」——使用者擁有哪些權限</li>
+</ul>
+<p>要使用認證系統，確認 <code>settings.py</code> 中已包含以下設定：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># settings.py</span>
+</span></span><span style="display:flex;"><span>INSTALLED_APPS <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.contrib.auth&#39;</span>,            <span style="color:#75715e"># 認證框架核心</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.contrib.contenttypes&#39;</span>,    <span style="color:#75715e"># 權限系統依賴</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># ...</span>
+</span></span><span style="display:flex;"><span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>MIDDLEWARE <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.contrib.sessions.middleware.SessionMiddleware&#39;</span>,       <span style="color:#75715e"># Session 支援</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.contrib.auth.middleware.AuthenticationMiddleware&#39;</span>,    <span style="color:#75715e"># 將 user 掛到 request</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># ...</span>
+</span></span><span style="display:flex;"><span>]
+</span></span></code></pre></div><p>認證系統的核心元件：</p>
+<table>
+	<thead>
+			<tr>
+					<th>元件</th>
+					<th>說明</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>User</code></td>
+					<td>內建使用者模型，提供帳號、密碼、Email 等欄位</td>
+			</tr>
+			<tr>
+					<td><code>Permission</code></td>
+					<td>Model 層級的權限（add、change、delete、view）</td>
+			</tr>
+			<tr>
+					<td><code>Group</code></td>
+					<td>權限的集合，可批次指派給使用者</td>
+			</tr>
+			<tr>
+					<td><code>Session</code></td>
+					<td>基於 Session 的登入狀態維護機制</td>
+			</tr>
+	</tbody>
+</table>
+<hr>
+<h3 id="user-模型欄位">User 模型欄位</h3>
+<p>Django 的內建 <code>User</code> 模型（<code>django.contrib.auth.models.User</code>）提供了以下欄位：</p>
+<table>
+	<thead>
+			<tr>
+					<th>欄位</th>
+					<th>類型</th>
+					<th>說明</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>username</code></td>
+					<td>CharField</td>
+					<td>使用者名稱（唯一）</td>
+			</tr>
+			<tr>
+					<td><code>password</code></td>
+					<td>CharField</td>
+					<td>雜湊後的密碼</td>
+			</tr>
+			<tr>
+					<td><code>email</code></td>
+					<td>EmailField</td>
+					<td>電子郵件</td>
+			</tr>
+			<tr>
+					<td><code>first_name</code></td>
+					<td>CharField</td>
+					<td>名</td>
+			</tr>
+			<tr>
+					<td><code>last_name</code></td>
+					<td>CharField</td>
+					<td>姓</td>
+			</tr>
+			<tr>
+					<td><code>is_active</code></td>
+					<td>BooleanField</td>
+					<td>帳號是否啟用</td>
+			</tr>
+			<tr>
+					<td><code>is_staff</code></td>
+					<td>BooleanField</td>
+					<td>是否可登入 Admin 後台</td>
+			</tr>
+			<tr>
+					<td><code>is_superuser</code></td>
+					<td>BooleanField</td>
+					<td>是否為超級使用者</td>
+			</tr>
+			<tr>
+					<td><code>last_login</code></td>
+					<td>DateTimeField</td>
+					<td>最後登入時間</td>
+			</tr>
+			<tr>
+					<td><code>date_joined</code></td>
+					<td>DateTimeField</td>
+					<td>帳號建立時間</td>
+			</tr>
+	</tbody>
+</table>
+<p>常用的方法：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> django.contrib.auth.models <span style="color:#f92672">import</span> User
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 建立一般使用者</span>
+</span></span><span style="display:flex;"><span>user <span style="color:#f92672">=</span> User<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>create_user(
+</span></span><span style="display:flex;"><span>    username<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;alice&#39;</span>,
+</span></span><span style="display:flex;"><span>    email<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;alice@example.com&#39;</span>,
+</span></span><span style="display:flex;"><span>    password<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;secure_password123&#39;</span>  <span style="color:#75715e"># 自動雜湊處理</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 建立超級使用者</span>
+</span></span><span style="display:flex;"><span>admin <span style="color:#f92672">=</span> User<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>create_superuser(
+</span></span><span style="display:flex;"><span>    username<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;admin&#39;</span>,
+</span></span><span style="display:flex;"><span>    email<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;admin@example.com&#39;</span>,
+</span></span><span style="display:flex;"><span>    password<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;admin_password123&#39;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 檢查使用者屬性</span>
+</span></span><span style="display:flex;"><span>user<span style="color:#f92672">.</span>is_authenticated  <span style="color:#75715e"># True（已登入的使用者永遠為 True）</span>
+</span></span><span style="display:flex;"><span>user<span style="color:#f92672">.</span>is_anonymous      <span style="color:#75715e"># False</span>
+</span></span><span style="display:flex;"><span>user<span style="color:#f92672">.</span>get_full_name()   <span style="color:#75715e"># 回傳 &#34;first_name last_name&#34;</span>
+</span></span><span style="display:flex;"><span>user<span style="color:#f92672">.</span>get_short_name()  <span style="color:#75715e"># 回傳 &#34;first_name&#34;</span>
+</span></span></code></pre></div><hr>
+<h3 id="authenticate--login--logout-函數">authenticate / login / logout 函數</h3>
+<p>Django 提供三個核心函數來處理認證流程，它們位於 <code>django.contrib.auth</code> 模組中。</p>
+<h4 id="authenticate驗證帳號密碼">authenticate()——驗證帳號密碼</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> django.contrib.auth <span style="color:#f92672">import</span> authenticate
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 驗證使用者憑證</span>
+</span></span><span style="display:flex;"><span>user <span style="color:#f92672">=</span> authenticate(request, username<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;alice&#39;</span>, password<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;secure_password123&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> user <span style="color:#f92672">is</span> <span style="color:#f92672">not</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 驗證成功，user 是一個 User 物件</span>
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;歡迎，</span><span style="color:#e6db74">{</span>user<span style="color:#f92672">.</span>username<span style="color:#e6db74">}</span><span style="color:#e6db74">！&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 驗證失敗（帳號不存在或密碼錯誤）</span>
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#34;帳號或密碼錯誤&#34;</span>)
+</span></span></code></pre></div><p><code>authenticate()</code> 會依序嘗試 <code>settings.py</code> 中 <code>AUTHENTICATION_BACKENDS</code> 列出的所有認證後端，任一成功即回傳 User 物件。</p>
+<h4 id="login建立登入狀態">login()——建立登入狀態</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> django.contrib.auth <span style="color:#f92672">import</span> login
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 驗證成功後，建立 Session 登入狀態</span>
+</span></span><span style="display:flex;"><span>login(request, user)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 此時 Session 中已記錄使用者資訊</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 後續請求的 request.user 會自動指向此使用者</span>
+</span></span></code></pre></div><p><code>login()</code> 做的事情是：將 User 的 ID 寫入 Session，並在 Response 中設定 <code>sessionid</code> Cookie，後續請求就能透過 Cookie 識別使用者身份。</p>
+<h4 id="logout登出">logout()——登出</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> django.contrib.auth <span style="color:#f92672">import</span> logout
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 清除 Session，登出使用者</span>
+</span></span><span style="display:flex;"><span>logout(request)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 此時 request.user 會變成 AnonymousUser</span>
+</span></span></code></pre></div><h4 id="完整登入-view-範例">完整登入 View 範例</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># views.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.contrib.auth <span style="color:#f92672">import</span> authenticate, login, logout
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.shortcuts <span style="color:#f92672">import</span> render, redirect
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">login_view</span>(request):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> request<span style="color:#f92672">.</span>method <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;POST&#39;</span>:
+</span></span><span style="display:flex;"><span>        username <span style="color:#f92672">=</span> request<span style="color:#f92672">.</span>POST[<span style="color:#e6db74">&#39;username&#39;</span>]
+</span></span><span style="display:flex;"><span>        password <span style="color:#f92672">=</span> request<span style="color:#f92672">.</span>POST[<span style="color:#e6db74">&#39;password&#39;</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 第一步：驗證帳號密碼</span>
+</span></span><span style="display:flex;"><span>        user <span style="color:#f92672">=</span> authenticate(request, username<span style="color:#f92672">=</span>username, password<span style="color:#f92672">=</span>password)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> user <span style="color:#f92672">is</span> <span style="color:#f92672">not</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># 第二步：建立登入狀態</span>
+</span></span><span style="display:flex;"><span>            login(request, user)
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># 第三步：重導向到原始頁面或首頁</span>
+</span></span><span style="display:flex;"><span>            next_url <span style="color:#f92672">=</span> request<span style="color:#f92672">.</span>GET<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#39;next&#39;</span>, <span style="color:#e6db74">&#39;/&#39;</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> redirect(next_url)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> render(request, <span style="color:#e6db74">&#39;accounts/login.html&#39;</span>, {
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#39;error&#39;</span>: <span style="color:#e6db74">&#39;帳號或密碼錯誤&#39;</span>
+</span></span><span style="display:flex;"><span>            })
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> render(request, <span style="color:#e6db74">&#39;accounts/login.html&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">logout_view</span>(request):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> request<span style="color:#f92672">.</span>method <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;POST&#39;</span>:
+</span></span><span style="display:flex;"><span>        logout(request)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> redirect(<span style="color:#e6db74">&#39;login&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> redirect(<span style="color:#e6db74">&#39;/&#39;</span>)
+</span></span></code></pre></div><hr>
+<h3 id="login_required-裝飾器">@login_required 裝飾器</h3>
+<p><strong>@login_required</strong> 是最常用的認證裝飾器，它會在 View 執行前自動檢查使用者是否已登入。未登入的使用者會被重導向到登入頁面。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> django.contrib.auth.decorators <span style="color:#f92672">import</span> login_required
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@login_required</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">dashboard</span>(request):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;只有已登入的使用者才能存取此頁面&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> render(request, <span style="color:#e6db74">&#39;accounts/dashboard.html&#39;</span>, {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;user&#39;</span>: request<span style="color:#f92672">.</span>user
+</span></span><span style="display:flex;"><span>    })
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 自訂登入頁面 URL</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@login_required</span>(login_url<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;/custom-login/&#39;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">profile</span>(request):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> render(request, <span style="color:#e6db74">&#39;accounts/profile.html&#39;</span>)
+</span></span></code></pre></div><p>重導向行為：</p>
+<ol>
+<li>未登入使用者造訪 <code>/dashboard/</code></li>
+<li>被重導向到 <code>LOGIN_URL</code>（預設 <code>/accounts/login/</code>），URL 帶有 <code>?next=/dashboard/</code></li>
+<li>使用者登入成功後，自動跳回 <code>/dashboard/</code></li>
+</ol>
+<p>在 <code>settings.py</code> 中設定相關的重導向 URL：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># settings.py</span>
+</span></span><span style="display:flex;"><span>LOGIN_URL <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;/accounts/login/&#39;</span>            <span style="color:#75715e"># 未登入時重導向的目標</span>
+</span></span><span style="display:flex;"><span>LOGIN_REDIRECT_URL <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;/dashboard/&#39;</span>        <span style="color:#75715e"># 登入成功後的預設重導向</span>
+</span></span><span style="display:flex;"><span>LOGOUT_REDIRECT_URL <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;/&#39;</span>                 <span style="color:#75715e"># 登出後的重導向目標</span>
+</span></span></code></pre></div><h4 id="在-cbv-中使用-loginrequiredmixin">在 CBV 中使用 LoginRequiredMixin</h4>
+<p>如果你使用 <strong>Class-Based Views（CBV）</strong> ，可以使用 <code>LoginRequiredMixin</code>：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> django.contrib.auth.mixins <span style="color:#f92672">import</span> LoginRequiredMixin
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.views.generic <span style="color:#f92672">import</span> TemplateView
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">DashboardView</span>(LoginRequiredMixin, TemplateView):
+</span></span><span style="display:flex;"><span>    template_name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;accounts/dashboard.html&#39;</span>
+</span></span><span style="display:flex;"><span>    login_url <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;/accounts/login/&#39;</span>  <span style="color:#75715e"># 可選，預設使用 settings.LOGIN_URL</span>
+</span></span></code></pre></div><p>注意：<code>LoginRequiredMixin</code> 必須放在 <strong>第一個</strong> 繼承位置，才能正確攔截未登入的請求。</p>
+<hr>
+<h3 id="loginview--logoutview-cbv">LoginView / LogoutView CBV</h3>
+<p>Django 提供了內建的 <strong>LoginView</strong> 和 <strong>LogoutView</strong> ，讓你不用自己寫認證邏輯，只需要設定 URL 和模板即可。</p>
+<h4 id="loginview">LoginView</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># urls.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.contrib.auth.views <span style="color:#f92672">import</span> LoginView
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>urlpatterns <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;accounts/login/&#39;</span>, LoginView<span style="color:#f92672">.</span>as_view(
+</span></span><span style="display:flex;"><span>        template_name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;accounts/login.html&#39;</span>,     <span style="color:#75715e"># 自訂模板</span>
+</span></span><span style="display:flex;"><span>        redirect_authenticated_user<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>,         <span style="color:#75715e"># 已登入使用者自動跳轉</span>
+</span></span><span style="display:flex;"><span>    ), name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;login&#39;</span>),
+</span></span><span style="display:flex;"><span>]
+</span></span></code></pre></div><p>對應的模板只需要提供一個 form：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-django" data-lang="django"><span style="display:flex;"><span><span style="color:#75715e">{# templates/accounts/login.html #}</span>
+</span></span><span style="display:flex;"><span>&lt;h2&gt;登入&lt;/h2&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">{%</span> <span style="color:#66d9ef">if</span> form.errors <span style="color:#75715e">%}</span>
+</span></span><span style="display:flex;"><span>  &lt;p style=&#34;color: red;&#34;&gt;帳號或密碼錯誤，請重試。&lt;/p&gt;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">{%</span> <span style="color:#66d9ef">endif</span> <span style="color:#75715e">%}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>&lt;form method=&#34;post&#34;&gt;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">{%</span> <span style="color:#66d9ef">csrf_token</span> <span style="color:#75715e">%}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">{{</span> form.as_p <span style="color:#75715e">}}</span>
+</span></span><span style="display:flex;"><span>  &lt;button type=&#34;submit&#34;&gt;登入&lt;/button&gt;
+</span></span><span style="display:flex;"><span>&lt;/form&gt;
+</span></span></code></pre></div><h4 id="logoutview">LogoutView</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># urls.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.contrib.auth.views <span style="color:#f92672">import</span> LogoutView
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>urlpatterns <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;accounts/logout/&#39;</span>, LogoutView<span style="color:#f92672">.</span>as_view(
+</span></span><span style="display:flex;"><span>        next_page<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;/&#39;</span>,  <span style="color:#75715e"># 登出後重導向到首頁</span>
+</span></span><span style="display:flex;"><span>    ), name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;logout&#39;</span>),
+</span></span><span style="display:flex;"><span>]
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-django" data-lang="django"><span style="display:flex;"><span><span style="color:#75715e">{# 在模板中使用 POST 請求登出 #}</span>
+</span></span><span style="display:flex;"><span>&lt;form method=&#34;post&#34; action=&#34;<span style="color:#75715e">{%</span> <span style="color:#66d9ef">url</span> <span style="color:#e6db74">&#39;logout&#39;</span> <span style="color:#75715e">%}</span>&#34;&gt;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">{%</span> <span style="color:#66d9ef">csrf_token</span> <span style="color:#75715e">%}</span>
+</span></span><span style="display:flex;"><span>  &lt;button type=&#34;submit&#34;&gt;登出&lt;/button&gt;
+</span></span><span style="display:flex;"><span>&lt;/form&gt;
+</span></span></code></pre></div><p>Django 4.1 以後，LogoutView 預設只接受 POST 請求，不再支援 GET 登出，這是為了防止 <strong>CSRF 攻擊（跨站請求偽造）</strong> 。</p>
+<hr>
+<h3 id="密碼管理">密碼管理</h3>
+<p>Django 提供了完善的密碼管理機制，包括密碼的設定、驗證與雜湊處理。</p>
+<h4 id="set_password-與-check_password">set_password() 與 check_password()</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> django.contrib.auth.models <span style="color:#f92672">import</span> User
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>user <span style="color:#f92672">=</span> User<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>get(username<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;alice&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 設定新密碼（自動雜湊，不是存明碼）</span>
+</span></span><span style="display:flex;"><span>user<span style="color:#f92672">.</span>set_password(<span style="color:#e6db74">&#39;new_secure_password&#39;</span>)
+</span></span><span style="display:flex;"><span>user<span style="color:#f92672">.</span>save()  <span style="color:#75715e"># 記得要呼叫 save()</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 驗證密碼是否正確</span>
+</span></span><span style="display:flex;"><span>user<span style="color:#f92672">.</span>check_password(<span style="color:#e6db74">&#39;new_secure_password&#39;</span>)   <span style="color:#75715e"># True</span>
+</span></span><span style="display:flex;"><span>user<span style="color:#f92672">.</span>check_password(<span style="color:#e6db74">&#39;wrong_password&#39;</span>)         <span style="color:#75715e"># False</span>
+</span></span></code></pre></div><p><strong>重要提醒</strong>：永遠不要直接賦值 <code>user.password = '...'</code>，這樣會存入明碼。必須使用 <code>set_password()</code> 方法，它會自動進行雜湊處理。</p>
+<h4 id="密碼雜湊機制">密碼雜湊機制</h4>
+<p>Django 使用 <strong>PBKDF2</strong> 演算法作為預設的密碼雜湊方式，儲存格式為 <code>&lt;algorithm&gt;$&lt;iterations&gt;$&lt;salt&gt;$&lt;hash&gt;</code>：</p>
+<pre tabindex="0"><code>pbkdf2_sha256$600000$randomsalt$hashed_value_here
+</code></pre><p>你可以在 <code>settings.py</code> 中自訂使用的雜湊演算法：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># settings.py</span>
+</span></span><span style="display:flex;"><span>PASSWORD_HASHERS <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 第一個為新密碼的預設演算法</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.contrib.auth.hashers.PBKDF2PasswordHasher&#39;</span>,       <span style="color:#75715e"># 預設</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.contrib.auth.hashers.Argon2PasswordHasher&#39;</span>,        <span style="color:#75715e"># 推薦（需 pip install argon2-cffi）</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.contrib.auth.hashers.BCryptSHA256PasswordHasher&#39;</span>,  <span style="color:#75715e"># 需 pip install bcrypt</span>
+</span></span><span style="display:flex;"><span>]
+</span></span></code></pre></div><h4 id="密碼驗證器">密碼驗證器</h4>
+<p>Django 內建四個密碼驗證器，確保使用者設定的密碼符合安全標準：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># settings.py</span>
+</span></span><span style="display:flex;"><span>AUTH_PASSWORD_VALIDATORS <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 密碼不能與使用者屬性（username、email 等）太相似</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;NAME&#39;</span>: <span style="color:#e6db74">&#39;django.contrib.auth.password_validation.UserAttributeSimilarityValidator&#39;</span>,
+</span></span><span style="display:flex;"><span>    },
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 密碼最短長度</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;NAME&#39;</span>: <span style="color:#e6db74">&#39;django.contrib.auth.password_validation.MinimumLengthValidator&#39;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;OPTIONS&#39;</span>: {<span style="color:#e6db74">&#39;min_length&#39;</span>: <span style="color:#ae81ff">8</span>},
+</span></span><span style="display:flex;"><span>    },
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 密碼不能是常見弱密碼（內建 20,000 組常見密碼清單）</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;NAME&#39;</span>: <span style="color:#e6db74">&#39;django.contrib.auth.password_validation.CommonPasswordValidator&#39;</span>,
+</span></span><span style="display:flex;"><span>    },
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 密碼不能全部是數字</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;NAME&#39;</span>: <span style="color:#e6db74">&#39;django.contrib.auth.password_validation.NumericPasswordValidator&#39;</span>,
+</span></span><span style="display:flex;"><span>    },
+</span></span><span style="display:flex;"><span>]
+</span></span></code></pre></div><hr>
+<h3 id="密碼重設流程">密碼重設流程</h3>
+<p>Django 內建完整的密碼重設（Password Reset）流程，由四個 View 組成。你只需設定 URL 與模板，無需自己處理 token 產生與驗證邏輯。</p>
+<h4 id="設定四個-url">設定四個 URL</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># urls.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.contrib.auth <span style="color:#f92672">import</span> views <span style="color:#66d9ef">as</span> auth_views
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>urlpatterns <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 第一步：輸入 Email 頁面</span>
+</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;password-reset/&#39;</span>, auth_views<span style="color:#f92672">.</span>PasswordResetView<span style="color:#f92672">.</span>as_view(
+</span></span><span style="display:flex;"><span>        template_name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;accounts/password_reset.html&#39;</span>,
+</span></span><span style="display:flex;"><span>        email_template_name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;accounts/password_reset_email.html&#39;</span>,
+</span></span><span style="display:flex;"><span>        subject_template_name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;accounts/password_reset_subject.txt&#39;</span>,
+</span></span><span style="display:flex;"><span>        success_url<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;/password-reset/done/&#39;</span>,
+</span></span><span style="display:flex;"><span>    ), name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;password_reset&#39;</span>),
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 第二步：Email 已寄出的提示頁面</span>
+</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;password-reset/done/&#39;</span>, auth_views<span style="color:#f92672">.</span>PasswordResetDoneView<span style="color:#f92672">.</span>as_view(
+</span></span><span style="display:flex;"><span>        template_name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;accounts/password_reset_done.html&#39;</span>,
+</span></span><span style="display:flex;"><span>    ), name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;password_reset_done&#39;</span>),
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 第三步：點擊連結後的重設表單頁面</span>
+</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;password-reset-confirm/&lt;uidb64&gt;/&lt;token&gt;/&#39;</span>, auth_views<span style="color:#f92672">.</span>PasswordResetConfirmView<span style="color:#f92672">.</span>as_view(
+</span></span><span style="display:flex;"><span>        template_name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;accounts/password_reset_confirm.html&#39;</span>,
+</span></span><span style="display:flex;"><span>        success_url<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;/password-reset-complete/&#39;</span>,
+</span></span><span style="display:flex;"><span>    ), name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;password_reset_confirm&#39;</span>),
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 第四步：重設完成的提示頁面</span>
+</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;password-reset-complete/&#39;</span>, auth_views<span style="color:#f92672">.</span>PasswordResetCompleteView<span style="color:#f92672">.</span>as_view(
+</span></span><span style="display:flex;"><span>        template_name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;accounts/password_reset_complete.html&#39;</span>,
+</span></span><span style="display:flex;"><span>    ), name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;password_reset_complete&#39;</span>),
+</span></span><span style="display:flex;"><span>]
+</span></span></code></pre></div><h4 id="對應模板">對應模板</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-django" data-lang="django"><span style="display:flex;"><span><span style="color:#75715e">{# templates/accounts/password_reset.html #}</span>
+</span></span><span style="display:flex;"><span>&lt;h2&gt;重設密碼&lt;/h2&gt;
+</span></span><span style="display:flex;"><span>&lt;p&gt;請輸入您的 Email，我們將寄送密碼重設連結。&lt;/p&gt;
+</span></span><span style="display:flex;"><span>&lt;form method=&#34;post&#34;&gt;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">{%</span> <span style="color:#66d9ef">csrf_token</span> <span style="color:#75715e">%}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">{{</span> form.as_p <span style="color:#75715e">}}</span>
+</span></span><span style="display:flex;"><span>  &lt;button type=&#34;submit&#34;&gt;寄送重設連結&lt;/button&gt;
+</span></span><span style="display:flex;"><span>&lt;/form&gt;
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-django" data-lang="django"><span style="display:flex;"><span><span style="color:#75715e">{# templates/accounts/password_reset_email.html（Email 內容模板）#}</span>
+</span></span><span style="display:flex;"><span>您好 <span style="color:#75715e">{{</span> user.get_username <span style="color:#75715e">}}</span>，
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>請點擊以下連結重設您的密碼：
+</span></span><span style="display:flex;"><span><span style="color:#75715e">{{</span> protocol <span style="color:#75715e">}}</span>://<span style="color:#75715e">{{</span> domain <span style="color:#75715e">}}{%</span> <span style="color:#66d9ef">url</span> <span style="color:#e6db74">&#39;password_reset_confirm&#39;</span> uidb64<span style="color:#f92672">=</span>uid token<span style="color:#f92672">=</span>token <span style="color:#75715e">%}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>此連結僅可使用一次，若您未要求重設密碼，請忽略此信件。
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-django" data-lang="django"><span style="display:flex;"><span><span style="color:#75715e">{# templates/accounts/password_reset_confirm.html #}</span>
+</span></span><span style="display:flex;"><span>&lt;h2&gt;設定新密碼&lt;/h2&gt;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">{%</span> <span style="color:#66d9ef">if</span> validlink <span style="color:#75715e">%}</span>
+</span></span><span style="display:flex;"><span>  &lt;form method=&#34;post&#34;&gt;
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">{%</span> <span style="color:#66d9ef">csrf_token</span> <span style="color:#75715e">%}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">{{</span> form.as_p <span style="color:#75715e">}}</span>
+</span></span><span style="display:flex;"><span>    &lt;button type=&#34;submit&#34;&gt;確認新密碼&lt;/button&gt;
+</span></span><span style="display:flex;"><span>  &lt;/form&gt;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">{%</span> <span style="color:#66d9ef">else</span> <span style="color:#75715e">%}</span>
+</span></span><span style="display:flex;"><span>  &lt;p&gt;此重設連結已失效，請重新申請。&lt;/p&gt;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">{%</span> <span style="color:#66d9ef">endif</span> <span style="color:#75715e">%}</span>
+</span></span></code></pre></div><hr>
+<h3 id="註冊功能實作">註冊功能實作</h3>
+<p>Django 沒有提供內建的註冊 View，但提供了 <code>UserCreationForm</code> 表單類別，讓你快速實作使用者註冊功能。</p>
+<h4 id="使用-usercreationform">使用 UserCreationForm</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># views.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.contrib.auth.forms <span style="color:#f92672">import</span> UserCreationForm
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.contrib.auth <span style="color:#f92672">import</span> login
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.shortcuts <span style="color:#f92672">import</span> render, redirect
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">register_view</span>(request):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> request<span style="color:#f92672">.</span>method <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;POST&#39;</span>:
+</span></span><span style="display:flex;"><span>        form <span style="color:#f92672">=</span> UserCreationForm(request<span style="color:#f92672">.</span>POST)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> form<span style="color:#f92672">.</span>is_valid():
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># 儲存新使用者</span>
+</span></span><span style="display:flex;"><span>            user <span style="color:#f92672">=</span> form<span style="color:#f92672">.</span>save()
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># 註冊成功後自動登入</span>
+</span></span><span style="display:flex;"><span>            login(request, user)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> redirect(<span style="color:#e6db74">&#39;dashboard&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>        form <span style="color:#f92672">=</span> UserCreationForm()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> render(request, <span style="color:#e6db74">&#39;accounts/register.html&#39;</span>, {<span style="color:#e6db74">&#39;form&#39;</span>: form})
+</span></span></code></pre></div><h4 id="擴展-usercreationform-加入-email-欄位">擴展 UserCreationForm 加入 Email 欄位</h4>
+<p>預設的 <code>UserCreationForm</code> 只有 username 和 password 欄位。若需要 Email 欄位，可以繼承並擴展：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># forms.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.contrib.auth.forms <span style="color:#f92672">import</span> UserCreationForm
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.contrib.auth.models <span style="color:#f92672">import</span> User
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django <span style="color:#f92672">import</span> forms
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">CustomUserCreationForm</span>(UserCreationForm):
+</span></span><span style="display:flex;"><span>    email <span style="color:#f92672">=</span> forms<span style="color:#f92672">.</span>EmailField(
+</span></span><span style="display:flex;"><span>        required<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>,
+</span></span><span style="display:flex;"><span>        help_text<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;請輸入有效的電子郵件地址&#39;</span>
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Meta</span>:
+</span></span><span style="display:flex;"><span>        model <span style="color:#f92672">=</span> User
+</span></span><span style="display:flex;"><span>        fields <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;username&#39;</span>, <span style="color:#e6db74">&#39;email&#39;</span>, <span style="color:#e6db74">&#39;password1&#39;</span>, <span style="color:#e6db74">&#39;password2&#39;</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">clean_email</span>(self):
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;&#34;&#34;檢查 Email 是否已被使用&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>        email <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>cleaned_data<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#39;email&#39;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> User<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>filter(email<span style="color:#f92672">=</span>email)<span style="color:#f92672">.</span>exists():
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">raise</span> forms<span style="color:#f92672">.</span>ValidationError(<span style="color:#e6db74">&#39;此 Email 已被註冊&#39;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> email
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">save</span>(self, commit<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>):
+</span></span><span style="display:flex;"><span>        user <span style="color:#f92672">=</span> super()<span style="color:#f92672">.</span>save(commit<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>)
+</span></span><span style="display:flex;"><span>        user<span style="color:#f92672">.</span>email <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>cleaned_data[<span style="color:#e6db74">&#39;email&#39;</span>]
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> commit:
+</span></span><span style="display:flex;"><span>            user<span style="color:#f92672">.</span>save()
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> user
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># views.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> .forms <span style="color:#f92672">import</span> CustomUserCreationForm
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">register_view</span>(request):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> request<span style="color:#f92672">.</span>method <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;POST&#39;</span>:
+</span></span><span style="display:flex;"><span>        form <span style="color:#f92672">=</span> CustomUserCreationForm(request<span style="color:#f92672">.</span>POST)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> form<span style="color:#f92672">.</span>is_valid():
+</span></span><span style="display:flex;"><span>            user <span style="color:#f92672">=</span> form<span style="color:#f92672">.</span>save()
+</span></span><span style="display:flex;"><span>            login(request, user)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> redirect(<span style="color:#e6db74">&#39;dashboard&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>        form <span style="color:#f92672">=</span> CustomUserCreationForm()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> render(request, <span style="color:#e6db74">&#39;accounts/register.html&#39;</span>, {<span style="color:#e6db74">&#39;form&#39;</span>: form})
+</span></span></code></pre></div><p>對應的模板：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-django" data-lang="django"><span style="display:flex;"><span><span style="color:#75715e">{# templates/accounts/register.html #}</span>
+</span></span><span style="display:flex;"><span>&lt;h2&gt;建立帳號&lt;/h2&gt;
+</span></span><span style="display:flex;"><span>&lt;form method=&#34;post&#34;&gt;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">{%</span> <span style="color:#66d9ef">csrf_token</span> <span style="color:#75715e">%}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">{{</span> form.as_p <span style="color:#75715e">}}</span>
+</span></span><span style="display:flex;"><span>  &lt;button type=&#34;submit&#34;&gt;註冊&lt;/button&gt;
+</span></span><span style="display:flex;"><span>&lt;/form&gt;
+</span></span><span style="display:flex;"><span>&lt;p&gt;已有帳號？&lt;a href=&#34;<span style="color:#75715e">{%</span> <span style="color:#66d9ef">url</span> <span style="color:#e6db74">&#39;login&#39;</span> <span style="color:#75715e">%}</span>&#34;&gt;前往登入&lt;/a&gt;&lt;/p&gt;
+</span></span></code></pre></div><hr>
+<h3 id="session-安全性設定">Session 安全性設定</h3>
+<p>認證系統依賴 <strong>Session</strong> 維護登入狀態，確保 Session 的安全性非常重要：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># settings.py</span>
+</span></span><span style="display:flex;"><span>SESSION_COOKIE_HTTPONLY <span style="color:#f92672">=</span> <span style="color:#66d9ef">True</span>       <span style="color:#75715e"># 防止 JavaScript 讀取 Cookie</span>
+</span></span><span style="display:flex;"><span>SESSION_COOKIE_SECURE <span style="color:#f92672">=</span> <span style="color:#66d9ef">True</span>         <span style="color:#75715e"># 只透過 HTTPS 傳送（生產環境）</span>
+</span></span><span style="display:flex;"><span>SESSION_COOKIE_SAMESITE <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;Lax&#39;</span>     <span style="color:#75715e"># 防止 CSRF 攻擊</span>
+</span></span><span style="display:flex;"><span>SESSION_COOKIE_AGE <span style="color:#f92672">=</span> <span style="color:#ae81ff">1209600</span>         <span style="color:#75715e"># Session 有效期 14 天（單位：秒）</span>
+</span></span><span style="display:flex;"><span>SESSION_EXPIRE_AT_BROWSER_CLOSE <span style="color:#f92672">=</span> <span style="color:#66d9ef">False</span>  <span style="color:#75715e"># 關閉瀏覽器後 Session 不失效</span>
+</span></span></code></pre></div><hr>
+<h3 id="總結">總結</h3>
+<p>Django 的 Authentication 系統功能完善且開箱即用，大幅降低了實作使用者認證的工作量。以下整理本篇的核心要點：</p>
+<ol>
+<li><strong>認證系統架構</strong> 整合了 User 模型、Permission、Group 與 Session，提供從登入到權限控制的完整解決方案</li>
+<li><strong>authenticate / login / logout</strong> 三個核心函數各司其職——驗證憑證、建立登入狀態、清除 Session</li>
+<li><strong>@login_required</strong> 裝飾器與 <strong>LoginRequiredMixin</strong> 讓存取控制變得簡單，搭配 <code>LOGIN_URL</code> 設定可自訂重導向行為</li>
+<li><strong>LoginView / LogoutView</strong> 是 Django 內建的認證 CBV，只需設定模板和 URL 就能快速上線</li>
+<li><strong>密碼管理</strong> 透過 <code>set_password</code> 和 <code>check_password</code> 處理，Django 自動進行雜湊，永遠不存明碼</li>
+<li><strong>密碼重設流程</strong> 由四個內建 View 組成，包含 token 產生與驗證，只需撰寫模板即可使用</li>
+<li><strong>註冊功能</strong> 透過 <code>UserCreationForm</code> 快速實作，可繼承擴展以加入自訂欄位</li>
+</ol>
+<p>掌握了認證系統後，下一篇我們將深入探討 <strong>自訂使用者模型（Custom User Model）</strong> ，學習如何透過 <code>AbstractUser</code> 和 <code>AbstractBaseUser</code> 打造符合業務需求的使用者模型。</p></div>
+        
+        
+
+        
+        <div class="mt-8">
+          
+<div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose">
+  <div>
+    <div class="flex items-center gap-2 mb-1">
+      <a href="/about" class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">
+        BenZ
+      </a>
+      
+      <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span>
+      
+    </div>
+    <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">
+      熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。
+    </p>
+    <div class="flex items-center gap-3">
+      
+      <a href="https://github.com/benzhub" target="_blank" rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label="GitHub">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      
+      
+      
+    </div>
+  </div>
+</div>
+
+        </div>
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        
+
+
+<div>
+  <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3>
+  <div class="grid gap-2">
+    
+    <a href="http://localhost:1313/post/django/028-django-middleware/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django Middleware 中介軟體原理與實作 | Django 教學</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/17</span>
+    </a>
+    
+    <a href="http://localhost:1313/post/django/027-drf-permissions-throttling/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">DRF 權限控制與 API 限流完全指南 | Django 教學</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/16</span>
+    </a>
+    
+    <a href="http://localhost:1313/post/django/026-drf-authentication/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">DRF 認證機制：Token、JWT 與 Session 認證 | Django 教學</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/15</span>
+    </a>
+    
+  </div>
+</div>
+
+
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            
+            <a href="http://localhost:1313/post/django/028-django-middleware/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+                <span class="text-sm font-medium">Django Middleware 中介軟體原理與實作 | Django 教學</span>
+            </a>
+            
+          </div>
+          <div>
+            
+            <a href="http://localhost:1313/post/django/030-django-custom-user-model/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+                <span class="text-sm font-medium">Django 自訂使用者模型：AbstractUser 與 AbstractBaseUser | Django 教學</span>
+            </a>
+            
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        
+<script src="https://giscus.app/client.js"
+        data-repo="benzhub/benzhub.github.io"
+        data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM="
+        data-category="Announcements"
+        data-category-id="MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme="preferred_color_scheme"
+        data-lang="zh-TW"
+        crossorigin="anonymous"
+        async>
+</script>
+
+
+      </div>
+    </div>
+    
+    <div class="hidden lg:block lg:col-span-1 mt-4">
+    
+    
+            
+            <div class="widget fade-in">
+    <p class="widget-title">搜尋</p>
+    <form role="search" method="get" action="https://google.com/search">
+        <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
+        <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
+    </form>
+</div>
+
+        
+            
+            
+
+        
+            
+            
+<div class="widget fade-in">
+    <p class="widget-title">標籤</p>
+    <div class="flex flex-wrap gap-1.5">
+        <a href='/tags/80/20-%E6%B3%95%E5%89%87'>
+            <span class="tag-pill">80/20 法則</span>
+        </a>
+        <a href='/tags/acid'>
+            <span class="tag-pill">acid</span>
+        </a>
+        <a href='/tags/ai'>
+            <span class="tag-pill">ai</span>
+        </a>
+        <a href='/tags/ai-agent'>
+            <span class="tag-pill">ai agent</span>
+        </a>
+        <a href='/tags/ai-workflow'>
+            <span class="tag-pill">ai workflow</span>
+        </a>
+        <a href='/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE'>
+            <span class="tag-pill">ai 工具焦慮</span>
+        </a>
+        <a href='/tags/ai-%E6%8E%A5%E5%96%AE'>
+            <span class="tag-pill">ai 接單</span>
+        </a>
+        <a href='/tags/ai-%E7%B9%AA%E5%9C%96'>
+            <span class="tag-pill">ai 繪圖</span>
+        </a>
+        <a href='/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA'>
+            <span class="tag-pill">ai 虛擬人</span>
+        </a>
+        <a href='/tags/ai-%E8%A1%8C%E9%8A%B7'>
+            <span class="tag-pill">ai 行銷</span>
+        </a>
+        <a href='/tags/ai-%E8%A8%AD%E8%A8%88'>
+            <span class="tag-pill">ai 設計</span>
+        </a>
+        <a href='/tags/ai-%E8%AE%8A%E7%8F%BE'>
+            <span class="tag-pill">ai 變現</span>
+        </a>
+        <a href='/tags/ai-%E8%B3%BA%E9%8C%A2'>
+            <span class="tag-pill">ai 賺錢</span>
+        </a>
+        <a href='/tags/ai-income'>
+            <span class="tag-pill">ai-income</span>
+        </a>
+        <a href='/tags/ai-insights'>
+            <span class="tag-pill">ai-insights</span>
+        </a>
+        <a href='/tags/api'>
+            <span class="tag-pill">api</span>
+        </a>
+        <a href='/tags/architecture'>
+            <span class="tag-pill">architecture</span>
+        </a>
+        <a href='/tags/autovacuum'>
+            <span class="tag-pill">autovacuum</span>
+        </a>
+        <a href='/tags/background-processes'>
+            <span class="tag-pill">background-processes</span>
+        </a>
+        <a href='/tags/big-o'>
+            <span class="tag-pill">big o</span>
+        </a>
+    </div>
+</div>
+
+
+        
+            
+            
+<div class="widget fade-in">
+    <p class="widget-title">文章系列</p>
+    <div class="flex flex-wrap gap-1.5">
+        
+        
+        
+        
+        <a href='/post/postgresql/'>
+            <span class="tag-pill">PostgreSQL (13)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/javascript/'>
+            <span class="tag-pill">JavaScript (68)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/django/'>
+            <span class="tag-pill">Django (30)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/python/'>
+            <span class="tag-pill">Python (37)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/htmlcss/'>
+            <span class="tag-pill">HTML &amp; CSS (23)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/linux/'>
+            <span class="tag-pill">Linux (22)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/git/'>
+            <span class="tag-pill">Git (18)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/ai-insights/'>
+            <span class="tag-pill">AI Insights (13)</span>
+        </a>
+        
+        
+    </div>
+</div>
+
+
+        
+            
+            
+
+<div class="widget fade-in">
+    <p class="widget-title">最新文章</p>
+    <div class="flex flex-col gap-1">
+        <a href="/post/postgresql/013-ddl-schema/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/19
+            </p>
+        </a>
+        <a href="/post/django/030-django-custom-user-model/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django 自訂使用者模型：AbstractUser 與 AbstractBaseUser | Django 教學</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/19
+            </p>
+        </a>
+        <a href="/post/javascript/data-structures--algorithms/006-heap-priority-queue/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">堆積與優先佇列 — Min/Max Heap 原理與 Heap Sort 完整實作 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/19
+            </p>
+        </a>
+        <a href="/post/django/029-django-authentication/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Authentication 使用者認證系統完全指南 | Django 教學</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/18
+            </p>
+        </a>
+        <a href="/post/postgresql/012-data-types/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/18
+            </p>
+        </a>
+    </div>
+</div>
+
+        
+    
+</div>
+
+    
+</div>
+
+        </div>
+    </div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]">
+    
+    <p>&copy; 2026 <a href="http://localhost:1313/" class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p>
+</footer>
+
+
+<script>
+    (function (window, document) {
+        function main() {
+            var ad = document.createElement('script');
+            ad.async = true;
+            ad.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606';
+            ad.crossOrigin = "anonymous";
+            var sc = document.getElementsByTagName('script')[0];
+            sc.parentNode.insertBefore(ad, sc);
+        }
+        var lazyLoad = false;
+        function onLazyLoad() {
+            if (lazyLoad === false) {
+                lazyLoad = true;
+                window.removeEventListener('scroll', onLazyLoad);
+                window.removeEventListener('mousemove', onLazyLoad);
+                window.removeEventListener('mousedown', onLazyLoad);
+                window.removeEventListener('touchstart', onLazyLoad);
+                window.removeEventListener('keydown', onLazyLoad);
+                main();
+            }
+        }
+        window.addEventListener('scroll', onLazyLoad);
+        window.addEventListener('mousemove', onLazyLoad);
+        window.addEventListener('mousedown', onLazyLoad);
+        window.addEventListener('touchstart', onLazyLoad);
+        window.addEventListener('keydown', onLazyLoad);
+        window.addEventListener('load', function () {
+            if (window.pageYOffset) {
+                onLazyLoad();
+                window.setTimeout(onLazyLoad, 3000);
+            }
+        });
+    })(window, document);
+</script>
+
+
+<script>
+    
+    var icon = document.getElementById("icon");
+    var icon2 = document.getElementById("icon2");
+    if (document.documentElement.classList.contains("dark") || localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+        if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+    function toggleDarkMode() {
+        if (document.documentElement.classList.contains('dark')) {
+            if (icon) { icon.classList.remove("icon-sun"); icon.classList.add("icon-moon"); }
+            if (icon2) { icon2.classList.remove("icon-sun"); icon2.classList.add("icon-moon"); }
+            document.documentElement.classList.remove('dark');
+            localStorage.theme = 'light';
+        } else {
+            if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+            if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+            document.documentElement.classList.add('dark');
+            localStorage.theme = 'dark';
+        }
+    }
+
+    
+    document.addEventListener('DOMContentLoaded', function () {
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0 });
+
+        document.querySelectorAll('.fade-in').forEach(function (el) {
+            observer.observe(el);
+        });
+    });
+</script>
+</body>
+
+</html>

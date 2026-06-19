@@ -1,37 +1,508 @@
-<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>DRF 權限控制與 API 限流完全指南 | Django 教學 | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="DRF 權限控制與 API 限流完全指南 | Django 教學 | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="完整解析 DRF Permissions 權限控制機制，涵蓋內建權限類別、自訂 Permission 與 Object-Level Permissions 物件層級權限，深入 Throttling 限流設定包含 AnonRateThrottle、UserRateThrottle 與 ScopedRateThrottle，打造安全且穩定的 API 服務。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="完整解析 DRF Permissions 權限控制機制，涵蓋內建權限類別、自訂 Permission 與 Object-Level Permissions 物件層級權限，深入 Throttling 限流設定包含 AnonRateThrottle、UserRateThrottle 與 ScopedRateThrottle，打造安全且穩定的 API 服務。"><meta property="og:url" content="https://benzhub.github.io/post/django/027-drf-permissions-throttling/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/django/027-drf-permissions-throttling/><meta name=twitter:description content="完整解析 DRF Permissions 權限控制機制，涵蓋內建權限類別、自訂 Permission 與 Object-Level Permissions 物件層級權限，深入 Throttling 限流設定包含 AnonRateThrottle、UserRateThrottle 與 ScopedRateThrottle，打造安全且穩定的 API 服務。"><meta property="article:published_time" content="2026-06-16T00:00:00+00:00"><meta property="article:updated_time" content="2026-05-26T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/django/027-DRF-Permissions-Throttling.png"><meta property="og:image:url" content="https://benzhub.github.io/img/django/027-DRF-Permissions-Throttling.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
-<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/django/027-drf-permissions-throttling/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/django/027-drf-permissions-throttling/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"DRF 權限控制與 API 限流完全指南 | Django 教學\"","description":"\"完整解析 DRF Permissions 權限控制機制，涵蓋內建權限類別、自訂 Permission 與 Object-Level Permissions 物件層級權限，深入 Throttling 限流設定包含 AnonRateThrottle、UserRateThrottle 與 ScopedRateThrottle，打造安全且穩定的 API 服務。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-06-16T00:00:00\u002b00:00","dateModified":"2026-05-26T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/django\/027-DRF-Permissions-Throttling.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/django\/027-drf-permissions-throttling\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/django\/"},{"@type":"ListItem","position":3,"name":"\"DRF 權限控制與 API 限流完全指南 | Django 教學\""}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"\"has_permission 和 has_object_permission 有什麼差別？\"","acceptedAnswer":{"@type":"Answer","text":"\"has_permission 是全域權限檢查，在每次請求進入 View 時都會執行，用於判斷用戶是否有權存取該 API 端點。has_object_permission 是物件層級權限檢查，只有在 View 呼叫 get_object() 取得特定物件時才會執行，用於判斷用戶是否有權操作該特定物件。例如「只有文章作者可以編輯自己的文章」就需要在 has_object_permission 中實作。\""}},{"@type":"Question","name":"\"DRF 多個 Permission 之間是 AND 還是 OR 邏輯？\"","acceptedAnswer":{"@type":"Answer","text":"\"DRF 預設的 permission_classes 列表中，多個 Permission 之間是 AND 邏輯，也就是所有 Permission 都必須通過才允許存取。如果需要 OR 邏輯（任一通過即可），需要自訂一個組合 Permission 類別，在其中手動實作 OR 判斷。也可以使用第三方套件 django-rest-condition 來簡化 OR 組合。\""}},{"@type":"Question","name":"\"Throttling 限流的計數器儲存在哪裡？\"","acceptedAnswer":{"@type":"Answer","text":"\"DRF 預設使用 Django 的快取系統（cache framework）來儲存限流計數器。在開發環境中預設使用本地記憶體快取（LocMemCache），正式環境建議使用 Redis 或 Memcached 作為快取後端。可以在 settings.py 的 CACHES 設定中指定快取後端，這樣限流計數器在多伺服器部署時也能共享狀態。\""}}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
-</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
-</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
-</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
-<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
-<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-<span>🌐</span>
-<span>繁體中文</span>
-<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
-<a href=https://benzhub.github.io/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-<a href=https://benzhub.github.io/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
-<a href=https://benzhub.github.io/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-<a href=https://benzhub.github.io/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
-</button>
-<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
-<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
-</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
-</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
-</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
-<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-<span>🌐</span>
-<span>繁體中文</span>
-<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
-<a href=https://benzhub.github.io/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-<a href=https://benzhub.github.io/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
-<a href=https://benzhub.github.io/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-<a href=https://benzhub.github.io/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">DRF 權限控制與 API 限流完全指南 | Django 教學</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/16
-</span><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001.0 004.582 9m0 0H9m11 11v-5h-.581m0 0A8.003 8.003.0 014.062 13m15.357 2H15"/></svg>
-2026/05/26</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/python class="tag-pill no-underline">python</a>
-<a href=/tags/django class="tag-pill no-underline">django</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/django/027-DRF-Permissions-Throttling.png alt="DRF 權限控制與 API 限流完全指南 | Django 教學"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p>上一篇文章解決了「<strong>你是誰？</strong>」的認證問題，但光知道用戶身份還不夠 &ndash; 我們還需要控制「<strong>你能做什麼？</strong>」以及「<strong>你能做多少次？</strong>」。DRF 的 <strong>Permissions</strong> 權限機制決定了已認證的用戶可以執行哪些操作，而 <strong>Throttling</strong> 限流機制則防止 API 被濫用或遭受暴力攻擊。這三層安全機制（Authentication → Permission → Throttle）環環相扣，共同構成了一個完整的 API 安全防護體系。</p></blockquote><h3 id=權限系統概覽>權限系統概覽</h3><p>DRF 的每個 HTTP 請求在進入 View 的業務邏輯之前，都會依序通過三層安全檢查：</p><pre tabindex=0><code>HTTP Request
+<!DOCTYPE html>
+
+<html lang="zh-TW">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><title>DRF 權限控制與 API 限流完全指南 | Django 教學 | BenzHub</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="apple-touch-icon" sizes="180x180" href='/favicon/apple-touch-icon.png'>
+    <link rel="icon" type="image/png" sizes="32x32" href='/favicon/favicon-32x32.png'>
+    <link rel="icon" type="image/png" sizes="16x16" href='/favicon/favicon-16x16.png'>
+    <link rel="manifest" href='/favicon/site.webmanifest' />
+    <link rel="mask-icon" href=' /favicon/safari-pinned-tab.svg' color="#5bbad5" />
+    <link rel="shortcut icon" href='/favicon/favicon.ico' />
+    <meta name="theme-color" content="#fafafa">
+    <meta property="og:title" content="DRF 權限控制與 API 限流完全指南 | Django 教學 | BenzHub" />
+    
+    
+    <link rel="stylesheet" href="/css/style.css" />
+    
+    <link href=' /css/blonde.min.css' rel="stylesheet" type="text/css" media="print"
+        onload="this.media=' all'">
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+
+<meta name="description" content="完整解析 DRF Permissions 權限控制機制，涵蓋內建權限類別、自訂 Permission 與 Object-Level Permissions 物件層級權限，深入 Throttling 限流設定包含 AnonRateThrottle、UserRateThrottle 與 ScopedRateThrottle，打造安全且穩定的 API 服務。">
+<meta property="og:site_name" content="BenzHub">
+<meta property="og:description" content="完整解析 DRF Permissions 權限控制機制，涵蓋內建權限類別、自訂 Permission 與 Object-Level Permissions 物件層級權限，深入 Throttling 限流設定包含 AnonRateThrottle、UserRateThrottle 與 ScopedRateThrottle，打造安全且穩定的 API 服務。">
+<meta property="og:url" content="http://localhost:1313/post/django/027-drf-permissions-throttling/">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="zh_TW">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="">
+
+<link rel="canonical" href="http://localhost:1313/post/django/027-drf-permissions-throttling/">
+
+<meta name="twitter:description" content="完整解析 DRF Permissions 權限控制機制，涵蓋內建權限類別、自訂 Permission 與 Object-Level Permissions 物件層級權限，深入 Throttling 限流設定包含 AnonRateThrottle、UserRateThrottle 與 ScopedRateThrottle，打造安全且穩定的 API 服務。">
+<meta property="article:published_time" content="2026-06-16T00:00:00&#43;00:00">
+<meta property="article:updated_time" content="2026-05-26T00:00:00&#43;00:00">
+
+
+
+
+
+    
+<meta property="og:image" content="http://localhost:1313/img/django/027-DRF-Permissions-Throttling.png">
+<meta property="og:image:url" content="http://localhost:1313/img/django/027-DRF-Permissions-Throttling.png">
+    
+
+    
+    <link rel="stylesheet" href='/css/custom.css'>
+    <i class="dark hidden"></i>
+    
+<link rel="alternate" hreflang="zh-TW" href="http://localhost:1313/post/django/027-drf-permissions-throttling/" />
+
+<link rel="alternate" hreflang="x-default" href="http://localhost:1313/post/django/027-drf-permissions-throttling/" />
+
+    
+
+
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "\"DRF 權限控制與 API 限流完全指南 | Django 教學\"",
+  "description": "\"完整解析 DRF Permissions 權限控制機制，涵蓋內建權限類別、自訂 Permission 與 Object-Level Permissions 物件層級權限，深入 Throttling 限流設定包含 AnonRateThrottle、UserRateThrottle 與 ScopedRateThrottle，打造安全且穩定的 API 服務。\"",
+  "author": {
+    "@type": "Person",
+    "name": "\"BenzHub\"",
+    "url": "http:\/\/localhost:1313\/about",
+    "jobTitle": "\"Software Developer\"",
+    "sameAs": [
+      "\"https://github.com/benzhub\""
+    ]
+  },
+  "datePublished": "2026-06-16T00:00:00\u002b00:00",
+  "dateModified": "2026-05-26T00:00:00\u002b00:00",
+  "image": "http:\/\/localhost:1313\/img\/django\/027-DRF-Permissions-Throttling.png",
+  "publisher": {
+    "@type": "Organization",
+    "name": "\"BenzHub\"",
+    "url": "\"http://localhost:1313/\"",
+    "sameAs": [
+      "\"https://github.com/benzhub\""
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http:\/\/localhost:1313\/post\/django\/027-drf-permissions-throttling\/"
+  },
+  "inLanguage": "zh-TW"
+}
+</script>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "\"BenzHub\"",
+      "item": "http:\/\/localhost:1313\/"
+    }
+    
+    
+      
+      
+    ,{
+      "@type": "ListItem",
+      "position": 2,
+      "name": "\"Blog\"",
+      "item": "http:\/\/localhost:1313\/post\/django\/"
+    }
+      
+      
+    
+    ,{
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "\"DRF 權限控制與 API 限流完全指南 | Django 教學\""
+    }
+  ]
+}
+</script>
+
+
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    
+    
+    {
+      "@type": "Question",
+      "name": "\"has_permission 和 has_object_permission 有什麼差別？\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"has_permission 是全域權限檢查，在每次請求進入 View 時都會執行，用於判斷用戶是否有權存取該 API 端點。has_object_permission 是物件層級權限檢查，只有在 View 呼叫 get_object() 取得特定物件時才會執行，用於判斷用戶是否有權操作該特定物件。例如「只有文章作者可以編輯自己的文章」就需要在 has_object_permission 中實作。\""
+      }
+    }
+    
+    ,
+    {
+      "@type": "Question",
+      "name": "\"DRF 多個 Permission 之間是 AND 還是 OR 邏輯？\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"DRF 預設的 permission_classes 列表中，多個 Permission 之間是 AND 邏輯，也就是所有 Permission 都必須通過才允許存取。如果需要 OR 邏輯（任一通過即可），需要自訂一個組合 Permission 類別，在其中手動實作 OR 判斷。也可以使用第三方套件 django-rest-condition 來簡化 OR 組合。\""
+      }
+    }
+    
+    ,
+    {
+      "@type": "Question",
+      "name": "\"Throttling 限流的計數器儲存在哪裡？\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"DRF 預設使用 Django 的快取系統（cache framework）來儲存限流計數器。在開發環境中預設使用本地記憶體快取（LocMemCache），正式環境建議使用 Redis 或 Memcached 作為快取後端。可以在 settings.py 的 CACHES 設定中指定快取後端，這樣限流計數器在多伺服器部署時也能共享狀態。\""
+      }
+    }
+    
+  ]
+}
+</script>
+
+
+
+
+
+</head>
+<body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class="site-nav" id="siteNav">
+    <div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full">
+        
+        <a href="http://localhost:1313/" class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">
+            BenzHub
+        </a>
+
+        
+        <div class="hidden md:flex items-center gap-6">
+            
+            <a href="/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                首頁
+            </a>
+            
+            <a href="/about/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                關於
+            </a>
+            
+            <a href="/contact/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                聯絡
+            </a>
+            
+            <a href="/resourses/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                資源
+            </a>
+            
+
+            
+            <div class="flex items-center gap-2">
+                <form class="flex items-center" role="search" method="get" action="https://google.com/search" id="navSearchForm">
+                    <input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50"
+                        type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋" id="navSearchInput">
+                    <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
+                </form>
+                <button onclick="toggleNavSearch()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+                    <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                    </svg>
+                </button>
+            </div>
+
+            
+            <span class="text-zinc-200 dark:text-zinc-700">|</span>
+
+            
+            
+
+
+
+
+<div class="lang-switcher relative hidden md:block">
+    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+        <span>🌐</span>
+        <span>繁體中文</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
+        
+            
+            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
+    <div class="flex gap-2">
+        
+            
+            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+            
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon2" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+        </div>
+
+        
+        <div class="flex md:hidden items-center gap-1">
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+            <button id="hamburgerbtn" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Menu">
+                <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    
+    <div class="mobile-menu md:hidden" id="mobileMenu">
+        
+        <a href="/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            首頁
+        </a>
+        
+        <a href="/about/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            關於
+        </a>
+        
+        <a href="/contact/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            聯絡
+        </a>
+        
+        <a href="/resourses/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            資源
+        </a>
+        
+        <form class="mt-2" role="search" method="get" action="https://google.com/search">
+            <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
+            <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
+        </form>
+        
+        
+
+
+
+
+<div class="lang-switcher relative hidden md:block">
+    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+        <span>🌐</span>
+        <span>繁體中文</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
+        
+            
+            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
+    <div class="flex gap-2">
+        
+            
+            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+    </div>
+</nav>
+
+<script>
+    
+    document.getElementById('hamburgerbtn').addEventListener('click', function () {
+        document.getElementById('mobileMenu').classList.toggle('active');
+    });
+
+    
+    window.addEventListener('scroll', function () {
+        var nav = document.getElementById('siteNav');
+        if (window.scrollY > 50) {
+            nav.classList.add('scrolled');
+        } else {
+            nav.classList.remove('scrolled');
+        }
+    });
+
+    
+    function toggleNavSearch() {
+        var input = document.getElementById('navSearchInput');
+        input.classList.toggle('expanded');
+        if (input.classList.contains('expanded')) {
+            input.focus();
+        }
+    }
+
+    
+    function toggleLangMenu() {
+        var dropdown = document.getElementById('langDropdown');
+        dropdown.classList.toggle('hidden');
+    }
+
+    
+    document.addEventListener('click', function (e) {
+        
+        var form = document.getElementById('navSearchForm');
+        var input = document.getElementById('navSearchInput');
+        if (form && input && !form.contains(e.target) && !e.target.closest('[aria-label="Toggle Search"]')) {
+            input.classList.remove('expanded');
+        }
+        
+        var langSwitcher = e.target.closest('.lang-switcher');
+        if (!langSwitcher) {
+            var dropdown = document.getElementById('langDropdown');
+            if (dropdown) dropdown.classList.add('hidden');
+        }
+    });
+</script>
+<div class="nav-spacer"></div>
+    <div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id="content">
+        <div class="lg:mx-5">
+<div class="grid grid-cols-3 gap-6">
+  
+  <div class="col-span-3 lg:col-span-2">
+  
+      
+      <div class="post-detail fade-in my-4">
+        <h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">DRF 權限控制與 API 限流完全指南 | Django 教學</h1>
+        <div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4">
+            <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/16
+            </span>
+            
+            <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                2026/05/26
+            </span>
+            
+        </div>
+        
+        <div class="flex flex-wrap gap-1.5 mb-5">
+            
+            <a href='/tags/python' class="tag-pill no-underline">python</a>
+            
+            <a href='/tags/django' class="tag-pill no-underline">django</a>
+            
+        </div>
+        
+        
+        <img class="py-4 m-auto rounded-lg thumb-img" src="http://localhost:1313/img/django/027-DRF-Permissions-Throttling.png" alt="DRF 權限控制與 API 限流完全指南 | Django 教學">
+        
+        
+        <div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote>
+<p>上一篇文章解決了「<strong>你是誰？</strong>」的認證問題，但光知道用戶身份還不夠 &ndash; 我們還需要控制「<strong>你能做什麼？</strong>」以及「<strong>你能做多少次？</strong>」。DRF 的 <strong>Permissions</strong> 權限機制決定了已認證的用戶可以執行哪些操作，而 <strong>Throttling</strong> 限流機制則防止 API 被濫用或遭受暴力攻擊。這三層安全機制（Authentication → Permission → Throttle）環環相扣，共同構成了一個完整的 API 安全防護體系。</p>
+</blockquote>
+<h3 id="權限系統概覽">權限系統概覽</h3>
+<p>DRF 的每個 HTTP 請求在進入 View 的業務邏輯之前，都會依序通過三層安全檢查：</p>
+<pre tabindex="0"><code>HTTP Request
      │
      ▼
   Authentication（認證）→ 你是誰？         → 失敗：401 Unauthorized
@@ -44,444 +515,988 @@
      │
      ▼
   View 業務邏輯
-</code></pre><p>Permission 層的特點：</p><ul><li>在 <strong>認證之後</strong> 執行，此時 <code>request.user</code> 已經確定</li><li>多個 Permission 之間是 <strong>AND 邏輯</strong>，全部通過才允許</li><li>分為 <strong>全域權限</strong>（<code>has_permission</code>）和 <strong>物件層級權限</strong>（<code>has_object_permission</code>）</li></ul><hr><h3 id=內建權限類別>內建權限類別</h3><p>DRF 提供了四個常用的內建 Permission 類別：</p><h4 id=allowany>AllowAny</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework.permissions <span style=color:#f92672>import</span> AllowAny
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>PublicArticleView</span>(generics<span style=color:#f92672>.</span>ListAPIView):
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;任何人都可以存取，包含未認證的匿名用戶&#34;&#34;&#34;</span>
-</span></span><span style=display:flex><span>    permission_classes <span style=color:#f92672>=</span> [AllowAny]
-</span></span><span style=display:flex><span>    queryset <span style=color:#f92672>=</span> Article<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>filter(is_published<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
-</span></span><span style=display:flex><span>    serializer_class <span style=color:#f92672>=</span> ArticleSerializer
-</span></span></code></pre></div><h4 id=isauthenticated>IsAuthenticated</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework.permissions <span style=color:#f92672>import</span> IsAuthenticated
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>MyArticleView</span>(generics<span style=color:#f92672>.</span>ListCreateAPIView):
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;只有已登入的用戶可以存取&#34;&#34;&#34;</span>
-</span></span><span style=display:flex><span>    permission_classes <span style=color:#f92672>=</span> [IsAuthenticated]
-</span></span><span style=display:flex><span>    serializer_class <span style=color:#f92672>=</span> ArticleSerializer
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>get_queryset</span>(self):
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> Article<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>filter(author<span style=color:#f92672>=</span>self<span style=color:#f92672>.</span>request<span style=color:#f92672>.</span>user)
-</span></span></code></pre></div><h4 id=isadminuser>IsAdminUser</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework.permissions <span style=color:#f92672>import</span> IsAdminUser
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>AdminDashboardView</span>(APIView):
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;只有 is_staff=True 的管理員可以存取&#34;&#34;&#34;</span>
-</span></span><span style=display:flex><span>    permission_classes <span style=color:#f92672>=</span> [IsAdminUser]
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>get</span>(self, request):
-</span></span><span style=display:flex><span>        stats <span style=color:#f92672>=</span> {
-</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;total_articles&#39;</span>: Article<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>count(),
-</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;total_users&#39;</span>: User<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>count(),
-</span></span><span style=display:flex><span>        }
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> Response(stats)
-</span></span></code></pre></div><h4 id=isauthenticatedorreadonly>IsAuthenticatedOrReadOnly</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework.permissions <span style=color:#f92672>import</span> IsAuthenticatedOrReadOnly
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ArticleViewSet</span>(viewsets<span style=color:#f92672>.</span>ModelViewSet):
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;
-</span></span></span><span style=display:flex><span><span style=color:#e6db74>    未登入用戶只能讀取（GET、HEAD、OPTIONS）
-</span></span></span><span style=display:flex><span><span style=color:#e6db74>    已登入用戶可以執行所有操作（包含 POST、PUT、DELETE）
-</span></span></span><span style=display:flex><span><span style=color:#e6db74>    &#34;&#34;&#34;</span>
-</span></span><span style=display:flex><span>    permission_classes <span style=color:#f92672>=</span> [IsAuthenticatedOrReadOnly]
-</span></span><span style=display:flex><span>    queryset <span style=color:#f92672>=</span> Article<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>all()
-</span></span><span style=display:flex><span>    serializer_class <span style=color:#f92672>=</span> ArticleSerializer
-</span></span></code></pre></div><p>四種內建權限的比較：</p><table><thead><tr><th>權限類別</th><th>匿名讀取</th><th>匿名寫入</th><th>認證讀取</th><th>認證寫入</th><th>管理員</th></tr></thead><tbody><tr><td>AllowAny</td><td>O</td><td>O</td><td>O</td><td>O</td><td>O</td></tr><tr><td>IsAuthenticated</td><td>X</td><td>X</td><td>O</td><td>O</td><td>O</td></tr><tr><td>IsAdminUser</td><td>X</td><td>X</td><td>X</td><td>X</td><td>O</td></tr><tr><td>IsAuthenticatedOrReadOnly</td><td>O</td><td>X</td><td>O</td><td>O</td><td>O</td></tr></tbody></table><hr><h3 id=permission_classes-設定>permission_classes 設定</h3><p>Permission 可以在兩個層級設定：全域和 View 層級。</p><h4 id=全域設定>全域設定</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># settings.py</span>
-</span></span><span style=display:flex><span>REST_FRAMEWORK <span style=color:#f92672>=</span> {
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;DEFAULT_PERMISSION_CLASSES&#39;</span>: [
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;rest_framework.permissions.IsAuthenticated&#39;</span>,  <span style=color:#75715e># 預設所有 API 都需要認證</span>
-</span></span><span style=display:flex><span>    ],
-</span></span><span style=display:flex><span>}
-</span></span></code></pre></div><h4 id=view-層級覆寫>View 層級覆寫</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework.permissions <span style=color:#f92672>import</span> AllowAny, IsAuthenticated, IsAdminUser
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ArticleViewSet</span>(viewsets<span style=color:#f92672>.</span>ModelViewSet):
-</span></span><span style=display:flex><span>    queryset <span style=color:#f92672>=</span> Article<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>all()
-</span></span><span style=display:flex><span>    serializer_class <span style=color:#f92672>=</span> ArticleSerializer
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>get_permissions</span>(self):
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;根據不同的 action 動態設定權限&#34;&#34;&#34;</span>
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> self<span style=color:#f92672>.</span>action <span style=color:#f92672>==</span> <span style=color:#e6db74>&#39;list&#39;</span>:
-</span></span><span style=display:flex><span>            <span style=color:#75715e># 列表：任何人都可以看</span>
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> [AllowAny()]
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>elif</span> self<span style=color:#f92672>.</span>action <span style=color:#f92672>==</span> <span style=color:#e6db74>&#39;create&#39;</span>:
-</span></span><span style=display:flex><span>            <span style=color:#75715e># 建立：需要登入</span>
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> [IsAuthenticated()]
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>elif</span> self<span style=color:#f92672>.</span>action <span style=color:#f92672>in</span> (<span style=color:#e6db74>&#39;update&#39;</span>, <span style=color:#e6db74>&#39;partial_update&#39;</span>, <span style=color:#e6db74>&#39;destroy&#39;</span>):
-</span></span><span style=display:flex><span>            <span style=color:#75715e># 修改/刪除：需要是作者（自訂權限，下節說明）</span>
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> [IsAuthenticated(), IsAuthorOrReadOnly()]
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> [IsAuthenticated()]
-</span></span></code></pre></div><hr><h3 id=自訂-permission-類別>自訂 Permission 類別</h3><p>當內建權限不足以滿足需求時，你可以繼承 <code>BasePermission</code> 建立自訂權限。</p><h4 id=has_permission-vs-has_object_permission>has_permission vs has_object_permission</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework.permissions <span style=color:#f92672>import</span> BasePermission, SAFE_METHODS
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>IsAuthorOrReadOnly</span>(BasePermission):
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;
-</span></span></span><span style=display:flex><span><span style=color:#e6db74>    物件級權限：
-</span></span></span><span style=display:flex><span><span style=color:#e6db74>    - 任何人可以讀取（GET、HEAD、OPTIONS）
-</span></span></span><span style=display:flex><span><span style=color:#e6db74>    - 只有作者可以修改或刪除
-</span></span></span><span style=display:flex><span><span style=color:#e6db74>    &#34;&#34;&#34;</span>
-</span></span><span style=display:flex><span>    <span style=color:#75715e># 權限被拒絕時的錯誤訊息</span>
-</span></span><span style=display:flex><span>    message <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;只有文章作者才能執行此操作。&#39;</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>has_permission</span>(self, request, view):
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;
-</span></span></span><span style=display:flex><span><span style=color:#e6db74>        全域權限檢查（每次請求都會執行）
-</span></span></span><span style=display:flex><span><span style=color:#e6db74>        - 安全方法（GET、HEAD、OPTIONS）：允許所有人
-</span></span></span><span style=display:flex><span><span style=color:#e6db74>        - 寫入方法（POST、PUT、DELETE）：需要已認證
-</span></span></span><span style=display:flex><span><span style=color:#e6db74>        &#34;&#34;&#34;</span>
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> request<span style=color:#f92672>.</span>method <span style=color:#f92672>in</span> SAFE_METHODS:
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>True</span>
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> request<span style=color:#f92672>.</span>user <span style=color:#f92672>and</span> request<span style=color:#f92672>.</span>user<span style=color:#f92672>.</span>is_authenticated
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>has_object_permission</span>(self, request, view, obj):
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;
-</span></span></span><span style=display:flex><span><span style=color:#e6db74>        物件級權限檢查（只有在 get_object() 時執行）
-</span></span></span><span style=display:flex><span><span style=color:#e6db74>        - 安全方法：允許所有人
-</span></span></span><span style=display:flex><span><span style=color:#e6db74>        - 寫入方法：只有作者允許
-</span></span></span><span style=display:flex><span><span style=color:#e6db74>        &#34;&#34;&#34;</span>
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> request<span style=color:#f92672>.</span>method <span style=color:#f92672>in</span> SAFE_METHODS:
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>True</span>
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> obj<span style=color:#f92672>.</span>author <span style=color:#f92672>==</span> request<span style=color:#f92672>.</span>user
-</span></span></code></pre></div><p>在 ViewSet 中使用：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ArticleViewSet</span>(viewsets<span style=color:#f92672>.</span>ModelViewSet):
-</span></span><span style=display:flex><span>    queryset <span style=color:#f92672>=</span> Article<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>all()
-</span></span><span style=display:flex><span>    serializer_class <span style=color:#f92672>=</span> ArticleSerializer
-</span></span><span style=display:flex><span>    permission_classes <span style=color:#f92672>=</span> [IsAuthenticated, IsAuthorOrReadOnly]
-</span></span><span style=display:flex><span>    <span style=color:#75715e># AND 邏輯：用戶必須已認證 AND 是作者才能修改</span>
-</span></span></code></pre></div><h4 id=更多自訂權限範例>更多自訂權限範例</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>IsAdminOrReadOnly</span>(BasePermission):
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;只有管理員可以寫入，所有人可以讀取&#34;&#34;&#34;</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>has_permission</span>(self, request, view):
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> request<span style=color:#f92672>.</span>method <span style=color:#f92672>in</span> SAFE_METHODS:
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>True</span>
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> request<span style=color:#f92672>.</span>user <span style=color:#f92672>and</span> request<span style=color:#f92672>.</span>user<span style=color:#f92672>.</span>is_staff
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>IsPremiumUser</span>(BasePermission):
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;只有付費用戶可以存取&#34;&#34;&#34;</span>
-</span></span><span style=display:flex><span>    message <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;此功能僅限付費用戶使用。&#39;</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>has_permission</span>(self, request, view):
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> (
-</span></span><span style=display:flex><span>            request<span style=color:#f92672>.</span>user <span style=color:#f92672>and</span>
-</span></span><span style=display:flex><span>            request<span style=color:#f92672>.</span>user<span style=color:#f92672>.</span>is_authenticated <span style=color:#f92672>and</span>
-</span></span><span style=display:flex><span>            hasattr(request<span style=color:#f92672>.</span>user, <span style=color:#e6db74>&#39;profile&#39;</span>) <span style=color:#f92672>and</span>
-</span></span><span style=display:flex><span>            request<span style=color:#f92672>.</span>user<span style=color:#f92672>.</span>profile<span style=color:#f92672>.</span>is_premium
-</span></span><span style=display:flex><span>        )
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>IsOwnerOrAdmin</span>(BasePermission):
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;物件擁有者或管理員可以操作&#34;&#34;&#34;</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>has_object_permission</span>(self, request, view, obj):
-</span></span><span style=display:flex><span>        <span style=color:#75715e># 管理員可以操作任何物件</span>
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> request<span style=color:#f92672>.</span>user<span style=color:#f92672>.</span>is_staff:
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>True</span>
-</span></span><span style=display:flex><span>        <span style=color:#75715e># 一般用戶只能操作自己的物件</span>
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> obj<span style=color:#f92672>.</span>owner <span style=color:#f92672>==</span> request<span style=color:#f92672>.</span>user
-</span></span></code></pre></div><hr><h3 id=object-level-permissions物件層級權限>Object-Level Permissions（物件層級權限）</h3><p>物件層級權限在 <code>get_object()</code> 被呼叫時自動觸發。需要注意的是，<strong>列表操作（list）不會觸發物件層級權限</strong>，因為 list 不會呼叫 <code>get_object()</code>。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ArticleViewSet</span>(viewsets<span style=color:#f92672>.</span>ModelViewSet):
-</span></span><span style=display:flex><span>    queryset <span style=color:#f92672>=</span> Article<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>all()
-</span></span><span style=display:flex><span>    serializer_class <span style=color:#f92672>=</span> ArticleSerializer
-</span></span><span style=display:flex><span>    permission_classes <span style=color:#f92672>=</span> [IsAuthenticated, IsAuthorOrReadOnly]
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>get_queryset</span>(self):
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;
-</span></span></span><span style=display:flex><span><span style=color:#e6db74>        列表操作的權限控制：透過過濾 queryset 實現
-</span></span></span><span style=display:flex><span><span style=color:#e6db74>        管理員可以看到所有文章，一般用戶只能看到公開文章和自己的文章
-</span></span></span><span style=display:flex><span><span style=color:#e6db74>        &#34;&#34;&#34;</span>
-</span></span><span style=display:flex><span>        user <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>request<span style=color:#f92672>.</span>user
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> user<span style=color:#f92672>.</span>is_staff:
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> Article<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>all()
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>        <span style=color:#f92672>from</span> django.db.models <span style=color:#f92672>import</span> Q
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> Article<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>filter(
-</span></span><span style=display:flex><span>            Q(is_published<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>) <span style=color:#f92672>|</span> Q(author<span style=color:#f92672>=</span>user)
-</span></span><span style=display:flex><span>        )
-</span></span></code></pre></div><p>物件層級權限的執行時機：</p><table><thead><tr><th>操作</th><th>呼叫 get_object()</th><th>觸發 has_object_permission</th></tr></thead><tbody><tr><td>list</td><td>否</td><td>否（需透過 queryset 過濾）</td></tr><tr><td>create</td><td>否</td><td>否</td></tr><tr><td>retrieve</td><td>是</td><td>是</td></tr><tr><td>update / partial_update</td><td>是</td><td>是</td></tr><tr><td>destroy</td><td>是</td><td>是</td></tr></tbody></table><hr><h3 id=djangomodelpermissions>DjangoModelPermissions</h3><p>DRF 提供了 <code>DjangoModelPermissions</code>，可以直接對應 Django 內建的權限系統（<code>add</code>、<code>change</code>、<code>delete</code>、<code>view</code>）：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework.permissions <span style=color:#f92672>import</span> DjangoModelPermissions
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ArticleViewSet</span>(viewsets<span style=color:#f92672>.</span>ModelViewSet):
-</span></span><span style=display:flex><span>    queryset <span style=color:#f92672>=</span> Article<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>all()
-</span></span><span style=display:flex><span>    serializer_class <span style=color:#f92672>=</span> ArticleSerializer
-</span></span><span style=display:flex><span>    permission_classes <span style=color:#f92672>=</span> [DjangoModelPermissions]
-</span></span><span style=display:flex><span>    <span style=color:#75715e># 自動對應：</span>
-</span></span><span style=display:flex><span>    <span style=color:#75715e># POST   → 需要 myapp.add_article 權限</span>
-</span></span><span style=display:flex><span>    <span style=color:#75715e># PUT    → 需要 myapp.change_article 權限</span>
-</span></span><span style=display:flex><span>    <span style=color:#75715e># DELETE → 需要 myapp.delete_article 權限</span>
-</span></span><span style=display:flex><span>    <span style=color:#75715e># GET    → 預設允許已認證用戶（可用 DjangoModelPermissionsOrAnonReadOnly 允許匿名讀取）</span>
-</span></span></code></pre></div><p>這在使用 Django Admin 管理用戶權限的專案中特別有用，因為你可以在 Admin 介面中直接為用戶或群組指派權限。</p><hr><h3 id=throttling-限流機制>Throttling 限流機制</h3><p>Throttling 限制了用戶在一段時間內可以發送的請求次數，防止 API 被濫用或遭受暴力攻擊。</p><h4 id=內建-throttle-類別>內建 Throttle 類別</h4><p>DRF 提供了三種內建的 Throttle 類別：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># settings.py</span>
-</span></span><span style=display:flex><span>REST_FRAMEWORK <span style=color:#f92672>=</span> {
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;DEFAULT_THROTTLE_CLASSES&#39;</span>: [
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;rest_framework.throttling.AnonRateThrottle&#39;</span>,   <span style=color:#75715e># 匿名用戶限流</span>
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;rest_framework.throttling.UserRateThrottle&#39;</span>,   <span style=color:#75715e># 認證用戶限流</span>
-</span></span><span style=display:flex><span>    ],
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;DEFAULT_THROTTLE_RATES&#39;</span>: {
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;anon&#39;</span>: <span style=color:#e6db74>&#39;100/day&#39;</span>,     <span style=color:#75715e># 匿名用戶：每天 100 次</span>
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;user&#39;</span>: <span style=color:#e6db74>&#39;1000/day&#39;</span>,   <span style=color:#75715e># 認證用戶：每天 1000 次</span>
-</span></span><span style=display:flex><span>    }
-</span></span><span style=display:flex><span>}
-</span></span></code></pre></div><p><strong>AnonRateThrottle</strong>：根據 IP 地址識別匿名用戶</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># 匿名用戶每小時最多 60 次請求</span>
-</span></span><span style=display:flex><span>REST_FRAMEWORK <span style=color:#f92672>=</span> {
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;DEFAULT_THROTTLE_RATES&#39;</span>: {
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;anon&#39;</span>: <span style=color:#e6db74>&#39;60/hour&#39;</span>,
-</span></span><span style=display:flex><span>    }
-</span></span><span style=display:flex><span>}
-</span></span></code></pre></div><p><strong>UserRateThrottle</strong>：根據用戶 ID 識別已認證用戶</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># 認證用戶每天最多 5000 次請求</span>
-</span></span><span style=display:flex><span>REST_FRAMEWORK <span style=color:#f92672>=</span> {
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;DEFAULT_THROTTLE_RATES&#39;</span>: {
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;user&#39;</span>: <span style=color:#e6db74>&#39;5000/day&#39;</span>,
-</span></span><span style=display:flex><span>    }
-</span></span><span style=display:flex><span>}
-</span></span></code></pre></div><p><strong>ScopedRateThrottle</strong>：為不同的 View 設定不同的限流範圍</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># settings.py</span>
-</span></span><span style=display:flex><span>REST_FRAMEWORK <span style=color:#f92672>=</span> {
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;DEFAULT_THROTTLE_CLASSES&#39;</span>: [
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;rest_framework.throttling.ScopedRateThrottle&#39;</span>,
-</span></span><span style=display:flex><span>    ],
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;DEFAULT_THROTTLE_RATES&#39;</span>: {
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;login&#39;</span>: <span style=color:#e6db74>&#39;5/minute&#39;</span>,       <span style=color:#75715e># 登入端點：每分鐘 5 次</span>
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;upload&#39;</span>: <span style=color:#e6db74>&#39;20/hour&#39;</span>,       <span style=color:#75715e># 上傳端點：每小時 20 次</span>
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;contact&#39;</span>: <span style=color:#e6db74>&#39;3/day&#39;</span>,        <span style=color:#75715e># 聯絡表單：每天 3 次</span>
-</span></span><span style=display:flex><span>    }
-</span></span><span style=display:flex><span>}
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># views.py</span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>LoginView</span>(APIView):
-</span></span><span style=display:flex><span>    throttle_scope <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;login&#39;</span>  <span style=color:#75715e># 使用 &#39;login&#39; 限流範圍</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>post</span>(self, request):
-</span></span><span style=display:flex><span>        <span style=color:#75715e># 登入邏輯</span>
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>pass</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>FileUploadView</span>(APIView):
-</span></span><span style=display:flex><span>    throttle_scope <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;upload&#39;</span>  <span style=color:#75715e># 使用 &#39;upload&#39; 限流範圍</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>post</span>(self, request):
-</span></span><span style=display:flex><span>        <span style=color:#75715e># 上傳邏輯</span>
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>pass</span>
-</span></span></code></pre></div><hr><h3 id=default_throttle_rates-設定>DEFAULT_THROTTLE_RATES 設定</h3><p>頻率格式為 <code>次數/時間單位</code>，支援的時間單位：</p><table><thead><tr><th>縮寫</th><th>時間單位</th><th>範例</th></tr></thead><tbody><tr><td><code>second</code></td><td>秒</td><td><code>5/second</code></td></tr><tr><td><code>minute</code></td><td>分鐘</td><td><code>30/minute</code></td></tr><tr><td><code>hour</code></td><td>小時</td><td><code>1000/hour</code></td></tr><tr><td><code>day</code></td><td>天</td><td><code>5000/day</code></td></tr></tbody></table><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span>REST_FRAMEWORK <span style=color:#f92672>=</span> {
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;DEFAULT_THROTTLE_RATES&#39;</span>: {
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;anon&#39;</span>: <span style=color:#e6db74>&#39;60/hour&#39;</span>,          <span style=color:#75715e># 匿名用戶：每小時 60 次</span>
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;user&#39;</span>: <span style=color:#e6db74>&#39;5000/day&#39;</span>,         <span style=color:#75715e># 認證用戶：每天 5000 次</span>
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;login&#39;</span>: <span style=color:#e6db74>&#39;5/minute&#39;</span>,        <span style=color:#75715e># 登入端點：每分鐘 5 次</span>
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;premium&#39;</span>: <span style=color:#e6db74>&#39;10000/day&#39;</span>,     <span style=color:#75715e># 付費用戶：每天 10000 次</span>
-</span></span><span style=display:flex><span>    }
-</span></span><span style=display:flex><span>}
-</span></span></code></pre></div><hr><h3 id=自訂-throttle-類別>自訂 Throttle 類別</h3><h4 id=根據用戶等級設定不同限流>根據用戶等級設定不同限流</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># throttles.py</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework.throttling <span style=color:#f92672>import</span> UserRateThrottle
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>PremiumUserThrottle</span>(UserRateThrottle):
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;付費用戶使用更高的限流額度&#34;&#34;&#34;</span>
-</span></span><span style=display:flex><span>    scope <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;premium&#39;</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>allow_request</span>(self, request, view):
-</span></span><span style=display:flex><span>        <span style=color:#75715e># 管理員不限流</span>
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> request<span style=color:#f92672>.</span>user <span style=color:#f92672>and</span> request<span style=color:#f92672>.</span>user<span style=color:#f92672>.</span>is_staff:
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>True</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>        <span style=color:#75715e># 付費用戶使用 &#39;premium&#39; scope 的限流設定</span>
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> (request<span style=color:#f92672>.</span>user <span style=color:#f92672>and</span>
-</span></span><span style=display:flex><span>            hasattr(request<span style=color:#f92672>.</span>user, <span style=color:#e6db74>&#39;profile&#39;</span>) <span style=color:#f92672>and</span>
-</span></span><span style=display:flex><span>            request<span style=color:#f92672>.</span>user<span style=color:#f92672>.</span>profile<span style=color:#f92672>.</span>is_premium):
-</span></span><span style=display:flex><span>            self<span style=color:#f92672>.</span>scope <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;premium&#39;</span>
-</span></span><span style=display:flex><span>            self<span style=color:#f92672>.</span>rate <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>get_rate()
-</span></span><span style=display:flex><span>            self<span style=color:#f92672>.</span>num_requests, self<span style=color:#f92672>.</span>duration <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>parse_rate(self<span style=color:#f92672>.</span>rate)
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> super()<span style=color:#f92672>.</span>allow_request(request, view)
-</span></span></code></pre></div><h4 id=登入端點專用限流>登入端點專用限流</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># throttles.py</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework.throttling <span style=color:#f92672>import</span> AnonRateThrottle
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>LoginRateThrottle</span>(AnonRateThrottle):
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;登入端點限流，防止暴力破解&#34;&#34;&#34;</span>
-</span></span><span style=display:flex><span>    scope <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;login&#39;</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># views.py</span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>LoginView</span>(APIView):
-</span></span><span style=display:flex><span>    permission_classes <span style=color:#f92672>=</span> [AllowAny]
-</span></span><span style=display:flex><span>    throttle_classes <span style=color:#f92672>=</span> [LoginRateThrottle]
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>post</span>(self, request):
-</span></span><span style=display:flex><span>        <span style=color:#75715e># 登入邏輯</span>
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>pass</span>
-</span></span></code></pre></div><hr><h3 id=完整範例結合認證權限限流的-api>完整範例：結合認證、權限、限流的 API</h3><p>以下是一個完整的範例，展示如何將認證、權限與限流三者結合：</p><h4 id=設定檔>設定檔</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># settings.py</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> datetime <span style=color:#f92672>import</span> timedelta
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>REST_FRAMEWORK <span style=color:#f92672>=</span> {
-</span></span><span style=display:flex><span>    <span style=color:#75715e># 認證</span>
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;DEFAULT_AUTHENTICATION_CLASSES&#39;</span>: [
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;rest_framework_simplejwt.authentication.JWTAuthentication&#39;</span>,
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;rest_framework.authentication.SessionAuthentication&#39;</span>,
-</span></span><span style=display:flex><span>    ],
-</span></span><span style=display:flex><span>    <span style=color:#75715e># 權限</span>
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;DEFAULT_PERMISSION_CLASSES&#39;</span>: [
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;rest_framework.permissions.IsAuthenticated&#39;</span>,
-</span></span><span style=display:flex><span>    ],
-</span></span><span style=display:flex><span>    <span style=color:#75715e># 限流</span>
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;DEFAULT_THROTTLE_CLASSES&#39;</span>: [
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;rest_framework.throttling.AnonRateThrottle&#39;</span>,
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;rest_framework.throttling.UserRateThrottle&#39;</span>,
-</span></span><span style=display:flex><span>    ],
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;DEFAULT_THROTTLE_RATES&#39;</span>: {
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;anon&#39;</span>: <span style=color:#e6db74>&#39;60/hour&#39;</span>,
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;user&#39;</span>: <span style=color:#e6db74>&#39;5000/day&#39;</span>,
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;login&#39;</span>: <span style=color:#e6db74>&#39;5/minute&#39;</span>,
-</span></span><span style=display:flex><span>    },
-</span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>SIMPLE_JWT <span style=color:#f92672>=</span> {
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;ACCESS_TOKEN_LIFETIME&#39;</span>: timedelta(minutes<span style=color:#f92672>=</span><span style=color:#ae81ff>30</span>),
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;REFRESH_TOKEN_LIFETIME&#39;</span>: timedelta(days<span style=color:#f92672>=</span><span style=color:#ae81ff>7</span>),
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;ROTATE_REFRESH_TOKENS&#39;</span>: <span style=color:#66d9ef>True</span>,
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;BLACKLIST_AFTER_ROTATION&#39;</span>: <span style=color:#66d9ef>True</span>,
-</span></span><span style=display:flex><span>}
-</span></span></code></pre></div><h4 id=自訂權限>自訂權限</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># permissions.py</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework.permissions <span style=color:#f92672>import</span> BasePermission, SAFE_METHODS
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>IsAuthorOrReadOnly</span>(BasePermission):
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;只有作者可以修改，其他人只能讀取&#34;&#34;&#34;</span>
-</span></span><span style=display:flex><span>    message <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;只有作者才能修改此內容。&#39;</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>has_permission</span>(self, request, view):
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> request<span style=color:#f92672>.</span>method <span style=color:#f92672>in</span> SAFE_METHODS:
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>True</span>
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> request<span style=color:#f92672>.</span>user <span style=color:#f92672>and</span> request<span style=color:#f92672>.</span>user<span style=color:#f92672>.</span>is_authenticated
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>has_object_permission</span>(self, request, view, obj):
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> request<span style=color:#f92672>.</span>method <span style=color:#f92672>in</span> SAFE_METHODS:
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>True</span>
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> obj<span style=color:#f92672>.</span>author <span style=color:#f92672>==</span> request<span style=color:#f92672>.</span>user
-</span></span></code></pre></div><h4 id=自訂限流>自訂限流</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># throttles.py</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework.throttling <span style=color:#f92672>import</span> AnonRateThrottle
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>LoginRateThrottle</span>(AnonRateThrottle):
-</span></span><span style=display:flex><span>    scope <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;login&#39;</span>
-</span></span></code></pre></div><h4 id=viewset-與-url-配置>ViewSet 與 URL 配置</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># views.py</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework <span style=color:#f92672>import</span> viewsets, generics
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework.permissions <span style=color:#f92672>import</span> AllowAny, IsAuthenticated
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework.views <span style=color:#f92672>import</span> APIView
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework.response <span style=color:#f92672>import</span> Response
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework_simplejwt.views <span style=color:#f92672>import</span> TokenObtainPairView
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> .models <span style=color:#f92672>import</span> Article
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> .serializers <span style=color:#f92672>import</span> ArticleSerializer
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> .permissions <span style=color:#f92672>import</span> IsAuthorOrReadOnly
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> .throttles <span style=color:#f92672>import</span> LoginRateThrottle
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ThrottledTokenObtainPairView</span>(TokenObtainPairView):
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;加上限流的登入端點&#34;&#34;&#34;</span>
-</span></span><span style=display:flex><span>    throttle_classes <span style=color:#f92672>=</span> [LoginRateThrottle]
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ArticleViewSet</span>(viewsets<span style=color:#f92672>.</span>ModelViewSet):
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;
-</span></span></span><span style=display:flex><span><span style=color:#e6db74>    文章 CRUD API
-</span></span></span><span style=display:flex><span><span style=color:#e6db74>    - 列表/詳情：任何人可讀取
-</span></span></span><span style=display:flex><span><span style=color:#e6db74>    - 建立：需要登入
-</span></span></span><span style=display:flex><span><span style=color:#e6db74>    - 修改/刪除：只有作者可操作
-</span></span></span><span style=display:flex><span><span style=color:#e6db74>    &#34;&#34;&#34;</span>
-</span></span><span style=display:flex><span>    queryset <span style=color:#f92672>=</span> Article<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>select_related(<span style=color:#e6db74>&#39;author&#39;</span>)<span style=color:#f92672>.</span>order_by(<span style=color:#e6db74>&#39;-created_at&#39;</span>)
-</span></span><span style=display:flex><span>    serializer_class <span style=color:#f92672>=</span> ArticleSerializer
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>get_permissions</span>(self):
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> self<span style=color:#f92672>.</span>action <span style=color:#f92672>in</span> (<span style=color:#e6db74>&#39;list&#39;</span>, <span style=color:#e6db74>&#39;retrieve&#39;</span>):
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> [AllowAny()]
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> [IsAuthenticated(), IsAuthorOrReadOnly()]
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>perform_create</span>(self, serializer):
-</span></span><span style=display:flex><span>        serializer<span style=color:#f92672>.</span>save(author<span style=color:#f92672>=</span>self<span style=color:#f92672>.</span>request<span style=color:#f92672>.</span>user)
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>UserProfileView</span>(APIView):
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;用戶個人資料（需要認證）&#34;&#34;&#34;</span>
-</span></span><span style=display:flex><span>    permission_classes <span style=color:#f92672>=</span> [IsAuthenticated]
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>get</span>(self, request):
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> Response({
-</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;id&#39;</span>: request<span style=color:#f92672>.</span>user<span style=color:#f92672>.</span>id,
-</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;username&#39;</span>: request<span style=color:#f92672>.</span>user<span style=color:#f92672>.</span>username,
-</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;email&#39;</span>: request<span style=color:#f92672>.</span>user<span style=color:#f92672>.</span>email,
-</span></span><span style=display:flex><span>        })
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># urls.py</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.urls <span style=color:#f92672>import</span> path, include
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework.routers <span style=color:#f92672>import</span> DefaultRouter
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> .views <span style=color:#f92672>import</span> (
-</span></span><span style=display:flex><span>    ThrottledTokenObtainPairView,
-</span></span><span style=display:flex><span>    ArticleViewSet,
-</span></span><span style=display:flex><span>    UserProfileView,
-</span></span><span style=display:flex><span>)
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework_simplejwt.views <span style=color:#f92672>import</span> TokenRefreshView
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>router <span style=color:#f92672>=</span> DefaultRouter()
-</span></span><span style=display:flex><span>router<span style=color:#f92672>.</span>register(<span style=color:#e6db74>&#39;articles&#39;</span>, ArticleViewSet, basename<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;article&#39;</span>)
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>urlpatterns <span style=color:#f92672>=</span> [
-</span></span><span style=display:flex><span>    <span style=color:#75715e># 認證端點</span>
-</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;api/auth/token/&#39;</span>, ThrottledTokenObtainPairView<span style=color:#f92672>.</span>as_view()),
-</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;api/auth/token/refresh/&#39;</span>, TokenRefreshView<span style=color:#f92672>.</span>as_view()),
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#75715e># 用戶端點</span>
-</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;api/profile/&#39;</span>, UserProfileView<span style=color:#f92672>.</span>as_view()),
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#75715e># 資源端點（Router 自動產生）</span>
-</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;api/&#39;</span>, include(router<span style=color:#f92672>.</span>urls)),
-</span></span><span style=display:flex><span>]
-</span></span></code></pre></div><h4 id=測試流程>測試流程</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 1. 匿名用戶讀取文章列表（允許）</span>
-</span></span><span style=display:flex><span>curl http://localhost:8000/api/articles/
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 2. 匿名用戶嘗試建立文章（被拒：401）</span>
-</span></span><span style=display:flex><span>curl -X POST http://localhost:8000/api/articles/ <span style=color:#ae81ff>\
-</span></span></span><span style=display:flex><span>  -H <span style=color:#e6db74>&#34;Content-Type: application/json&#34;</span> <span style=color:#ae81ff>\
-</span></span></span><span style=display:flex><span>  -d <span style=color:#e6db74>&#39;{&#34;title&#34;: &#34;測試&#34;, &#34;content&#34;: &#34;內容&#34;}&#39;</span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 回應：{&#34;detail&#34;: &#34;Authentication credentials were not provided.&#34;}</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 3. 登入取得 Token</span>
-</span></span><span style=display:flex><span>curl -X POST http://localhost:8000/api/auth/token/ <span style=color:#ae81ff>\
-</span></span></span><span style=display:flex><span>  -H <span style=color:#e6db74>&#34;Content-Type: application/json&#34;</span> <span style=color:#ae81ff>\
-</span></span></span><span style=display:flex><span>  -d <span style=color:#e6db74>&#39;{&#34;username&#34;: &#34;alice&#34;, &#34;password&#34;: &#34;mypassword&#34;}&#39;</span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 回應：{&#34;access&#34;: &#34;eyJ...&#34;, &#34;refresh&#34;: &#34;eyJ...&#34;}</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 4. 使用 Token 建立文章（成功）</span>
-</span></span><span style=display:flex><span>curl -X POST http://localhost:8000/api/articles/ <span style=color:#ae81ff>\
-</span></span></span><span style=display:flex><span>  -H <span style=color:#e6db74>&#34;Authorization: Bearer eyJ...&#34;</span> <span style=color:#ae81ff>\
-</span></span></span><span style=display:flex><span>  -H <span style=color:#e6db74>&#34;Content-Type: application/json&#34;</span> <span style=color:#ae81ff>\
-</span></span></span><span style=display:flex><span>  -d <span style=color:#e6db74>&#39;{&#34;title&#34;: &#34;我的文章&#34;, &#34;content&#34;: &#34;文章內容&#34;}&#39;</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 5. 其他用戶嘗試修改（被拒：403）</span>
-</span></span><span style=display:flex><span>curl -X PUT http://localhost:8000/api/articles/1/ <span style=color:#ae81ff>\
-</span></span></span><span style=display:flex><span>  -H <span style=color:#e6db74>&#34;Authorization: Bearer eyJ...（其他用戶的 Token）&#34;</span> <span style=color:#ae81ff>\
-</span></span></span><span style=display:flex><span>  -H <span style=color:#e6db74>&#34;Content-Type: application/json&#34;</span> <span style=color:#ae81ff>\
-</span></span></span><span style=display:flex><span>  -d <span style=color:#e6db74>&#39;{&#34;title&#34;: &#34;修改標題&#34;}&#39;</span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 回應：{&#34;detail&#34;: &#34;只有作者才能修改此內容。&#34;}</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 6. 頻繁登入測試限流（超過 5 次/分鐘後被拒：429）</span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 回應：{&#34;detail&#34;: &#34;Request was throttled. Expected available in 45 seconds.&#34;}</span>
-</span></span></code></pre></div><hr><h3 id=總結>總結</h3><p>本文完整介紹了 DRF 安全機制的後兩層 &ndash; <strong>Permissions</strong> 權限控制與 <strong>Throttling</strong> 限流。</p><p>在權限方面，DRF 內建了 <code>AllowAny</code>、<code>IsAuthenticated</code>、<code>IsAdminUser</code> 和 <code>IsAuthenticatedOrReadOnly</code> 四種常用權限類別，並支援透過 <code>BasePermission</code> 自訂權限邏輯。<strong>has_permission</strong> 負責全域權限檢查，<strong>has_object_permission</strong> 負責物件層級權限檢查，兩者各有其觸發時機。<code>DjangoModelPermissions</code> 可以直接對應 Django 的內建權限系統，適合需要細粒度權限管理的專案。</p><p>在限流方面，<code>AnonRateThrottle</code> 和 <code>UserRateThrottle</code> 分別控制匿名和認證用戶的請求頻率，<code>ScopedRateThrottle</code> 則可以為不同端點設定不同的限流策略。自訂 Throttle 類別還能根據用戶等級動態調整限流額度。</p><p>至此，我們已經完整學會了 DRF 的三層安全機制：<strong>認證</strong>（你是誰）、<strong>權限</strong>（你能做什麼）、<strong>限流</strong>（你能做多少次）。將這三者結合起來，就能建構出一個安全、穩定且可控的 API 服務。</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
-</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/django/026-drf-authentication/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">DRF 認證機制：Token、JWT 與 Session 認證 | Django 教學</span>
-<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/15</span>
-</a><a href=https://benzhub.github.io/post/django/025-drf-views-generic-router/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">DRF Generic Views 與 Router 自動路由配置 | Django 教學</span>
-<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/14</span>
-</a><a href=https://benzhub.github.io/post/django/024-drf-views-apiview-viewset/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">DRF Views：APIView 與 ViewSet 完全解析 | Django 教學</span>
-<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/13</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/django/026-drf-authentication/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
-<span class="text-sm font-medium">DRF 認證機制：Token、JWT 與 Session 認證 | Django 教學</span></a></div><div><a href=https://benzhub.github.io/post/django/028-django-middleware/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
-<span class="text-sm font-medium">Django Middleware 中介軟體原理與實作 | Django 教學</span></a></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
-<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
-</a><a href=/tags/acid><span class=tag-pill>acid</span>
-</a><a href=/tags/ai><span class=tag-pill>ai</span>
-</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
-</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
-</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
-</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
-</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
-</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
-</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
-</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
-</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
-</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
-</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
-</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
-</a><a href=/tags/api><span class=tag-pill>api</span>
-</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
-</a><a href=/tags/autovacuum><span class=tag-pill>autovacuum</span>
-</a><a href=/tags/background-processes><span class=tag-pill>background-processes</span>
-</a><a href=/tags/big-o><span class=tag-pill>big o</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (12)</span>
-</a><a href=/post/javascript/><span class=tag-pill>JavaScript (67)</span>
-</a><a href=/post/django/><span class=tag-pill>Django (29)</span>
-</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
-</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
-</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
-</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
-</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/django/029-django-authentication/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Authentication 使用者認證系統完全指南 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/18</p></a><a href=/post/postgresql/012-data-types/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/18</p></a><a href=/post/javascript/data-structures--algorithms/005-hash-table/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">雜湊表 — Hash Table 原理、碰撞處理與實作完整指南 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/18</p></a><a href=/post/django/028-django-middleware/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Middleware 中介軟體原理與實作 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/17</p></a><a href=/post/postgresql/011-background-processes/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">背景進程：PostgreSQL 的幕後工作者們 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/17</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>
+</code></pre><p>Permission 層的特點：</p>
+<ul>
+<li>在 <strong>認證之後</strong> 執行，此時 <code>request.user</code> 已經確定</li>
+<li>多個 Permission 之間是 <strong>AND 邏輯</strong>，全部通過才允許</li>
+<li>分為 <strong>全域權限</strong>（<code>has_permission</code>）和 <strong>物件層級權限</strong>（<code>has_object_permission</code>）</li>
+</ul>
+<hr>
+<h3 id="內建權限類別">內建權限類別</h3>
+<p>DRF 提供了四個常用的內建 Permission 類別：</p>
+<h4 id="allowany">AllowAny</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> rest_framework.permissions <span style="color:#f92672">import</span> AllowAny
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PublicArticleView</span>(generics<span style="color:#f92672">.</span>ListAPIView):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;任何人都可以存取，包含未認證的匿名用戶&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    permission_classes <span style="color:#f92672">=</span> [AllowAny]
+</span></span><span style="display:flex;"><span>    queryset <span style="color:#f92672">=</span> Article<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>filter(is_published<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>    serializer_class <span style="color:#f92672">=</span> ArticleSerializer
+</span></span></code></pre></div><h4 id="isauthenticated">IsAuthenticated</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> rest_framework.permissions <span style="color:#f92672">import</span> IsAuthenticated
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MyArticleView</span>(generics<span style="color:#f92672">.</span>ListCreateAPIView):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;只有已登入的用戶可以存取&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    permission_classes <span style="color:#f92672">=</span> [IsAuthenticated]
+</span></span><span style="display:flex;"><span>    serializer_class <span style="color:#f92672">=</span> ArticleSerializer
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_queryset</span>(self):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> Article<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>filter(author<span style="color:#f92672">=</span>self<span style="color:#f92672">.</span>request<span style="color:#f92672">.</span>user)
+</span></span></code></pre></div><h4 id="isadminuser">IsAdminUser</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> rest_framework.permissions <span style="color:#f92672">import</span> IsAdminUser
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AdminDashboardView</span>(APIView):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;只有 is_staff=True 的管理員可以存取&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    permission_classes <span style="color:#f92672">=</span> [IsAdminUser]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get</span>(self, request):
+</span></span><span style="display:flex;"><span>        stats <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;total_articles&#39;</span>: Article<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>count(),
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;total_users&#39;</span>: User<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>count(),
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> Response(stats)
+</span></span></code></pre></div><h4 id="isauthenticatedorreadonly">IsAuthenticatedOrReadOnly</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> rest_framework.permissions <span style="color:#f92672">import</span> IsAuthenticatedOrReadOnly
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ArticleViewSet</span>(viewsets<span style="color:#f92672">.</span>ModelViewSet):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    未登入用戶只能讀取（GET、HEAD、OPTIONS）
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    已登入用戶可以執行所有操作（包含 POST、PUT、DELETE）
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    permission_classes <span style="color:#f92672">=</span> [IsAuthenticatedOrReadOnly]
+</span></span><span style="display:flex;"><span>    queryset <span style="color:#f92672">=</span> Article<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>all()
+</span></span><span style="display:flex;"><span>    serializer_class <span style="color:#f92672">=</span> ArticleSerializer
+</span></span></code></pre></div><p>四種內建權限的比較：</p>
+<table>
+	<thead>
+			<tr>
+					<th>權限類別</th>
+					<th>匿名讀取</th>
+					<th>匿名寫入</th>
+					<th>認證讀取</th>
+					<th>認證寫入</th>
+					<th>管理員</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>AllowAny</td>
+					<td>O</td>
+					<td>O</td>
+					<td>O</td>
+					<td>O</td>
+					<td>O</td>
+			</tr>
+			<tr>
+					<td>IsAuthenticated</td>
+					<td>X</td>
+					<td>X</td>
+					<td>O</td>
+					<td>O</td>
+					<td>O</td>
+			</tr>
+			<tr>
+					<td>IsAdminUser</td>
+					<td>X</td>
+					<td>X</td>
+					<td>X</td>
+					<td>X</td>
+					<td>O</td>
+			</tr>
+			<tr>
+					<td>IsAuthenticatedOrReadOnly</td>
+					<td>O</td>
+					<td>X</td>
+					<td>O</td>
+					<td>O</td>
+					<td>O</td>
+			</tr>
+	</tbody>
+</table>
+<hr>
+<h3 id="permission_classes-設定">permission_classes 設定</h3>
+<p>Permission 可以在兩個層級設定：全域和 View 層級。</p>
+<h4 id="全域設定">全域設定</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># settings.py</span>
+</span></span><span style="display:flex;"><span>REST_FRAMEWORK <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;DEFAULT_PERMISSION_CLASSES&#39;</span>: [
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;rest_framework.permissions.IsAuthenticated&#39;</span>,  <span style="color:#75715e"># 預設所有 API 都需要認證</span>
+</span></span><span style="display:flex;"><span>    ],
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h4 id="view-層級覆寫">View 層級覆寫</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> rest_framework.permissions <span style="color:#f92672">import</span> AllowAny, IsAuthenticated, IsAdminUser
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ArticleViewSet</span>(viewsets<span style="color:#f92672">.</span>ModelViewSet):
+</span></span><span style="display:flex;"><span>    queryset <span style="color:#f92672">=</span> Article<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>all()
+</span></span><span style="display:flex;"><span>    serializer_class <span style="color:#f92672">=</span> ArticleSerializer
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_permissions</span>(self):
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;&#34;&#34;根據不同的 action 動態設定權限&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> self<span style="color:#f92672">.</span>action <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;list&#39;</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># 列表：任何人都可以看</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> [AllowAny()]
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">elif</span> self<span style="color:#f92672">.</span>action <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;create&#39;</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># 建立：需要登入</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> [IsAuthenticated()]
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">elif</span> self<span style="color:#f92672">.</span>action <span style="color:#f92672">in</span> (<span style="color:#e6db74">&#39;update&#39;</span>, <span style="color:#e6db74">&#39;partial_update&#39;</span>, <span style="color:#e6db74">&#39;destroy&#39;</span>):
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># 修改/刪除：需要是作者（自訂權限，下節說明）</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> [IsAuthenticated(), IsAuthorOrReadOnly()]
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> [IsAuthenticated()]
+</span></span></code></pre></div><hr>
+<h3 id="自訂-permission-類別">自訂 Permission 類別</h3>
+<p>當內建權限不足以滿足需求時，你可以繼承 <code>BasePermission</code> 建立自訂權限。</p>
+<h4 id="has_permission-vs-has_object_permission">has_permission vs has_object_permission</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> rest_framework.permissions <span style="color:#f92672">import</span> BasePermission, SAFE_METHODS
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">IsAuthorOrReadOnly</span>(BasePermission):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    物件級權限：
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - 任何人可以讀取（GET、HEAD、OPTIONS）
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - 只有作者可以修改或刪除
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 權限被拒絕時的錯誤訊息</span>
+</span></span><span style="display:flex;"><span>    message <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;只有文章作者才能執行此操作。&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">has_permission</span>(self, request, view):
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        全域權限檢查（每次請求都會執行）
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        - 安全方法（GET、HEAD、OPTIONS）：允許所有人
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        - 寫入方法（POST、PUT、DELETE）：需要已認證
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> request<span style="color:#f92672">.</span>method <span style="color:#f92672">in</span> SAFE_METHODS:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">True</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> request<span style="color:#f92672">.</span>user <span style="color:#f92672">and</span> request<span style="color:#f92672">.</span>user<span style="color:#f92672">.</span>is_authenticated
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">has_object_permission</span>(self, request, view, obj):
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        物件級權限檢查（只有在 get_object() 時執行）
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        - 安全方法：允許所有人
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        - 寫入方法：只有作者允許
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> request<span style="color:#f92672">.</span>method <span style="color:#f92672">in</span> SAFE_METHODS:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">True</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> obj<span style="color:#f92672">.</span>author <span style="color:#f92672">==</span> request<span style="color:#f92672">.</span>user
+</span></span></code></pre></div><p>在 ViewSet 中使用：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ArticleViewSet</span>(viewsets<span style="color:#f92672">.</span>ModelViewSet):
+</span></span><span style="display:flex;"><span>    queryset <span style="color:#f92672">=</span> Article<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>all()
+</span></span><span style="display:flex;"><span>    serializer_class <span style="color:#f92672">=</span> ArticleSerializer
+</span></span><span style="display:flex;"><span>    permission_classes <span style="color:#f92672">=</span> [IsAuthenticated, IsAuthorOrReadOnly]
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># AND 邏輯：用戶必須已認證 AND 是作者才能修改</span>
+</span></span></code></pre></div><h4 id="更多自訂權限範例">更多自訂權限範例</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">IsAdminOrReadOnly</span>(BasePermission):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;只有管理員可以寫入，所有人可以讀取&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">has_permission</span>(self, request, view):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> request<span style="color:#f92672">.</span>method <span style="color:#f92672">in</span> SAFE_METHODS:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">True</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> request<span style="color:#f92672">.</span>user <span style="color:#f92672">and</span> request<span style="color:#f92672">.</span>user<span style="color:#f92672">.</span>is_staff
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">IsPremiumUser</span>(BasePermission):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;只有付費用戶可以存取&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    message <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;此功能僅限付費用戶使用。&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">has_permission</span>(self, request, view):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> (
+</span></span><span style="display:flex;"><span>            request<span style="color:#f92672">.</span>user <span style="color:#f92672">and</span>
+</span></span><span style="display:flex;"><span>            request<span style="color:#f92672">.</span>user<span style="color:#f92672">.</span>is_authenticated <span style="color:#f92672">and</span>
+</span></span><span style="display:flex;"><span>            hasattr(request<span style="color:#f92672">.</span>user, <span style="color:#e6db74">&#39;profile&#39;</span>) <span style="color:#f92672">and</span>
+</span></span><span style="display:flex;"><span>            request<span style="color:#f92672">.</span>user<span style="color:#f92672">.</span>profile<span style="color:#f92672">.</span>is_premium
+</span></span><span style="display:flex;"><span>        )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">IsOwnerOrAdmin</span>(BasePermission):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;物件擁有者或管理員可以操作&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">has_object_permission</span>(self, request, view, obj):
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 管理員可以操作任何物件</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> request<span style="color:#f92672">.</span>user<span style="color:#f92672">.</span>is_staff:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">True</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 一般用戶只能操作自己的物件</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> obj<span style="color:#f92672">.</span>owner <span style="color:#f92672">==</span> request<span style="color:#f92672">.</span>user
+</span></span></code></pre></div><hr>
+<h3 id="object-level-permissions物件層級權限">Object-Level Permissions（物件層級權限）</h3>
+<p>物件層級權限在 <code>get_object()</code> 被呼叫時自動觸發。需要注意的是，<strong>列表操作（list）不會觸發物件層級權限</strong>，因為 list 不會呼叫 <code>get_object()</code>。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ArticleViewSet</span>(viewsets<span style="color:#f92672">.</span>ModelViewSet):
+</span></span><span style="display:flex;"><span>    queryset <span style="color:#f92672">=</span> Article<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>all()
+</span></span><span style="display:flex;"><span>    serializer_class <span style="color:#f92672">=</span> ArticleSerializer
+</span></span><span style="display:flex;"><span>    permission_classes <span style="color:#f92672">=</span> [IsAuthenticated, IsAuthorOrReadOnly]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_queryset</span>(self):
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        列表操作的權限控制：透過過濾 queryset 實現
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        管理員可以看到所有文章，一般用戶只能看到公開文章和自己的文章
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>        user <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>request<span style="color:#f92672">.</span>user
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> user<span style="color:#f92672">.</span>is_staff:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> Article<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>all()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">from</span> django.db.models <span style="color:#f92672">import</span> Q
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> Article<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>filter(
+</span></span><span style="display:flex;"><span>            Q(is_published<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>) <span style="color:#f92672">|</span> Q(author<span style="color:#f92672">=</span>user)
+</span></span><span style="display:flex;"><span>        )
+</span></span></code></pre></div><p>物件層級權限的執行時機：</p>
+<table>
+	<thead>
+			<tr>
+					<th>操作</th>
+					<th>呼叫 get_object()</th>
+					<th>觸發 has_object_permission</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>list</td>
+					<td>否</td>
+					<td>否（需透過 queryset 過濾）</td>
+			</tr>
+			<tr>
+					<td>create</td>
+					<td>否</td>
+					<td>否</td>
+			</tr>
+			<tr>
+					<td>retrieve</td>
+					<td>是</td>
+					<td>是</td>
+			</tr>
+			<tr>
+					<td>update / partial_update</td>
+					<td>是</td>
+					<td>是</td>
+			</tr>
+			<tr>
+					<td>destroy</td>
+					<td>是</td>
+					<td>是</td>
+			</tr>
+	</tbody>
+</table>
+<hr>
+<h3 id="djangomodelpermissions">DjangoModelPermissions</h3>
+<p>DRF 提供了 <code>DjangoModelPermissions</code>，可以直接對應 Django 內建的權限系統（<code>add</code>、<code>change</code>、<code>delete</code>、<code>view</code>）：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> rest_framework.permissions <span style="color:#f92672">import</span> DjangoModelPermissions
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ArticleViewSet</span>(viewsets<span style="color:#f92672">.</span>ModelViewSet):
+</span></span><span style="display:flex;"><span>    queryset <span style="color:#f92672">=</span> Article<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>all()
+</span></span><span style="display:flex;"><span>    serializer_class <span style="color:#f92672">=</span> ArticleSerializer
+</span></span><span style="display:flex;"><span>    permission_classes <span style="color:#f92672">=</span> [DjangoModelPermissions]
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 自動對應：</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># POST   → 需要 myapp.add_article 權限</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># PUT    → 需要 myapp.change_article 權限</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># DELETE → 需要 myapp.delete_article 權限</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># GET    → 預設允許已認證用戶（可用 DjangoModelPermissionsOrAnonReadOnly 允許匿名讀取）</span>
+</span></span></code></pre></div><p>這在使用 Django Admin 管理用戶權限的專案中特別有用，因為你可以在 Admin 介面中直接為用戶或群組指派權限。</p>
+<hr>
+<h3 id="throttling-限流機制">Throttling 限流機制</h3>
+<p>Throttling 限制了用戶在一段時間內可以發送的請求次數，防止 API 被濫用或遭受暴力攻擊。</p>
+<h4 id="內建-throttle-類別">內建 Throttle 類別</h4>
+<p>DRF 提供了三種內建的 Throttle 類別：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># settings.py</span>
+</span></span><span style="display:flex;"><span>REST_FRAMEWORK <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;DEFAULT_THROTTLE_CLASSES&#39;</span>: [
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;rest_framework.throttling.AnonRateThrottle&#39;</span>,   <span style="color:#75715e"># 匿名用戶限流</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;rest_framework.throttling.UserRateThrottle&#39;</span>,   <span style="color:#75715e"># 認證用戶限流</span>
+</span></span><span style="display:flex;"><span>    ],
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;DEFAULT_THROTTLE_RATES&#39;</span>: {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;anon&#39;</span>: <span style="color:#e6db74">&#39;100/day&#39;</span>,     <span style="color:#75715e"># 匿名用戶：每天 100 次</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;user&#39;</span>: <span style="color:#e6db74">&#39;1000/day&#39;</span>,   <span style="color:#75715e"># 認證用戶：每天 1000 次</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><strong>AnonRateThrottle</strong>：根據 IP 地址識別匿名用戶</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 匿名用戶每小時最多 60 次請求</span>
+</span></span><span style="display:flex;"><span>REST_FRAMEWORK <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;DEFAULT_THROTTLE_RATES&#39;</span>: {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;anon&#39;</span>: <span style="color:#e6db74">&#39;60/hour&#39;</span>,
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><strong>UserRateThrottle</strong>：根據用戶 ID 識別已認證用戶</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 認證用戶每天最多 5000 次請求</span>
+</span></span><span style="display:flex;"><span>REST_FRAMEWORK <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;DEFAULT_THROTTLE_RATES&#39;</span>: {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;user&#39;</span>: <span style="color:#e6db74">&#39;5000/day&#39;</span>,
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><strong>ScopedRateThrottle</strong>：為不同的 View 設定不同的限流範圍</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># settings.py</span>
+</span></span><span style="display:flex;"><span>REST_FRAMEWORK <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;DEFAULT_THROTTLE_CLASSES&#39;</span>: [
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;rest_framework.throttling.ScopedRateThrottle&#39;</span>,
+</span></span><span style="display:flex;"><span>    ],
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;DEFAULT_THROTTLE_RATES&#39;</span>: {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;login&#39;</span>: <span style="color:#e6db74">&#39;5/minute&#39;</span>,       <span style="color:#75715e"># 登入端點：每分鐘 5 次</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;upload&#39;</span>: <span style="color:#e6db74">&#39;20/hour&#39;</span>,       <span style="color:#75715e"># 上傳端點：每小時 20 次</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;contact&#39;</span>: <span style="color:#e6db74">&#39;3/day&#39;</span>,        <span style="color:#75715e"># 聯絡表單：每天 3 次</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># views.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">LoginView</span>(APIView):
+</span></span><span style="display:flex;"><span>    throttle_scope <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;login&#39;</span>  <span style="color:#75715e"># 使用 &#39;login&#39; 限流範圍</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">post</span>(self, request):
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 登入邏輯</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">pass</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">FileUploadView</span>(APIView):
+</span></span><span style="display:flex;"><span>    throttle_scope <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;upload&#39;</span>  <span style="color:#75715e"># 使用 &#39;upload&#39; 限流範圍</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">post</span>(self, request):
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 上傳邏輯</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">pass</span>
+</span></span></code></pre></div><hr>
+<h3 id="default_throttle_rates-設定">DEFAULT_THROTTLE_RATES 設定</h3>
+<p>頻率格式為 <code>次數/時間單位</code>，支援的時間單位：</p>
+<table>
+	<thead>
+			<tr>
+					<th>縮寫</th>
+					<th>時間單位</th>
+					<th>範例</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>second</code></td>
+					<td>秒</td>
+					<td><code>5/second</code></td>
+			</tr>
+			<tr>
+					<td><code>minute</code></td>
+					<td>分鐘</td>
+					<td><code>30/minute</code></td>
+			</tr>
+			<tr>
+					<td><code>hour</code></td>
+					<td>小時</td>
+					<td><code>1000/hour</code></td>
+			</tr>
+			<tr>
+					<td><code>day</code></td>
+					<td>天</td>
+					<td><code>5000/day</code></td>
+			</tr>
+	</tbody>
+</table>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>REST_FRAMEWORK <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;DEFAULT_THROTTLE_RATES&#39;</span>: {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;anon&#39;</span>: <span style="color:#e6db74">&#39;60/hour&#39;</span>,          <span style="color:#75715e"># 匿名用戶：每小時 60 次</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;user&#39;</span>: <span style="color:#e6db74">&#39;5000/day&#39;</span>,         <span style="color:#75715e"># 認證用戶：每天 5000 次</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;login&#39;</span>: <span style="color:#e6db74">&#39;5/minute&#39;</span>,        <span style="color:#75715e"># 登入端點：每分鐘 5 次</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;premium&#39;</span>: <span style="color:#e6db74">&#39;10000/day&#39;</span>,     <span style="color:#75715e"># 付費用戶：每天 10000 次</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><hr>
+<h3 id="自訂-throttle-類別">自訂 Throttle 類別</h3>
+<h4 id="根據用戶等級設定不同限流">根據用戶等級設定不同限流</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># throttles.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> rest_framework.throttling <span style="color:#f92672">import</span> UserRateThrottle
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PremiumUserThrottle</span>(UserRateThrottle):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;付費用戶使用更高的限流額度&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    scope <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;premium&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">allow_request</span>(self, request, view):
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 管理員不限流</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> request<span style="color:#f92672">.</span>user <span style="color:#f92672">and</span> request<span style="color:#f92672">.</span>user<span style="color:#f92672">.</span>is_staff:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">True</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 付費用戶使用 &#39;premium&#39; scope 的限流設定</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (request<span style="color:#f92672">.</span>user <span style="color:#f92672">and</span>
+</span></span><span style="display:flex;"><span>            hasattr(request<span style="color:#f92672">.</span>user, <span style="color:#e6db74">&#39;profile&#39;</span>) <span style="color:#f92672">and</span>
+</span></span><span style="display:flex;"><span>            request<span style="color:#f92672">.</span>user<span style="color:#f92672">.</span>profile<span style="color:#f92672">.</span>is_premium):
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>scope <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;premium&#39;</span>
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>rate <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>get_rate()
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>num_requests, self<span style="color:#f92672">.</span>duration <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>parse_rate(self<span style="color:#f92672">.</span>rate)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> super()<span style="color:#f92672">.</span>allow_request(request, view)
+</span></span></code></pre></div><h4 id="登入端點專用限流">登入端點專用限流</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># throttles.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> rest_framework.throttling <span style="color:#f92672">import</span> AnonRateThrottle
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">LoginRateThrottle</span>(AnonRateThrottle):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;登入端點限流，防止暴力破解&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    scope <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;login&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># views.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">LoginView</span>(APIView):
+</span></span><span style="display:flex;"><span>    permission_classes <span style="color:#f92672">=</span> [AllowAny]
+</span></span><span style="display:flex;"><span>    throttle_classes <span style="color:#f92672">=</span> [LoginRateThrottle]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">post</span>(self, request):
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 登入邏輯</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">pass</span>
+</span></span></code></pre></div><hr>
+<h3 id="完整範例結合認證權限限流的-api">完整範例：結合認證、權限、限流的 API</h3>
+<p>以下是一個完整的範例，展示如何將認證、權限與限流三者結合：</p>
+<h4 id="設定檔">設定檔</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># settings.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> datetime <span style="color:#f92672">import</span> timedelta
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>REST_FRAMEWORK <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 認證</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;DEFAULT_AUTHENTICATION_CLASSES&#39;</span>: [
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;rest_framework_simplejwt.authentication.JWTAuthentication&#39;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;rest_framework.authentication.SessionAuthentication&#39;</span>,
+</span></span><span style="display:flex;"><span>    ],
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 權限</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;DEFAULT_PERMISSION_CLASSES&#39;</span>: [
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;rest_framework.permissions.IsAuthenticated&#39;</span>,
+</span></span><span style="display:flex;"><span>    ],
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 限流</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;DEFAULT_THROTTLE_CLASSES&#39;</span>: [
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;rest_framework.throttling.AnonRateThrottle&#39;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;rest_framework.throttling.UserRateThrottle&#39;</span>,
+</span></span><span style="display:flex;"><span>    ],
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;DEFAULT_THROTTLE_RATES&#39;</span>: {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;anon&#39;</span>: <span style="color:#e6db74">&#39;60/hour&#39;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;user&#39;</span>: <span style="color:#e6db74">&#39;5000/day&#39;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;login&#39;</span>: <span style="color:#e6db74">&#39;5/minute&#39;</span>,
+</span></span><span style="display:flex;"><span>    },
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>SIMPLE_JWT <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;ACCESS_TOKEN_LIFETIME&#39;</span>: timedelta(minutes<span style="color:#f92672">=</span><span style="color:#ae81ff">30</span>),
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;REFRESH_TOKEN_LIFETIME&#39;</span>: timedelta(days<span style="color:#f92672">=</span><span style="color:#ae81ff">7</span>),
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;ROTATE_REFRESH_TOKENS&#39;</span>: <span style="color:#66d9ef">True</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;BLACKLIST_AFTER_ROTATION&#39;</span>: <span style="color:#66d9ef">True</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h4 id="自訂權限">自訂權限</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># permissions.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> rest_framework.permissions <span style="color:#f92672">import</span> BasePermission, SAFE_METHODS
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">IsAuthorOrReadOnly</span>(BasePermission):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;只有作者可以修改，其他人只能讀取&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    message <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;只有作者才能修改此內容。&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">has_permission</span>(self, request, view):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> request<span style="color:#f92672">.</span>method <span style="color:#f92672">in</span> SAFE_METHODS:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">True</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> request<span style="color:#f92672">.</span>user <span style="color:#f92672">and</span> request<span style="color:#f92672">.</span>user<span style="color:#f92672">.</span>is_authenticated
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">has_object_permission</span>(self, request, view, obj):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> request<span style="color:#f92672">.</span>method <span style="color:#f92672">in</span> SAFE_METHODS:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">True</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> obj<span style="color:#f92672">.</span>author <span style="color:#f92672">==</span> request<span style="color:#f92672">.</span>user
+</span></span></code></pre></div><h4 id="自訂限流">自訂限流</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># throttles.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> rest_framework.throttling <span style="color:#f92672">import</span> AnonRateThrottle
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">LoginRateThrottle</span>(AnonRateThrottle):
+</span></span><span style="display:flex;"><span>    scope <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;login&#39;</span>
+</span></span></code></pre></div><h4 id="viewset-與-url-配置">ViewSet 與 URL 配置</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># views.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> rest_framework <span style="color:#f92672">import</span> viewsets, generics
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> rest_framework.permissions <span style="color:#f92672">import</span> AllowAny, IsAuthenticated
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> rest_framework.views <span style="color:#f92672">import</span> APIView
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> rest_framework.response <span style="color:#f92672">import</span> Response
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> rest_framework_simplejwt.views <span style="color:#f92672">import</span> TokenObtainPairView
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> .models <span style="color:#f92672">import</span> Article
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> .serializers <span style="color:#f92672">import</span> ArticleSerializer
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> .permissions <span style="color:#f92672">import</span> IsAuthorOrReadOnly
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> .throttles <span style="color:#f92672">import</span> LoginRateThrottle
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ThrottledTokenObtainPairView</span>(TokenObtainPairView):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;加上限流的登入端點&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    throttle_classes <span style="color:#f92672">=</span> [LoginRateThrottle]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ArticleViewSet</span>(viewsets<span style="color:#f92672">.</span>ModelViewSet):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    文章 CRUD API
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - 列表/詳情：任何人可讀取
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - 建立：需要登入
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - 修改/刪除：只有作者可操作
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    queryset <span style="color:#f92672">=</span> Article<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>select_related(<span style="color:#e6db74">&#39;author&#39;</span>)<span style="color:#f92672">.</span>order_by(<span style="color:#e6db74">&#39;-created_at&#39;</span>)
+</span></span><span style="display:flex;"><span>    serializer_class <span style="color:#f92672">=</span> ArticleSerializer
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_permissions</span>(self):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> self<span style="color:#f92672">.</span>action <span style="color:#f92672">in</span> (<span style="color:#e6db74">&#39;list&#39;</span>, <span style="color:#e6db74">&#39;retrieve&#39;</span>):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> [AllowAny()]
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> [IsAuthenticated(), IsAuthorOrReadOnly()]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">perform_create</span>(self, serializer):
+</span></span><span style="display:flex;"><span>        serializer<span style="color:#f92672">.</span>save(author<span style="color:#f92672">=</span>self<span style="color:#f92672">.</span>request<span style="color:#f92672">.</span>user)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">UserProfileView</span>(APIView):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;用戶個人資料（需要認證）&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    permission_classes <span style="color:#f92672">=</span> [IsAuthenticated]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get</span>(self, request):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> Response({
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;id&#39;</span>: request<span style="color:#f92672">.</span>user<span style="color:#f92672">.</span>id,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;username&#39;</span>: request<span style="color:#f92672">.</span>user<span style="color:#f92672">.</span>username,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;email&#39;</span>: request<span style="color:#f92672">.</span>user<span style="color:#f92672">.</span>email,
+</span></span><span style="display:flex;"><span>        })
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># urls.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.urls <span style="color:#f92672">import</span> path, include
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> rest_framework.routers <span style="color:#f92672">import</span> DefaultRouter
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> .views <span style="color:#f92672">import</span> (
+</span></span><span style="display:flex;"><span>    ThrottledTokenObtainPairView,
+</span></span><span style="display:flex;"><span>    ArticleViewSet,
+</span></span><span style="display:flex;"><span>    UserProfileView,
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> rest_framework_simplejwt.views <span style="color:#f92672">import</span> TokenRefreshView
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>router <span style="color:#f92672">=</span> DefaultRouter()
+</span></span><span style="display:flex;"><span>router<span style="color:#f92672">.</span>register(<span style="color:#e6db74">&#39;articles&#39;</span>, ArticleViewSet, basename<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;article&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>urlpatterns <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 認證端點</span>
+</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;api/auth/token/&#39;</span>, ThrottledTokenObtainPairView<span style="color:#f92672">.</span>as_view()),
+</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;api/auth/token/refresh/&#39;</span>, TokenRefreshView<span style="color:#f92672">.</span>as_view()),
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 用戶端點</span>
+</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;api/profile/&#39;</span>, UserProfileView<span style="color:#f92672">.</span>as_view()),
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 資源端點（Router 自動產生）</span>
+</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;api/&#39;</span>, include(router<span style="color:#f92672">.</span>urls)),
+</span></span><span style="display:flex;"><span>]
+</span></span></code></pre></div><h4 id="測試流程">測試流程</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 1. 匿名用戶讀取文章列表（允許）</span>
+</span></span><span style="display:flex;"><span>curl http://localhost:8000/api/articles/
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 2. 匿名用戶嘗試建立文章（被拒：401）</span>
+</span></span><span style="display:flex;"><span>curl -X POST http://localhost:8000/api/articles/ <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  -d <span style="color:#e6db74">&#39;{&#34;title&#34;: &#34;測試&#34;, &#34;content&#34;: &#34;內容&#34;}&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 回應：{&#34;detail&#34;: &#34;Authentication credentials were not provided.&#34;}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 3. 登入取得 Token</span>
+</span></span><span style="display:flex;"><span>curl -X POST http://localhost:8000/api/auth/token/ <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  -d <span style="color:#e6db74">&#39;{&#34;username&#34;: &#34;alice&#34;, &#34;password&#34;: &#34;mypassword&#34;}&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 回應：{&#34;access&#34;: &#34;eyJ...&#34;, &#34;refresh&#34;: &#34;eyJ...&#34;}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 4. 使用 Token 建立文章（成功）</span>
+</span></span><span style="display:flex;"><span>curl -X POST http://localhost:8000/api/articles/ <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  -H <span style="color:#e6db74">&#34;Authorization: Bearer eyJ...&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  -d <span style="color:#e6db74">&#39;{&#34;title&#34;: &#34;我的文章&#34;, &#34;content&#34;: &#34;文章內容&#34;}&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 5. 其他用戶嘗試修改（被拒：403）</span>
+</span></span><span style="display:flex;"><span>curl -X PUT http://localhost:8000/api/articles/1/ <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  -H <span style="color:#e6db74">&#34;Authorization: Bearer eyJ...（其他用戶的 Token）&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  -d <span style="color:#e6db74">&#39;{&#34;title&#34;: &#34;修改標題&#34;}&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 回應：{&#34;detail&#34;: &#34;只有作者才能修改此內容。&#34;}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 6. 頻繁登入測試限流（超過 5 次/分鐘後被拒：429）</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 回應：{&#34;detail&#34;: &#34;Request was throttled. Expected available in 45 seconds.&#34;}</span>
+</span></span></code></pre></div><hr>
+<h3 id="總結">總結</h3>
+<p>本文完整介紹了 DRF 安全機制的後兩層 &ndash; <strong>Permissions</strong> 權限控制與 <strong>Throttling</strong> 限流。</p>
+<p>在權限方面，DRF 內建了 <code>AllowAny</code>、<code>IsAuthenticated</code>、<code>IsAdminUser</code> 和 <code>IsAuthenticatedOrReadOnly</code> 四種常用權限類別，並支援透過 <code>BasePermission</code> 自訂權限邏輯。<strong>has_permission</strong> 負責全域權限檢查，<strong>has_object_permission</strong> 負責物件層級權限檢查，兩者各有其觸發時機。<code>DjangoModelPermissions</code> 可以直接對應 Django 的內建權限系統，適合需要細粒度權限管理的專案。</p>
+<p>在限流方面，<code>AnonRateThrottle</code> 和 <code>UserRateThrottle</code> 分別控制匿名和認證用戶的請求頻率，<code>ScopedRateThrottle</code> 則可以為不同端點設定不同的限流策略。自訂 Throttle 類別還能根據用戶等級動態調整限流額度。</p>
+<p>至此，我們已經完整學會了 DRF 的三層安全機制：<strong>認證</strong>（你是誰）、<strong>權限</strong>（你能做什麼）、<strong>限流</strong>（你能做多少次）。將這三者結合起來，就能建構出一個安全、穩定且可控的 API 服務。</p></div>
+        
+        
+
+        
+        <div class="mt-8">
+          
+<div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose">
+  <div>
+    <div class="flex items-center gap-2 mb-1">
+      <a href="/about" class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">
+        BenZ
+      </a>
+      
+      <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span>
+      
+    </div>
+    <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">
+      熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。
+    </p>
+    <div class="flex items-center gap-3">
+      
+      <a href="https://github.com/benzhub" target="_blank" rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label="GitHub">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      
+      
+      
+    </div>
+  </div>
+</div>
+
+        </div>
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        
+
+
+<div>
+  <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3>
+  <div class="grid gap-2">
+    
+    <a href="http://localhost:1313/post/django/026-drf-authentication/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">DRF 認證機制：Token、JWT 與 Session 認證 | Django 教學</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/15</span>
+    </a>
+    
+    <a href="http://localhost:1313/post/django/025-drf-views-generic-router/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">DRF Generic Views 與 Router 自動路由配置 | Django 教學</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/14</span>
+    </a>
+    
+    <a href="http://localhost:1313/post/django/024-drf-views-apiview-viewset/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">DRF Views：APIView 與 ViewSet 完全解析 | Django 教學</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/13</span>
+    </a>
+    
+  </div>
+</div>
+
+
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            
+            <a href="http://localhost:1313/post/django/026-drf-authentication/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+                <span class="text-sm font-medium">DRF 認證機制：Token、JWT 與 Session 認證 | Django 教學</span>
+            </a>
+            
+          </div>
+          <div>
+            
+            <a href="http://localhost:1313/post/django/028-django-middleware/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+                <span class="text-sm font-medium">Django Middleware 中介軟體原理與實作 | Django 教學</span>
+            </a>
+            
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        
+<script src="https://giscus.app/client.js"
+        data-repo="benzhub/benzhub.github.io"
+        data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM="
+        data-category="Announcements"
+        data-category-id="MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme="preferred_color_scheme"
+        data-lang="zh-TW"
+        crossorigin="anonymous"
+        async>
+</script>
+
+
+      </div>
+    </div>
+    
+    <div class="hidden lg:block lg:col-span-1 mt-4">
+    
+    
+            
+            <div class="widget fade-in">
+    <p class="widget-title">搜尋</p>
+    <form role="search" method="get" action="https://google.com/search">
+        <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
+        <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
+    </form>
+</div>
+
+        
+            
+            
+
+        
+            
+            
+<div class="widget fade-in">
+    <p class="widget-title">標籤</p>
+    <div class="flex flex-wrap gap-1.5">
+        <a href='/tags/80/20-%E6%B3%95%E5%89%87'>
+            <span class="tag-pill">80/20 法則</span>
+        </a>
+        <a href='/tags/acid'>
+            <span class="tag-pill">acid</span>
+        </a>
+        <a href='/tags/ai'>
+            <span class="tag-pill">ai</span>
+        </a>
+        <a href='/tags/ai-agent'>
+            <span class="tag-pill">ai agent</span>
+        </a>
+        <a href='/tags/ai-workflow'>
+            <span class="tag-pill">ai workflow</span>
+        </a>
+        <a href='/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE'>
+            <span class="tag-pill">ai 工具焦慮</span>
+        </a>
+        <a href='/tags/ai-%E6%8E%A5%E5%96%AE'>
+            <span class="tag-pill">ai 接單</span>
+        </a>
+        <a href='/tags/ai-%E7%B9%AA%E5%9C%96'>
+            <span class="tag-pill">ai 繪圖</span>
+        </a>
+        <a href='/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA'>
+            <span class="tag-pill">ai 虛擬人</span>
+        </a>
+        <a href='/tags/ai-%E8%A1%8C%E9%8A%B7'>
+            <span class="tag-pill">ai 行銷</span>
+        </a>
+        <a href='/tags/ai-%E8%A8%AD%E8%A8%88'>
+            <span class="tag-pill">ai 設計</span>
+        </a>
+        <a href='/tags/ai-%E8%AE%8A%E7%8F%BE'>
+            <span class="tag-pill">ai 變現</span>
+        </a>
+        <a href='/tags/ai-%E8%B3%BA%E9%8C%A2'>
+            <span class="tag-pill">ai 賺錢</span>
+        </a>
+        <a href='/tags/ai-income'>
+            <span class="tag-pill">ai-income</span>
+        </a>
+        <a href='/tags/ai-insights'>
+            <span class="tag-pill">ai-insights</span>
+        </a>
+        <a href='/tags/api'>
+            <span class="tag-pill">api</span>
+        </a>
+        <a href='/tags/architecture'>
+            <span class="tag-pill">architecture</span>
+        </a>
+        <a href='/tags/autovacuum'>
+            <span class="tag-pill">autovacuum</span>
+        </a>
+        <a href='/tags/background-processes'>
+            <span class="tag-pill">background-processes</span>
+        </a>
+        <a href='/tags/big-o'>
+            <span class="tag-pill">big o</span>
+        </a>
+    </div>
+</div>
+
+
+        
+            
+            
+<div class="widget fade-in">
+    <p class="widget-title">文章系列</p>
+    <div class="flex flex-wrap gap-1.5">
+        
+        
+        
+        
+        <a href='/post/postgresql/'>
+            <span class="tag-pill">PostgreSQL (13)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/javascript/'>
+            <span class="tag-pill">JavaScript (68)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/django/'>
+            <span class="tag-pill">Django (30)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/python/'>
+            <span class="tag-pill">Python (37)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/htmlcss/'>
+            <span class="tag-pill">HTML &amp; CSS (23)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/linux/'>
+            <span class="tag-pill">Linux (22)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/git/'>
+            <span class="tag-pill">Git (18)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/ai-insights/'>
+            <span class="tag-pill">AI Insights (13)</span>
+        </a>
+        
+        
+    </div>
+</div>
+
+
+        
+            
+            
+
+<div class="widget fade-in">
+    <p class="widget-title">最新文章</p>
+    <div class="flex flex-col gap-1">
+        <a href="/post/postgresql/013-ddl-schema/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/19
+            </p>
+        </a>
+        <a href="/post/django/030-django-custom-user-model/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django 自訂使用者模型：AbstractUser 與 AbstractBaseUser | Django 教學</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/19
+            </p>
+        </a>
+        <a href="/post/javascript/data-structures--algorithms/006-heap-priority-queue/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">堆積與優先佇列 — Min/Max Heap 原理與 Heap Sort 完整實作 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/19
+            </p>
+        </a>
+        <a href="/post/django/029-django-authentication/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Authentication 使用者認證系統完全指南 | Django 教學</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/18
+            </p>
+        </a>
+        <a href="/post/postgresql/012-data-types/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/18
+            </p>
+        </a>
+    </div>
+</div>
+
+        
+    
+</div>
+
+    
+</div>
+
+        </div>
+    </div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]">
+    
+    <p>&copy; 2026 <a href="http://localhost:1313/" class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p>
+</footer>
+
+
+<script>
+    (function (window, document) {
+        function main() {
+            var ad = document.createElement('script');
+            ad.async = true;
+            ad.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606';
+            ad.crossOrigin = "anonymous";
+            var sc = document.getElementsByTagName('script')[0];
+            sc.parentNode.insertBefore(ad, sc);
+        }
+        var lazyLoad = false;
+        function onLazyLoad() {
+            if (lazyLoad === false) {
+                lazyLoad = true;
+                window.removeEventListener('scroll', onLazyLoad);
+                window.removeEventListener('mousemove', onLazyLoad);
+                window.removeEventListener('mousedown', onLazyLoad);
+                window.removeEventListener('touchstart', onLazyLoad);
+                window.removeEventListener('keydown', onLazyLoad);
+                main();
+            }
+        }
+        window.addEventListener('scroll', onLazyLoad);
+        window.addEventListener('mousemove', onLazyLoad);
+        window.addEventListener('mousedown', onLazyLoad);
+        window.addEventListener('touchstart', onLazyLoad);
+        window.addEventListener('keydown', onLazyLoad);
+        window.addEventListener('load', function () {
+            if (window.pageYOffset) {
+                onLazyLoad();
+                window.setTimeout(onLazyLoad, 3000);
+            }
+        });
+    })(window, document);
+</script>
+
+
+<script>
+    
+    var icon = document.getElementById("icon");
+    var icon2 = document.getElementById("icon2");
+    if (document.documentElement.classList.contains("dark") || localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+        if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+    function toggleDarkMode() {
+        if (document.documentElement.classList.contains('dark')) {
+            if (icon) { icon.classList.remove("icon-sun"); icon.classList.add("icon-moon"); }
+            if (icon2) { icon2.classList.remove("icon-sun"); icon2.classList.add("icon-moon"); }
+            document.documentElement.classList.remove('dark');
+            localStorage.theme = 'light';
+        } else {
+            if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+            if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+            document.documentElement.classList.add('dark');
+            localStorage.theme = 'dark';
+        }
+    }
+
+    
+    document.addEventListener('DOMContentLoaded', function () {
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0 });
+
+        document.querySelectorAll('.fade-in').forEach(function (el) {
+            observer.observe(el);
+        });
+    });
+</script>
+</body>
+
+</html>

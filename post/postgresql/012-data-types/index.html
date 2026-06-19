@@ -1,37 +1,467 @@
-<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="深入解析 PostgreSQL 的資料型別系統，涵蓋數值、字串、日期時間、UUID、布林、網路位址、範圍型別、陣列、Enum、Domain 等，以及型別轉換機制、TOAST 儲存策略、型別對索引效能的影響。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="深入解析 PostgreSQL 的資料型別系統，涵蓋數值、字串、日期時間、UUID、布林、網路位址、範圍型別、陣列、Enum、Domain 等，以及型別轉換機制、TOAST 儲存策略、型別對索引效能的影響。"><meta property="og:url" content="https://benzhub.github.io/post/postgresql/012-data-types/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/postgresql/012-data-types/><meta name=twitter:description content="深入解析 PostgreSQL 的資料型別系統，涵蓋數值、字串、日期時間、UUID、布林、網路位址、範圍型別、陣列、Enum、Domain 等，以及型別轉換機制、TOAST 儲存策略、型別對索引效能的影響。"><meta property="article:published_time" content="2026-06-18T00:00:00+00:00"><meta property="article:updated_time" content="2026-06-18T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/postgresql/012-Data-Types.png"><meta property="og:image:url" content="https://benzhub.github.io/img/postgresql/012-Data-Types.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
-<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/postgresql/012-data-types/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/postgresql/012-data-types/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL\"","description":"\"深入解析 PostgreSQL 的資料型別系統，涵蓋數值、字串、日期時間、UUID、布林、網路位址、範圍型別、陣列、Enum、Domain 等，以及型別轉換機制、TOAST 儲存策略、型別對索引效能的影響。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-06-18T00:00:00\u002b00:00","dateModified":"2026-06-18T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/postgresql\/012-Data-Types.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/postgresql\/012-data-types\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/postgresql\/"},{"@type":"ListItem","position":3,"name":"\"資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL\""}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
-</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
-</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
-</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
-<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
-<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-<span>🌐</span>
-<span>繁體中文</span>
-<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
-<a href=https://benzhub.github.io/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-<a href=https://benzhub.github.io/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
-<a href=https://benzhub.github.io/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-<a href=https://benzhub.github.io/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
-</button>
-<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
-<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
-</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
-</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
-</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
-<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-<span>🌐</span>
-<span>繁體中文</span>
-<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
-<a href=https://benzhub.github.io/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-<a href=https://benzhub.github.io/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
-<a href=https://benzhub.github.io/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-<a href=https://benzhub.github.io/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/18</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/postgresql class="tag-pill no-underline">postgresql</a>
-<a href=/tags/data-types class="tag-pill no-underline">data-types</a>
-<a href=/tags/type-system class="tag-pill no-underline">type-system</a>
-<a href=/tags/enum class="tag-pill no-underline">enum</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/postgresql/012-Data-Types.png alt="資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p><strong>PostgreSQL</strong> 擁有業界最完整的原生型別集合——從基礎的整數、字串、日期時間，到進階的 <strong>JSONB</strong>、<strong>Range</strong>、<strong>Array</strong>、<strong>Enum</strong>、<strong>Domain</strong> 與網路位址型別，其型別系統建立在 <code>pg_type</code> 系統目錄之上，具備高度可擴展性。選對型別，不僅影響資料正確性，更直接關係到儲存效率與查詢效能。</p></blockquote><h3 id=型別系統架構>型別系統架構</h3><p><strong>PostgreSQL</strong> 的每個型別都是系統目錄 <code>pg_type</code> 中的一筆紀錄，包含 OID、輸入/輸出函式、儲存策略等元資訊。型別在 PostgreSQL 中是真正的「一等公民」：</p><pre tabindex=0><code>pg_type 核心欄位：
+<!DOCTYPE html>
+
+<html lang="zh-TW">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><title>資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL | BenzHub</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="apple-touch-icon" sizes="180x180" href='/favicon/apple-touch-icon.png'>
+    <link rel="icon" type="image/png" sizes="32x32" href='/favicon/favicon-32x32.png'>
+    <link rel="icon" type="image/png" sizes="16x16" href='/favicon/favicon-16x16.png'>
+    <link rel="manifest" href='/favicon/site.webmanifest' />
+    <link rel="mask-icon" href=' /favicon/safari-pinned-tab.svg' color="#5bbad5" />
+    <link rel="shortcut icon" href='/favicon/favicon.ico' />
+    <meta name="theme-color" content="#fafafa">
+    <meta property="og:title" content="資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL | BenzHub" />
+    
+    
+    <link rel="stylesheet" href="/css/style.css" />
+    
+    <link href=' /css/blonde.min.css' rel="stylesheet" type="text/css" media="print"
+        onload="this.media=' all'">
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+
+<meta name="description" content="深入解析 PostgreSQL 的資料型別系統，涵蓋數值、字串、日期時間、UUID、布林、網路位址、範圍型別、陣列、Enum、Domain 等，以及型別轉換機制、TOAST 儲存策略、型別對索引效能的影響。">
+<meta property="og:site_name" content="BenzHub">
+<meta property="og:description" content="深入解析 PostgreSQL 的資料型別系統，涵蓋數值、字串、日期時間、UUID、布林、網路位址、範圍型別、陣列、Enum、Domain 等，以及型別轉換機制、TOAST 儲存策略、型別對索引效能的影響。">
+<meta property="og:url" content="http://localhost:1313/post/postgresql/012-data-types/">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="zh_TW">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="">
+
+<link rel="canonical" href="http://localhost:1313/post/postgresql/012-data-types/">
+
+<meta name="twitter:description" content="深入解析 PostgreSQL 的資料型別系統，涵蓋數值、字串、日期時間、UUID、布林、網路位址、範圍型別、陣列、Enum、Domain 等，以及型別轉換機制、TOAST 儲存策略、型別對索引效能的影響。">
+<meta property="article:published_time" content="2026-06-18T00:00:00&#43;00:00">
+<meta property="article:updated_time" content="2026-06-18T00:00:00&#43;00:00">
+
+
+
+
+
+    
+<meta property="og:image" content="http://localhost:1313/img/postgresql/012-Data-Types.png">
+<meta property="og:image:url" content="http://localhost:1313/img/postgresql/012-Data-Types.png">
+    
+
+    
+    <link rel="stylesheet" href='/css/custom.css'>
+    <i class="dark hidden"></i>
+    
+<link rel="alternate" hreflang="zh-TW" href="http://localhost:1313/post/postgresql/012-data-types/" />
+
+<link rel="alternate" hreflang="x-default" href="http://localhost:1313/post/postgresql/012-data-types/" />
+
+    
+
+
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "\"資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL\"",
+  "description": "\"深入解析 PostgreSQL 的資料型別系統，涵蓋數值、字串、日期時間、UUID、布林、網路位址、範圍型別、陣列、Enum、Domain 等，以及型別轉換機制、TOAST 儲存策略、型別對索引效能的影響。\"",
+  "author": {
+    "@type": "Person",
+    "name": "\"BenzHub\"",
+    "url": "http:\/\/localhost:1313\/about",
+    "jobTitle": "\"Software Developer\"",
+    "sameAs": [
+      "\"https://github.com/benzhub\""
+    ]
+  },
+  "datePublished": "2026-06-18T00:00:00\u002b00:00",
+  "dateModified": "2026-06-18T00:00:00\u002b00:00",
+  "image": "http:\/\/localhost:1313\/img\/postgresql\/012-Data-Types.png",
+  "publisher": {
+    "@type": "Organization",
+    "name": "\"BenzHub\"",
+    "url": "\"http://localhost:1313/\"",
+    "sameAs": [
+      "\"https://github.com/benzhub\""
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http:\/\/localhost:1313\/post\/postgresql\/012-data-types\/"
+  },
+  "inLanguage": "zh-TW"
+}
+</script>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "\"BenzHub\"",
+      "item": "http:\/\/localhost:1313\/"
+    }
+    
+    
+      
+      
+    ,{
+      "@type": "ListItem",
+      "position": 2,
+      "name": "\"Blog\"",
+      "item": "http:\/\/localhost:1313\/post\/postgresql\/"
+    }
+      
+      
+    
+    ,{
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "\"資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL\""
+    }
+  ]
+}
+</script>
+
+
+
+
+
+
+
+
+
+
+
+</head>
+<body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class="site-nav" id="siteNav">
+    <div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full">
+        
+        <a href="http://localhost:1313/" class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">
+            BenzHub
+        </a>
+
+        
+        <div class="hidden md:flex items-center gap-6">
+            
+            <a href="/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                首頁
+            </a>
+            
+            <a href="/about/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                關於
+            </a>
+            
+            <a href="/contact/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                聯絡
+            </a>
+            
+            <a href="/resourses/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                資源
+            </a>
+            
+
+            
+            <div class="flex items-center gap-2">
+                <form class="flex items-center" role="search" method="get" action="https://google.com/search" id="navSearchForm">
+                    <input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50"
+                        type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋" id="navSearchInput">
+                    <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
+                </form>
+                <button onclick="toggleNavSearch()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+                    <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                    </svg>
+                </button>
+            </div>
+
+            
+            <span class="text-zinc-200 dark:text-zinc-700">|</span>
+
+            
+            
+
+
+
+
+<div class="lang-switcher relative hidden md:block">
+    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+        <span>🌐</span>
+        <span>繁體中文</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
+        
+            
+            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
+    <div class="flex gap-2">
+        
+            
+            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+            
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon2" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+        </div>
+
+        
+        <div class="flex md:hidden items-center gap-1">
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+            <button id="hamburgerbtn" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Menu">
+                <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    
+    <div class="mobile-menu md:hidden" id="mobileMenu">
+        
+        <a href="/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            首頁
+        </a>
+        
+        <a href="/about/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            關於
+        </a>
+        
+        <a href="/contact/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            聯絡
+        </a>
+        
+        <a href="/resourses/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            資源
+        </a>
+        
+        <form class="mt-2" role="search" method="get" action="https://google.com/search">
+            <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
+            <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
+        </form>
+        
+        
+
+
+
+
+<div class="lang-switcher relative hidden md:block">
+    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+        <span>🌐</span>
+        <span>繁體中文</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
+        
+            
+            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
+    <div class="flex gap-2">
+        
+            
+            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+    </div>
+</nav>
+
+<script>
+    
+    document.getElementById('hamburgerbtn').addEventListener('click', function () {
+        document.getElementById('mobileMenu').classList.toggle('active');
+    });
+
+    
+    window.addEventListener('scroll', function () {
+        var nav = document.getElementById('siteNav');
+        if (window.scrollY > 50) {
+            nav.classList.add('scrolled');
+        } else {
+            nav.classList.remove('scrolled');
+        }
+    });
+
+    
+    function toggleNavSearch() {
+        var input = document.getElementById('navSearchInput');
+        input.classList.toggle('expanded');
+        if (input.classList.contains('expanded')) {
+            input.focus();
+        }
+    }
+
+    
+    function toggleLangMenu() {
+        var dropdown = document.getElementById('langDropdown');
+        dropdown.classList.toggle('hidden');
+    }
+
+    
+    document.addEventListener('click', function (e) {
+        
+        var form = document.getElementById('navSearchForm');
+        var input = document.getElementById('navSearchInput');
+        if (form && input && !form.contains(e.target) && !e.target.closest('[aria-label="Toggle Search"]')) {
+            input.classList.remove('expanded');
+        }
+        
+        var langSwitcher = e.target.closest('.lang-switcher');
+        if (!langSwitcher) {
+            var dropdown = document.getElementById('langDropdown');
+            if (dropdown) dropdown.classList.add('hidden');
+        }
+    });
+</script>
+<div class="nav-spacer"></div>
+    <div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id="content">
+        <div class="lg:mx-5">
+<div class="grid grid-cols-3 gap-6">
+  
+  <div class="col-span-3 lg:col-span-2">
+  
+      
+      <div class="post-detail fade-in my-4">
+        <h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL</h1>
+        <div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4">
+            <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/18
+            </span>
+            
+        </div>
+        
+        <div class="flex flex-wrap gap-1.5 mb-5">
+            
+            <a href='/tags/postgresql' class="tag-pill no-underline">postgresql</a>
+            
+            <a href='/tags/data-types' class="tag-pill no-underline">data-types</a>
+            
+            <a href='/tags/type-system' class="tag-pill no-underline">type-system</a>
+            
+            <a href='/tags/enum' class="tag-pill no-underline">enum</a>
+            
+        </div>
+        
+        
+        <img class="py-4 m-auto rounded-lg thumb-img" src="http://localhost:1313/img/postgresql/012-Data-Types.png" alt="資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL">
+        
+        
+        <div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote>
+<p><strong>PostgreSQL</strong> 擁有業界最完整的原生型別集合——從基礎的整數、字串、日期時間，到進階的 <strong>JSONB</strong>、<strong>Range</strong>、<strong>Array</strong>、<strong>Enum</strong>、<strong>Domain</strong> 與網路位址型別，其型別系統建立在 <code>pg_type</code> 系統目錄之上，具備高度可擴展性。選對型別，不僅影響資料正確性，更直接關係到儲存效率與查詢效能。</p>
+</blockquote>
+<h3 id="型別系統架構">型別系統架構</h3>
+<p><strong>PostgreSQL</strong> 的每個型別都是系統目錄 <code>pg_type</code> 中的一筆紀錄，包含 OID、輸入/輸出函式、儲存策略等元資訊。型別在 PostgreSQL 中是真正的「一等公民」：</p>
+<pre tabindex="0"><code>pg_type 核心欄位：
 ├── typname      — 型別名稱
 ├── typoid       — 唯一 OID 識別碼
 ├── typlen       — 固定長度（-1 表示可變長度）
@@ -40,13 +470,14 @@
 ├── typinput     — 文字輸入函式
 ├── typoutput    — 文字輸出函式
 └── typstorage   — TOAST 儲存策略
-</code></pre><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 查詢所有型別分類
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> typcategory, typname, typlen
-</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_type
-</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> typisdefined <span style=color:#f92672>=</span> <span style=color:#66d9ef>true</span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> typcategory, typname
-</span></span><span style=display:flex><span><span style=color:#66d9ef>LIMIT</span> <span style=color:#ae81ff>20</span>;
-</span></span></code></pre></div><h3 id=型別分類總覽>型別分類總覽</h3><pre tabindex=0><code>PostgreSQL 型別分類體系
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 查詢所有型別分類
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> typcategory, typname, typlen
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> pg_type
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> typisdefined <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> typcategory, typname
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">LIMIT</span> <span style="color:#ae81ff">20</span>;
+</span></span></code></pre></div><h3 id="型別分類總覽">型別分類總覽</h3>
+<pre tabindex="0"><code>PostgreSQL 型別分類體系
 │
 ├── 數值型別（Numeric）
 │   ├── 整數：smallint / integer / bigint
@@ -79,331 +510,951 @@
 ├── UUID：128 位元全域唯一識別碼
 ├── Enum / Domain / Composite（自訂型別）
 └── 全文搜尋：tsvector / tsquery
-</code></pre><h3 id=數值型別>數值型別</h3><h4 id=整數型別選擇>整數型別選擇</h4><table><thead><tr><th>型別</th><th>別名</th><th>大小</th><th>範圍</th></tr></thead><tbody><tr><td><code>smallint</code></td><td><code>int2</code></td><td>2 bytes</td><td>-32,768 ~ 32,767</td></tr><tr><td><code>integer</code></td><td><code>int4</code></td><td>4 bytes</td><td>-2,147,483,648 ~ 2,147,483,647</td></tr><tr><td><code>bigint</code></td><td><code>int8</code></td><td>8 bytes</td><td>±9.2×10^18</td></tr></tbody></table><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- smallint：適合有限範圍的值
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> calendar_event (
-</span></span><span style=display:flex><span>    day_of_week smallint <span style=color:#66d9ef>CHECK</span> (day_of_week <span style=color:#66d9ef>BETWEEN</span> <span style=color:#ae81ff>0</span> <span style=color:#66d9ef>AND</span> <span style=color:#ae81ff>6</span>)
-</span></span><span style=display:flex><span>);
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>-- integer：最常用的整數型別
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> orders (
-</span></span><span style=display:flex><span>    order_id integer <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span>,
-</span></span><span style=display:flex><span>    quantity integer <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>
-</span></span><span style=display:flex><span>);
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>-- bigint：需要超大範圍時使用
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> event_log (
-</span></span><span style=display:flex><span>    event_id bigint <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span>,
-</span></span><span style=display:flex><span>    user_id bigint <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>
-</span></span><span style=display:flex><span>);
-</span></span></code></pre></div><h4 id=serial-vs-generated-as-identity>serial vs GENERATED AS IDENTITY</h4><p><code>serial</code> 是 PG10 之前的慣例，實際上是 <code>integer DEFAULT nextval('seq')</code> 的語法糖。PG10+ 推薦使用 <code>GENERATED ALWAYS AS IDENTITY</code>：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 舊式 serial（仍可用，但不推薦新程式碼）
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> old_style (
-</span></span><span style=display:flex><span>    id serial <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span>
-</span></span><span style=display:flex><span>);
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>-- PG10+ 推薦：GENERATED ALWAYS AS IDENTITY
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> new_style (
-</span></span><span style=display:flex><span>    id integer <span style=color:#66d9ef>GENERATED</span> ALWAYS <span style=color:#66d9ef>AS</span> <span style=color:#66d9ef>IDENTITY</span> <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span>,
-</span></span><span style=display:flex><span>    name text
-</span></span><span style=display:flex><span>);
-</span></span><span style=display:flex><span><span style=color:#75715e>-- ALWAYS 模式不允許直接 INSERT 指定 id 值
-</span></span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>-- GENERATED BY DEFAULT AS IDENTITY：允許覆寫（較寬鬆）
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> flexible_id (
-</span></span><span style=display:flex><span>    id bigint <span style=color:#66d9ef>GENERATED</span> <span style=color:#66d9ef>BY</span> <span style=color:#66d9ef>DEFAULT</span> <span style=color:#66d9ef>AS</span> <span style=color:#66d9ef>IDENTITY</span> <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span>,
-</span></span><span style=display:flex><span>    name text
-</span></span><span style=display:flex><span>);
-</span></span></code></pre></div><p><strong>差異</strong>：<code>serial</code> 的序列是獨立物件，刪除表時不會自動刪除（需 CASCADE）；<code>IDENTITY</code> 欄位的序列隸屬於欄位，自動清理。</p><h4 id=numeric-精確度>numeric 精確度</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- numeric(precision, scale)
-</span></span></span><span style=display:flex><span><span style=color:#75715e>-- precision：總位數  scale：小數點後位數
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> financial (
-</span></span><span style=display:flex><span>    price numeric(<span style=color:#ae81ff>12</span>, <span style=color:#ae81ff>2</span>),   <span style=color:#75715e>-- 最大 999,999,999,999.99
-</span></span></span><span style=display:flex><span>    tax_rate numeric(<span style=color:#ae81ff>5</span>, <span style=color:#ae81ff>4</span>)  <span style=color:#75715e>-- 如 0.1500（15%）
-</span></span></span><span style=display:flex><span>);
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>-- 常見錯誤：用 float 儲存金融資料
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#ae81ff>0</span>.<span style=color:#ae81ff>1</span>::float <span style=color:#f92672>+</span> <span style=color:#ae81ff>0</span>.<span style=color:#ae81ff>2</span>::float;    <span style=color:#75715e>-- 0.30000000000000004（浮點誤差！）
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#ae81ff>0</span>.<span style=color:#ae81ff>1</span>::numeric <span style=color:#f92672>+</span> <span style=color:#ae81ff>0</span>.<span style=color:#ae81ff>2</span>::numeric; <span style=color:#75715e>-- 0.3（精確）
-</span></span></span></code></pre></div><p><strong>規則</strong>：涉及金錢或需要精確計算的場景，一律使用 <code>numeric</code>，絕不用 <code>float</code>。</p><h3 id=字串型別>字串型別</h3><h4 id=text-vs-varchar-vs-char>text vs varchar vs char</h4><p>在 PostgreSQL 中，<code>text</code> 和 <code>varchar</code> 底層儲存機制<strong>完全相同</strong>，<code>varchar(n)</code> 只是在 <code>text</code> 上增加了長度限制。除非業務上有明確的長度需求，否則直接用 <code>text</code>：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 推薦：使用 text
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> users (
-</span></span><span style=display:flex><span>    username text <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
-</span></span><span style=display:flex><span>    bio text,
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>CONSTRAINT</span> username_length <span style=color:#66d9ef>CHECK</span> (<span style=color:#66d9ef>length</span>(username) <span style=color:#66d9ef>BETWEEN</span> <span style=color:#ae81ff>3</span> <span style=color:#66d9ef>AND</span> <span style=color:#ae81ff>50</span>)
-</span></span><span style=display:flex><span>);
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>-- varchar(n)：等同於 text 加上長度 CHECK
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> products (
-</span></span><span style=display:flex><span>    sku varchar(<span style=color:#ae81ff>20</span>) <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>  <span style=color:#75715e>-- 業務上確定不超過 20 字元
-</span></span></span><span style=display:flex><span>);
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>-- char(n)：固定長度，右側填充空格，幾乎沒有使用場景
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> country_code (
-</span></span><span style=display:flex><span>    code char(<span style=color:#ae81ff>2</span>)  <span style=color:#75715e>-- 如 &#39;TW&#39;, &#39;US&#39;
-</span></span></span><span style=display:flex><span>);
-</span></span><span style=display:flex><span><span style=color:#75715e>-- 陷阱：&#39;TW&#39;::char(5) = &#39;TW&#39;::char(2) 為 true（比較時忽略尾部空格）
-</span></span></span></code></pre></div><h4 id=collation排序規則>Collation（排序規則）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 資料庫層級 collation
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>DATABASE</span> mydb
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>WITH</span> <span style=color:#66d9ef>ENCODING</span> <span style=color:#e6db74>&#39;UTF8&#39;</span>
-</span></span><span style=display:flex><span>    LC_COLLATE <span style=color:#e6db74>&#39;zh_TW.UTF-8&#39;</span>
-</span></span><span style=display:flex><span>    LC_CTYPE <span style=color:#e6db74>&#39;zh_TW.UTF-8&#39;</span>;
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>-- 欄位層級 collation
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> articles (
-</span></span><span style=display:flex><span>    title text <span style=color:#66d9ef>COLLATE</span> <span style=color:#e6db74>&#34;zh-TW-x-icu&#34;</span>,  <span style=color:#75715e>-- ICU 排序（PG10+）
-</span></span></span><span style=display:flex><span>    slug text <span style=color:#66d9ef>COLLATE</span> <span style=color:#e6db74>&#34;C&#34;</span>               <span style=color:#75715e>-- 位元組排序，效能最佳
-</span></span></span><span style=display:flex><span>);
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>-- 查詢可用 collation
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> collname <span style=color:#66d9ef>FROM</span> pg_collation
-</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> collencoding <span style=color:#f92672>=</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span> <span style=color:#66d9ef>OR</span> collencoding <span style=color:#f92672>=</span> <span style=color:#ae81ff>6</span>;
-</span></span></code></pre></div><h3 id=日期時間型別>日期時間型別</h3><h4 id=timestamp-vs-timestamptz>timestamp vs timestamptz</h4><p>這是 PostgreSQL 中<strong>最重要的設計決策之一</strong>。<code>timestamp</code> 儲存「壁鐘時間」字串，不知道時區；<code>timestamptz</code> 在儲存時換算為 UTC，讀取時依 <code>TimeZone</code> 設定轉回。</p><p><strong>永遠使用 <code>timestamptz</code>，除非你有非常明確的理由不用。</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> events (
-</span></span><span style=display:flex><span>    id bigint <span style=color:#66d9ef>GENERATED</span> ALWAYS <span style=color:#66d9ef>AS</span> <span style=color:#66d9ef>IDENTITY</span> <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span>,
-</span></span><span style=display:flex><span>    event_name text <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
-</span></span><span style=display:flex><span>    created_at timestamptz <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span> <span style=color:#66d9ef>DEFAULT</span> now(),
-</span></span><span style=display:flex><span>    scheduled_at timestamptz
-</span></span><span style=display:flex><span>);
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>-- timestamptz 的行為
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SET</span> TimeZone <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;Asia/Taipei&#39;</span>;
-</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> events (event_name, scheduled_at)
-</span></span><span style=display:flex><span><span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;會議&#39;</span>, <span style=color:#e6db74>&#39;2026-05-23 14:00:00&#39;</span>);
-</span></span><span style=display:flex><span><span style=color:#75715e>-- 儲存時：14:00 Asia/Taipei → 06:00 UTC
-</span></span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>SET</span> TimeZone <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;UTC&#39;</span>;
-</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> scheduled_at <span style=color:#66d9ef>FROM</span> events <span style=color:#66d9ef>WHERE</span> event_name <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;會議&#39;</span>;
-</span></span><span style=display:flex><span><span style=color:#75715e>-- 顯示 2026-05-23 06:00:00+00
-</span></span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>SET</span> TimeZone <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;America/New_York&#39;</span>;
-</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> scheduled_at <span style=color:#66d9ef>FROM</span> events <span style=color:#66d9ef>WHERE</span> event_name <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;會議&#39;</span>;
-</span></span><span style=display:flex><span><span style=color:#75715e>-- 顯示 2026-05-23 02:00:00-04
-</span></span></span></code></pre></div><h4 id=日期時間操作>日期時間操作</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 取得當前時間
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> now();               <span style=color:#75715e>-- 當前 Transaction 開始時間
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> clock_timestamp();   <span style=color:#75715e>-- 系統時間（每次呼叫都更新）
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#66d9ef>current_date</span>;        <span style=color:#75715e>-- 當前日期
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#66d9ef>current_time</span>;        <span style=color:#75715e>-- 當前時間
-</span></span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>-- interval 運算
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> now() <span style=color:#f92672>+</span> interval <span style=color:#e6db74>&#39;1 day&#39;</span>;
-</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> now() <span style=color:#f92672>+</span> interval <span style=color:#e6db74>&#39;1 year 2 months 3 days&#39;</span>;
-</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#e6db74>&#39;2026-05-23&#39;</span>::date <span style=color:#f92672>-</span> <span style=color:#e6db74>&#39;2026-01-01&#39;</span>::date;  <span style=color:#75715e>-- 天數差（integer）
-</span></span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>-- 日期截斷
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> date_trunc(<span style=color:#e6db74>&#39;month&#39;</span>, now());  <span style=color:#75715e>-- 截斷到月份開頭
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> date_trunc(<span style=color:#e6db74>&#39;week&#39;</span>, now());   <span style=color:#75715e>-- 截斷到週一
-</span></span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>-- 日期部分提取
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#66d9ef>extract</span>(<span style=color:#66d9ef>year</span> <span style=color:#66d9ef>FROM</span> now());    <span style=color:#75715e>-- 年份
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#66d9ef>extract</span>(dow <span style=color:#66d9ef>FROM</span> now());     <span style=color:#75715e>-- 星期幾（0=週日）
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#66d9ef>extract</span>(epoch <span style=color:#66d9ef>FROM</span> now());   <span style=color:#75715e>-- Unix timestamp（秒）
-</span></span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>-- 時區轉換
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> now() <span style=color:#66d9ef>AT</span> TIME <span style=color:#66d9ef>ZONE</span> <span style=color:#e6db74>&#39;Asia/Taipei&#39;</span>;
-</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> now() <span style=color:#66d9ef>AT</span> TIME <span style=color:#66d9ef>ZONE</span> <span style=color:#e6db74>&#39;UTC&#39;</span>;
-</span></span></code></pre></div><h3 id=uuid>UUID</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- PG13+ 內建 gen_random_uuid()（推薦）
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> sessions (
-</span></span><span style=display:flex><span>    session_id uuid <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span> <span style=color:#66d9ef>DEFAULT</span> gen_random_uuid(),
-</span></span><span style=display:flex><span>    user_id bigint <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
-</span></span><span style=display:flex><span>    created_at timestamptz <span style=color:#66d9ef>DEFAULT</span> now()
-</span></span><span style=display:flex><span>);
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> gen_random_uuid();
-</span></span><span style=display:flex><span><span style=color:#75715e>-- 如：a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
-</span></span></span></code></pre></div><p><strong>UUID vs BIGINT 作為主鍵</strong>：</p><table><thead><tr><th>比較項目</th><th>UUID</th><th>BIGINT</th></tr></thead><tbody><tr><td>儲存大小</td><td>16 bytes</td><td>8 bytes</td></tr><tr><td>分散式系統</td><td>無需協調即可生成</td><td>需要序列同步</td></tr><tr><td>安全性</td><td>不可猜測</td><td>可猜測</td></tr><tr><td>索引效率</td><td>略低（隨機分散）</td><td>較高（遞增有序）</td></tr><tr><td>可讀性</td><td>差</td><td>好</td></tr></tbody></table><h3 id=網路型別>網路型別</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> network_config (
-</span></span><span style=display:flex><span>    device_name text,
-</span></span><span style=display:flex><span>    ip_address inet,       <span style=color:#75715e>-- IPv4/IPv6 位址
-</span></span></span><span style=display:flex><span>    network cidr,          <span style=color:#75715e>-- 網路位址
-</span></span></span><span style=display:flex><span>    mac macaddr            <span style=color:#75715e>-- MAC 位址
-</span></span></span><span style=display:flex><span>);
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> network_config <span style=color:#66d9ef>VALUES</span>
-</span></span><span style=display:flex><span>    (<span style=color:#e6db74>&#39;router01&#39;</span>, <span style=color:#e6db74>&#39;192.168.1.1&#39;</span>, <span style=color:#e6db74>&#39;192.168.1.0/24&#39;</span>, <span style=color:#e6db74>&#39;08:00:2b:01:02:03&#39;</span>);
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>-- 網路運算子
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#e6db74>&#39;192.168.1.100&#39;</span>::inet <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#39;192.168.1.0/24&#39;</span>::cidr;  <span style=color:#75715e>-- 是否在子網中
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> network(<span style=color:#e6db74>&#39;192.168.1.100/24&#39;</span>);   <span style=color:#75715e>-- 取得網路位址
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> broadcast(<span style=color:#e6db74>&#39;192.168.1.0/24&#39;</span>);   <span style=color:#75715e>-- 廣播位址
-</span></span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>-- GiST 索引支援快速範圍查詢
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_network <span style=color:#66d9ef>ON</span> network_config <span style=color:#66d9ef>USING</span> gist (ip_address inet_ops);
-</span></span></code></pre></div><h3 id=範圍型別range>範圍型別（Range）</h3><p><strong>PostgreSQL 9.2+</strong> 引入的範圍型別，可表達連續的值區間，搭配<strong>排他約束（EXCLUDE）</strong> 能優雅地解決「不可重疊」的業務邏輯：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> reservations (
-</span></span><span style=display:flex><span>    id bigint <span style=color:#66d9ef>GENERATED</span> ALWAYS <span style=color:#66d9ef>AS</span> <span style=color:#66d9ef>IDENTITY</span> <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span>,
-</span></span><span style=display:flex><span>    room_number integer <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
-</span></span><span style=display:flex><span>    reserved_period tstzrange <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
-</span></span><span style=display:flex><span>    <span style=color:#75715e>-- 排他約束：同一房間的預約不能重疊
-</span></span></span><span style=display:flex><span>    EXCLUDE <span style=color:#66d9ef>USING</span> gist (room_number <span style=color:#66d9ef>WITH</span> <span style=color:#f92672>=</span>, reserved_period <span style=color:#66d9ef>WITH</span> <span style=color:#f92672>&amp;&amp;</span>)
-</span></span><span style=display:flex><span>);
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> reservations (room_number, reserved_period) <span style=color:#66d9ef>VALUES</span>
-</span></span><span style=display:flex><span>    (<span style=color:#ae81ff>101</span>, <span style=color:#e6db74>&#39;[2026-06-01 14:00, 2026-06-03 12:00)&#39;</span>);
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>-- 範圍運算子
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#e6db74>&#39;[1,5]&#39;</span>::int4range <span style=color:#f92672>@&gt;</span> <span style=color:#ae81ff>3</span>;              <span style=color:#75715e>-- 包含值 3（true）
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#e6db74>&#39;[1,5]&#39;</span>::int4range <span style=color:#f92672>&amp;&amp;</span> <span style=color:#e6db74>&#39;[4,8]&#39;</span>::int4range; <span style=color:#75715e>-- 是否重疊（true）
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#e6db74>&#39;[1,5]&#39;</span>::int4range <span style=color:#f92672>*</span> <span style=color:#e6db74>&#39;[3,8]&#39;</span>::int4range;  <span style=color:#75715e>-- 交集：[3,5]
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#e6db74>&#39;[1,5]&#39;</span>::int4range <span style=color:#f92672>+</span> <span style=color:#e6db74>&#39;[3,8]&#39;</span>::int4range;  <span style=color:#75715e>-- 聯集：[1,8]
-</span></span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>-- 範圍邊界語法
-</span></span></span><span style=display:flex><span><span style=color:#75715e>-- [lower, upper)  — 左閉右開（最常用）
-</span></span></span><span style=display:flex><span><span style=color:#75715e>-- [lower, upper]  — 兩端閉合
-</span></span></span><span style=display:flex><span><span style=color:#75715e>-- (lower, upper)  — 兩端開放
-</span></span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>-- multirange（PG14+）
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#e6db74>&#39;{[1,3], [5,8]}&#39;</span>::int4multirange;  <span style=color:#75715e>-- 多個不連續範圍
-</span></span></span></code></pre></div><h3 id=陣列型別array>陣列型別（Array）</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> blog_posts (
-</span></span><span style=display:flex><span>    id bigint <span style=color:#66d9ef>GENERATED</span> ALWAYS <span style=color:#66d9ef>AS</span> <span style=color:#66d9ef>IDENTITY</span> <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span>,
-</span></span><span style=display:flex><span>    title text <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
-</span></span><span style=display:flex><span>    tags text[]
-</span></span><span style=display:flex><span>);
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>-- 插入陣列值
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> blog_posts (title, tags)
-</span></span><span style=display:flex><span><span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;PostgreSQL 教學&#39;</span>, ARRAY[<span style=color:#e6db74>&#39;postgresql&#39;</span>, <span style=color:#e6db74>&#39;database&#39;</span>, <span style=color:#e6db74>&#39;sql&#39;</span>]);
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>-- 陣列存取（1-based 索引）
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> tags[<span style=color:#ae81ff>1</span>] <span style=color:#66d9ef>FROM</span> blog_posts;              <span style=color:#75715e>-- 第一個元素
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> tags[<span style=color:#ae81ff>1</span>:<span style=color:#ae81ff>2</span>] <span style=color:#66d9ef>FROM</span> blog_posts;            <span style=color:#75715e>-- 前兩個元素（切片）
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> array_length(tags, <span style=color:#ae81ff>1</span>) <span style=color:#66d9ef>FROM</span> blog_posts; <span style=color:#75715e>-- 第一維長度
-</span></span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>-- 陣列操作
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> ARRAY[<span style=color:#e6db74>&#39;a&#39;</span>, <span style=color:#e6db74>&#39;b&#39;</span>] <span style=color:#f92672>||</span> ARRAY[<span style=color:#e6db74>&#39;c&#39;</span>, <span style=color:#e6db74>&#39;d&#39;</span>];  <span style=color:#75715e>-- 連接：{a,b,c,d}
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> array_append(ARRAY[<span style=color:#e6db74>&#39;a&#39;</span>, <span style=color:#e6db74>&#39;b&#39;</span>], <span style=color:#e6db74>&#39;c&#39;</span>);   <span style=color:#75715e>-- 附加：{a,b,c}
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#66d9ef>unnest</span>(ARRAY[<span style=color:#e6db74>&#39;a&#39;</span>, <span style=color:#e6db74>&#39;b&#39;</span>, <span style=color:#e6db74>&#39;c&#39;</span>]);         <span style=color:#75715e>-- 展開為多列
-</span></span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>-- 陣列查詢運算子
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> blog_posts <span style=color:#66d9ef>WHERE</span> <span style=color:#e6db74>&#39;postgresql&#39;</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>ANY</span>(tags);  <span style=color:#75715e>-- 包含元素
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> blog_posts <span style=color:#66d9ef>WHERE</span> tags <span style=color:#f92672>@&gt;</span> ARRAY[<span style=color:#e6db74>&#39;sql&#39;</span>];       <span style=color:#75715e>-- 包含子集
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> blog_posts <span style=color:#66d9ef>WHERE</span> tags <span style=color:#f92672>&amp;&amp;</span> ARRAY[<span style=color:#e6db74>&#39;python&#39;</span>, <span style=color:#e6db74>&#39;sql&#39;</span>]; <span style=color:#75715e>-- 有交集
-</span></span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>-- GIN 索引加速陣列查詢
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_tags <span style=color:#66d9ef>ON</span> blog_posts <span style=color:#66d9ef>USING</span> gin (tags);
-</span></span></code></pre></div><h3 id=enum-型別>Enum 型別</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 建立 Enum 型別
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TYPE</span> order_status <span style=color:#66d9ef>AS</span> ENUM (
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;pending&#39;</span>, <span style=color:#e6db74>&#39;confirmed&#39;</span>, <span style=color:#e6db74>&#39;shipped&#39;</span>, <span style=color:#e6db74>&#39;delivered&#39;</span>, <span style=color:#e6db74>&#39;cancelled&#39;</span>
-</span></span><span style=display:flex><span>);
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> orders (
-</span></span><span style=display:flex><span>    id bigint <span style=color:#66d9ef>GENERATED</span> ALWAYS <span style=color:#66d9ef>AS</span> <span style=color:#66d9ef>IDENTITY</span> <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span>,
-</span></span><span style=display:flex><span>    status order_status <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span> <span style=color:#66d9ef>DEFAULT</span> <span style=color:#e6db74>&#39;pending&#39;</span>
-</span></span><span style=display:flex><span>);
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>-- Enum 有隱含順序（按定義順序）
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> orders <span style=color:#66d9ef>WHERE</span> status <span style=color:#f92672>&gt;</span> <span style=color:#e6db74>&#39;pending&#39;</span>;
-</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> orders <span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> status;
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>-- 新增 Enum 值（PG9.1+）
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>TYPE</span> order_status <span style=color:#66d9ef>ADD</span> VALUE <span style=color:#e6db74>&#39;processing&#39;</span> <span style=color:#66d9ef>AFTER</span> <span style=color:#e6db74>&#39;confirmed&#39;</span>;
-</span></span><span style=display:flex><span><span style=color:#75715e>-- 注意：ADD VALUE 在 Transaction 中無法回滾！
-</span></span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>-- 不支援刪除 Enum 值（需要重建型別）
-</span></span></span></code></pre></div><p><strong>Enum vs text + CHECK</strong>：</p><table><thead><tr><th>比較項目</th><th>Enum</th><th>text + CHECK</th></tr></thead><tbody><tr><td>儲存效率</td><td>高（4 bytes OID）</td><td>可變長度</td></tr><tr><td>排序語義</td><td>有（按定義順序）</td><td>無（字母序）</td></tr><tr><td>修改靈活性</td><td>低（ADD 有限制）</td><td>高（ALTER CHECK）</td></tr><tr><td>跨 DB 遷移</td><td>較困難</td><td>容易</td></tr></tbody></table><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 替代方案：text + CHECK（更靈活）
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> flexible_orders (
-</span></span><span style=display:flex><span>    id bigint <span style=color:#66d9ef>GENERATED</span> ALWAYS <span style=color:#66d9ef>AS</span> <span style=color:#66d9ef>IDENTITY</span> <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span>,
-</span></span><span style=display:flex><span>    status text <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span> <span style=color:#66d9ef>DEFAULT</span> <span style=color:#e6db74>&#39;pending&#39;</span>
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>CHECK</span> (status <span style=color:#66d9ef>IN</span> (<span style=color:#e6db74>&#39;pending&#39;</span>, <span style=color:#e6db74>&#39;confirmed&#39;</span>, <span style=color:#e6db74>&#39;shipped&#39;</span>, <span style=color:#e6db74>&#39;delivered&#39;</span>))
-</span></span><span style=display:flex><span>);
-</span></span></code></pre></div><h3 id=domain-型別>Domain 型別</h3><p><strong>Domain</strong> 是在既有型別上加上 CHECK 約束的衍生型別，實現「型別即文件」：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>DOMAIN</span> positive_integer <span style=color:#66d9ef>AS</span> integer
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>CHECK</span> (VALUE <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>);
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>DOMAIN</span> email_address <span style=color:#66d9ef>AS</span> text
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>CHECK</span> (VALUE <span style=color:#f92672>~</span> <span style=color:#e6db74>&#39;^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$&#39;</span>);
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>DOMAIN</span> percentage <span style=color:#66d9ef>AS</span> numeric(<span style=color:#ae81ff>5</span>, <span style=color:#ae81ff>2</span>)
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>CHECK</span> (VALUE <span style=color:#f92672>&gt;=</span> <span style=color:#ae81ff>0</span> <span style=color:#66d9ef>AND</span> VALUE <span style=color:#f92672>&lt;=</span> <span style=color:#ae81ff>100</span>);
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> employees (
-</span></span><span style=display:flex><span>    id positive_integer <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span>,
-</span></span><span style=display:flex><span>    email email_address <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span> <span style=color:#66d9ef>UNIQUE</span>,
-</span></span><span style=display:flex><span>    commission_rate percentage <span style=color:#66d9ef>DEFAULT</span> <span style=color:#ae81ff>0</span>
-</span></span><span style=display:flex><span>);
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> employees <span style=color:#66d9ef>VALUES</span> (<span style=color:#ae81ff>1</span>, <span style=color:#e6db74>&#39;alice@example.com&#39;</span>, <span style=color:#ae81ff>15</span>.<span style=color:#ae81ff>50</span>);  <span style=color:#75715e>-- 成功
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> employees <span style=color:#66d9ef>VALUES</span> (<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>, <span style=color:#e6db74>&#39;bob@example.com&#39;</span>, <span style=color:#ae81ff>0</span>);       <span style=color:#75715e>-- 報錯：positive_integer
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> employees <span style=color:#66d9ef>VALUES</span> (<span style=color:#ae81ff>2</span>, <span style=color:#e6db74>&#39;invalid-email&#39;</span>, <span style=color:#ae81ff>0</span>);          <span style=color:#75715e>-- 報錯：email_address
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> employees <span style=color:#66d9ef>VALUES</span> (<span style=color:#ae81ff>3</span>, <span style=color:#e6db74>&#39;charlie@example.com&#39;</span>, <span style=color:#ae81ff>150</span>);  <span style=color:#75715e>-- 報錯：percentage
-</span></span></span></code></pre></div><p>Domain 的優勢在於：多個表格可重用相同的驗證邏輯，修改一處即可全域生效。</p><h3 id=型別轉換機制>型別轉換機制</h3><p>PostgreSQL 的型別轉換分為三種層次：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 1. 顯式轉換（Explicit Cast）
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#66d9ef>CAST</span>(<span style=color:#e6db74>&#39;2026-01-01&#39;</span> <span style=color:#66d9ef>AS</span> date);    <span style=color:#75715e>-- SQL 標準語法
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#e6db74>&#39;2026-01-01&#39;</span>::date;            <span style=color:#75715e>-- PostgreSQL 簡寫
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#e6db74>&#39;{&#34;key&#34;:&#34;val&#34;}&#39;</span>::jsonb;
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>-- 2. 賦值轉換（Assignment Cast）
-</span></span></span><span style=display:flex><span><span style=color:#75715e>-- INSERT/UPDATE 時自動嘗試轉換
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> demo (val integer);
-</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> demo <span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;42&#39;</span>);   <span style=color:#75715e>-- 字串 &#39;42&#39; 自動轉為 integer
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> demo <span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;abc&#39;</span>);  <span style=color:#75715e>-- 無法轉換，報錯
-</span></span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>-- 3. 隱式轉換（Implicit Cast）
-</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 在表達式中自動發生，PostgreSQL 非常保守
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#ae81ff>1</span> <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>.<span style=color:#ae81ff>5</span>;  <span style=color:#75715e>-- integer → numeric，結果為 2.5
-</span></span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 查詢型別轉換路徑
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> castsource::regtype, casttarget::regtype, castcontext
-</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_cast
-</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> castsource <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;integer&#39;</span>::regtype
-</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> casttarget::regtype::text;
-</span></span><span style=display:flex><span><span style=color:#75715e>-- castcontext: &#39;e&#39;=explicit, &#39;a&#39;=assignment, &#39;i&#39;=implicit
-</span></span></span></code></pre></div><h3 id=型別對索引效能的影響>型別對索引效能的影響</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 型別不匹配會導致隱式轉換，使索引失效
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> accounts (
-</span></span><span style=display:flex><span>    user_id varchar(<span style=color:#ae81ff>20</span>) <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span>,
-</span></span><span style=display:flex><span>    balance numeric
-</span></span><span style=display:flex><span>);
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> accounts <span style=color:#66d9ef>WHERE</span> user_id <span style=color:#f92672>=</span> <span style=color:#ae81ff>12345</span>;    <span style=color:#75715e>-- 索引可能失效！
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> accounts <span style=color:#66d9ef>WHERE</span> user_id <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;12345&#39;</span>;  <span style=color:#75715e>-- 正確使用索引
-</span></span></span></code></pre></div><p><strong>各型別儲存大小比較</strong>：</p><table><thead><tr><th>型別</th><th>固定/可變</th><th>大小</th><th>對齊</th></tr></thead><tbody><tr><td>boolean</td><td>固定</td><td>1 byte</td><td>1 byte</td></tr><tr><td>smallint</td><td>固定</td><td>2 bytes</td><td>2 bytes</td></tr><tr><td>integer</td><td>固定</td><td>4 bytes</td><td>4 bytes</td></tr><tr><td>bigint</td><td>固定</td><td>8 bytes</td><td>8 bytes</td></tr><tr><td>date</td><td>固定</td><td>4 bytes</td><td>4 bytes</td></tr><tr><td>timestamptz</td><td>固定</td><td>8 bytes</td><td>8 bytes</td></tr><tr><td>uuid</td><td>固定</td><td>16 bytes</td><td>4 bytes</td></tr><tr><td>numeric</td><td>可變</td><td>2+ bytes</td><td>4 bytes</td></tr><tr><td>text/varchar</td><td>可變</td><td>4+len bytes</td><td>4 bytes</td></tr><tr><td>jsonb</td><td>可變</td><td>4+len bytes</td><td>4 bytes</td></tr></tbody></table><p>B-tree 索引對固定長度型別效率最高。<code>text</code>/<code>varchar</code> 索引受限於 2704 bytes（B-tree 頁面的 1/4），超過時需使用前綴索引或 hash 索引。</p><h3 id=常見陷阱>常見陷阱</h3><h4 id=浮點精確度問題>浮點精確度問題</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#ae81ff>0</span>.<span style=color:#ae81ff>1</span>::float <span style=color:#f92672>+</span> <span style=color:#ae81ff>0</span>.<span style=color:#ae81ff>2</span>::float <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>.<span style=color:#ae81ff>3</span>::float;  <span style=color:#75715e>-- false！
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#ae81ff>0</span>.<span style=color:#ae81ff>1</span>::float <span style=color:#f92672>+</span> <span style=color:#ae81ff>0</span>.<span style=color:#ae81ff>2</span>::float;                <span style=color:#75715e>-- 0.30000000000000004
-</span></span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>-- 金融計算必須使用 numeric
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#ae81ff>0</span>.<span style=color:#ae81ff>1</span>::numeric <span style=color:#f92672>+</span> <span style=color:#ae81ff>0</span>.<span style=color:#ae81ff>2</span>::numeric <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>.<span style=color:#ae81ff>3</span>::numeric;  <span style=color:#75715e>-- true
-</span></span></span></code></pre></div><h4 id=timestamp-與-timestamptz-混用>timestamp 與 timestamptz 混用</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 絕對不要在同一表格混用兩者
-</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 錯誤設計
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> bad_design (
-</span></span><span style=display:flex><span>    created_at <span style=color:#66d9ef>timestamp</span>,     <span style=color:#75715e>-- 無時區
-</span></span></span><span style=display:flex><span>    updated_at timestamptz    <span style=color:#75715e>-- 有時區
-</span></span></span><span style=display:flex><span>);
-</span></span><span style=display:flex><span><span style=color:#75715e>-- 比較兩欄位時會依 session TimeZone 隱式轉換，極易出錯
-</span></span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>-- 正確設計
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> good_design (
-</span></span><span style=display:flex><span>    created_at timestamptz <span style=color:#66d9ef>DEFAULT</span> now(),
-</span></span><span style=display:flex><span>    updated_at timestamptz <span style=color:#66d9ef>DEFAULT</span> now()
-</span></span><span style=display:flex><span>);
-</span></span></code></pre></div><h4 id=charn-的空格填充>char(n) 的空格填充</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#e6db74>&#39;TW&#39;</span>::char(<span style=color:#ae81ff>5</span>) <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;TW&#39;</span>::char(<span style=color:#ae81ff>2</span>);  <span style=color:#75715e>-- true（忽略尾部空格）
-</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#e6db74>&#39;TW&#39;</span>::text <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;TW   &#39;</span>::text;     <span style=color:#75715e>-- false（text 不忽略）
-</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 結論：除非有特殊需求，不要使用 char(n)
-</span></span></span></code></pre></div><h3 id=版本演進>版本演進</h3><table><thead><tr><th>版本</th><th>型別改進</th></tr></thead><tbody><tr><td>PG9.2</td><td>範圍型別（Range Types）</td></tr><tr><td>PG9.4</td><td><code>jsonb</code> 型別</td></tr><tr><td>PG10</td><td><code>GENERATED AS IDENTITY</code> 欄位</td></tr><tr><td>PG13</td><td><code>gen_random_uuid()</code> 內建（無需擴充）</td></tr><tr><td>PG14</td><td><code>multirange</code> 型別</td></tr></tbody></table><h3 id=總結>總結</h3><p><strong>資料型別</strong> 是 PostgreSQL 型別系統的核心基礎：</p><ul><li><strong>數值</strong>：金融計算用 <code>numeric</code>，絕不用 <code>float</code>；自動遞增用 <code>GENERATED AS IDENTITY</code></li><li><strong>字串</strong>：優先使用 <code>text</code>，<code>varchar(n)</code> 僅在有明確長度限制時使用，避免 <code>char(n)</code></li><li><strong>日期時間</strong>：永遠使用 <code>timestamptz</code>，除非有非常明確的理由</li><li><strong>UUID</strong>：PG13+ 用 <code>gen_random_uuid()</code>，適合分散式系統的主鍵</li><li><strong>範圍型別</strong>：搭配 EXCLUDE 約束解決「不可重疊」的業務邏輯</li><li><strong>陣列與 JSONB</strong>：搭配 GIN 索引實現高效查詢</li><li><strong>Enum vs text + CHECK</strong>：需要排序語義用 Enum，需要靈活性用 text + CHECK</li><li><strong>Domain</strong>：在多表重用驗證邏輯的最佳方式</li><li><strong>型別匹配</strong>：保持應用端型別與資料庫欄位型別一致，避免隱式轉換使索引失效</li></ul><p>下一篇，我們將深入探討 <strong>DDL 與 Schema 管理</strong>——如何用 PostgreSQL 的豐富語法設計與維護資料庫結構。</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
-</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/postgresql/011-background-processes/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">背景進程：PostgreSQL 的幕後工作者們 | PostgreSQL</span>
-<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/17</span>
-</a><a href=https://benzhub.github.io/post/postgresql/010-concurrency-control/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">並行控制與鎖機制：PostgreSQL 如何協調多用戶同時存取 | PostgreSQL</span>
-<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/16</span>
-</a><a href=https://benzhub.github.io/post/postgresql/009-transaction-management/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Transaction 管理：PostgreSQL 的 ACID 實現與進階控制 | PostgreSQL</span>
-<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/15</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/postgresql/011-background-processes/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
-<span class="text-sm font-medium">背景進程：PostgreSQL 的幕後工作者們 | PostgreSQL</span></a></div><div></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
-<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
-</a><a href=/tags/acid><span class=tag-pill>acid</span>
-</a><a href=/tags/ai><span class=tag-pill>ai</span>
-</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
-</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
-</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
-</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
-</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
-</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
-</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
-</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
-</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
-</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
-</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
-</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
-</a><a href=/tags/api><span class=tag-pill>api</span>
-</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
-</a><a href=/tags/autovacuum><span class=tag-pill>autovacuum</span>
-</a><a href=/tags/background-processes><span class=tag-pill>background-processes</span>
-</a><a href=/tags/big-o><span class=tag-pill>big o</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (12)</span>
-</a><a href=/post/javascript/><span class=tag-pill>JavaScript (67)</span>
-</a><a href=/post/django/><span class=tag-pill>Django (29)</span>
-</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
-</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
-</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
-</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
-</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/django/029-django-authentication/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Authentication 使用者認證系統完全指南 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/18</p></a><a href=/post/postgresql/012-data-types/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/18</p></a><a href=/post/javascript/data-structures--algorithms/005-hash-table/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">雜湊表 — Hash Table 原理、碰撞處理與實作完整指南 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/18</p></a><a href=/post/django/028-django-middleware/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Middleware 中介軟體原理與實作 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/17</p></a><a href=/post/postgresql/011-background-processes/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">背景進程：PostgreSQL 的幕後工作者們 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/17</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>
+</code></pre><h3 id="數值型別">數值型別</h3>
+<h4 id="整數型別選擇">整數型別選擇</h4>
+<table>
+	<thead>
+			<tr>
+					<th>型別</th>
+					<th>別名</th>
+					<th>大小</th>
+					<th>範圍</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>smallint</code></td>
+					<td><code>int2</code></td>
+					<td>2 bytes</td>
+					<td>-32,768 ~ 32,767</td>
+			</tr>
+			<tr>
+					<td><code>integer</code></td>
+					<td><code>int4</code></td>
+					<td>4 bytes</td>
+					<td>-2,147,483,648 ~ 2,147,483,647</td>
+			</tr>
+			<tr>
+					<td><code>bigint</code></td>
+					<td><code>int8</code></td>
+					<td>8 bytes</td>
+					<td>±9.2×10^18</td>
+			</tr>
+	</tbody>
+</table>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- smallint：適合有限範圍的值
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> calendar_event (
+</span></span><span style="display:flex;"><span>    day_of_week smallint <span style="color:#66d9ef">CHECK</span> (day_of_week <span style="color:#66d9ef">BETWEEN</span> <span style="color:#ae81ff">0</span> <span style="color:#66d9ef">AND</span> <span style="color:#ae81ff">6</span>)
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- integer：最常用的整數型別
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> orders (
+</span></span><span style="display:flex;"><span>    order_id integer <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
+</span></span><span style="display:flex;"><span>    quantity integer <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- bigint：需要超大範圍時使用
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> event_log (
+</span></span><span style="display:flex;"><span>    event_id bigint <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
+</span></span><span style="display:flex;"><span>    user_id bigint <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>
+</span></span><span style="display:flex;"><span>);
+</span></span></code></pre></div><h4 id="serial-vs-generated-as-identity">serial vs GENERATED AS IDENTITY</h4>
+<p><code>serial</code> 是 PG10 之前的慣例，實際上是 <code>integer DEFAULT nextval('seq')</code> 的語法糖。PG10+ 推薦使用 <code>GENERATED ALWAYS AS IDENTITY</code>：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 舊式 serial（仍可用，但不推薦新程式碼）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> old_style (
+</span></span><span style="display:flex;"><span>    id serial <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- PG10+ 推薦：GENERATED ALWAYS AS IDENTITY
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> new_style (
+</span></span><span style="display:flex;"><span>    id integer <span style="color:#66d9ef">GENERATED</span> ALWAYS <span style="color:#66d9ef">AS</span> <span style="color:#66d9ef">IDENTITY</span> <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
+</span></span><span style="display:flex;"><span>    name text
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- ALWAYS 模式不允許直接 INSERT 指定 id 值
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- GENERATED BY DEFAULT AS IDENTITY：允許覆寫（較寬鬆）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> flexible_id (
+</span></span><span style="display:flex;"><span>    id bigint <span style="color:#66d9ef">GENERATED</span> <span style="color:#66d9ef">BY</span> <span style="color:#66d9ef">DEFAULT</span> <span style="color:#66d9ef">AS</span> <span style="color:#66d9ef">IDENTITY</span> <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
+</span></span><span style="display:flex;"><span>    name text
+</span></span><span style="display:flex;"><span>);
+</span></span></code></pre></div><p><strong>差異</strong>：<code>serial</code> 的序列是獨立物件，刪除表時不會自動刪除（需 CASCADE）；<code>IDENTITY</code> 欄位的序列隸屬於欄位，自動清理。</p>
+<h4 id="numeric-精確度">numeric 精確度</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- numeric(precision, scale)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">-- precision：總位數  scale：小數點後位數
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> financial (
+</span></span><span style="display:flex;"><span>    price numeric(<span style="color:#ae81ff">12</span>, <span style="color:#ae81ff">2</span>),   <span style="color:#75715e">-- 最大 999,999,999,999.99
+</span></span></span><span style="display:flex;"><span>    tax_rate numeric(<span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">4</span>)  <span style="color:#75715e">-- 如 0.1500（15%）
+</span></span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 常見錯誤：用 float 儲存金融資料
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">1</span>::float <span style="color:#f92672">+</span> <span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">2</span>::float;    <span style="color:#75715e">-- 0.30000000000000004（浮點誤差！）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">1</span>::numeric <span style="color:#f92672">+</span> <span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">2</span>::numeric; <span style="color:#75715e">-- 0.3（精確）
+</span></span></span></code></pre></div><p><strong>規則</strong>：涉及金錢或需要精確計算的場景，一律使用 <code>numeric</code>，絕不用 <code>float</code>。</p>
+<h3 id="字串型別">字串型別</h3>
+<h4 id="text-vs-varchar-vs-char">text vs varchar vs char</h4>
+<p>在 PostgreSQL 中，<code>text</code> 和 <code>varchar</code> 底層儲存機制<strong>完全相同</strong>，<code>varchar(n)</code> 只是在 <code>text</code> 上增加了長度限制。除非業務上有明確的長度需求，否則直接用 <code>text</code>：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 推薦：使用 text
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> users (
+</span></span><span style="display:flex;"><span>    username text <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
+</span></span><span style="display:flex;"><span>    bio text,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">CONSTRAINT</span> username_length <span style="color:#66d9ef">CHECK</span> (<span style="color:#66d9ef">length</span>(username) <span style="color:#66d9ef">BETWEEN</span> <span style="color:#ae81ff">3</span> <span style="color:#66d9ef">AND</span> <span style="color:#ae81ff">50</span>)
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- varchar(n)：等同於 text 加上長度 CHECK
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> products (
+</span></span><span style="display:flex;"><span>    sku varchar(<span style="color:#ae81ff">20</span>) <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>  <span style="color:#75715e">-- 業務上確定不超過 20 字元
+</span></span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- char(n)：固定長度，右側填充空格，幾乎沒有使用場景
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> country_code (
+</span></span><span style="display:flex;"><span>    code char(<span style="color:#ae81ff">2</span>)  <span style="color:#75715e">-- 如 &#39;TW&#39;, &#39;US&#39;
+</span></span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 陷阱：&#39;TW&#39;::char(5) = &#39;TW&#39;::char(2) 為 true（比較時忽略尾部空格）
+</span></span></span></code></pre></div><h4 id="collation排序規則">Collation（排序規則）</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 資料庫層級 collation
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">DATABASE</span> mydb
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">WITH</span> <span style="color:#66d9ef">ENCODING</span> <span style="color:#e6db74">&#39;UTF8&#39;</span>
+</span></span><span style="display:flex;"><span>    LC_COLLATE <span style="color:#e6db74">&#39;zh_TW.UTF-8&#39;</span>
+</span></span><span style="display:flex;"><span>    LC_CTYPE <span style="color:#e6db74">&#39;zh_TW.UTF-8&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 欄位層級 collation
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> articles (
+</span></span><span style="display:flex;"><span>    title text <span style="color:#66d9ef">COLLATE</span> <span style="color:#e6db74">&#34;zh-TW-x-icu&#34;</span>,  <span style="color:#75715e">-- ICU 排序（PG10+）
+</span></span></span><span style="display:flex;"><span>    slug text <span style="color:#66d9ef">COLLATE</span> <span style="color:#e6db74">&#34;C&#34;</span>               <span style="color:#75715e">-- 位元組排序，效能最佳
+</span></span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 查詢可用 collation
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> collname <span style="color:#66d9ef">FROM</span> pg_collation
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> collencoding <span style="color:#f92672">=</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span> <span style="color:#66d9ef">OR</span> collencoding <span style="color:#f92672">=</span> <span style="color:#ae81ff">6</span>;
+</span></span></code></pre></div><h3 id="日期時間型別">日期時間型別</h3>
+<h4 id="timestamp-vs-timestamptz">timestamp vs timestamptz</h4>
+<p>這是 PostgreSQL 中<strong>最重要的設計決策之一</strong>。<code>timestamp</code> 儲存「壁鐘時間」字串，不知道時區；<code>timestamptz</code> 在儲存時換算為 UTC，讀取時依 <code>TimeZone</code> 設定轉回。</p>
+<p><strong>永遠使用 <code>timestamptz</code>，除非你有非常明確的理由不用。</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> events (
+</span></span><span style="display:flex;"><span>    id bigint <span style="color:#66d9ef">GENERATED</span> ALWAYS <span style="color:#66d9ef">AS</span> <span style="color:#66d9ef">IDENTITY</span> <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
+</span></span><span style="display:flex;"><span>    event_name text <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
+</span></span><span style="display:flex;"><span>    created_at timestamptz <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">DEFAULT</span> now(),
+</span></span><span style="display:flex;"><span>    scheduled_at timestamptz
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- timestamptz 的行為
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SET</span> TimeZone <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;Asia/Taipei&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">INSERT</span> <span style="color:#66d9ef">INTO</span> events (event_name, scheduled_at)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">VALUES</span> (<span style="color:#e6db74">&#39;會議&#39;</span>, <span style="color:#e6db74">&#39;2026-05-23 14:00:00&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 儲存時：14:00 Asia/Taipei → 06:00 UTC
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SET</span> TimeZone <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;UTC&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> scheduled_at <span style="color:#66d9ef">FROM</span> events <span style="color:#66d9ef">WHERE</span> event_name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;會議&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 顯示 2026-05-23 06:00:00+00
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SET</span> TimeZone <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;America/New_York&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> scheduled_at <span style="color:#66d9ef">FROM</span> events <span style="color:#66d9ef">WHERE</span> event_name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;會議&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 顯示 2026-05-23 02:00:00-04
+</span></span></span></code></pre></div><h4 id="日期時間操作">日期時間操作</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 取得當前時間
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> now();               <span style="color:#75715e">-- 當前 Transaction 開始時間
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> clock_timestamp();   <span style="color:#75715e">-- 系統時間（每次呼叫都更新）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#66d9ef">current_date</span>;        <span style="color:#75715e">-- 當前日期
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#66d9ef">current_time</span>;        <span style="color:#75715e">-- 當前時間
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- interval 運算
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> now() <span style="color:#f92672">+</span> interval <span style="color:#e6db74">&#39;1 day&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> now() <span style="color:#f92672">+</span> interval <span style="color:#e6db74">&#39;1 year 2 months 3 days&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#e6db74">&#39;2026-05-23&#39;</span>::date <span style="color:#f92672">-</span> <span style="color:#e6db74">&#39;2026-01-01&#39;</span>::date;  <span style="color:#75715e">-- 天數差（integer）
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 日期截斷
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> date_trunc(<span style="color:#e6db74">&#39;month&#39;</span>, now());  <span style="color:#75715e">-- 截斷到月份開頭
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> date_trunc(<span style="color:#e6db74">&#39;week&#39;</span>, now());   <span style="color:#75715e">-- 截斷到週一
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 日期部分提取
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#66d9ef">extract</span>(<span style="color:#66d9ef">year</span> <span style="color:#66d9ef">FROM</span> now());    <span style="color:#75715e">-- 年份
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#66d9ef">extract</span>(dow <span style="color:#66d9ef">FROM</span> now());     <span style="color:#75715e">-- 星期幾（0=週日）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#66d9ef">extract</span>(epoch <span style="color:#66d9ef">FROM</span> now());   <span style="color:#75715e">-- Unix timestamp（秒）
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 時區轉換
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> now() <span style="color:#66d9ef">AT</span> TIME <span style="color:#66d9ef">ZONE</span> <span style="color:#e6db74">&#39;Asia/Taipei&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> now() <span style="color:#66d9ef">AT</span> TIME <span style="color:#66d9ef">ZONE</span> <span style="color:#e6db74">&#39;UTC&#39;</span>;
+</span></span></code></pre></div><h3 id="uuid">UUID</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- PG13+ 內建 gen_random_uuid()（推薦）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> sessions (
+</span></span><span style="display:flex;"><span>    session_id uuid <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span> <span style="color:#66d9ef">DEFAULT</span> gen_random_uuid(),
+</span></span><span style="display:flex;"><span>    user_id bigint <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
+</span></span><span style="display:flex;"><span>    created_at timestamptz <span style="color:#66d9ef">DEFAULT</span> now()
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> gen_random_uuid();
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 如：a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
+</span></span></span></code></pre></div><p><strong>UUID vs BIGINT 作為主鍵</strong>：</p>
+<table>
+	<thead>
+			<tr>
+					<th>比較項目</th>
+					<th>UUID</th>
+					<th>BIGINT</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>儲存大小</td>
+					<td>16 bytes</td>
+					<td>8 bytes</td>
+			</tr>
+			<tr>
+					<td>分散式系統</td>
+					<td>無需協調即可生成</td>
+					<td>需要序列同步</td>
+			</tr>
+			<tr>
+					<td>安全性</td>
+					<td>不可猜測</td>
+					<td>可猜測</td>
+			</tr>
+			<tr>
+					<td>索引效率</td>
+					<td>略低（隨機分散）</td>
+					<td>較高（遞增有序）</td>
+			</tr>
+			<tr>
+					<td>可讀性</td>
+					<td>差</td>
+					<td>好</td>
+			</tr>
+	</tbody>
+</table>
+<h3 id="網路型別">網路型別</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> network_config (
+</span></span><span style="display:flex;"><span>    device_name text,
+</span></span><span style="display:flex;"><span>    ip_address inet,       <span style="color:#75715e">-- IPv4/IPv6 位址
+</span></span></span><span style="display:flex;"><span>    network cidr,          <span style="color:#75715e">-- 網路位址
+</span></span></span><span style="display:flex;"><span>    mac macaddr            <span style="color:#75715e">-- MAC 位址
+</span></span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">INSERT</span> <span style="color:#66d9ef">INTO</span> network_config <span style="color:#66d9ef">VALUES</span>
+</span></span><span style="display:flex;"><span>    (<span style="color:#e6db74">&#39;router01&#39;</span>, <span style="color:#e6db74">&#39;192.168.1.1&#39;</span>, <span style="color:#e6db74">&#39;192.168.1.0/24&#39;</span>, <span style="color:#e6db74">&#39;08:00:2b:01:02:03&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 網路運算子
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#e6db74">&#39;192.168.1.100&#39;</span>::inet <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#39;192.168.1.0/24&#39;</span>::cidr;  <span style="color:#75715e">-- 是否在子網中
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> network(<span style="color:#e6db74">&#39;192.168.1.100/24&#39;</span>);   <span style="color:#75715e">-- 取得網路位址
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> broadcast(<span style="color:#e6db74">&#39;192.168.1.0/24&#39;</span>);   <span style="color:#75715e">-- 廣播位址
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- GiST 索引支援快速範圍查詢
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">INDEX</span> idx_network <span style="color:#66d9ef">ON</span> network_config <span style="color:#66d9ef">USING</span> gist (ip_address inet_ops);
+</span></span></code></pre></div><h3 id="範圍型別range">範圍型別（Range）</h3>
+<p><strong>PostgreSQL 9.2+</strong> 引入的範圍型別，可表達連續的值區間，搭配<strong>排他約束（EXCLUDE）</strong> 能優雅地解決「不可重疊」的業務邏輯：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> reservations (
+</span></span><span style="display:flex;"><span>    id bigint <span style="color:#66d9ef">GENERATED</span> ALWAYS <span style="color:#66d9ef">AS</span> <span style="color:#66d9ef">IDENTITY</span> <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
+</span></span><span style="display:flex;"><span>    room_number integer <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
+</span></span><span style="display:flex;"><span>    reserved_period tstzrange <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">-- 排他約束：同一房間的預約不能重疊
+</span></span></span><span style="display:flex;"><span>    EXCLUDE <span style="color:#66d9ef">USING</span> gist (room_number <span style="color:#66d9ef">WITH</span> <span style="color:#f92672">=</span>, reserved_period <span style="color:#66d9ef">WITH</span> <span style="color:#f92672">&amp;&amp;</span>)
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">INSERT</span> <span style="color:#66d9ef">INTO</span> reservations (room_number, reserved_period) <span style="color:#66d9ef">VALUES</span>
+</span></span><span style="display:flex;"><span>    (<span style="color:#ae81ff">101</span>, <span style="color:#e6db74">&#39;[2026-06-01 14:00, 2026-06-03 12:00)&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 範圍運算子
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#e6db74">&#39;[1,5]&#39;</span>::int4range <span style="color:#f92672">@&gt;</span> <span style="color:#ae81ff">3</span>;              <span style="color:#75715e">-- 包含值 3（true）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#e6db74">&#39;[1,5]&#39;</span>::int4range <span style="color:#f92672">&amp;&amp;</span> <span style="color:#e6db74">&#39;[4,8]&#39;</span>::int4range; <span style="color:#75715e">-- 是否重疊（true）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#e6db74">&#39;[1,5]&#39;</span>::int4range <span style="color:#f92672">*</span> <span style="color:#e6db74">&#39;[3,8]&#39;</span>::int4range;  <span style="color:#75715e">-- 交集：[3,5]
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#e6db74">&#39;[1,5]&#39;</span>::int4range <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;[3,8]&#39;</span>::int4range;  <span style="color:#75715e">-- 聯集：[1,8]
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 範圍邊界語法
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">-- [lower, upper)  — 左閉右開（最常用）
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">-- [lower, upper]  — 兩端閉合
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">-- (lower, upper)  — 兩端開放
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- multirange（PG14+）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#e6db74">&#39;{[1,3], [5,8]}&#39;</span>::int4multirange;  <span style="color:#75715e">-- 多個不連續範圍
+</span></span></span></code></pre></div><h3 id="陣列型別array">陣列型別（Array）</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> blog_posts (
+</span></span><span style="display:flex;"><span>    id bigint <span style="color:#66d9ef">GENERATED</span> ALWAYS <span style="color:#66d9ef">AS</span> <span style="color:#66d9ef">IDENTITY</span> <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
+</span></span><span style="display:flex;"><span>    title text <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
+</span></span><span style="display:flex;"><span>    tags text[]
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 插入陣列值
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">INSERT</span> <span style="color:#66d9ef">INTO</span> blog_posts (title, tags)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">VALUES</span> (<span style="color:#e6db74">&#39;PostgreSQL 教學&#39;</span>, ARRAY[<span style="color:#e6db74">&#39;postgresql&#39;</span>, <span style="color:#e6db74">&#39;database&#39;</span>, <span style="color:#e6db74">&#39;sql&#39;</span>]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 陣列存取（1-based 索引）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> tags[<span style="color:#ae81ff">1</span>] <span style="color:#66d9ef">FROM</span> blog_posts;              <span style="color:#75715e">-- 第一個元素
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> tags[<span style="color:#ae81ff">1</span>:<span style="color:#ae81ff">2</span>] <span style="color:#66d9ef">FROM</span> blog_posts;            <span style="color:#75715e">-- 前兩個元素（切片）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> array_length(tags, <span style="color:#ae81ff">1</span>) <span style="color:#66d9ef">FROM</span> blog_posts; <span style="color:#75715e">-- 第一維長度
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 陣列操作
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> ARRAY[<span style="color:#e6db74">&#39;a&#39;</span>, <span style="color:#e6db74">&#39;b&#39;</span>] <span style="color:#f92672">||</span> ARRAY[<span style="color:#e6db74">&#39;c&#39;</span>, <span style="color:#e6db74">&#39;d&#39;</span>];  <span style="color:#75715e">-- 連接：{a,b,c,d}
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> array_append(ARRAY[<span style="color:#e6db74">&#39;a&#39;</span>, <span style="color:#e6db74">&#39;b&#39;</span>], <span style="color:#e6db74">&#39;c&#39;</span>);   <span style="color:#75715e">-- 附加：{a,b,c}
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#66d9ef">unnest</span>(ARRAY[<span style="color:#e6db74">&#39;a&#39;</span>, <span style="color:#e6db74">&#39;b&#39;</span>, <span style="color:#e6db74">&#39;c&#39;</span>]);         <span style="color:#75715e">-- 展開為多列
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 陣列查詢運算子
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> blog_posts <span style="color:#66d9ef">WHERE</span> <span style="color:#e6db74">&#39;postgresql&#39;</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">ANY</span>(tags);  <span style="color:#75715e">-- 包含元素
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> blog_posts <span style="color:#66d9ef">WHERE</span> tags <span style="color:#f92672">@&gt;</span> ARRAY[<span style="color:#e6db74">&#39;sql&#39;</span>];       <span style="color:#75715e">-- 包含子集
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> blog_posts <span style="color:#66d9ef">WHERE</span> tags <span style="color:#f92672">&amp;&amp;</span> ARRAY[<span style="color:#e6db74">&#39;python&#39;</span>, <span style="color:#e6db74">&#39;sql&#39;</span>]; <span style="color:#75715e">-- 有交集
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- GIN 索引加速陣列查詢
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">INDEX</span> idx_tags <span style="color:#66d9ef">ON</span> blog_posts <span style="color:#66d9ef">USING</span> gin (tags);
+</span></span></code></pre></div><h3 id="enum-型別">Enum 型別</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 建立 Enum 型別
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TYPE</span> order_status <span style="color:#66d9ef">AS</span> ENUM (
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;pending&#39;</span>, <span style="color:#e6db74">&#39;confirmed&#39;</span>, <span style="color:#e6db74">&#39;shipped&#39;</span>, <span style="color:#e6db74">&#39;delivered&#39;</span>, <span style="color:#e6db74">&#39;cancelled&#39;</span>
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> orders (
+</span></span><span style="display:flex;"><span>    id bigint <span style="color:#66d9ef">GENERATED</span> ALWAYS <span style="color:#66d9ef">AS</span> <span style="color:#66d9ef">IDENTITY</span> <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
+</span></span><span style="display:flex;"><span>    status order_status <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">DEFAULT</span> <span style="color:#e6db74">&#39;pending&#39;</span>
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- Enum 有隱含順序（按定義順序）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> orders <span style="color:#66d9ef">WHERE</span> status <span style="color:#f92672">&gt;</span> <span style="color:#e6db74">&#39;pending&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> orders <span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> status;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 新增 Enum 值（PG9.1+）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TYPE</span> order_status <span style="color:#66d9ef">ADD</span> VALUE <span style="color:#e6db74">&#39;processing&#39;</span> <span style="color:#66d9ef">AFTER</span> <span style="color:#e6db74">&#39;confirmed&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 注意：ADD VALUE 在 Transaction 中無法回滾！
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 不支援刪除 Enum 值（需要重建型別）
+</span></span></span></code></pre></div><p><strong>Enum vs text + CHECK</strong>：</p>
+<table>
+	<thead>
+			<tr>
+					<th>比較項目</th>
+					<th>Enum</th>
+					<th>text + CHECK</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>儲存效率</td>
+					<td>高（4 bytes OID）</td>
+					<td>可變長度</td>
+			</tr>
+			<tr>
+					<td>排序語義</td>
+					<td>有（按定義順序）</td>
+					<td>無（字母序）</td>
+			</tr>
+			<tr>
+					<td>修改靈活性</td>
+					<td>低（ADD 有限制）</td>
+					<td>高（ALTER CHECK）</td>
+			</tr>
+			<tr>
+					<td>跨 DB 遷移</td>
+					<td>較困難</td>
+					<td>容易</td>
+			</tr>
+	</tbody>
+</table>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 替代方案：text + CHECK（更靈活）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> flexible_orders (
+</span></span><span style="display:flex;"><span>    id bigint <span style="color:#66d9ef">GENERATED</span> ALWAYS <span style="color:#66d9ef">AS</span> <span style="color:#66d9ef">IDENTITY</span> <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
+</span></span><span style="display:flex;"><span>    status text <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">DEFAULT</span> <span style="color:#e6db74">&#39;pending&#39;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">CHECK</span> (status <span style="color:#66d9ef">IN</span> (<span style="color:#e6db74">&#39;pending&#39;</span>, <span style="color:#e6db74">&#39;confirmed&#39;</span>, <span style="color:#e6db74">&#39;shipped&#39;</span>, <span style="color:#e6db74">&#39;delivered&#39;</span>))
+</span></span><span style="display:flex;"><span>);
+</span></span></code></pre></div><h3 id="domain-型別">Domain 型別</h3>
+<p><strong>Domain</strong> 是在既有型別上加上 CHECK 約束的衍生型別，實現「型別即文件」：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">DOMAIN</span> positive_integer <span style="color:#66d9ef">AS</span> integer
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">CHECK</span> (VALUE <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">DOMAIN</span> email_address <span style="color:#66d9ef">AS</span> text
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">CHECK</span> (VALUE <span style="color:#f92672">~</span> <span style="color:#e6db74">&#39;^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">DOMAIN</span> percentage <span style="color:#66d9ef">AS</span> numeric(<span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">2</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">CHECK</span> (VALUE <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span> <span style="color:#66d9ef">AND</span> VALUE <span style="color:#f92672">&lt;=</span> <span style="color:#ae81ff">100</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> employees (
+</span></span><span style="display:flex;"><span>    id positive_integer <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
+</span></span><span style="display:flex;"><span>    email email_address <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">UNIQUE</span>,
+</span></span><span style="display:flex;"><span>    commission_rate percentage <span style="color:#66d9ef">DEFAULT</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">INSERT</span> <span style="color:#66d9ef">INTO</span> employees <span style="color:#66d9ef">VALUES</span> (<span style="color:#ae81ff">1</span>, <span style="color:#e6db74">&#39;alice@example.com&#39;</span>, <span style="color:#ae81ff">15</span>.<span style="color:#ae81ff">50</span>);  <span style="color:#75715e">-- 成功
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">INSERT</span> <span style="color:#66d9ef">INTO</span> employees <span style="color:#66d9ef">VALUES</span> (<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, <span style="color:#e6db74">&#39;bob@example.com&#39;</span>, <span style="color:#ae81ff">0</span>);       <span style="color:#75715e">-- 報錯：positive_integer
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">INSERT</span> <span style="color:#66d9ef">INTO</span> employees <span style="color:#66d9ef">VALUES</span> (<span style="color:#ae81ff">2</span>, <span style="color:#e6db74">&#39;invalid-email&#39;</span>, <span style="color:#ae81ff">0</span>);          <span style="color:#75715e">-- 報錯：email_address
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">INSERT</span> <span style="color:#66d9ef">INTO</span> employees <span style="color:#66d9ef">VALUES</span> (<span style="color:#ae81ff">3</span>, <span style="color:#e6db74">&#39;charlie@example.com&#39;</span>, <span style="color:#ae81ff">150</span>);  <span style="color:#75715e">-- 報錯：percentage
+</span></span></span></code></pre></div><p>Domain 的優勢在於：多個表格可重用相同的驗證邏輯，修改一處即可全域生效。</p>
+<h3 id="型別轉換機制">型別轉換機制</h3>
+<p>PostgreSQL 的型別轉換分為三種層次：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 1. 顯式轉換（Explicit Cast）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#66d9ef">CAST</span>(<span style="color:#e6db74">&#39;2026-01-01&#39;</span> <span style="color:#66d9ef">AS</span> date);    <span style="color:#75715e">-- SQL 標準語法
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#e6db74">&#39;2026-01-01&#39;</span>::date;            <span style="color:#75715e">-- PostgreSQL 簡寫
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#e6db74">&#39;{&#34;key&#34;:&#34;val&#34;}&#39;</span>::jsonb;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 2. 賦值轉換（Assignment Cast）
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">-- INSERT/UPDATE 時自動嘗試轉換
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> demo (val integer);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">INSERT</span> <span style="color:#66d9ef">INTO</span> demo <span style="color:#66d9ef">VALUES</span> (<span style="color:#e6db74">&#39;42&#39;</span>);   <span style="color:#75715e">-- 字串 &#39;42&#39; 自動轉為 integer
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">INSERT</span> <span style="color:#66d9ef">INTO</span> demo <span style="color:#66d9ef">VALUES</span> (<span style="color:#e6db74">&#39;abc&#39;</span>);  <span style="color:#75715e">-- 無法轉換，報錯
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 3. 隱式轉換（Implicit Cast）
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">-- 在表達式中自動發生，PostgreSQL 非常保守
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>.<span style="color:#ae81ff">5</span>;  <span style="color:#75715e">-- integer → numeric，結果為 2.5
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 查詢型別轉換路徑
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> castsource::regtype, casttarget::regtype, castcontext
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> pg_cast
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> castsource <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;integer&#39;</span>::regtype
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> casttarget::regtype::text;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- castcontext: &#39;e&#39;=explicit, &#39;a&#39;=assignment, &#39;i&#39;=implicit
+</span></span></span></code></pre></div><h3 id="型別對索引效能的影響">型別對索引效能的影響</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 型別不匹配會導致隱式轉換，使索引失效
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> accounts (
+</span></span><span style="display:flex;"><span>    user_id varchar(<span style="color:#ae81ff">20</span>) <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
+</span></span><span style="display:flex;"><span>    balance numeric
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">EXPLAIN</span> <span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> accounts <span style="color:#66d9ef">WHERE</span> user_id <span style="color:#f92672">=</span> <span style="color:#ae81ff">12345</span>;    <span style="color:#75715e">-- 索引可能失效！
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">EXPLAIN</span> <span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> accounts <span style="color:#66d9ef">WHERE</span> user_id <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;12345&#39;</span>;  <span style="color:#75715e">-- 正確使用索引
+</span></span></span></code></pre></div><p><strong>各型別儲存大小比較</strong>：</p>
+<table>
+	<thead>
+			<tr>
+					<th>型別</th>
+					<th>固定/可變</th>
+					<th>大小</th>
+					<th>對齊</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>boolean</td>
+					<td>固定</td>
+					<td>1 byte</td>
+					<td>1 byte</td>
+			</tr>
+			<tr>
+					<td>smallint</td>
+					<td>固定</td>
+					<td>2 bytes</td>
+					<td>2 bytes</td>
+			</tr>
+			<tr>
+					<td>integer</td>
+					<td>固定</td>
+					<td>4 bytes</td>
+					<td>4 bytes</td>
+			</tr>
+			<tr>
+					<td>bigint</td>
+					<td>固定</td>
+					<td>8 bytes</td>
+					<td>8 bytes</td>
+			</tr>
+			<tr>
+					<td>date</td>
+					<td>固定</td>
+					<td>4 bytes</td>
+					<td>4 bytes</td>
+			</tr>
+			<tr>
+					<td>timestamptz</td>
+					<td>固定</td>
+					<td>8 bytes</td>
+					<td>8 bytes</td>
+			</tr>
+			<tr>
+					<td>uuid</td>
+					<td>固定</td>
+					<td>16 bytes</td>
+					<td>4 bytes</td>
+			</tr>
+			<tr>
+					<td>numeric</td>
+					<td>可變</td>
+					<td>2+ bytes</td>
+					<td>4 bytes</td>
+			</tr>
+			<tr>
+					<td>text/varchar</td>
+					<td>可變</td>
+					<td>4+len bytes</td>
+					<td>4 bytes</td>
+			</tr>
+			<tr>
+					<td>jsonb</td>
+					<td>可變</td>
+					<td>4+len bytes</td>
+					<td>4 bytes</td>
+			</tr>
+	</tbody>
+</table>
+<p>B-tree 索引對固定長度型別效率最高。<code>text</code>/<code>varchar</code> 索引受限於 2704 bytes（B-tree 頁面的 1/4），超過時需使用前綴索引或 hash 索引。</p>
+<h3 id="常見陷阱">常見陷阱</h3>
+<h4 id="浮點精確度問題">浮點精確度問題</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">1</span>::float <span style="color:#f92672">+</span> <span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">2</span>::float <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">3</span>::float;  <span style="color:#75715e">-- false！
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">1</span>::float <span style="color:#f92672">+</span> <span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">2</span>::float;                <span style="color:#75715e">-- 0.30000000000000004
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 金融計算必須使用 numeric
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">1</span>::numeric <span style="color:#f92672">+</span> <span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">2</span>::numeric <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">3</span>::numeric;  <span style="color:#75715e">-- true
+</span></span></span></code></pre></div><h4 id="timestamp-與-timestamptz-混用">timestamp 與 timestamptz 混用</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 絕對不要在同一表格混用兩者
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">-- 錯誤設計
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> bad_design (
+</span></span><span style="display:flex;"><span>    created_at <span style="color:#66d9ef">timestamp</span>,     <span style="color:#75715e">-- 無時區
+</span></span></span><span style="display:flex;"><span>    updated_at timestamptz    <span style="color:#75715e">-- 有時區
+</span></span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 比較兩欄位時會依 session TimeZone 隱式轉換，極易出錯
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 正確設計
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> good_design (
+</span></span><span style="display:flex;"><span>    created_at timestamptz <span style="color:#66d9ef">DEFAULT</span> now(),
+</span></span><span style="display:flex;"><span>    updated_at timestamptz <span style="color:#66d9ef">DEFAULT</span> now()
+</span></span><span style="display:flex;"><span>);
+</span></span></code></pre></div><h4 id="charn-的空格填充">char(n) 的空格填充</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#e6db74">&#39;TW&#39;</span>::char(<span style="color:#ae81ff">5</span>) <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;TW&#39;</span>::char(<span style="color:#ae81ff">2</span>);  <span style="color:#75715e">-- true（忽略尾部空格）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#e6db74">&#39;TW&#39;</span>::text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;TW   &#39;</span>::text;     <span style="color:#75715e">-- false（text 不忽略）
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">-- 結論：除非有特殊需求，不要使用 char(n)
+</span></span></span></code></pre></div><h3 id="版本演進">版本演進</h3>
+<table>
+	<thead>
+			<tr>
+					<th>版本</th>
+					<th>型別改進</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>PG9.2</td>
+					<td>範圍型別（Range Types）</td>
+			</tr>
+			<tr>
+					<td>PG9.4</td>
+					<td><code>jsonb</code> 型別</td>
+			</tr>
+			<tr>
+					<td>PG10</td>
+					<td><code>GENERATED AS IDENTITY</code> 欄位</td>
+			</tr>
+			<tr>
+					<td>PG13</td>
+					<td><code>gen_random_uuid()</code> 內建（無需擴充）</td>
+			</tr>
+			<tr>
+					<td>PG14</td>
+					<td><code>multirange</code> 型別</td>
+			</tr>
+	</tbody>
+</table>
+<h3 id="總結">總結</h3>
+<p><strong>資料型別</strong> 是 PostgreSQL 型別系統的核心基礎：</p>
+<ul>
+<li><strong>數值</strong>：金融計算用 <code>numeric</code>，絕不用 <code>float</code>；自動遞增用 <code>GENERATED AS IDENTITY</code></li>
+<li><strong>字串</strong>：優先使用 <code>text</code>，<code>varchar(n)</code> 僅在有明確長度限制時使用，避免 <code>char(n)</code></li>
+<li><strong>日期時間</strong>：永遠使用 <code>timestamptz</code>，除非有非常明確的理由</li>
+<li><strong>UUID</strong>：PG13+ 用 <code>gen_random_uuid()</code>，適合分散式系統的主鍵</li>
+<li><strong>範圍型別</strong>：搭配 EXCLUDE 約束解決「不可重疊」的業務邏輯</li>
+<li><strong>陣列與 JSONB</strong>：搭配 GIN 索引實現高效查詢</li>
+<li><strong>Enum vs text + CHECK</strong>：需要排序語義用 Enum，需要靈活性用 text + CHECK</li>
+<li><strong>Domain</strong>：在多表重用驗證邏輯的最佳方式</li>
+<li><strong>型別匹配</strong>：保持應用端型別與資料庫欄位型別一致，避免隱式轉換使索引失效</li>
+</ul>
+<p>下一篇，我們將深入探討 <strong>DDL 與 Schema 管理</strong>——如何用 PostgreSQL 的豐富語法設計與維護資料庫結構。</p></div>
+        
+        
+
+        
+        <div class="mt-8">
+          
+<div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose">
+  <div>
+    <div class="flex items-center gap-2 mb-1">
+      <a href="/about" class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">
+        BenZ
+      </a>
+      
+      <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span>
+      
+    </div>
+    <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">
+      熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。
+    </p>
+    <div class="flex items-center gap-3">
+      
+      <a href="https://github.com/benzhub" target="_blank" rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label="GitHub">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      
+      
+      
+    </div>
+  </div>
+</div>
+
+        </div>
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        
+
+
+<div>
+  <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3>
+  <div class="grid gap-2">
+    
+    <a href="http://localhost:1313/post/postgresql/011-background-processes/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">背景進程：PostgreSQL 的幕後工作者們 | PostgreSQL</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/17</span>
+    </a>
+    
+    <a href="http://localhost:1313/post/postgresql/010-concurrency-control/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">並行控制與鎖機制：PostgreSQL 如何協調多用戶同時存取 | PostgreSQL</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/16</span>
+    </a>
+    
+    <a href="http://localhost:1313/post/postgresql/009-transaction-management/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Transaction 管理：PostgreSQL 的 ACID 實現與進階控制 | PostgreSQL</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/15</span>
+    </a>
+    
+  </div>
+</div>
+
+
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            
+            <a href="http://localhost:1313/post/postgresql/011-background-processes/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+                <span class="text-sm font-medium">背景進程：PostgreSQL 的幕後工作者們 | PostgreSQL</span>
+            </a>
+            
+          </div>
+          <div>
+            
+            <a href="http://localhost:1313/post/postgresql/013-ddl-schema/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+                <span class="text-sm font-medium">DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL</span>
+            </a>
+            
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        
+<script src="https://giscus.app/client.js"
+        data-repo="benzhub/benzhub.github.io"
+        data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM="
+        data-category="Announcements"
+        data-category-id="MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme="preferred_color_scheme"
+        data-lang="zh-TW"
+        crossorigin="anonymous"
+        async>
+</script>
+
+
+      </div>
+    </div>
+    
+    <div class="hidden lg:block lg:col-span-1 mt-4">
+    
+    
+            
+            <div class="widget fade-in">
+    <p class="widget-title">搜尋</p>
+    <form role="search" method="get" action="https://google.com/search">
+        <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
+        <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
+    </form>
+</div>
+
+        
+            
+            
+
+        
+            
+            
+<div class="widget fade-in">
+    <p class="widget-title">標籤</p>
+    <div class="flex flex-wrap gap-1.5">
+        <a href='/tags/80/20-%E6%B3%95%E5%89%87'>
+            <span class="tag-pill">80/20 法則</span>
+        </a>
+        <a href='/tags/acid'>
+            <span class="tag-pill">acid</span>
+        </a>
+        <a href='/tags/ai'>
+            <span class="tag-pill">ai</span>
+        </a>
+        <a href='/tags/ai-agent'>
+            <span class="tag-pill">ai agent</span>
+        </a>
+        <a href='/tags/ai-workflow'>
+            <span class="tag-pill">ai workflow</span>
+        </a>
+        <a href='/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE'>
+            <span class="tag-pill">ai 工具焦慮</span>
+        </a>
+        <a href='/tags/ai-%E6%8E%A5%E5%96%AE'>
+            <span class="tag-pill">ai 接單</span>
+        </a>
+        <a href='/tags/ai-%E7%B9%AA%E5%9C%96'>
+            <span class="tag-pill">ai 繪圖</span>
+        </a>
+        <a href='/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA'>
+            <span class="tag-pill">ai 虛擬人</span>
+        </a>
+        <a href='/tags/ai-%E8%A1%8C%E9%8A%B7'>
+            <span class="tag-pill">ai 行銷</span>
+        </a>
+        <a href='/tags/ai-%E8%A8%AD%E8%A8%88'>
+            <span class="tag-pill">ai 設計</span>
+        </a>
+        <a href='/tags/ai-%E8%AE%8A%E7%8F%BE'>
+            <span class="tag-pill">ai 變現</span>
+        </a>
+        <a href='/tags/ai-%E8%B3%BA%E9%8C%A2'>
+            <span class="tag-pill">ai 賺錢</span>
+        </a>
+        <a href='/tags/ai-income'>
+            <span class="tag-pill">ai-income</span>
+        </a>
+        <a href='/tags/ai-insights'>
+            <span class="tag-pill">ai-insights</span>
+        </a>
+        <a href='/tags/api'>
+            <span class="tag-pill">api</span>
+        </a>
+        <a href='/tags/architecture'>
+            <span class="tag-pill">architecture</span>
+        </a>
+        <a href='/tags/autovacuum'>
+            <span class="tag-pill">autovacuum</span>
+        </a>
+        <a href='/tags/background-processes'>
+            <span class="tag-pill">background-processes</span>
+        </a>
+        <a href='/tags/big-o'>
+            <span class="tag-pill">big o</span>
+        </a>
+    </div>
+</div>
+
+
+        
+            
+            
+<div class="widget fade-in">
+    <p class="widget-title">文章系列</p>
+    <div class="flex flex-wrap gap-1.5">
+        
+        
+        
+        
+        <a href='/post/postgresql/'>
+            <span class="tag-pill">PostgreSQL (13)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/javascript/'>
+            <span class="tag-pill">JavaScript (68)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/django/'>
+            <span class="tag-pill">Django (30)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/python/'>
+            <span class="tag-pill">Python (37)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/htmlcss/'>
+            <span class="tag-pill">HTML &amp; CSS (23)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/linux/'>
+            <span class="tag-pill">Linux (22)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/git/'>
+            <span class="tag-pill">Git (18)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/ai-insights/'>
+            <span class="tag-pill">AI Insights (13)</span>
+        </a>
+        
+        
+    </div>
+</div>
+
+
+        
+            
+            
+
+<div class="widget fade-in">
+    <p class="widget-title">最新文章</p>
+    <div class="flex flex-col gap-1">
+        <a href="/post/postgresql/013-ddl-schema/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/19
+            </p>
+        </a>
+        <a href="/post/django/030-django-custom-user-model/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django 自訂使用者模型：AbstractUser 與 AbstractBaseUser | Django 教學</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/19
+            </p>
+        </a>
+        <a href="/post/javascript/data-structures--algorithms/006-heap-priority-queue/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">堆積與優先佇列 — Min/Max Heap 原理與 Heap Sort 完整實作 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/19
+            </p>
+        </a>
+        <a href="/post/django/029-django-authentication/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Authentication 使用者認證系統完全指南 | Django 教學</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/18
+            </p>
+        </a>
+        <a href="/post/postgresql/012-data-types/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/18
+            </p>
+        </a>
+    </div>
+</div>
+
+        
+    
+</div>
+
+    
+</div>
+
+        </div>
+    </div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]">
+    
+    <p>&copy; 2026 <a href="http://localhost:1313/" class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p>
+</footer>
+
+
+<script>
+    (function (window, document) {
+        function main() {
+            var ad = document.createElement('script');
+            ad.async = true;
+            ad.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606';
+            ad.crossOrigin = "anonymous";
+            var sc = document.getElementsByTagName('script')[0];
+            sc.parentNode.insertBefore(ad, sc);
+        }
+        var lazyLoad = false;
+        function onLazyLoad() {
+            if (lazyLoad === false) {
+                lazyLoad = true;
+                window.removeEventListener('scroll', onLazyLoad);
+                window.removeEventListener('mousemove', onLazyLoad);
+                window.removeEventListener('mousedown', onLazyLoad);
+                window.removeEventListener('touchstart', onLazyLoad);
+                window.removeEventListener('keydown', onLazyLoad);
+                main();
+            }
+        }
+        window.addEventListener('scroll', onLazyLoad);
+        window.addEventListener('mousemove', onLazyLoad);
+        window.addEventListener('mousedown', onLazyLoad);
+        window.addEventListener('touchstart', onLazyLoad);
+        window.addEventListener('keydown', onLazyLoad);
+        window.addEventListener('load', function () {
+            if (window.pageYOffset) {
+                onLazyLoad();
+                window.setTimeout(onLazyLoad, 3000);
+            }
+        });
+    })(window, document);
+</script>
+
+
+<script>
+    
+    var icon = document.getElementById("icon");
+    var icon2 = document.getElementById("icon2");
+    if (document.documentElement.classList.contains("dark") || localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+        if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+    function toggleDarkMode() {
+        if (document.documentElement.classList.contains('dark')) {
+            if (icon) { icon.classList.remove("icon-sun"); icon.classList.add("icon-moon"); }
+            if (icon2) { icon2.classList.remove("icon-sun"); icon2.classList.add("icon-moon"); }
+            document.documentElement.classList.remove('dark');
+            localStorage.theme = 'light';
+        } else {
+            if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+            if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+            document.documentElement.classList.add('dark');
+            localStorage.theme = 'dark';
+        }
+    }
+
+    
+    document.addEventListener('DOMContentLoaded', function () {
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0 });
+
+        document.querySelectorAll('.fade-in').forEach(function (el) {
+            observer.observe(el);
+        });
+    });
+</script>
+</body>
+
+</html>

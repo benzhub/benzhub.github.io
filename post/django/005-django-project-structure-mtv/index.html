@@ -1,72 +1,551 @@
-<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>Django 專案結構與 MTV 架構模式 | Django 教學 | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="Django 專案結構與 MTV 架構模式 | Django 教學 | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="深入解析 Django 的 MTV（Model-Template-View）架構模式，完整剖析 Django 專案與 App 的目錄結構，涵蓋 settings.py、urls.py、manage.py 等核心檔案的角色與用法。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="深入解析 Django 的 MTV（Model-Template-View）架構模式，完整剖析 Django 專案與 App 的目錄結構，涵蓋 settings.py、urls.py、manage.py 等核心檔案的角色與用法。"><meta property="og:url" content="https://benzhub.github.io/post/django/005-django-project-structure-mtv/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/django/005-django-project-structure-mtv/><meta name=twitter:description content="深入解析 Django 的 MTV（Model-Template-View）架構模式，完整剖析 Django 專案與 App 的目錄結構，涵蓋 settings.py、urls.py、manage.py 等核心檔案的角色與用法。"><meta property="article:published_time" content="2026-05-25T00:00:00+00:00"><meta property="article:updated_time" content="2026-05-21T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/django/005-Django-Project-Structure-MTV.png"><meta property="og:image:url" content="https://benzhub.github.io/img/django/005-Django-Project-Structure-MTV.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
-<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/django/005-django-project-structure-mtv/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/django/005-django-project-structure-mtv/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"Django 專案結構與 MTV 架構模式 | Django 教學\"","description":"\"深入解析 Django 的 MTV（Model-Template-View）架構模式，完整剖析 Django 專案與 App 的目錄結構，涵蓋 settings.py、urls.py、manage.py 等核心檔案的角色與用法。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-05-25T00:00:00\u002b00:00","dateModified":"2026-05-21T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/django\/005-Django-Project-Structure-MTV.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/django\/005-django-project-structure-mtv\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/django\/"},{"@type":"ListItem","position":3,"name":"\"Django 專案結構與 MTV 架構模式 | Django 教學\""}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"\"Django 的 MTV 架構和 MVC 架構有什麼差別？\"","acceptedAnswer":{"@type":"Answer","text":"\"Django 的 MTV（Model-Template-View）本質上與 MVC（Model-View-Controller）是同一概念的不同命名。對應關係為：Model 對應 Model（資料層）、Template 對應 View（呈現層）、View 對應 Controller（邏輯層）。Django 將控制邏輯放在 View 中處理，畫面渲染交給 Template，框架本身扮演 Controller 的路由角色。\""}},{"@type":"Question","name":"\"Django 的 Project 和 App 有什麼不同？\"","acceptedAnswer":{"@type":"Answer","text":"\"Project（專案）是整個網站的配置中心，包含全域設定檔 settings.py、根層路由 urls.py 以及 WSGI/ASGI 入口。App（應用）則是獨立的功能模組，每個 App 負責一個特定的業務領域，例如使用者管理、文章系統等。一個 Project 可以包含多個 App，App 也可以跨 Project 重複使用。\""}},{"@type":"Question","name":"\"建立 Django App 後為什麼要註冊到 INSTALLED_APPS？\"","acceptedAnswer":{"@type":"Answer","text":"\"Django 透過 INSTALLED_APPS 來追蹤所有啟用的 App。只有註冊到 INSTALLED_APPS 的 App，Django 才會載入其 models.py（資料庫模型）、執行 migrations（資料庫遷移）、發現 admin.py（後台管理設定）以及載入 Template 等資源。未註冊的 App 形同不存在。\""}}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
-</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
-</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
-</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
-<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
-<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-<span>🌐</span>
-<span>繁體中文</span>
-<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
-<a href=https://benzhub.github.io/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-<a href=https://benzhub.github.io/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
-<a href=https://benzhub.github.io/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-<a href=https://benzhub.github.io/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
-</button>
-<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
-<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
-</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
-</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
-</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
-<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-<span>🌐</span>
-<span>繁體中文</span>
-<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
-<a href=https://benzhub.github.io/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-<a href=https://benzhub.github.io/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
-<a href=https://benzhub.github.io/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-<a href=https://benzhub.github.io/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Django 專案結構與 MTV 架構模式 | Django 教學</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/05/25
-</span><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001.0 004.582 9m0 0H9m11 11v-5h-.581m0 0A8.003 8.003.0 014.062 13m15.357 2H15"/></svg>
-2026/05/21</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/python class="tag-pill no-underline">python</a>
-<a href=/tags/django class="tag-pill no-underline">django</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/django/005-Django-Project-Structure-MTV.png alt="Django 專案結構與 MTV 架構模式 | Django 教學"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p>理解 <strong>Django</strong> 的專案結構是高效開發的第一步。Django 採用獨特的 <strong>MTV</strong>（Model-Template-View）架構模式，將資料處理、頁面呈現與業務邏輯清楚分離。同時，Django 以 <strong>Project</strong>（專案）與 <strong>App</strong>（應用）的階層式組織來管理程式碼，讓每個功能模組都能獨立開發、測試與重複使用。本篇將帶你完整剖析 Django 的目錄結構與 MTV 架構，幫助你建立紮實的開發基礎。</p></blockquote><h3 id=mtv-架構模式詳解>MTV 架構模式詳解</h3><p><strong>MTV</strong> 是 Django 的核心設計模式，分別代表 <strong>Model</strong>（模型）、<strong>Template</strong>（模板）和 <strong>View</strong>（視圖）。這三個元件各司其職，構成了 Django 處理 Web 請求的完整流程。</p><h4 id=model模型資料層>Model（模型）：資料層</h4><p><strong>Model</strong> 負責定義資料結構並處理與資料庫（Database）的互動。每個 Model 對應資料庫中的一張資料表（Table），透過 Django 內建的 <strong>ORM</strong>（Object-Relational Mapping，物件關聯對映）系統，開發者可以用 Python 程式碼操作資料庫，而不需要撰寫原始的 SQL 語句。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># models.py - 定義文章的資料模型</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.db <span style=color:#f92672>import</span> models
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Article</span>(models<span style=color:#f92672>.</span>Model):
-</span></span><span style=display:flex><span>    title <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>CharField(max_length<span style=color:#f92672>=</span><span style=color:#ae81ff>200</span>)       <span style=color:#75715e># 文章標題</span>
-</span></span><span style=display:flex><span>    content <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>TextField()                    <span style=color:#75715e># 文章內容</span>
-</span></span><span style=display:flex><span>    created_at <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>DateTimeField(auto_now_add<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)  <span style=color:#75715e># 建立時間（自動填入）</span>
-</span></span><span style=display:flex><span>    updated_at <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>DateTimeField(auto_now<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)      <span style=color:#75715e># 更新時間（自動更新）</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>__str__</span>(self):
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> self<span style=color:#f92672>.</span>title
-</span></span></code></pre></div><h4 id=template模板呈現層>Template（模板）：呈現層</h4><p><strong>Template</strong> 負責決定資料如何呈現給使用者。Django 的模板系統（Template Engine）使用 HTML 搭配模板標籤（Template Tags）和過濾器（Filters），將 View 傳遞過來的資料渲染成最終的 HTML 頁面。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-html data-lang=html><span style=display:flex><span><span style=color:#75715e>&lt;!-- templates/articles/list.html --&gt;</span>
-</span></span><span style=display:flex><span>{% extends &#34;base.html&#34; %}
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>{% block content %}
-</span></span><span style=display:flex><span>&lt;<span style=color:#f92672>h1</span>&gt;文章列表&lt;/<span style=color:#f92672>h1</span>&gt;
-</span></span><span style=display:flex><span>{% for article in articles %}
-</span></span><span style=display:flex><span>    &lt;<span style=color:#f92672>div</span> <span style=color:#a6e22e>class</span><span style=color:#f92672>=</span><span style=color:#e6db74>&#34;article&#34;</span>&gt;
-</span></span><span style=display:flex><span>        &lt;<span style=color:#f92672>h2</span>&gt;{{ article.title }}&lt;/<span style=color:#f92672>h2</span>&gt;
-</span></span><span style=display:flex><span>        &lt;<span style=color:#f92672>p</span>&gt;{{ article.content|truncatewords:30 }}&lt;/<span style=color:#f92672>p</span>&gt;
-</span></span><span style=display:flex><span>        &lt;<span style=color:#f92672>span</span>&gt;{{ article.created_at|date:&#34;Y-m-d&#34; }}&lt;/<span style=color:#f92672>span</span>&gt;
-</span></span><span style=display:flex><span>    &lt;/<span style=color:#f92672>div</span>&gt;
-</span></span><span style=display:flex><span>{% empty %}
-</span></span><span style=display:flex><span>    &lt;<span style=color:#f92672>p</span>&gt;目前沒有任何文章。&lt;/<span style=color:#f92672>p</span>&gt;
-</span></span><span style=display:flex><span>{% endfor %}
-</span></span><span style=display:flex><span>{% endblock %}
-</span></span></code></pre></div><h4 id=view視圖邏輯層>View（視圖）：邏輯層</h4><p><strong>View</strong> 是 MTV 的核心樞紐，負責接收 HTTP 請求、執行業務邏輯、呼叫 Model 取得資料，再將資料傳遞給 Template 進行渲染，最後回傳 HTTP 回應（Response）。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># views.py - 處理文章列表的請求邏輯</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.shortcuts <span style=color:#f92672>import</span> render
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> .models <span style=color:#f92672>import</span> Article
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>article_list</span>(request):
-</span></span><span style=display:flex><span>    articles <span style=color:#f92672>=</span> Article<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>all()<span style=color:#f92672>.</span>order_by(<span style=color:#e6db74>&#39;-created_at&#39;</span>)  <span style=color:#75715e># 從 Model 取得所有文章</span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> render(request, <span style=color:#e6db74>&#39;articles/list.html&#39;</span>, {            <span style=color:#75715e># 將資料傳給 Template 渲染</span>
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;articles&#39;</span>: articles,
-</span></span><span style=display:flex><span>    })
-</span></span></code></pre></div><h4 id=mtv-的請求處理流程>MTV 的請求處理流程</h4><p>當使用者發出一個 HTTP 請求時，Django 的處理流程如下：</p><pre tabindex=0><code>使用者發出 HTTP 請求
+<!DOCTYPE html>
+
+<html lang="zh-TW">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><title>Django 專案結構與 MTV 架構模式 | Django 教學 | BenzHub</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="apple-touch-icon" sizes="180x180" href='/favicon/apple-touch-icon.png'>
+    <link rel="icon" type="image/png" sizes="32x32" href='/favicon/favicon-32x32.png'>
+    <link rel="icon" type="image/png" sizes="16x16" href='/favicon/favicon-16x16.png'>
+    <link rel="manifest" href='/favicon/site.webmanifest' />
+    <link rel="mask-icon" href=' /favicon/safari-pinned-tab.svg' color="#5bbad5" />
+    <link rel="shortcut icon" href='/favicon/favicon.ico' />
+    <meta name="theme-color" content="#fafafa">
+    <meta property="og:title" content="Django 專案結構與 MTV 架構模式 | Django 教學 | BenzHub" />
+    
+    
+    <link rel="stylesheet" href="/css/style.css" />
+    
+    <link href=' /css/blonde.min.css' rel="stylesheet" type="text/css" media="print"
+        onload="this.media=' all'">
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+
+<meta name="description" content="深入解析 Django 的 MTV（Model-Template-View）架構模式，完整剖析 Django 專案與 App 的目錄結構，涵蓋 settings.py、urls.py、manage.py 等核心檔案的角色與用法。">
+<meta property="og:site_name" content="BenzHub">
+<meta property="og:description" content="深入解析 Django 的 MTV（Model-Template-View）架構模式，完整剖析 Django 專案與 App 的目錄結構，涵蓋 settings.py、urls.py、manage.py 等核心檔案的角色與用法。">
+<meta property="og:url" content="http://localhost:1313/post/django/005-django-project-structure-mtv/">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="zh_TW">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="">
+
+<link rel="canonical" href="http://localhost:1313/post/django/005-django-project-structure-mtv/">
+
+<meta name="twitter:description" content="深入解析 Django 的 MTV（Model-Template-View）架構模式，完整剖析 Django 專案與 App 的目錄結構，涵蓋 settings.py、urls.py、manage.py 等核心檔案的角色與用法。">
+<meta property="article:published_time" content="2026-05-25T00:00:00&#43;00:00">
+<meta property="article:updated_time" content="2026-05-21T00:00:00&#43;00:00">
+
+
+
+
+
+    
+<meta property="og:image" content="http://localhost:1313/img/django/005-Django-Project-Structure-MTV.png">
+<meta property="og:image:url" content="http://localhost:1313/img/django/005-Django-Project-Structure-MTV.png">
+    
+
+    
+    <link rel="stylesheet" href='/css/custom.css'>
+    <i class="dark hidden"></i>
+    
+<link rel="alternate" hreflang="zh-TW" href="http://localhost:1313/post/django/005-django-project-structure-mtv/" />
+
+<link rel="alternate" hreflang="x-default" href="http://localhost:1313/post/django/005-django-project-structure-mtv/" />
+
+    
+
+
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "\"Django 專案結構與 MTV 架構模式 | Django 教學\"",
+  "description": "\"深入解析 Django 的 MTV（Model-Template-View）架構模式，完整剖析 Django 專案與 App 的目錄結構，涵蓋 settings.py、urls.py、manage.py 等核心檔案的角色與用法。\"",
+  "author": {
+    "@type": "Person",
+    "name": "\"BenzHub\"",
+    "url": "http:\/\/localhost:1313\/about",
+    "jobTitle": "\"Software Developer\"",
+    "sameAs": [
+      "\"https://github.com/benzhub\""
+    ]
+  },
+  "datePublished": "2026-05-25T00:00:00\u002b00:00",
+  "dateModified": "2026-05-21T00:00:00\u002b00:00",
+  "image": "http:\/\/localhost:1313\/img\/django\/005-Django-Project-Structure-MTV.png",
+  "publisher": {
+    "@type": "Organization",
+    "name": "\"BenzHub\"",
+    "url": "\"http://localhost:1313/\"",
+    "sameAs": [
+      "\"https://github.com/benzhub\""
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http:\/\/localhost:1313\/post\/django\/005-django-project-structure-mtv\/"
+  },
+  "inLanguage": "zh-TW"
+}
+</script>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "\"BenzHub\"",
+      "item": "http:\/\/localhost:1313\/"
+    }
+    
+    
+      
+      
+    ,{
+      "@type": "ListItem",
+      "position": 2,
+      "name": "\"Blog\"",
+      "item": "http:\/\/localhost:1313\/post\/django\/"
+    }
+      
+      
+    
+    ,{
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "\"Django 專案結構與 MTV 架構模式 | Django 教學\""
+    }
+  ]
+}
+</script>
+
+
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    
+    
+    {
+      "@type": "Question",
+      "name": "\"Django 的 MTV 架構和 MVC 架構有什麼差別？\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Django 的 MTV（Model-Template-View）本質上與 MVC（Model-View-Controller）是同一概念的不同命名。對應關係為：Model 對應 Model（資料層）、Template 對應 View（呈現層）、View 對應 Controller（邏輯層）。Django 將控制邏輯放在 View 中處理，畫面渲染交給 Template，框架本身扮演 Controller 的路由角色。\""
+      }
+    }
+    
+    ,
+    {
+      "@type": "Question",
+      "name": "\"Django 的 Project 和 App 有什麼不同？\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Project（專案）是整個網站的配置中心，包含全域設定檔 settings.py、根層路由 urls.py 以及 WSGI/ASGI 入口。App（應用）則是獨立的功能模組，每個 App 負責一個特定的業務領域，例如使用者管理、文章系統等。一個 Project 可以包含多個 App，App 也可以跨 Project 重複使用。\""
+      }
+    }
+    
+    ,
+    {
+      "@type": "Question",
+      "name": "\"建立 Django App 後為什麼要註冊到 INSTALLED_APPS？\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Django 透過 INSTALLED_APPS 來追蹤所有啟用的 App。只有註冊到 INSTALLED_APPS 的 App，Django 才會載入其 models.py（資料庫模型）、執行 migrations（資料庫遷移）、發現 admin.py（後台管理設定）以及載入 Template 等資源。未註冊的 App 形同不存在。\""
+      }
+    }
+    
+  ]
+}
+</script>
+
+
+
+
+
+</head>
+<body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class="site-nav" id="siteNav">
+    <div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full">
+        
+        <a href="http://localhost:1313/" class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">
+            BenzHub
+        </a>
+
+        
+        <div class="hidden md:flex items-center gap-6">
+            
+            <a href="/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                首頁
+            </a>
+            
+            <a href="/about/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                關於
+            </a>
+            
+            <a href="/contact/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                聯絡
+            </a>
+            
+            <a href="/resourses/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                資源
+            </a>
+            
+
+            
+            <div class="flex items-center gap-2">
+                <form class="flex items-center" role="search" method="get" action="https://google.com/search" id="navSearchForm">
+                    <input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50"
+                        type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋" id="navSearchInput">
+                    <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
+                </form>
+                <button onclick="toggleNavSearch()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+                    <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                    </svg>
+                </button>
+            </div>
+
+            
+            <span class="text-zinc-200 dark:text-zinc-700">|</span>
+
+            
+            
+
+
+
+
+<div class="lang-switcher relative hidden md:block">
+    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+        <span>🌐</span>
+        <span>繁體中文</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
+        
+            
+            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
+    <div class="flex gap-2">
+        
+            
+            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+            
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon2" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+        </div>
+
+        
+        <div class="flex md:hidden items-center gap-1">
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+            <button id="hamburgerbtn" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Menu">
+                <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    
+    <div class="mobile-menu md:hidden" id="mobileMenu">
+        
+        <a href="/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            首頁
+        </a>
+        
+        <a href="/about/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            關於
+        </a>
+        
+        <a href="/contact/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            聯絡
+        </a>
+        
+        <a href="/resourses/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            資源
+        </a>
+        
+        <form class="mt-2" role="search" method="get" action="https://google.com/search">
+            <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
+            <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
+        </form>
+        
+        
+
+
+
+
+<div class="lang-switcher relative hidden md:block">
+    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+        <span>🌐</span>
+        <span>繁體中文</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
+        
+            
+            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
+    <div class="flex gap-2">
+        
+            
+            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+    </div>
+</nav>
+
+<script>
+    
+    document.getElementById('hamburgerbtn').addEventListener('click', function () {
+        document.getElementById('mobileMenu').classList.toggle('active');
+    });
+
+    
+    window.addEventListener('scroll', function () {
+        var nav = document.getElementById('siteNav');
+        if (window.scrollY > 50) {
+            nav.classList.add('scrolled');
+        } else {
+            nav.classList.remove('scrolled');
+        }
+    });
+
+    
+    function toggleNavSearch() {
+        var input = document.getElementById('navSearchInput');
+        input.classList.toggle('expanded');
+        if (input.classList.contains('expanded')) {
+            input.focus();
+        }
+    }
+
+    
+    function toggleLangMenu() {
+        var dropdown = document.getElementById('langDropdown');
+        dropdown.classList.toggle('hidden');
+    }
+
+    
+    document.addEventListener('click', function (e) {
+        
+        var form = document.getElementById('navSearchForm');
+        var input = document.getElementById('navSearchInput');
+        if (form && input && !form.contains(e.target) && !e.target.closest('[aria-label="Toggle Search"]')) {
+            input.classList.remove('expanded');
+        }
+        
+        var langSwitcher = e.target.closest('.lang-switcher');
+        if (!langSwitcher) {
+            var dropdown = document.getElementById('langDropdown');
+            if (dropdown) dropdown.classList.add('hidden');
+        }
+    });
+</script>
+<div class="nav-spacer"></div>
+    <div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id="content">
+        <div class="lg:mx-5">
+<div class="grid grid-cols-3 gap-6">
+  
+  <div class="col-span-3 lg:col-span-2">
+  
+      
+      <div class="post-detail fade-in my-4">
+        <h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Django 專案結構與 MTV 架構模式 | Django 教學</h1>
+        <div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4">
+            <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/05/25
+            </span>
+            
+            <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                2026/05/21
+            </span>
+            
+        </div>
+        
+        <div class="flex flex-wrap gap-1.5 mb-5">
+            
+            <a href='/tags/python' class="tag-pill no-underline">python</a>
+            
+            <a href='/tags/django' class="tag-pill no-underline">django</a>
+            
+        </div>
+        
+        
+        <img class="py-4 m-auto rounded-lg thumb-img" src="http://localhost:1313/img/django/005-Django-Project-Structure-MTV.png" alt="Django 專案結構與 MTV 架構模式 | Django 教學">
+        
+        
+        <div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote>
+<p>理解 <strong>Django</strong> 的專案結構是高效開發的第一步。Django 採用獨特的 <strong>MTV</strong>（Model-Template-View）架構模式，將資料處理、頁面呈現與業務邏輯清楚分離。同時，Django 以 <strong>Project</strong>（專案）與 <strong>App</strong>（應用）的階層式組織來管理程式碼，讓每個功能模組都能獨立開發、測試與重複使用。本篇將帶你完整剖析 Django 的目錄結構與 MTV 架構，幫助你建立紮實的開發基礎。</p>
+</blockquote>
+<h3 id="mtv-架構模式詳解">MTV 架構模式詳解</h3>
+<p><strong>MTV</strong> 是 Django 的核心設計模式，分別代表 <strong>Model</strong>（模型）、<strong>Template</strong>（模板）和 <strong>View</strong>（視圖）。這三個元件各司其職，構成了 Django 處理 Web 請求的完整流程。</p>
+<h4 id="model模型資料層">Model（模型）：資料層</h4>
+<p><strong>Model</strong> 負責定義資料結構並處理與資料庫（Database）的互動。每個 Model 對應資料庫中的一張資料表（Table），透過 Django 內建的 <strong>ORM</strong>（Object-Relational Mapping，物件關聯對映）系統，開發者可以用 Python 程式碼操作資料庫，而不需要撰寫原始的 SQL 語句。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># models.py - 定義文章的資料模型</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.db <span style="color:#f92672">import</span> models
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Article</span>(models<span style="color:#f92672">.</span>Model):
+</span></span><span style="display:flex;"><span>    title <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>CharField(max_length<span style="color:#f92672">=</span><span style="color:#ae81ff">200</span>)       <span style="color:#75715e"># 文章標題</span>
+</span></span><span style="display:flex;"><span>    content <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>TextField()                    <span style="color:#75715e"># 文章內容</span>
+</span></span><span style="display:flex;"><span>    created_at <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>DateTimeField(auto_now_add<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)  <span style="color:#75715e"># 建立時間（自動填入）</span>
+</span></span><span style="display:flex;"><span>    updated_at <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>DateTimeField(auto_now<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)      <span style="color:#75715e"># 更新時間（自動更新）</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__str__</span>(self):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>title
+</span></span></code></pre></div><h4 id="template模板呈現層">Template（模板）：呈現層</h4>
+<p><strong>Template</strong> 負責決定資料如何呈現給使用者。Django 的模板系統（Template Engine）使用 HTML 搭配模板標籤（Template Tags）和過濾器（Filters），將 View 傳遞過來的資料渲染成最終的 HTML 頁面。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-html" data-lang="html"><span style="display:flex;"><span><span style="color:#75715e">&lt;!-- templates/articles/list.html --&gt;</span>
+</span></span><span style="display:flex;"><span>{% extends &#34;base.html&#34; %}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>{% block content %}
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#f92672">h1</span>&gt;文章列表&lt;/<span style="color:#f92672">h1</span>&gt;
+</span></span><span style="display:flex;"><span>{% for article in articles %}
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;article&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>        &lt;<span style="color:#f92672">h2</span>&gt;{{ article.title }}&lt;/<span style="color:#f92672">h2</span>&gt;
+</span></span><span style="display:flex;"><span>        &lt;<span style="color:#f92672">p</span>&gt;{{ article.content|truncatewords:30 }}&lt;/<span style="color:#f92672">p</span>&gt;
+</span></span><span style="display:flex;"><span>        &lt;<span style="color:#f92672">span</span>&gt;{{ article.created_at|date:&#34;Y-m-d&#34; }}&lt;/<span style="color:#f92672">span</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;/<span style="color:#f92672">div</span>&gt;
+</span></span><span style="display:flex;"><span>{% empty %}
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">p</span>&gt;目前沒有任何文章。&lt;/<span style="color:#f92672">p</span>&gt;
+</span></span><span style="display:flex;"><span>{% endfor %}
+</span></span><span style="display:flex;"><span>{% endblock %}
+</span></span></code></pre></div><h4 id="view視圖邏輯層">View（視圖）：邏輯層</h4>
+<p><strong>View</strong> 是 MTV 的核心樞紐，負責接收 HTTP 請求、執行業務邏輯、呼叫 Model 取得資料，再將資料傳遞給 Template 進行渲染，最後回傳 HTTP 回應（Response）。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># views.py - 處理文章列表的請求邏輯</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.shortcuts <span style="color:#f92672">import</span> render
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> .models <span style="color:#f92672">import</span> Article
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">article_list</span>(request):
+</span></span><span style="display:flex;"><span>    articles <span style="color:#f92672">=</span> Article<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>all()<span style="color:#f92672">.</span>order_by(<span style="color:#e6db74">&#39;-created_at&#39;</span>)  <span style="color:#75715e"># 從 Model 取得所有文章</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> render(request, <span style="color:#e6db74">&#39;articles/list.html&#39;</span>, {            <span style="color:#75715e"># 將資料傳給 Template 渲染</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;articles&#39;</span>: articles,
+</span></span><span style="display:flex;"><span>    })
+</span></span></code></pre></div><h4 id="mtv-的請求處理流程">MTV 的請求處理流程</h4>
+<p>當使用者發出一個 HTTP 請求時，Django 的處理流程如下：</p>
+<pre tabindex="0"><code>使用者發出 HTTP 請求
         ↓
   URL 路由（urls.py）匹配對應的 View
         ↓
@@ -77,7 +556,48 @@
   View 將資料傳遞給 Template 渲染頁面
         ↓
   回傳 HTTP 回應給使用者
-</code></pre><hr><h3 id=mtv-vs-mvc-對比>MTV vs MVC 對比</h3><p>如果你接觸過其他 Web 框架（如 Ruby on Rails、Spring MVC、ASP.NET MVC），一定對 <strong>MVC</strong>（Model-View-Controller）模式不陌生。Django 的 MTV 本質上是 MVC 的變體，只是命名不同：</p><table><thead><tr><th>MTV（Django）</th><th>MVC（傳統）</th><th>職責說明</th></tr></thead><tbody><tr><td><strong>Model</strong></td><td>Model</td><td>資料結構定義與資料庫操作</td></tr><tr><td><strong>Template</strong></td><td>View</td><td>負責 HTML 頁面的渲染與呈現</td></tr><tr><td><strong>View</strong></td><td>Controller</td><td>處理請求邏輯、協調 Model 與 Template</td></tr></tbody></table><p>為什麼 Django 不直接叫 MVC？Django 的設計哲學認為，View 應該描述「使用者看到什麼資料」而非「資料長什麼樣子」，所以將呈現層命名為 Template，而將邏輯層命名為 View。至於 Controller 的角色，則由 Django 框架本身（特別是 URL 路由系統）來承擔。</p><hr><h3 id=django-專案projectvs-應用app>Django 專案（Project）vs 應用（App）</h3><p>在 Django 的世界裡，<strong>Project</strong>（專案）和 <strong>App</strong>（應用）是兩個層級不同的組織概念：</p><ul><li><strong>Project</strong>：代表整個網站或 Web 應用程式，是所有設定與配置的中心。一個 Project 包含全域設定檔（<code>settings.py</code>）、根層路由（<code>urls.py</code>）以及部署入口（<code>wsgi.py</code>、<code>asgi.py</code>）。</li><li><strong>App</strong>：代表一個獨立的功能模組，負責特定的業務領域。例如 <code>users</code> App 處理使用者註冊與認證、<code>articles</code> App 處理文章的 CRUD（建立、讀取、更新、刪除）操作。</li></ul><p>一個 Project 通常包含多個 App，而一個設計良好的 App 可以在不同的 Project 中重複使用。這種模組化的設計正是 Django 強調的 <strong>DRY</strong>（Don&rsquo;t Repeat Yourself，不重複自己）原則的體現。</p><hr><h3 id=專案目錄結構詳解>專案目錄結構詳解</h3><p>當你使用 <code>django-admin startproject myproject</code> 建立一個新專案時，Django 會自動生成以下目錄結構：</p><pre tabindex=0><code>myproject/                  # 根目錄
+</code></pre><hr>
+<h3 id="mtv-vs-mvc-對比">MTV vs MVC 對比</h3>
+<p>如果你接觸過其他 Web 框架（如 Ruby on Rails、Spring MVC、ASP.NET MVC），一定對 <strong>MVC</strong>（Model-View-Controller）模式不陌生。Django 的 MTV 本質上是 MVC 的變體，只是命名不同：</p>
+<table>
+	<thead>
+			<tr>
+					<th>MTV（Django）</th>
+					<th>MVC（傳統）</th>
+					<th>職責說明</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><strong>Model</strong></td>
+					<td>Model</td>
+					<td>資料結構定義與資料庫操作</td>
+			</tr>
+			<tr>
+					<td><strong>Template</strong></td>
+					<td>View</td>
+					<td>負責 HTML 頁面的渲染與呈現</td>
+			</tr>
+			<tr>
+					<td><strong>View</strong></td>
+					<td>Controller</td>
+					<td>處理請求邏輯、協調 Model 與 Template</td>
+			</tr>
+	</tbody>
+</table>
+<p>為什麼 Django 不直接叫 MVC？Django 的設計哲學認為，View 應該描述「使用者看到什麼資料」而非「資料長什麼樣子」，所以將呈現層命名為 Template，而將邏輯層命名為 View。至於 Controller 的角色，則由 Django 框架本身（特別是 URL 路由系統）來承擔。</p>
+<hr>
+<h3 id="django-專案projectvs-應用app">Django 專案（Project）vs 應用（App）</h3>
+<p>在 Django 的世界裡，<strong>Project</strong>（專案）和 <strong>App</strong>（應用）是兩個層級不同的組織概念：</p>
+<ul>
+<li><strong>Project</strong>：代表整個網站或 Web 應用程式，是所有設定與配置的中心。一個 Project 包含全域設定檔（<code>settings.py</code>）、根層路由（<code>urls.py</code>）以及部署入口（<code>wsgi.py</code>、<code>asgi.py</code>）。</li>
+<li><strong>App</strong>：代表一個獨立的功能模組，負責特定的業務領域。例如 <code>users</code> App 處理使用者註冊與認證、<code>articles</code> App 處理文章的 CRUD（建立、讀取、更新、刪除）操作。</li>
+</ul>
+<p>一個 Project 通常包含多個 App，而一個設計良好的 App 可以在不同的 Project 中重複使用。這種模組化的設計正是 Django 強調的 <strong>DRY</strong>（Don&rsquo;t Repeat Yourself，不重複自己）原則的體現。</p>
+<hr>
+<h3 id="專案目錄結構詳解">專案目錄結構詳解</h3>
+<p>當你使用 <code>django-admin startproject myproject</code> 建立一個新專案時，Django 會自動生成以下目錄結構：</p>
+<pre tabindex="0"><code>myproject/                  # 根目錄
 ├── manage.py               # 管理指令入口
 └── myproject/              # Project 配置套件（與專案同名）
     ├── __init__.py         # 標記此目錄為 Python 套件
@@ -85,89 +605,106 @@
     ├── urls.py             # 根層 URL 路由設定
     ├── wsgi.py             # WSGI 部署入口
     └── asgi.py             # ASGI 部署入口
-</code></pre><p>接下來逐一介紹每個檔案的角色。</p><h4 id=managepy管理指令入口>manage.py：管理指令入口</h4><p><code>manage.py</code> 是 Django 專案的命令列工具，你在開發過程中幾乎所有的操作都會透過它來執行。它的作用等同於 <code>django-admin</code>，但已經預設綁定了當前專案的 <code>settings</code> 模組。</p><p>常用指令一覽：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 啟動開發伺服器（預設 port 8000）</span>
-</span></span><span style=display:flex><span>python manage.py runserver
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 建立資料庫遷移檔</span>
-</span></span><span style=display:flex><span>python manage.py makemigrations
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 執行資料庫遷移</span>
-</span></span><span style=display:flex><span>python manage.py migrate
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 建立超級使用者（管理員帳號）</span>
-</span></span><span style=display:flex><span>python manage.py createsuperuser
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 開啟 Django 互動式 Shell</span>
-</span></span><span style=display:flex><span>python manage.py shell
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 建立新的 App</span>
-</span></span><span style=display:flex><span>python manage.py startapp blog
-</span></span></code></pre></div><h4 id=settingspy核心設定檔>settings.py：核心設定檔</h4><p><code>settings.py</code> 是 Django 專案的「大腦」，集中管理所有設定。以下是幾個最重要的設定項：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># settings.py 關鍵設定項目</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 安全金鑰，用於加密簽名（正式環境務必保密）</span>
-</span></span><span style=display:flex><span>SECRET_KEY <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;your-secret-key-here&#39;</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 除錯模式（正式環境必須設為 False）</span>
-</span></span><span style=display:flex><span>DEBUG <span style=color:#f92672>=</span> <span style=color:#66d9ef>True</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 允許存取的主機名稱</span>
-</span></span><span style=display:flex><span>ALLOWED_HOSTS <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#39;localhost&#39;</span>, <span style=color:#e6db74>&#39;127.0.0.1&#39;</span>]
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 已安裝的 App 清單</span>
-</span></span><span style=display:flex><span>INSTALLED_APPS <span style=color:#f92672>=</span> [
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.admin&#39;</span>,         <span style=color:#75715e># 後台管理介面</span>
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.auth&#39;</span>,          <span style=color:#75715e># 認證系統</span>
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.contenttypes&#39;</span>,  <span style=color:#75715e># 內容類型框架</span>
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.sessions&#39;</span>,      <span style=color:#75715e># Session 管理</span>
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.messages&#39;</span>,      <span style=color:#75715e># 訊息框架</span>
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.staticfiles&#39;</span>,   <span style=color:#75715e># 靜態檔案管理</span>
-</span></span><span style=display:flex><span>]
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 中介軟體清單（依序執行）</span>
-</span></span><span style=display:flex><span>MIDDLEWARE <span style=color:#f92672>=</span> [
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.middleware.security.SecurityMiddleware&#39;</span>,
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.sessions.middleware.SessionMiddleware&#39;</span>,
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.middleware.common.CommonMiddleware&#39;</span>,
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.middleware.csrf.CsrfViewMiddleware&#39;</span>,
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.auth.middleware.AuthenticationMiddleware&#39;</span>,
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.messages.middleware.MessageMiddleware&#39;</span>,
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.middleware.clickjacking.XFrameOptionsMiddleware&#39;</span>,
-</span></span><span style=display:flex><span>]
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 根層 URL 路由模組</span>
-</span></span><span style=display:flex><span>ROOT_URLCONF <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;myproject.urls&#39;</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 資料庫設定（預設使用 SQLite）</span>
-</span></span><span style=display:flex><span>DATABASES <span style=color:#f92672>=</span> {
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;default&#39;</span>: {
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;ENGINE&#39;</span>: <span style=color:#e6db74>&#39;django.db.backends.sqlite3&#39;</span>,
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;NAME&#39;</span>: BASE_DIR <span style=color:#f92672>/</span> <span style=color:#e6db74>&#39;db.sqlite3&#39;</span>,
-</span></span><span style=display:flex><span>    }
-</span></span><span style=display:flex><span>}
-</span></span></code></pre></div><h4 id=urlspy路由設定>urls.py：路由設定</h4><p><code>urls.py</code> 定義了 URL 與 View 的對應關係。Django 透過 <strong>URLconf</strong>（URL Configuration）系統，將使用者請求的 URL 路徑匹配到對應的 View 函式或類別。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># myproject/urls.py（根層路由）</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.contrib <span style=color:#f92672>import</span> admin
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.urls <span style=color:#f92672>import</span> path, include
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>urlpatterns <span style=color:#f92672>=</span> [
-</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;admin/&#39;</span>, admin<span style=color:#f92672>.</span>site<span style=color:#f92672>.</span>urls),               <span style=color:#75715e># Django 內建後台管理</span>
-</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;articles/&#39;</span>, include(<span style=color:#e6db74>&#39;articles.urls&#39;</span>)),    <span style=color:#75715e># 將 articles/ 開頭的 URL 轉發給 articles App</span>
-</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;users/&#39;</span>, include(<span style=color:#e6db74>&#39;users.urls&#39;</span>)),          <span style=color:#75715e># 將 users/ 開頭的 URL 轉發給 users App</span>
-</span></span><span style=display:flex><span>]
-</span></span></code></pre></div><p>透過 <code>include()</code> 函式，每個 App 可以維護自己的 <code>urls.py</code>，實現路由的模組化管理。</p><h4 id=wsgipywsgi-入口點>wsgi.py：WSGI 入口點</h4><p><strong>WSGI</strong>（Web Server Gateway Interface，網頁伺服器閘道介面）是 Python Web 應用程式與 Web 伺服器之間的標準介面。<code>wsgi.py</code> 是 Django 在正式部署時的入口檔案，透過 <strong>Gunicorn</strong> 等 WSGI 伺服器來服務你的應用程式。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># wsgi.py</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>import</span> os
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.core.wsgi <span style=color:#f92672>import</span> get_wsgi_application
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>os<span style=color:#f92672>.</span>environ<span style=color:#f92672>.</span>setdefault(<span style=color:#e6db74>&#39;DJANGO_SETTINGS_MODULE&#39;</span>, <span style=color:#e6db74>&#39;myproject.settings&#39;</span>)
-</span></span><span style=display:flex><span>application <span style=color:#f92672>=</span> get_wsgi_application()
-</span></span></code></pre></div><h4 id=asgipyasgi-入口點>asgi.py：ASGI 入口點</h4><p><strong>ASGI</strong>（Asynchronous Server Gateway Interface，非同步伺服器閘道介面）是 WSGI 的進化版，自 Django 3.0 起內建支援。<code>asgi.py</code> 讓 Django 能夠處理非同步請求，支援 <strong>WebSocket</strong>、長輪詢（Long Polling）等即時通訊協定，透過 <strong>Uvicorn</strong> 或 <strong>Daphne</strong> 等 ASGI 伺服器部署。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># asgi.py</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>import</span> os
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.core.asgi <span style=color:#f92672>import</span> get_asgi_application
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>os<span style=color:#f92672>.</span>environ<span style=color:#f92672>.</span>setdefault(<span style=color:#e6db74>&#39;DJANGO_SETTINGS_MODULE&#39;</span>, <span style=color:#e6db74>&#39;myproject.settings&#39;</span>)
-</span></span><span style=display:flex><span>application <span style=color:#f92672>=</span> get_asgi_application()
-</span></span></code></pre></div><hr><h3 id=建立第一個-app>建立第一個 App</h3><p>使用 <code>startapp</code> 指令來建立一個新的 App：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 在專案根目錄下執行</span>
-</span></span><span style=display:flex><span>python manage.py startapp blog
-</span></span></code></pre></div><p>執行後，Django 會在專案根目錄下產生一個 <code>blog/</code> 資料夾，其目錄結構如下：</p><pre tabindex=0><code>blog/
+</code></pre><p>接下來逐一介紹每個檔案的角色。</p>
+<h4 id="managepy管理指令入口">manage.py：管理指令入口</h4>
+<p><code>manage.py</code> 是 Django 專案的命令列工具，你在開發過程中幾乎所有的操作都會透過它來執行。它的作用等同於 <code>django-admin</code>，但已經預設綁定了當前專案的 <code>settings</code> 模組。</p>
+<p>常用指令一覽：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 啟動開發伺服器（預設 port 8000）</span>
+</span></span><span style="display:flex;"><span>python manage.py runserver
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 建立資料庫遷移檔</span>
+</span></span><span style="display:flex;"><span>python manage.py makemigrations
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 執行資料庫遷移</span>
+</span></span><span style="display:flex;"><span>python manage.py migrate
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 建立超級使用者（管理員帳號）</span>
+</span></span><span style="display:flex;"><span>python manage.py createsuperuser
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 開啟 Django 互動式 Shell</span>
+</span></span><span style="display:flex;"><span>python manage.py shell
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 建立新的 App</span>
+</span></span><span style="display:flex;"><span>python manage.py startapp blog
+</span></span></code></pre></div><h4 id="settingspy核心設定檔">settings.py：核心設定檔</h4>
+<p><code>settings.py</code> 是 Django 專案的「大腦」，集中管理所有設定。以下是幾個最重要的設定項：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># settings.py 關鍵設定項目</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 安全金鑰，用於加密簽名（正式環境務必保密）</span>
+</span></span><span style="display:flex;"><span>SECRET_KEY <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;your-secret-key-here&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 除錯模式（正式環境必須設為 False）</span>
+</span></span><span style="display:flex;"><span>DEBUG <span style="color:#f92672">=</span> <span style="color:#66d9ef">True</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 允許存取的主機名稱</span>
+</span></span><span style="display:flex;"><span>ALLOWED_HOSTS <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;localhost&#39;</span>, <span style="color:#e6db74">&#39;127.0.0.1&#39;</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 已安裝的 App 清單</span>
+</span></span><span style="display:flex;"><span>INSTALLED_APPS <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.contrib.admin&#39;</span>,         <span style="color:#75715e"># 後台管理介面</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.contrib.auth&#39;</span>,          <span style="color:#75715e"># 認證系統</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.contrib.contenttypes&#39;</span>,  <span style="color:#75715e"># 內容類型框架</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.contrib.sessions&#39;</span>,      <span style="color:#75715e"># Session 管理</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.contrib.messages&#39;</span>,      <span style="color:#75715e"># 訊息框架</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.contrib.staticfiles&#39;</span>,   <span style="color:#75715e"># 靜態檔案管理</span>
+</span></span><span style="display:flex;"><span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 中介軟體清單（依序執行）</span>
+</span></span><span style="display:flex;"><span>MIDDLEWARE <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.middleware.security.SecurityMiddleware&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.contrib.sessions.middleware.SessionMiddleware&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.middleware.common.CommonMiddleware&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.middleware.csrf.CsrfViewMiddleware&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.contrib.auth.middleware.AuthenticationMiddleware&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.contrib.messages.middleware.MessageMiddleware&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.middleware.clickjacking.XFrameOptionsMiddleware&#39;</span>,
+</span></span><span style="display:flex;"><span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 根層 URL 路由模組</span>
+</span></span><span style="display:flex;"><span>ROOT_URLCONF <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;myproject.urls&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 資料庫設定（預設使用 SQLite）</span>
+</span></span><span style="display:flex;"><span>DATABASES <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;default&#39;</span>: {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;ENGINE&#39;</span>: <span style="color:#e6db74">&#39;django.db.backends.sqlite3&#39;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;NAME&#39;</span>: BASE_DIR <span style="color:#f92672">/</span> <span style="color:#e6db74">&#39;db.sqlite3&#39;</span>,
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h4 id="urlspy路由設定">urls.py：路由設定</h4>
+<p><code>urls.py</code> 定義了 URL 與 View 的對應關係。Django 透過 <strong>URLconf</strong>（URL Configuration）系統，將使用者請求的 URL 路徑匹配到對應的 View 函式或類別。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># myproject/urls.py（根層路由）</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.contrib <span style="color:#f92672">import</span> admin
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.urls <span style="color:#f92672">import</span> path, include
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>urlpatterns <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;admin/&#39;</span>, admin<span style="color:#f92672">.</span>site<span style="color:#f92672">.</span>urls),               <span style="color:#75715e"># Django 內建後台管理</span>
+</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;articles/&#39;</span>, include(<span style="color:#e6db74">&#39;articles.urls&#39;</span>)),    <span style="color:#75715e"># 將 articles/ 開頭的 URL 轉發給 articles App</span>
+</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;users/&#39;</span>, include(<span style="color:#e6db74">&#39;users.urls&#39;</span>)),          <span style="color:#75715e"># 將 users/ 開頭的 URL 轉發給 users App</span>
+</span></span><span style="display:flex;"><span>]
+</span></span></code></pre></div><p>透過 <code>include()</code> 函式，每個 App 可以維護自己的 <code>urls.py</code>，實現路由的模組化管理。</p>
+<h4 id="wsgipywsgi-入口點">wsgi.py：WSGI 入口點</h4>
+<p><strong>WSGI</strong>（Web Server Gateway Interface，網頁伺服器閘道介面）是 Python Web 應用程式與 Web 伺服器之間的標準介面。<code>wsgi.py</code> 是 Django 在正式部署時的入口檔案，透過 <strong>Gunicorn</strong> 等 WSGI 伺服器來服務你的應用程式。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># wsgi.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> os
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.core.wsgi <span style="color:#f92672">import</span> get_wsgi_application
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>os<span style="color:#f92672">.</span>environ<span style="color:#f92672">.</span>setdefault(<span style="color:#e6db74">&#39;DJANGO_SETTINGS_MODULE&#39;</span>, <span style="color:#e6db74">&#39;myproject.settings&#39;</span>)
+</span></span><span style="display:flex;"><span>application <span style="color:#f92672">=</span> get_wsgi_application()
+</span></span></code></pre></div><h4 id="asgipyasgi-入口點">asgi.py：ASGI 入口點</h4>
+<p><strong>ASGI</strong>（Asynchronous Server Gateway Interface，非同步伺服器閘道介面）是 WSGI 的進化版，自 Django 3.0 起內建支援。<code>asgi.py</code> 讓 Django 能夠處理非同步請求，支援 <strong>WebSocket</strong>、長輪詢（Long Polling）等即時通訊協定，透過 <strong>Uvicorn</strong> 或 <strong>Daphne</strong> 等 ASGI 伺服器部署。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># asgi.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> os
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.core.asgi <span style="color:#f92672">import</span> get_asgi_application
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>os<span style="color:#f92672">.</span>environ<span style="color:#f92672">.</span>setdefault(<span style="color:#e6db74">&#39;DJANGO_SETTINGS_MODULE&#39;</span>, <span style="color:#e6db74">&#39;myproject.settings&#39;</span>)
+</span></span><span style="display:flex;"><span>application <span style="color:#f92672">=</span> get_asgi_application()
+</span></span></code></pre></div><hr>
+<h3 id="建立第一個-app">建立第一個 App</h3>
+<p>使用 <code>startapp</code> 指令來建立一個新的 App：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 在專案根目錄下執行</span>
+</span></span><span style="display:flex;"><span>python manage.py startapp blog
+</span></span></code></pre></div><p>執行後，Django 會在專案根目錄下產生一個 <code>blog/</code> 資料夾，其目錄結構如下：</p>
+<pre tabindex="0"><code>blog/
 ├── __init__.py         # 標記此目錄為 Python 套件
 ├── admin.py            # 後台管理設定
 ├── apps.py             # App 配置類別（AppConfig）
@@ -176,90 +713,535 @@
 ├── views.py            # 視圖函式或類別
 └── migrations/         # 資料庫遷移檔案目錄
     └── __init__.py
-</code></pre><hr><h3 id=app-目錄結構詳解>App 目錄結構詳解</h3><h4 id=modelspy資料模型>models.py：資料模型</h4><p>定義此 App 所需的資料結構。每個 class 對應一張資料庫表，Django ORM 會自動處理 SQL 的生成與執行。</p><h4 id=viewspy視圖邏輯>views.py：視圖邏輯</h4><p>撰寫處理 HTTP 請求的函式（Function-Based Views）或類別（Class-Based Views）。View 負責協調 Model 與 Template，是 MTV 架構的核心樞紐。</p><h4 id=urlspyapp-層路由>urls.py：App 層路由</h4><p>Django 預設不會自動建立 App 層的 <code>urls.py</code>，需要手動新增。建議每個 App 都維護自己的路由，再透過根層 <code>urls.py</code> 的 <code>include()</code> 引入。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># blog/urls.py（手動建立）</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.urls <span style=color:#f92672>import</span> path
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> . <span style=color:#f92672>import</span> views
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>app_name <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;blog&#39;</span>  <span style=color:#75715e># URL 命名空間，避免不同 App 之間的 URL 名稱衝突</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>urlpatterns <span style=color:#f92672>=</span> [
-</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;&#39;</span>, views<span style=color:#f92672>.</span>article_list, name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;list&#39;</span>),
-</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;&lt;int:pk&gt;/&#39;</span>, views<span style=color:#f92672>.</span>article_detail, name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;detail&#39;</span>),
-</span></span><span style=display:flex><span>]
-</span></span></code></pre></div><h4 id=adminpy後台管理設定>admin.py：後台管理設定</h4><p>在這裡註冊 Model，讓 Django 內建的 <strong>Admin</strong>（後台管理介面）能夠對該 Model 進行 CRUD 操作。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># blog/admin.py</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.contrib <span style=color:#f92672>import</span> admin
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> .models <span style=color:#f92672>import</span> Article
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#a6e22e>@admin.register</span>(Article)
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ArticleAdmin</span>(admin<span style=color:#f92672>.</span>ModelAdmin):
-</span></span><span style=display:flex><span>    list_display <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#39;title&#39;</span>, <span style=color:#e6db74>&#39;created_at&#39;</span>, <span style=color:#e6db74>&#39;updated_at&#39;</span>]  <span style=color:#75715e># 列表頁顯示的欄位</span>
-</span></span><span style=display:flex><span>    search_fields <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#39;title&#39;</span>, <span style=color:#e6db74>&#39;content&#39;</span>]                   <span style=color:#75715e># 搜尋欄位</span>
-</span></span></code></pre></div><h4 id=appspyapp-配置>apps.py：App 配置</h4><p>定義 App 的元資料，包括名稱與顯示名稱。<code>ready()</code> 方法可用於在 Django 啟動時執行初始化邏輯（例如連接 Signal）。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># blog/apps.py</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.apps <span style=color:#f92672>import</span> AppConfig
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>BlogConfig</span>(AppConfig):
-</span></span><span style=display:flex><span>    default_auto_field <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;django.db.models.BigAutoField&#39;</span>
-</span></span><span style=display:flex><span>    name <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;blog&#39;</span>
-</span></span><span style=display:flex><span>    verbose_name <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;部落格管理&#39;</span>  <span style=color:#75715e># 在 Admin 後台顯示的中文名稱</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>ready</span>(self):
-</span></span><span style=display:flex><span>        <span style=color:#f92672>import</span> blog.signals  <span style=color:#75715e># 載入 Signal 處理器（如有需要）</span>
-</span></span></code></pre></div><h4 id=testspy測試程式碼>tests.py：測試程式碼</h4><p>撰寫單元測試（Unit Test）和整合測試（Integration Test），確保 App 的功能正確無誤。</p><hr><h3 id=註冊-app-到-installed_apps>註冊 App 到 INSTALLED_APPS</h3><p>建立 App 後，必須將它註冊到 <code>settings.py</code> 的 <code>INSTALLED_APPS</code> 中，Django 才會「認識」這個 App：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># settings.py</span>
-</span></span><span style=display:flex><span>INSTALLED_APPS <span style=color:#f92672>=</span> [
-</span></span><span style=display:flex><span>    <span style=color:#75715e># Django 內建 App</span>
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.admin&#39;</span>,
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.auth&#39;</span>,
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.contenttypes&#39;</span>,
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.sessions&#39;</span>,
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.messages&#39;</span>,
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.staticfiles&#39;</span>,
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#75715e># 自訂 App（推薦使用 AppConfig 路徑）</span>
-</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;blog.apps.BlogConfig&#39;</span>,
-</span></span><span style=display:flex><span>]
-</span></span></code></pre></div><p>有兩種註冊方式：</p><ol><li><strong>簡寫</strong>：直接寫 App 名稱，例如 <code>'blog'</code></li><li><strong>完整路徑（推薦）</strong>：指向 AppConfig 類別，例如 <code>'blog.apps.BlogConfig'</code></li></ol><p>使用完整路徑的好處是可以在 <code>apps.py</code> 中自訂 <code>verbose_name</code> 和 <code>ready()</code> 方法，讓 Django 在啟動時自動載入相關配置。</p><p>未註冊到 <code>INSTALLED_APPS</code> 的 App，Django 不會載入其 Model、不會執行 Migrations、也不會在 Admin 後台中顯示。</p><hr><h3 id=wsgi-vs-asgi-簡介>WSGI vs ASGI 簡介</h3><p>Django 提供了兩種部署協定入口，選擇哪一種取決於你的應用需求：</p><table><thead><tr><th>比較項目</th><th>WSGI</th><th>ASGI</th></tr></thead><tbody><tr><td>全名</td><td>Web Server Gateway Interface</td><td>Asynchronous Server Gateway Interface</td></tr><tr><td>處理方式</td><td>同步（Synchronous）</td><td>非同步（Asynchronous）</td></tr><tr><td>Django 支援版本</td><td>所有版本</td><td>Django 3.0+</td></tr><tr><td>常用伺服器</td><td>Gunicorn、uWSGI</td><td>Uvicorn、Daphne、Hypercorn</td></tr><tr><td>適用場景</td><td>傳統 HTTP 請求/回應</td><td>WebSocket、即時通訊、Server-Sent Events</td></tr><tr><td>效能特性</td><td>每個請求佔用一個 Worker 執行緒</td><td>單執行緒可處理大量並發連線</td></tr></tbody></table><p>對於大多數傳統的 Web 應用程式，<strong>WSGI</strong> 已經足夠應付。如果你的專案需要 WebSocket 或即時推播功能，則需要使用 <strong>ASGI</strong>。兩個入口可以在同一個專案中共存，你可以根據部署環境自由選擇。</p><p>部署指令範例：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># WSGI 部署（使用 Gunicorn）</span>
-</span></span><span style=display:flex><span>gunicorn myproject.wsgi:application --bind 0.0.0.0:8000
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># ASGI 部署（使用 Uvicorn）</span>
-</span></span><span style=display:flex><span>uvicorn myproject.asgi:application --host 0.0.0.0 --port <span style=color:#ae81ff>8000</span>
-</span></span></code></pre></div><hr><h3 id=總結>總結</h3><p>本篇介紹了 Django 開發中最基礎也最重要的兩個概念：<strong>MTV 架構模式</strong> 與 <strong>專案目錄結構</strong>。</p><p><strong>MTV 架構</strong> 將應用程式分為 Model（資料層）、Template（呈現層）和 View（邏輯層）三個清晰的職責區塊，讓程式碼的組織更有條理，也更容易維護與擴展。它與傳統 MVC 模式本質相同，只是 Django 選擇了更貼近 Web 開發直覺的命名方式。</p><p><strong>專案結構</strong> 方面，Django 以 Project 為配置中心、App 為功能單元的階層式設計，讓開發者能夠將複雜的系統拆解為多個獨立的模組。每個 App 擁有自己的 Model、View、Template 和路由，可以獨立開發、測試，甚至跨專案重複使用。</p><p>掌握了這些基礎概念後，你就有了 Django 開發的「地圖」。在接下來的教學中，我們將深入每個元件，從 Model 的資料庫操作到 View 的請求處理，一步步帶你建構完整的 Web 應用程式。</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
-</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/django/004-django-introduction-and-installation/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django 是什麼？框架介紹與安裝 | Django 教學</span>
-<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/05/24</span>
-</a><a href=https://benzhub.github.io/post/django/003-python-basics-for-django/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Python 基礎語法速覽：給 Django 學習者的快速入門 | Django 教學</span>
-<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/05/23</span>
-</a><a href=https://benzhub.github.io/post/django/002-python-environment-setup/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Python 環境安裝與設定 | Django 教學</span>
-<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/05/22</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/django/004-django-introduction-and-installation/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
-<span class="text-sm font-medium">Django 是什麼？框架介紹與安裝 | Django 教學</span></a></div><div><a href=https://benzhub.github.io/post/django/006-django-settings-deep-dive/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
-<span class="text-sm font-medium">Django 設定檔深入解析：settings.py 完全指南 | Django 教學</span></a></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
-<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
-</a><a href=/tags/acid><span class=tag-pill>acid</span>
-</a><a href=/tags/ai><span class=tag-pill>ai</span>
-</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
-</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
-</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
-</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
-</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
-</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
-</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
-</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
-</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
-</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
-</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
-</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
-</a><a href=/tags/api><span class=tag-pill>api</span>
-</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
-</a><a href=/tags/autovacuum><span class=tag-pill>autovacuum</span>
-</a><a href=/tags/background-processes><span class=tag-pill>background-processes</span>
-</a><a href=/tags/big-o><span class=tag-pill>big o</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (12)</span>
-</a><a href=/post/javascript/><span class=tag-pill>JavaScript (67)</span>
-</a><a href=/post/django/><span class=tag-pill>Django (29)</span>
-</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
-</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
-</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
-</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
-</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/django/029-django-authentication/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Authentication 使用者認證系統完全指南 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/18</p></a><a href=/post/postgresql/012-data-types/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/18</p></a><a href=/post/javascript/data-structures--algorithms/005-hash-table/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">雜湊表 — Hash Table 原理、碰撞處理與實作完整指南 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/18</p></a><a href=/post/django/028-django-middleware/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Middleware 中介軟體原理與實作 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/17</p></a><a href=/post/postgresql/011-background-processes/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">背景進程：PostgreSQL 的幕後工作者們 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/17</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>
+</code></pre><hr>
+<h3 id="app-目錄結構詳解">App 目錄結構詳解</h3>
+<h4 id="modelspy資料模型">models.py：資料模型</h4>
+<p>定義此 App 所需的資料結構。每個 class 對應一張資料庫表，Django ORM 會自動處理 SQL 的生成與執行。</p>
+<h4 id="viewspy視圖邏輯">views.py：視圖邏輯</h4>
+<p>撰寫處理 HTTP 請求的函式（Function-Based Views）或類別（Class-Based Views）。View 負責協調 Model 與 Template，是 MTV 架構的核心樞紐。</p>
+<h4 id="urlspyapp-層路由">urls.py：App 層路由</h4>
+<p>Django 預設不會自動建立 App 層的 <code>urls.py</code>，需要手動新增。建議每個 App 都維護自己的路由，再透過根層 <code>urls.py</code> 的 <code>include()</code> 引入。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># blog/urls.py（手動建立）</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.urls <span style="color:#f92672">import</span> path
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> . <span style="color:#f92672">import</span> views
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>app_name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;blog&#39;</span>  <span style="color:#75715e"># URL 命名空間，避免不同 App 之間的 URL 名稱衝突</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>urlpatterns <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;&#39;</span>, views<span style="color:#f92672">.</span>article_list, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;list&#39;</span>),
+</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;&lt;int:pk&gt;/&#39;</span>, views<span style="color:#f92672">.</span>article_detail, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;detail&#39;</span>),
+</span></span><span style="display:flex;"><span>]
+</span></span></code></pre></div><h4 id="adminpy後台管理設定">admin.py：後台管理設定</h4>
+<p>在這裡註冊 Model，讓 Django 內建的 <strong>Admin</strong>（後台管理介面）能夠對該 Model 進行 CRUD 操作。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># blog/admin.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.contrib <span style="color:#f92672">import</span> admin
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> .models <span style="color:#f92672">import</span> Article
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@admin.register</span>(Article)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ArticleAdmin</span>(admin<span style="color:#f92672">.</span>ModelAdmin):
+</span></span><span style="display:flex;"><span>    list_display <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;title&#39;</span>, <span style="color:#e6db74">&#39;created_at&#39;</span>, <span style="color:#e6db74">&#39;updated_at&#39;</span>]  <span style="color:#75715e"># 列表頁顯示的欄位</span>
+</span></span><span style="display:flex;"><span>    search_fields <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;title&#39;</span>, <span style="color:#e6db74">&#39;content&#39;</span>]                   <span style="color:#75715e"># 搜尋欄位</span>
+</span></span></code></pre></div><h4 id="appspyapp-配置">apps.py：App 配置</h4>
+<p>定義 App 的元資料，包括名稱與顯示名稱。<code>ready()</code> 方法可用於在 Django 啟動時執行初始化邏輯（例如連接 Signal）。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># blog/apps.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.apps <span style="color:#f92672">import</span> AppConfig
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">BlogConfig</span>(AppConfig):
+</span></span><span style="display:flex;"><span>    default_auto_field <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;django.db.models.BigAutoField&#39;</span>
+</span></span><span style="display:flex;"><span>    name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;blog&#39;</span>
+</span></span><span style="display:flex;"><span>    verbose_name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;部落格管理&#39;</span>  <span style="color:#75715e"># 在 Admin 後台顯示的中文名稱</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">ready</span>(self):
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">import</span> blog.signals  <span style="color:#75715e"># 載入 Signal 處理器（如有需要）</span>
+</span></span></code></pre></div><h4 id="testspy測試程式碼">tests.py：測試程式碼</h4>
+<p>撰寫單元測試（Unit Test）和整合測試（Integration Test），確保 App 的功能正確無誤。</p>
+<hr>
+<h3 id="註冊-app-到-installed_apps">註冊 App 到 INSTALLED_APPS</h3>
+<p>建立 App 後，必須將它註冊到 <code>settings.py</code> 的 <code>INSTALLED_APPS</code> 中，Django 才會「認識」這個 App：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># settings.py</span>
+</span></span><span style="display:flex;"><span>INSTALLED_APPS <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Django 內建 App</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.contrib.admin&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.contrib.auth&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.contrib.contenttypes&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.contrib.sessions&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.contrib.messages&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.contrib.staticfiles&#39;</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 自訂 App（推薦使用 AppConfig 路徑）</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;blog.apps.BlogConfig&#39;</span>,
+</span></span><span style="display:flex;"><span>]
+</span></span></code></pre></div><p>有兩種註冊方式：</p>
+<ol>
+<li><strong>簡寫</strong>：直接寫 App 名稱，例如 <code>'blog'</code></li>
+<li><strong>完整路徑（推薦）</strong>：指向 AppConfig 類別，例如 <code>'blog.apps.BlogConfig'</code></li>
+</ol>
+<p>使用完整路徑的好處是可以在 <code>apps.py</code> 中自訂 <code>verbose_name</code> 和 <code>ready()</code> 方法，讓 Django 在啟動時自動載入相關配置。</p>
+<p>未註冊到 <code>INSTALLED_APPS</code> 的 App，Django 不會載入其 Model、不會執行 Migrations、也不會在 Admin 後台中顯示。</p>
+<hr>
+<h3 id="wsgi-vs-asgi-簡介">WSGI vs ASGI 簡介</h3>
+<p>Django 提供了兩種部署協定入口，選擇哪一種取決於你的應用需求：</p>
+<table>
+	<thead>
+			<tr>
+					<th>比較項目</th>
+					<th>WSGI</th>
+					<th>ASGI</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>全名</td>
+					<td>Web Server Gateway Interface</td>
+					<td>Asynchronous Server Gateway Interface</td>
+			</tr>
+			<tr>
+					<td>處理方式</td>
+					<td>同步（Synchronous）</td>
+					<td>非同步（Asynchronous）</td>
+			</tr>
+			<tr>
+					<td>Django 支援版本</td>
+					<td>所有版本</td>
+					<td>Django 3.0+</td>
+			</tr>
+			<tr>
+					<td>常用伺服器</td>
+					<td>Gunicorn、uWSGI</td>
+					<td>Uvicorn、Daphne、Hypercorn</td>
+			</tr>
+			<tr>
+					<td>適用場景</td>
+					<td>傳統 HTTP 請求/回應</td>
+					<td>WebSocket、即時通訊、Server-Sent Events</td>
+			</tr>
+			<tr>
+					<td>效能特性</td>
+					<td>每個請求佔用一個 Worker 執行緒</td>
+					<td>單執行緒可處理大量並發連線</td>
+			</tr>
+	</tbody>
+</table>
+<p>對於大多數傳統的 Web 應用程式，<strong>WSGI</strong> 已經足夠應付。如果你的專案需要 WebSocket 或即時推播功能，則需要使用 <strong>ASGI</strong>。兩個入口可以在同一個專案中共存，你可以根據部署環境自由選擇。</p>
+<p>部署指令範例：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># WSGI 部署（使用 Gunicorn）</span>
+</span></span><span style="display:flex;"><span>gunicorn myproject.wsgi:application --bind 0.0.0.0:8000
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># ASGI 部署（使用 Uvicorn）</span>
+</span></span><span style="display:flex;"><span>uvicorn myproject.asgi:application --host 0.0.0.0 --port <span style="color:#ae81ff">8000</span>
+</span></span></code></pre></div><hr>
+<h3 id="總結">總結</h3>
+<p>本篇介紹了 Django 開發中最基礎也最重要的兩個概念：<strong>MTV 架構模式</strong> 與 <strong>專案目錄結構</strong>。</p>
+<p><strong>MTV 架構</strong> 將應用程式分為 Model（資料層）、Template（呈現層）和 View（邏輯層）三個清晰的職責區塊，讓程式碼的組織更有條理，也更容易維護與擴展。它與傳統 MVC 模式本質相同，只是 Django 選擇了更貼近 Web 開發直覺的命名方式。</p>
+<p><strong>專案結構</strong> 方面，Django 以 Project 為配置中心、App 為功能單元的階層式設計，讓開發者能夠將複雜的系統拆解為多個獨立的模組。每個 App 擁有自己的 Model、View、Template 和路由，可以獨立開發、測試，甚至跨專案重複使用。</p>
+<p>掌握了這些基礎概念後，你就有了 Django 開發的「地圖」。在接下來的教學中，我們將深入每個元件，從 Model 的資料庫操作到 View 的請求處理，一步步帶你建構完整的 Web 應用程式。</p></div>
+        
+        
+
+        
+        <div class="mt-8">
+          
+<div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose">
+  <div>
+    <div class="flex items-center gap-2 mb-1">
+      <a href="/about" class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">
+        BenZ
+      </a>
+      
+      <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span>
+      
+    </div>
+    <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">
+      熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。
+    </p>
+    <div class="flex items-center gap-3">
+      
+      <a href="https://github.com/benzhub" target="_blank" rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label="GitHub">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      
+      
+      
+    </div>
+  </div>
+</div>
+
+        </div>
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        
+
+
+<div>
+  <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3>
+  <div class="grid gap-2">
+    
+    <a href="http://localhost:1313/post/django/004-django-introduction-and-installation/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django 是什麼？框架介紹與安裝 | Django 教學</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/05/24</span>
+    </a>
+    
+    <a href="http://localhost:1313/post/django/003-python-basics-for-django/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Python 基礎語法速覽：給 Django 學習者的快速入門 | Django 教學</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/05/23</span>
+    </a>
+    
+    <a href="http://localhost:1313/post/django/002-python-environment-setup/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Python 環境安裝與設定 | Django 教學</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/05/22</span>
+    </a>
+    
+  </div>
+</div>
+
+
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            
+            <a href="http://localhost:1313/post/django/004-django-introduction-and-installation/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+                <span class="text-sm font-medium">Django 是什麼？框架介紹與安裝 | Django 教學</span>
+            </a>
+            
+          </div>
+          <div>
+            
+            <a href="http://localhost:1313/post/django/006-django-settings-deep-dive/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+                <span class="text-sm font-medium">Django 設定檔深入解析：settings.py 完全指南 | Django 教學</span>
+            </a>
+            
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        
+<script src="https://giscus.app/client.js"
+        data-repo="benzhub/benzhub.github.io"
+        data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM="
+        data-category="Announcements"
+        data-category-id="MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme="preferred_color_scheme"
+        data-lang="zh-TW"
+        crossorigin="anonymous"
+        async>
+</script>
+
+
+      </div>
+    </div>
+    
+    <div class="hidden lg:block lg:col-span-1 mt-4">
+    
+    
+            
+            <div class="widget fade-in">
+    <p class="widget-title">搜尋</p>
+    <form role="search" method="get" action="https://google.com/search">
+        <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
+        <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
+    </form>
+</div>
+
+        
+            
+            
+
+        
+            
+            
+<div class="widget fade-in">
+    <p class="widget-title">標籤</p>
+    <div class="flex flex-wrap gap-1.5">
+        <a href='/tags/80/20-%E6%B3%95%E5%89%87'>
+            <span class="tag-pill">80/20 法則</span>
+        </a>
+        <a href='/tags/acid'>
+            <span class="tag-pill">acid</span>
+        </a>
+        <a href='/tags/ai'>
+            <span class="tag-pill">ai</span>
+        </a>
+        <a href='/tags/ai-agent'>
+            <span class="tag-pill">ai agent</span>
+        </a>
+        <a href='/tags/ai-workflow'>
+            <span class="tag-pill">ai workflow</span>
+        </a>
+        <a href='/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE'>
+            <span class="tag-pill">ai 工具焦慮</span>
+        </a>
+        <a href='/tags/ai-%E6%8E%A5%E5%96%AE'>
+            <span class="tag-pill">ai 接單</span>
+        </a>
+        <a href='/tags/ai-%E7%B9%AA%E5%9C%96'>
+            <span class="tag-pill">ai 繪圖</span>
+        </a>
+        <a href='/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA'>
+            <span class="tag-pill">ai 虛擬人</span>
+        </a>
+        <a href='/tags/ai-%E8%A1%8C%E9%8A%B7'>
+            <span class="tag-pill">ai 行銷</span>
+        </a>
+        <a href='/tags/ai-%E8%A8%AD%E8%A8%88'>
+            <span class="tag-pill">ai 設計</span>
+        </a>
+        <a href='/tags/ai-%E8%AE%8A%E7%8F%BE'>
+            <span class="tag-pill">ai 變現</span>
+        </a>
+        <a href='/tags/ai-%E8%B3%BA%E9%8C%A2'>
+            <span class="tag-pill">ai 賺錢</span>
+        </a>
+        <a href='/tags/ai-income'>
+            <span class="tag-pill">ai-income</span>
+        </a>
+        <a href='/tags/ai-insights'>
+            <span class="tag-pill">ai-insights</span>
+        </a>
+        <a href='/tags/api'>
+            <span class="tag-pill">api</span>
+        </a>
+        <a href='/tags/architecture'>
+            <span class="tag-pill">architecture</span>
+        </a>
+        <a href='/tags/autovacuum'>
+            <span class="tag-pill">autovacuum</span>
+        </a>
+        <a href='/tags/background-processes'>
+            <span class="tag-pill">background-processes</span>
+        </a>
+        <a href='/tags/big-o'>
+            <span class="tag-pill">big o</span>
+        </a>
+    </div>
+</div>
+
+
+        
+            
+            
+<div class="widget fade-in">
+    <p class="widget-title">文章系列</p>
+    <div class="flex flex-wrap gap-1.5">
+        
+        
+        
+        
+        <a href='/post/postgresql/'>
+            <span class="tag-pill">PostgreSQL (13)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/javascript/'>
+            <span class="tag-pill">JavaScript (68)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/django/'>
+            <span class="tag-pill">Django (30)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/python/'>
+            <span class="tag-pill">Python (37)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/htmlcss/'>
+            <span class="tag-pill">HTML &amp; CSS (23)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/linux/'>
+            <span class="tag-pill">Linux (22)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/git/'>
+            <span class="tag-pill">Git (18)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/ai-insights/'>
+            <span class="tag-pill">AI Insights (13)</span>
+        </a>
+        
+        
+    </div>
+</div>
+
+
+        
+            
+            
+
+<div class="widget fade-in">
+    <p class="widget-title">最新文章</p>
+    <div class="flex flex-col gap-1">
+        <a href="/post/postgresql/013-ddl-schema/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/19
+            </p>
+        </a>
+        <a href="/post/django/030-django-custom-user-model/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django 自訂使用者模型：AbstractUser 與 AbstractBaseUser | Django 教學</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/19
+            </p>
+        </a>
+        <a href="/post/javascript/data-structures--algorithms/006-heap-priority-queue/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">堆積與優先佇列 — Min/Max Heap 原理與 Heap Sort 完整實作 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/19
+            </p>
+        </a>
+        <a href="/post/django/029-django-authentication/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Authentication 使用者認證系統完全指南 | Django 教學</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/18
+            </p>
+        </a>
+        <a href="/post/postgresql/012-data-types/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/18
+            </p>
+        </a>
+    </div>
+</div>
+
+        
+    
+</div>
+
+    
+</div>
+
+        </div>
+    </div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]">
+    
+    <p>&copy; 2026 <a href="http://localhost:1313/" class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p>
+</footer>
+
+
+<script>
+    (function (window, document) {
+        function main() {
+            var ad = document.createElement('script');
+            ad.async = true;
+            ad.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606';
+            ad.crossOrigin = "anonymous";
+            var sc = document.getElementsByTagName('script')[0];
+            sc.parentNode.insertBefore(ad, sc);
+        }
+        var lazyLoad = false;
+        function onLazyLoad() {
+            if (lazyLoad === false) {
+                lazyLoad = true;
+                window.removeEventListener('scroll', onLazyLoad);
+                window.removeEventListener('mousemove', onLazyLoad);
+                window.removeEventListener('mousedown', onLazyLoad);
+                window.removeEventListener('touchstart', onLazyLoad);
+                window.removeEventListener('keydown', onLazyLoad);
+                main();
+            }
+        }
+        window.addEventListener('scroll', onLazyLoad);
+        window.addEventListener('mousemove', onLazyLoad);
+        window.addEventListener('mousedown', onLazyLoad);
+        window.addEventListener('touchstart', onLazyLoad);
+        window.addEventListener('keydown', onLazyLoad);
+        window.addEventListener('load', function () {
+            if (window.pageYOffset) {
+                onLazyLoad();
+                window.setTimeout(onLazyLoad, 3000);
+            }
+        });
+    })(window, document);
+</script>
+
+
+<script>
+    
+    var icon = document.getElementById("icon");
+    var icon2 = document.getElementById("icon2");
+    if (document.documentElement.classList.contains("dark") || localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+        if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+    function toggleDarkMode() {
+        if (document.documentElement.classList.contains('dark')) {
+            if (icon) { icon.classList.remove("icon-sun"); icon.classList.add("icon-moon"); }
+            if (icon2) { icon2.classList.remove("icon-sun"); icon2.classList.add("icon-moon"); }
+            document.documentElement.classList.remove('dark');
+            localStorage.theme = 'light';
+        } else {
+            if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+            if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+            document.documentElement.classList.add('dark');
+            localStorage.theme = 'dark';
+        }
+    }
+
+    
+    document.addEventListener('DOMContentLoaded', function () {
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0 });
+
+        document.querySelectorAll('.fade-in').forEach(function (el) {
+            observer.observe(el);
+        });
+    });
+</script>
+</body>
+
+</html>

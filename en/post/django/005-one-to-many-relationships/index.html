@@ -1,293 +1,1228 @@
-<!doctype html><html lang=en><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>Django One-to-Many Relationships: ForeignKey Complete Guide | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="Django One-to-Many Relationships: ForeignKey Complete Guide | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="Learn how to implement one-to-many relationships in Django using ForeignKey. Covers model definition, related_name, on_delete options, querying related objects, and reverse lookups with practical examples."><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="Learn how to implement one-to-many relationships in Django using ForeignKey. Covers model definition, related_name, on_delete options, querying related objects, and reverse lookups with practical examples."><meta property="og:url" content="https://benzhub.github.io/en/post/django/005-one-to-many-relationships/"><meta property="og:type" content="article"><meta property="og:locale" content="en_US"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/en/post/django/005-one-to-many-relationships/><meta name=twitter:description content="Learn how to implement one-to-many relationships in Django using ForeignKey. Covers model definition, related_name, on_delete options, querying related objects, and reverse lookups with practical examples."><meta property="article:published_time" content="2024-01-01T00:00:00+00:00"><meta property="article:updated_time" content="2026-05-16T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/django/005-One-to-Many-Relationships.png"><meta property="og:image:url" content="https://benzhub.github.io/img/django/005-One-to-Many-Relationships.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
-<link rel=alternate hreflang=en href=https://benzhub.github.io/en/post/django/005-one-to-many-relationships/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/en/post/django/005-one-to-many-relationships/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"Django One-to-Many Relationships: ForeignKey Complete Guide\"","description":"\"Learn how to implement one-to-many relationships in Django using ForeignKey. Covers model definition, related_name, on_delete options, querying related objects, and reverse lookups with practical examples.\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/en\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2024-01-01T00:00:00\u002b00:00","dateModified":"2026-05-16T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/django\/005-One-to-Many-Relationships.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/en\/post\/django\/005-one-to-many-relationships\/"},"inLanguage":"en"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Posts\"","item":"https:\/\/benzhub.github.io\/en\/post\/"},{"@type":"ListItem","position":3,"name":"\"Django One-to-Many Relationships: ForeignKey Complete Guide\""}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"\"How do I create a one-to-many relationship in Django?\"","acceptedAnswer":{"@type":"Answer","text":"\"Use ForeignKey in the 'many' side model. Example: class Comment(models.Model): post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments'). Each Comment belongs to one Post; each Post can have many Comments.\""}},{"@type":"Question","name":"\"What does on_delete=models.CASCADE mean?\"","acceptedAnswer":{"@type":"Answer","text":"\"CASCADE means when the parent object is deleted, all related child objects are automatically deleted too. Other options: PROTECT (prevent deletion), SET_NULL (set FK to null), SET_DEFAULT (set to default value), DO_NOTHING (leave orphaned records).\""}},{"@type":"Question","name":"\"How do I query related objects in Django?\"","acceptedAnswer":{"@type":"Answer","text":"\"Forward: comment.post gives the related Post. Reverse: post.comments.all() gives all Comments for a Post (using related_name). Without related_name, use post.comment_set.all() (Django's default reverse manager name).\""}}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"HowTo","name":"\"How to Create a One-to-Many Relationship in Django\"","description":"\"Learn how to implement one-to-many relationships in Django using ForeignKey. Covers model definition, related_name, on_delete options, querying related objects, and reverse lookups with practical examples.\"","totalTime":"PT5M","step":[{"@type":"HowToStep","position":1,"name":"\"Define the parent model\"","text":"\"Create a Django model class for the 'one' side (e.g., Author) with its fields.\""},{"@type":"HowToStep","position":2,"name":"\"Add ForeignKey to the child model\"","text":"\"In the 'many' side model (e.g., Book), add a ForeignKey field pointing to the parent: author = models.ForeignKey(Author, on_delete=models.CASCADE).\""},{"@type":"HowToStep","position":3,"name":"\"Run migrations\"","text":"\"Run 'python manage.py makemigrations' then 'python manage.py migrate' to create the database table.\""},{"@type":"HowToStep","position":4,"name":"\"Query related objects\"","text":"\"Access related objects with author.book_set.all() (reverse) or book.author (forward).\""}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/en/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">Home
-</a><a href=/en/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">About
-</a><a href=/en/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">Contact
-</a><a href=/en/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">Resources</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder="Search articles..." name=q aria-label=Search id=navSearchInput>
-<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
-<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-<span>🌐</span>
-<span>English</span>
-<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><a href=https://benzhub.github.io/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">繁體中文</a>
-<span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ English</span>
-<a href=https://benzhub.github.io/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><a href=https://benzhub.github.io/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">繁體中文</a>
-<span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">English</span>
-<a href=https://benzhub.github.io/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
-</button>
-<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
-<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/en/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">Home
-</a><a href=/en/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">About
-</a><a href=/en/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">Contact
-</a><a href=/en/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">Resources</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder="Search articles..." name=q aria-label=Search>
-<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-<span>🌐</span>
-<span>English</span>
-<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><a href=https://benzhub.github.io/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">繁體中文</a>
-<span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ English</span>
-<a href=https://benzhub.github.io/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><a href=https://benzhub.github.io/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">繁體中文</a>
-<span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">English</span>
-<a href=https://benzhub.github.io/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Django One-to-Many Relationships: ForeignKey Complete Guide</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2024/01/01
-</span><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001.0 004.582 9m0 0H9m11 11v-5h-.581m0 0A8.003 8.003.0 014.062 13m15.357 2H15"/></svg>
-2026/05/16</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/en/tags/django class="tag-pill no-underline">django</a>
-<a href=/en/tags/python class="tag-pill no-underline">python</a>
-<a href=/en/tags/database class="tag-pill no-underline">database</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/django/005-One-to-Many-Relationships.png alt="Django One-to-Many Relationships: ForeignKey Complete Guide"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><p>A one-to-many relationship in Django is one of the most common database patterns you will encounter when building web applications. It describes a situation where a single record in one table is associated with multiple records in another table. Django implements this relationship through the <code>ForeignKey</code> field, making it straightforward to define, query, and manage related objects across your models.</p><p>In this guide, we will cover everything you need to know about Django one-to-many relationships: from defining ForeignKey fields in your models, understanding on_delete behaviors, querying related objects in both directions, and applying these concepts in a real-world blog example.</p><h2 id=what-is-a-one-to-many-relationship>What Is a One-to-Many Relationship?</h2><p>A one-to-many relationship (also called a many-to-one relationship depending on which side you look at) means that one record in a parent table can be linked to many records in a child table, but each child record belongs to exactly one parent.</p><p>Real-world examples include:</p><ul><li>A <strong>blog post</strong> has many <strong>comments</strong>, but each comment belongs to one post.</li><li>An <strong>author</strong> writes many <strong>books</strong>, but each book has one author.</li><li>A <strong>department</strong> contains many <strong>employees</strong>, but each employee belongs to one department.</li><li>A <strong>category</strong> contains many <strong>products</strong>, but each product belongs to one category.</li></ul><p>In relational database terms, the &ldquo;many&rdquo; side holds a foreign key column that references the primary key of the &ldquo;one&rdquo; side. Django abstracts this with the <code>ForeignKey</code> model field.</p><p>It is worth noting the difference between a one-to-many relationship and a Django one-to-one relationship. In a one-to-one relationship, each record on both sides is linked to exactly one record on the other side (implemented with <code>OneToOneField</code>). In a one-to-many relationship, the parent side can have multiple children.</p><h2 id=defining-foreignkey-in-django-models>Defining ForeignKey in Django Models</h2><p>To create a one-to-many relationship in Django, you add a <code>ForeignKey</code> field to the model on the &ldquo;many&rdquo; side. Here is a basic example:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> django.db <span style=color:#f92672>import</span> models
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Post</span>(models<span style=color:#f92672>.</span>Model):
-</span></span><span style=display:flex><span>    title <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>CharField(max_length<span style=color:#f92672>=</span><span style=color:#ae81ff>200</span>)
-</span></span><span style=display:flex><span>    content <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>TextField()
-</span></span><span style=display:flex><span>    created_at <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>DateTimeField(auto_now_add<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>__str__</span>(self):
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> self<span style=color:#f92672>.</span>title
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Comment</span>(models<span style=color:#f92672>.</span>Model):
-</span></span><span style=display:flex><span>    post <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>ForeignKey(
-</span></span><span style=display:flex><span>        Post,
-</span></span><span style=display:flex><span>        on_delete<span style=color:#f92672>=</span>models<span style=color:#f92672>.</span>CASCADE,
-</span></span><span style=display:flex><span>        related_name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;comments&#39;</span>
-</span></span><span style=display:flex><span>    )
-</span></span><span style=display:flex><span>    author_name <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>CharField(max_length<span style=color:#f92672>=</span><span style=color:#ae81ff>100</span>)
-</span></span><span style=display:flex><span>    body <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>TextField()
-</span></span><span style=display:flex><span>    created_at <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>DateTimeField(auto_now_add<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>__str__</span>(self):
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> <span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;Comment by </span><span style=color:#e6db74>{</span>self<span style=color:#f92672>.</span>author_name<span style=color:#e6db74>}</span><span style=color:#e6db74> on </span><span style=color:#e6db74>{</span>self<span style=color:#f92672>.</span>post<span style=color:#f92672>.</span>title<span style=color:#e6db74>}</span><span style=color:#e6db74>&#34;</span>
-</span></span></code></pre></div><p>Key points about this definition:</p><ul><li>The <code>ForeignKey</code> is placed on the <code>Comment</code> model (the &ldquo;many&rdquo; side).</li><li>The first argument is the related model (<code>Post</code>).</li><li><code>on_delete=models.CASCADE</code> specifies what happens when the parent is deleted.</li><li><code>related_name='comments'</code> defines the reverse accessor name on the <code>Post</code> model.</li></ul><p>The <code>related_name</code> parameter is optional but highly recommended. Without it, Django creates a default reverse manager named <code>comment_set</code> (lowercase model name + <code>_set</code>). Using an explicit <code>related_name</code> makes your code more readable and self-documenting.</p><p>If you have multiple ForeignKey fields pointing to the same model, you <strong>must</strong> specify different <code>related_name</code> values to avoid naming conflicts:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Transfer</span>(models<span style=color:#f92672>.</span>Model):
-</span></span><span style=display:flex><span>    from_account <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>ForeignKey(
-</span></span><span style=display:flex><span>        Account,
-</span></span><span style=display:flex><span>        on_delete<span style=color:#f92672>=</span>models<span style=color:#f92672>.</span>CASCADE,
-</span></span><span style=display:flex><span>        related_name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;outgoing_transfers&#39;</span>
-</span></span><span style=display:flex><span>    )
-</span></span><span style=display:flex><span>    to_account <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>ForeignKey(
-</span></span><span style=display:flex><span>        Account,
-</span></span><span style=display:flex><span>        on_delete<span style=color:#f92672>=</span>models<span style=color:#f92672>.</span>CASCADE,
-</span></span><span style=display:flex><span>        related_name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;incoming_transfers&#39;</span>
-</span></span><span style=display:flex><span>    )
-</span></span><span style=display:flex><span>    amount <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>DecimalField(max_digits<span style=color:#f92672>=</span><span style=color:#ae81ff>10</span>, decimal_places<span style=color:#f92672>=</span><span style=color:#ae81ff>2</span>)
-</span></span></code></pre></div><h2 id=on_delete-options-explained>on_delete Options Explained</h2><p>The <code>on_delete</code> parameter is required for every <code>ForeignKey</code> field. It tells Django what to do with child records when the referenced parent object is deleted. Here are all available options:</p><table><thead><tr><th>Option</th><th>Behavior</th></tr></thead><tbody><tr><td><code>CASCADE</code></td><td>Delete all child objects when the parent is deleted. Most common choice.</td></tr><tr><td><code>PROTECT</code></td><td>Prevent deletion of the parent if child objects exist. Raises <code>ProtectedError</code>.</td></tr><tr><td><code>SET_NULL</code></td><td>Set the foreign key to <code>NULL</code> (requires <code>null=True</code> on the field).</td></tr><tr><td><code>SET_DEFAULT</code></td><td>Set the foreign key to its default value (requires <code>default</code> to be defined).</td></tr><tr><td><code>SET(...)</code></td><td>Set the foreign key to the value passed to <code>SET()</code>, or call a callable.</td></tr><tr><td><code>DO_NOTHING</code></td><td>Take no action. May cause database integrity errors if not handled at the DB level.</td></tr><tr><td><code>RESTRICT</code></td><td>Similar to PROTECT but allows deletion in some CASCADE scenarios (Django 3.1+).</td></tr></tbody></table><p>Choosing the right option depends on your business logic:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># CASCADE: Comments are deleted when the post is deleted</span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Comment</span>(models<span style=color:#f92672>.</span>Model):
-</span></span><span style=display:flex><span>    post <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>ForeignKey(Post, on_delete<span style=color:#f92672>=</span>models<span style=color:#f92672>.</span>CASCADE)
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># PROTECT: Cannot delete a category if products exist in it</span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Product</span>(models<span style=color:#f92672>.</span>Model):
-</span></span><span style=display:flex><span>    category <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>ForeignKey(Category, on_delete<span style=color:#f92672>=</span>models<span style=color:#f92672>.</span>PROTECT)
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># SET_NULL: Keep the order but set customer to NULL if customer is deleted</span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Order</span>(models<span style=color:#f92672>.</span>Model):
-</span></span><span style=display:flex><span>    customer <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>ForeignKey(
-</span></span><span style=display:flex><span>        Customer,
-</span></span><span style=display:flex><span>        on_delete<span style=color:#f92672>=</span>models<span style=color:#f92672>.</span>SET_NULL,
-</span></span><span style=display:flex><span>        null<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>,
-</span></span><span style=display:flex><span>        blank<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>
-</span></span><span style=display:flex><span>    )
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># SET_DEFAULT: Reassign to a default author</span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Article</span>(models<span style=color:#f92672>.</span>Model):
-</span></span><span style=display:flex><span>    author <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>ForeignKey(
-</span></span><span style=display:flex><span>        User,
-</span></span><span style=display:flex><span>        on_delete<span style=color:#f92672>=</span>models<span style=color:#f92672>.</span>SET_DEFAULT,
-</span></span><span style=display:flex><span>        default<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>  <span style=color:#75715e># ID of a &#34;deleted user&#34; placeholder</span>
-</span></span><span style=display:flex><span>    )
-</span></span></code></pre></div><h2 id=querying-related-objects-forward--reverse>Querying Related Objects (Forward & Reverse)</h2><p>Django provides intuitive ways to traverse one-to-many relationships in both directions.</p><h3 id=forward-query-child-to-parent>Forward Query (Child to Parent)</h3><p>Accessing the parent from a child instance is straightforward &ndash; just access the ForeignKey field attribute:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># Get a comment and access its parent post</span>
-</span></span><span style=display:flex><span>comment <span style=color:#f92672>=</span> Comment<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>get(pk<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>)
-</span></span><span style=display:flex><span>post <span style=color:#f92672>=</span> comment<span style=color:#f92672>.</span>post  <span style=color:#75715e># Returns the related Post instance</span>
-</span></span><span style=display:flex><span>print(post<span style=color:#f92672>.</span>title)
-</span></span></code></pre></div><p>You can also filter child objects by parent attributes using double-underscore notation:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># Get all comments on posts published in 2024</span>
-</span></span><span style=display:flex><span>comments <span style=color:#f92672>=</span> Comment<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>filter(post__created_at__year<span style=color:#f92672>=</span><span style=color:#ae81ff>2024</span>)
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># Get all comments on posts with &#34;Django&#34; in the title</span>
-</span></span><span style=display:flex><span>comments <span style=color:#f92672>=</span> Comment<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>filter(post__title__icontains<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;Django&#34;</span>)
-</span></span></code></pre></div><h3 id=reverse-query-parent-to-children>Reverse Query (Parent to Children)</h3><p>To access all children from a parent instance, use the <code>related_name</code> (or the default <code>_set</code> manager):</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># Get a post and access all its comments</span>
-</span></span><span style=display:flex><span>post <span style=color:#f92672>=</span> Post<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>get(pk<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>)
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># Using related_name=&#39;comments&#39;</span>
-</span></span><span style=display:flex><span>all_comments <span style=color:#f92672>=</span> post<span style=color:#f92672>.</span>comments<span style=color:#f92672>.</span>all()
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># Without related_name, Django uses the default manager</span>
-</span></span><span style=display:flex><span><span style=color:#75715e># all_comments = post.comment_set.all()</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># Filter comments on this post</span>
-</span></span><span style=display:flex><span>recent_comments <span style=color:#f92672>=</span> post<span style=color:#f92672>.</span>comments<span style=color:#f92672>.</span>filter(
-</span></span><span style=display:flex><span>    created_at__year<span style=color:#f92672>=</span><span style=color:#ae81ff>2024</span>
-</span></span><span style=display:flex><span>)<span style=color:#f92672>.</span>order_by(<span style=color:#e6db74>&#39;-created_at&#39;</span>)
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># Count comments</span>
-</span></span><span style=display:flex><span>comment_count <span style=color:#f92672>=</span> post<span style=color:#f92672>.</span>comments<span style=color:#f92672>.</span>count()
-</span></span></code></pre></div><h3 id=using-select_related-and-prefetch_related>Using select_related and prefetch_related</h3><p>For performance optimization, Django provides two methods to reduce database queries:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># select_related: Use for forward ForeignKey lookups (JOIN)</span>
-</span></span><span style=display:flex><span>comments <span style=color:#f92672>=</span> Comment<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>select_related(<span style=color:#e6db74>&#39;post&#39;</span>)<span style=color:#f92672>.</span>all()
-</span></span><span style=display:flex><span><span style=color:#66d9ef>for</span> comment <span style=color:#f92672>in</span> comments:
-</span></span><span style=display:flex><span>    <span style=color:#75715e># No additional query needed -- post is already loaded</span>
-</span></span><span style=display:flex><span>    print(comment<span style=color:#f92672>.</span>post<span style=color:#f92672>.</span>title)
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># prefetch_related: Use for reverse (one-to-many) lookups</span>
-</span></span><span style=display:flex><span>posts <span style=color:#f92672>=</span> Post<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>prefetch_related(<span style=color:#e6db74>&#39;comments&#39;</span>)<span style=color:#f92672>.</span>all()
-</span></span><span style=display:flex><span><span style=color:#66d9ef>for</span> post <span style=color:#f92672>in</span> posts:
-</span></span><span style=display:flex><span>    <span style=color:#75715e># No additional query needed -- comments are pre-fetched</span>
-</span></span><span style=display:flex><span>    print(post<span style=color:#f92672>.</span>comments<span style=color:#f92672>.</span>count())
-</span></span></code></pre></div><p>Use <code>select_related</code> for forward ForeignKey relationships (it performs a SQL JOIN). Use <code>prefetch_related</code> for reverse relationships and many-to-many fields (it performs a separate query and joins in Python).</p><h2 id=practical-example-blog-posts-and-comments>Practical Example: Blog Posts and Comments</h2><p>Let us build a more complete example that demonstrates creating, querying, and managing one-to-many relationships in a blog application.</p><h3 id=model-definition>Model Definition</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> django.db <span style=color:#f92672>import</span> models
-</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.contrib.auth.models <span style=color:#f92672>import</span> User
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Post</span>(models<span style=color:#f92672>.</span>Model):
-</span></span><span style=display:flex><span>    author <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>ForeignKey(
-</span></span><span style=display:flex><span>        User,
-</span></span><span style=display:flex><span>        on_delete<span style=color:#f92672>=</span>models<span style=color:#f92672>.</span>CASCADE,
-</span></span><span style=display:flex><span>        related_name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;posts&#39;</span>
-</span></span><span style=display:flex><span>    )
-</span></span><span style=display:flex><span>    title <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>CharField(max_length<span style=color:#f92672>=</span><span style=color:#ae81ff>200</span>)
-</span></span><span style=display:flex><span>    slug <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>SlugField(max_length<span style=color:#f92672>=</span><span style=color:#ae81ff>200</span>, unique<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
-</span></span><span style=display:flex><span>    content <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>TextField()
-</span></span><span style=display:flex><span>    published <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>BooleanField(default<span style=color:#f92672>=</span><span style=color:#66d9ef>False</span>)
-</span></span><span style=display:flex><span>    created_at <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>DateTimeField(auto_now_add<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
-</span></span><span style=display:flex><span>    updated_at <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>DateTimeField(auto_now<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Meta</span>:
-</span></span><span style=display:flex><span>        ordering <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#39;-created_at&#39;</span>]
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>__str__</span>(self):
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> self<span style=color:#f92672>.</span>title
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Comment</span>(models<span style=color:#f92672>.</span>Model):
-</span></span><span style=display:flex><span>    post <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>ForeignKey(
-</span></span><span style=display:flex><span>        Post,
-</span></span><span style=display:flex><span>        on_delete<span style=color:#f92672>=</span>models<span style=color:#f92672>.</span>CASCADE,
-</span></span><span style=display:flex><span>        related_name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;comments&#39;</span>
-</span></span><span style=display:flex><span>    )
-</span></span><span style=display:flex><span>    author_name <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>CharField(max_length<span style=color:#f92672>=</span><span style=color:#ae81ff>100</span>)
-</span></span><span style=display:flex><span>    email <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>EmailField()
-</span></span><span style=display:flex><span>    body <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>TextField()
-</span></span><span style=display:flex><span>    approved <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>BooleanField(default<span style=color:#f92672>=</span><span style=color:#66d9ef>False</span>)
-</span></span><span style=display:flex><span>    created_at <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>DateTimeField(auto_now_add<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Meta</span>:
-</span></span><span style=display:flex><span>        ordering <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#39;created_at&#39;</span>]
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>__str__</span>(self):
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> <span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;Comment by </span><span style=color:#e6db74>{</span>self<span style=color:#f92672>.</span>author_name<span style=color:#e6db74>}</span><span style=color:#e6db74> on </span><span style=color:#e6db74>{</span>self<span style=color:#f92672>.</span>post<span style=color:#f92672>.</span>title<span style=color:#e6db74>}</span><span style=color:#e6db74>&#34;</span>
-</span></span></code></pre></div><h3 id=creating-related-objects>Creating Related Objects</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># Create a post</span>
-</span></span><span style=display:flex><span>post <span style=color:#f92672>=</span> Post<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>create(
-</span></span><span style=display:flex><span>    author<span style=color:#f92672>=</span>user,
-</span></span><span style=display:flex><span>    title<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;Django One-to-Many Relationships&#34;</span>,
-</span></span><span style=display:flex><span>    slug<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;django-one-to-many&#34;</span>,
-</span></span><span style=display:flex><span>    content<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;A comprehensive guide...&#34;</span>,
-</span></span><span style=display:flex><span>    published<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>
-</span></span><span style=display:flex><span>)
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># Create comments for the post</span>
-</span></span><span style=display:flex><span>Comment<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>create(
-</span></span><span style=display:flex><span>    post<span style=color:#f92672>=</span>post,
-</span></span><span style=display:flex><span>    author_name<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;Alice&#34;</span>,
-</span></span><span style=display:flex><span>    email<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;alice@example.com&#34;</span>,
-</span></span><span style=display:flex><span>    body<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;Great tutorial!&#34;</span>,
-</span></span><span style=display:flex><span>    approved<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>
-</span></span><span style=display:flex><span>)
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>Comment<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>create(
-</span></span><span style=display:flex><span>    post<span style=color:#f92672>=</span>post,
-</span></span><span style=display:flex><span>    author_name<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;Bob&#34;</span>,
-</span></span><span style=display:flex><span>    email<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;bob@example.com&#34;</span>,
-</span></span><span style=display:flex><span>    body<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;Very helpful, thanks!&#34;</span>,
-</span></span><span style=display:flex><span>    approved<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>
-</span></span><span style=display:flex><span>)
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># You can also use the reverse manager to create</span>
-</span></span><span style=display:flex><span>post<span style=color:#f92672>.</span>comments<span style=color:#f92672>.</span>create(
-</span></span><span style=display:flex><span>    author_name<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;Charlie&#34;</span>,
-</span></span><span style=display:flex><span>    email<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;charlie@example.com&#34;</span>,
-</span></span><span style=display:flex><span>    body<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;Can you cover many-to-many next?&#34;</span>
-</span></span><span style=display:flex><span>)
-</span></span></code></pre></div><h3 id=querying-in-views>Querying in Views</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> django.shortcuts <span style=color:#f92672>import</span> get_object_or_404
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>post_detail</span>(request, slug):
-</span></span><span style=display:flex><span>    <span style=color:#75715e># Efficiently load the post and prefetch approved comments</span>
-</span></span><span style=display:flex><span>    post <span style=color:#f92672>=</span> get_object_or_404(
-</span></span><span style=display:flex><span>        Post<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>prefetch_related(<span style=color:#e6db74>&#39;comments&#39;</span>),
-</span></span><span style=display:flex><span>        slug<span style=color:#f92672>=</span>slug,
-</span></span><span style=display:flex><span>        published<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>
-</span></span><span style=display:flex><span>    )
-</span></span><span style=display:flex><span>    approved_comments <span style=color:#f92672>=</span> post<span style=color:#f92672>.</span>comments<span style=color:#f92672>.</span>filter(approved<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> render(request, <span style=color:#e6db74>&#39;blog/post_detail.html&#39;</span>, {
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;post&#39;</span>: post,
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;comments&#39;</span>: approved_comments,
-</span></span><span style=display:flex><span>    })
-</span></span></code></pre></div><h3 id=aggregation-with-related-objects>Aggregation with Related Objects</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> django.db.models <span style=color:#f92672>import</span> Count, Q
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># Get posts with their comment count</span>
-</span></span><span style=display:flex><span>posts_with_counts <span style=color:#f92672>=</span> Post<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>annotate(
-</span></span><span style=display:flex><span>    total_comments<span style=color:#f92672>=</span>Count(<span style=color:#e6db74>&#39;comments&#39;</span>),
-</span></span><span style=display:flex><span>    approved_comments<span style=color:#f92672>=</span>Count(
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;comments&#39;</span>,
-</span></span><span style=display:flex><span>        filter<span style=color:#f92672>=</span>Q(comments__approved<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
-</span></span><span style=display:flex><span>    )
-</span></span><span style=display:flex><span>)
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>for</span> post <span style=color:#f92672>in</span> posts_with_counts:
-</span></span><span style=display:flex><span>    print(<span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>{</span>post<span style=color:#f92672>.</span>title<span style=color:#e6db74>}</span><span style=color:#e6db74>: </span><span style=color:#e6db74>{</span>post<span style=color:#f92672>.</span>approved_comments<span style=color:#e6db74>}</span><span style=color:#e6db74> approved comments&#34;</span>)
-</span></span></code></pre></div><h2 id=common-patterns-and-tips>Common Patterns and Tips</h2><p>Here are practical patterns and tips for working with Django one-to-many relationships effectively:</p><h3 id=1-use-related_name-consistently>1. Use related_name Consistently</h3><p>Always define <code>related_name</code> explicitly. It serves as documentation and prevents confusion when models have multiple foreign keys to the same parent:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># Good: explicit and descriptive</span>
-</span></span><span style=display:flex><span>post <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>ForeignKey(Post, on_delete<span style=color:#f92672>=</span>models<span style=color:#f92672>.</span>CASCADE, related_name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;comments&#39;</span>)
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># Avoid: relying on default _set naming</span>
-</span></span><span style=display:flex><span>post <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>ForeignKey(Post, on_delete<span style=color:#f92672>=</span>models<span style=color:#f92672>.</span>CASCADE)
-</span></span></code></pre></div><h3 id=2-limit-reverse-querysets-with-custom-managers>2. Limit Reverse Querysets with Custom Managers</h3><p>If you frequently need filtered subsets of related objects, consider adding methods:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>CommentManager</span>(models<span style=color:#f92672>.</span>Manager):
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>approved</span>(self):
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> self<span style=color:#f92672>.</span>filter(approved<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Comment</span>(models<span style=color:#f92672>.</span>Model):
-</span></span><span style=display:flex><span>    objects <span style=color:#f92672>=</span> CommentManager()
-</span></span><span style=display:flex><span>    <span style=color:#75715e># ... fields ...</span>
-</span></span></code></pre></div><h3 id=3-use-bulk_create-for-performance>3. Use bulk_create for Performance</h3><p>When inserting many related objects at once, use <code>bulk_create</code> to minimize database queries:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span>comments <span style=color:#f92672>=</span> [
-</span></span><span style=display:flex><span>    Comment(post<span style=color:#f92672>=</span>post, author_name<span style=color:#f92672>=</span><span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;User </span><span style=color:#e6db74>{</span>i<span style=color:#e6db74>}</span><span style=color:#e6db74>&#34;</span>, body<span style=color:#f92672>=</span><span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;Comment </span><span style=color:#e6db74>{</span>i<span style=color:#e6db74>}</span><span style=color:#e6db74>&#34;</span>)
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> i <span style=color:#f92672>in</span> range(<span style=color:#ae81ff>100</span>)
-</span></span><span style=display:flex><span>]
-</span></span><span style=display:flex><span>Comment<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>bulk_create(comments)
-</span></span></code></pre></div><h3 id=4-handle-circular-imports-with-string-references>4. Handle Circular Imports with String References</h3><p>If your models are in different apps, use a string reference instead of importing the model directly:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Comment</span>(models<span style=color:#f92672>.</span>Model):
-</span></span><span style=display:flex><span>    post <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>ForeignKey(
-</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;blog.Post&#39;</span>,  <span style=color:#75715e># String reference: &#39;app_label.ModelName&#39;</span>
-</span></span><span style=display:flex><span>        on_delete<span style=color:#f92672>=</span>models<span style=color:#f92672>.</span>CASCADE,
-</span></span><span style=display:flex><span>        related_name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;comments&#39;</span>
-</span></span><span style=display:flex><span>    )
-</span></span></code></pre></div><h3 id=5-index-foreign-key-fields>5. Index Foreign Key Fields</h3><p>Django automatically creates a database index on ForeignKey fields, so you do not need to add <code>db_index=True</code> manually. However, if you frequently filter by a combination of the foreign key and another field, consider a composite index:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Comment</span>(models<span style=color:#f92672>.</span>Model):
-</span></span><span style=display:flex><span>    post <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>ForeignKey(Post, on_delete<span style=color:#f92672>=</span>models<span style=color:#f92672>.</span>CASCADE)
-</span></span><span style=display:flex><span>    approved <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>BooleanField(default<span style=color:#f92672>=</span><span style=color:#66d9ef>False</span>)
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Meta</span>:
-</span></span><span style=display:flex><span>        indexes <span style=color:#f92672>=</span> [
-</span></span><span style=display:flex><span>            models<span style=color:#f92672>.</span>Index(fields<span style=color:#f92672>=</span>[<span style=color:#e6db74>&#39;post&#39;</span>, <span style=color:#e6db74>&#39;approved&#39;</span>]),
-</span></span><span style=display:flex><span>        ]
-</span></span></code></pre></div><h3 id=6-avoid-n1-query-problems>6. Avoid N+1 Query Problems</h3><p>Always use <code>select_related</code> (for forward lookups) or <code>prefetch_related</code> (for reverse lookups) when you know you will access related objects in a loop. This is one of the most common performance pitfalls in Django applications.</p><p>By following these patterns, you can build efficient, maintainable Django applications that properly leverage one-to-many relationships through ForeignKey fields.</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/en/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
-</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">Software developer passionate about technology. Sharing programming experiences and learning notes.</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/en/post/flutter/001-flutter-vs-react-native/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; Previous</span>
-<span class="text-sm font-medium">Flutter vs React Native: Which Cross-Platform Framework to Choose?</span></a></div><div><a href=https://benzhub.github.io/en/post/linux/005-what-is-unix/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">Next &rarr;</span>
-<span class="text-sm font-medium">What Is Unix? | Linux</span></a></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=en crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>Search</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder="Search articles..." name=q aria-label=Search>
-<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>Tags</p><div class="flex flex-wrap gap-1.5"><a href=/en/tags/ai><span class=tag-pill>ai</span>
-</a><a href=/en/tags/ai-insights><span class=tag-pill>ai-insights</span>
-</a><a href=/en/tags/api><span class=tag-pill>api</span>
-</a><a href=/en/tags/automation><span class=tag-pill>automation</span>
-</a><a href=/en/tags/claude-code><span class=tag-pill>claude code</span>
-</a><a href=/en/tags/cron><span class=tag-pill>cron</span>
-</a><a href=/en/tags/cursor><span class=tag-pill>cursor</span>
-</a><a href=/en/tags/database><span class=tag-pill>database</span>
-</a><a href=/en/tags/debugging><span class=tag-pill>debugging</span>
-</a><a href=/en/tags/design-pattern><span class=tag-pill>design-pattern</span>
-</a><a href=/en/tags/devops><span class=tag-pill>devops</span>
-</a><a href=/en/tags/django><span class=tag-pill>django</span>
-</a><a href=/en/tags/flutter><span class=tag-pill>flutter</span>
-</a><a href=/en/tags/fnm><span class=tag-pill>fnm</span>
-</a><a href=/en/tags/git><span class=tag-pill>git</span>
-</a><a href=/en/tags/github-copilot><span class=tag-pill>github copilot</span>
-</a><a href=/en/tags/harness-engineering><span class=tag-pill>harness engineering</span>
-</a><a href=/en/tags/html><span class=tag-pill>html</span>
-</a><a href=/en/tags/javascript><span class=tag-pill>javascript</span>
-</a><a href=/en/tags/linux><span class=tag-pill>linux</span></a></div></div><div class="widget fade-in"><p class=widget-title>Article Series</p><div class="flex flex-wrap gap-1.5"></div></div><div class="widget fade-in"><p class=widget-title>Recent Posts</p><div class="flex flex-col gap-1"><a href=/en/post/linux/027-cron-job-not-running/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Cron Job Not Running? 10 Fixes for Common Cron Issues</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/05/16</p></a><a href=/en/post/linux/025-cron-every-5-minutes/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">How to Run a Cron Job Every 5 Minutes (and Other Intervals)</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/05/15</p></a><a href=/en/post/linux/026-systemd-timer-vs-cron/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Systemd Timer vs Cron: Which Linux Scheduler Should You Use?</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/05/15</p></a><a href=/en/post/linux/024-crontab-syntax/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Crontab Syntax Explained: The Complete Time Format Guide</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/05/14</p></a><a href=/en/post/linux/023-crontab-examples/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">30+ Crontab Examples for Every Use Case | Linux Cron Scheduling</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/05/13</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>
+<!DOCTYPE html>
+
+<html lang="en">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><title>Django One-to-Many Relationships: ForeignKey Complete Guide | BenzHub</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="apple-touch-icon" sizes="180x180" href='/favicon/apple-touch-icon.png'>
+    <link rel="icon" type="image/png" sizes="32x32" href='/favicon/favicon-32x32.png'>
+    <link rel="icon" type="image/png" sizes="16x16" href='/favicon/favicon-16x16.png'>
+    <link rel="manifest" href='/favicon/site.webmanifest' />
+    <link rel="mask-icon" href=' /favicon/safari-pinned-tab.svg' color="#5bbad5" />
+    <link rel="shortcut icon" href='/favicon/favicon.ico' />
+    <meta name="theme-color" content="#fafafa">
+    <meta property="og:title" content="Django One-to-Many Relationships: ForeignKey Complete Guide | BenzHub" />
+    
+    
+    <link rel="stylesheet" href="/css/style.css" />
+    
+    <link href=' /css/blonde.min.css' rel="stylesheet" type="text/css" media="print"
+        onload="this.media=' all'">
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+
+<meta name="description" content="Learn how to implement one-to-many relationships in Django using ForeignKey. Covers model definition, related_name, on_delete options, querying related objects, and reverse lookups with practical examples.">
+<meta property="og:site_name" content="BenzHub">
+<meta property="og:description" content="Learn how to implement one-to-many relationships in Django using ForeignKey. Covers model definition, related_name, on_delete options, querying related objects, and reverse lookups with practical examples.">
+<meta property="og:url" content="http://localhost:1313/en/post/django/005-one-to-many-relationships/">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="">
+
+<link rel="canonical" href="http://localhost:1313/en/post/django/005-one-to-many-relationships/">
+
+<meta name="twitter:description" content="Learn how to implement one-to-many relationships in Django using ForeignKey. Covers model definition, related_name, on_delete options, querying related objects, and reverse lookups with practical examples.">
+<meta property="article:published_time" content="2024-01-01T00:00:00&#43;00:00">
+<meta property="article:updated_time" content="2026-05-16T00:00:00&#43;00:00">
+
+
+
+
+
+    
+<meta property="og:image" content="http://localhost:1313/img/django/005-One-to-Many-Relationships.png">
+<meta property="og:image:url" content="http://localhost:1313/img/django/005-One-to-Many-Relationships.png">
+    
+
+    
+    <link rel="stylesheet" href='/css/custom.css'>
+    <i class="dark hidden"></i>
+    
+<link rel="alternate" hreflang="en" href="http://localhost:1313/en/post/django/005-one-to-many-relationships/" />
+
+<link rel="alternate" hreflang="x-default" href="http://localhost:1313/en/post/django/005-one-to-many-relationships/" />
+
+    
+
+
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "\"Django One-to-Many Relationships: ForeignKey Complete Guide\"",
+  "description": "\"Learn how to implement one-to-many relationships in Django using ForeignKey. Covers model definition, related_name, on_delete options, querying related objects, and reverse lookups with practical examples.\"",
+  "author": {
+    "@type": "Person",
+    "name": "\"BenzHub\"",
+    "url": "http:\/\/localhost:1313\/en\/about",
+    "jobTitle": "\"Software Developer\"",
+    "sameAs": [
+      "\"https://github.com/benzhub\""
+    ]
+  },
+  "datePublished": "2024-01-01T00:00:00\u002b00:00",
+  "dateModified": "2026-05-16T00:00:00\u002b00:00",
+  "image": "http:\/\/localhost:1313\/img\/django\/005-One-to-Many-Relationships.png",
+  "publisher": {
+    "@type": "Organization",
+    "name": "\"BenzHub\"",
+    "url": "\"http://localhost:1313/\"",
+    "sameAs": [
+      "\"https://github.com/benzhub\""
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http:\/\/localhost:1313\/en\/post\/django\/005-one-to-many-relationships\/"
+  },
+  "inLanguage": "en"
+}
+</script>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "\"BenzHub\"",
+      "item": "http:\/\/localhost:1313\/"
+    }
+    
+    
+      
+      
+    ,{
+      "@type": "ListItem",
+      "position": 2,
+      "name": "\"Posts\"",
+      "item": "http:\/\/localhost:1313\/en\/post\/"
+    }
+      
+      
+    
+    ,{
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "\"Django One-to-Many Relationships: ForeignKey Complete Guide\""
+    }
+  ]
+}
+</script>
+
+
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    
+    
+    {
+      "@type": "Question",
+      "name": "\"How do I create a one-to-many relationship in Django?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Use ForeignKey in the 'many' side model. Example: class Comment(models.Model): post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments'). Each Comment belongs to one Post; each Post can have many Comments.\""
+      }
+    }
+    
+    ,
+    {
+      "@type": "Question",
+      "name": "\"What does on_delete=models.CASCADE mean?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"CASCADE means when the parent object is deleted, all related child objects are automatically deleted too. Other options: PROTECT (prevent deletion), SET_NULL (set FK to null), SET_DEFAULT (set to default value), DO_NOTHING (leave orphaned records).\""
+      }
+    }
+    
+    ,
+    {
+      "@type": "Question",
+      "name": "\"How do I query related objects in Django?\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Forward: comment.post gives the related Post. Reverse: post.comments.all() gives all Comments for a Post (using related_name). Without related_name, use post.comment_set.all() (Django's default reverse manager name).\""
+      }
+    }
+    
+  ]
+}
+</script>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "\"How to Create a One-to-Many Relationship in Django\"",
+  "description": "\"Learn how to implement one-to-many relationships in Django using ForeignKey. Covers model definition, related_name, on_delete options, querying related objects, and reverse lookups with practical examples.\"",
+  "totalTime": "PT5M",
+  "step": [
+    
+    
+    {
+      "@type": "HowToStep",
+      "position":  1 ,
+      "name": "\"Define the parent model\"",
+      "text": "\"Create a Django model class for the 'one' side (e.g., Author) with its fields.\""
+    }
+    
+    ,
+    {
+      "@type": "HowToStep",
+      "position":  2 ,
+      "name": "\"Add ForeignKey to the child model\"",
+      "text": "\"In the 'many' side model (e.g., Book), add a ForeignKey field pointing to the parent: author = models.ForeignKey(Author, on_delete=models.CASCADE).\""
+    }
+    
+    ,
+    {
+      "@type": "HowToStep",
+      "position":  3 ,
+      "name": "\"Run migrations\"",
+      "text": "\"Run 'python manage.py makemigrations' then 'python manage.py migrate' to create the database table.\""
+    }
+    
+    ,
+    {
+      "@type": "HowToStep",
+      "position":  4 ,
+      "name": "\"Query related objects\"",
+      "text": "\"Access related objects with author.book_set.all() (reverse) or book.author (forward).\""
+    }
+    
+  ]
+}
+</script>
+
+
+</head>
+<body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class="site-nav" id="siteNav">
+    <div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full">
+        
+        <a href="http://localhost:1313/" class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">
+            BenzHub
+        </a>
+
+        
+        <div class="hidden md:flex items-center gap-6">
+            
+            <a href="/en/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                Home
+            </a>
+            
+            <a href="/en/about/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                About
+            </a>
+            
+            <a href="/en/contact/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                Contact
+            </a>
+            
+            <a href="/en/resourses/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                Resources
+            </a>
+            
+
+            
+            <div class="flex items-center gap-2">
+                <form class="flex items-center" role="search" method="get" action="https://google.com/search" id="navSearchForm">
+                    <input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50"
+                        type="search" placeholder="Search articles..." name="q" aria-label="Search" id="navSearchInput">
+                    <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
+                </form>
+                <button onclick="toggleNavSearch()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+                    <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                    </svg>
+                </button>
+            </div>
+
+            
+            <span class="text-zinc-200 dark:text-zinc-700">|</span>
+
+            
+            
+
+
+
+
+<div class="lang-switcher relative hidden md:block">
+    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+        <span>🌐</span>
+        <span>English</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
+        
+            
+                
+                
+                <a href="http://localhost:1313/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">繁體中文</a>
+                
+            
+        
+            
+            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ English</span>
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
+    <div class="flex gap-2">
+        
+            
+                
+                
+                <a href="http://localhost:1313/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">繁體中文</a>
+                
+            
+        
+            
+            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">English</span>
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+            
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon2" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+        </div>
+
+        
+        <div class="flex md:hidden items-center gap-1">
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+            <button id="hamburgerbtn" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Menu">
+                <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    
+    <div class="mobile-menu md:hidden" id="mobileMenu">
+        
+        <a href="/en/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            Home
+        </a>
+        
+        <a href="/en/about/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            About
+        </a>
+        
+        <a href="/en/contact/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            Contact
+        </a>
+        
+        <a href="/en/resourses/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            Resources
+        </a>
+        
+        <form class="mt-2" role="search" method="get" action="https://google.com/search">
+            <input class="search-input" type="search" placeholder="Search articles..." name="q" aria-label="Search">
+            <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
+        </form>
+        
+        
+
+
+
+
+<div class="lang-switcher relative hidden md:block">
+    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+        <span>🌐</span>
+        <span>English</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
+        
+            
+                
+                
+                <a href="http://localhost:1313/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">繁體中文</a>
+                
+            
+        
+            
+            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ English</span>
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
+    <div class="flex gap-2">
+        
+            
+                
+                
+                <a href="http://localhost:1313/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">繁體中文</a>
+                
+            
+        
+            
+            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">English</span>
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+    </div>
+</nav>
+
+<script>
+    
+    document.getElementById('hamburgerbtn').addEventListener('click', function () {
+        document.getElementById('mobileMenu').classList.toggle('active');
+    });
+
+    
+    window.addEventListener('scroll', function () {
+        var nav = document.getElementById('siteNav');
+        if (window.scrollY > 50) {
+            nav.classList.add('scrolled');
+        } else {
+            nav.classList.remove('scrolled');
+        }
+    });
+
+    
+    function toggleNavSearch() {
+        var input = document.getElementById('navSearchInput');
+        input.classList.toggle('expanded');
+        if (input.classList.contains('expanded')) {
+            input.focus();
+        }
+    }
+
+    
+    function toggleLangMenu() {
+        var dropdown = document.getElementById('langDropdown');
+        dropdown.classList.toggle('hidden');
+    }
+
+    
+    document.addEventListener('click', function (e) {
+        
+        var form = document.getElementById('navSearchForm');
+        var input = document.getElementById('navSearchInput');
+        if (form && input && !form.contains(e.target) && !e.target.closest('[aria-label="Toggle Search"]')) {
+            input.classList.remove('expanded');
+        }
+        
+        var langSwitcher = e.target.closest('.lang-switcher');
+        if (!langSwitcher) {
+            var dropdown = document.getElementById('langDropdown');
+            if (dropdown) dropdown.classList.add('hidden');
+        }
+    });
+</script>
+<div class="nav-spacer"></div>
+    <div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id="content">
+        <div class="lg:mx-5">
+<div class="grid grid-cols-3 gap-6">
+  
+  <div class="col-span-3 lg:col-span-2">
+  
+      
+      <div class="post-detail fade-in my-4">
+        <h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Django One-to-Many Relationships: ForeignKey Complete Guide</h1>
+        <div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4">
+            <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2024/01/01
+            </span>
+            
+            <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                2026/05/16
+            </span>
+            
+        </div>
+        
+        <div class="flex flex-wrap gap-1.5 mb-5">
+            
+            <a href='/en/tags/django' class="tag-pill no-underline">django</a>
+            
+            <a href='/en/tags/python' class="tag-pill no-underline">python</a>
+            
+            <a href='/en/tags/database' class="tag-pill no-underline">database</a>
+            
+        </div>
+        
+        
+        <img class="py-4 m-auto rounded-lg thumb-img" src="http://localhost:1313/img/django/005-One-to-Many-Relationships.png" alt="Django One-to-Many Relationships: ForeignKey Complete Guide">
+        
+        
+        <div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><p>A one-to-many relationship in Django is one of the most common database patterns you will encounter when building web applications. It describes a situation where a single record in one table is associated with multiple records in another table. Django implements this relationship through the <code>ForeignKey</code> field, making it straightforward to define, query, and manage related objects across your models.</p>
+<p>In this guide, we will cover everything you need to know about Django one-to-many relationships: from defining ForeignKey fields in your models, understanding on_delete behaviors, querying related objects in both directions, and applying these concepts in a real-world blog example.</p>
+<h2 id="what-is-a-one-to-many-relationship">What Is a One-to-Many Relationship?</h2>
+<p>A one-to-many relationship (also called a many-to-one relationship depending on which side you look at) means that one record in a parent table can be linked to many records in a child table, but each child record belongs to exactly one parent.</p>
+<p>Real-world examples include:</p>
+<ul>
+<li>A <strong>blog post</strong> has many <strong>comments</strong>, but each comment belongs to one post.</li>
+<li>An <strong>author</strong> writes many <strong>books</strong>, but each book has one author.</li>
+<li>A <strong>department</strong> contains many <strong>employees</strong>, but each employee belongs to one department.</li>
+<li>A <strong>category</strong> contains many <strong>products</strong>, but each product belongs to one category.</li>
+</ul>
+<p>In relational database terms, the &ldquo;many&rdquo; side holds a foreign key column that references the primary key of the &ldquo;one&rdquo; side. Django abstracts this with the <code>ForeignKey</code> model field.</p>
+<p>It is worth noting the difference between a one-to-many relationship and a Django one-to-one relationship. In a one-to-one relationship, each record on both sides is linked to exactly one record on the other side (implemented with <code>OneToOneField</code>). In a one-to-many relationship, the parent side can have multiple children.</p>
+<h2 id="defining-foreignkey-in-django-models">Defining ForeignKey in Django Models</h2>
+<p>To create a one-to-many relationship in Django, you add a <code>ForeignKey</code> field to the model on the &ldquo;many&rdquo; side. Here is a basic example:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> django.db <span style="color:#f92672">import</span> models
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Post</span>(models<span style="color:#f92672">.</span>Model):
+</span></span><span style="display:flex;"><span>    title <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>CharField(max_length<span style="color:#f92672">=</span><span style="color:#ae81ff">200</span>)
+</span></span><span style="display:flex;"><span>    content <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>TextField()
+</span></span><span style="display:flex;"><span>    created_at <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>DateTimeField(auto_now_add<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__str__</span>(self):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>title
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Comment</span>(models<span style="color:#f92672">.</span>Model):
+</span></span><span style="display:flex;"><span>    post <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>ForeignKey(
+</span></span><span style="display:flex;"><span>        Post,
+</span></span><span style="display:flex;"><span>        on_delete<span style="color:#f92672">=</span>models<span style="color:#f92672">.</span>CASCADE,
+</span></span><span style="display:flex;"><span>        related_name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;comments&#39;</span>
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>    author_name <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>CharField(max_length<span style="color:#f92672">=</span><span style="color:#ae81ff">100</span>)
+</span></span><span style="display:flex;"><span>    body <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>TextField()
+</span></span><span style="display:flex;"><span>    created_at <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>DateTimeField(auto_now_add<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__str__</span>(self):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Comment by </span><span style="color:#e6db74">{</span>self<span style="color:#f92672">.</span>author_name<span style="color:#e6db74">}</span><span style="color:#e6db74"> on </span><span style="color:#e6db74">{</span>self<span style="color:#f92672">.</span>post<span style="color:#f92672">.</span>title<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span></code></pre></div><p>Key points about this definition:</p>
+<ul>
+<li>The <code>ForeignKey</code> is placed on the <code>Comment</code> model (the &ldquo;many&rdquo; side).</li>
+<li>The first argument is the related model (<code>Post</code>).</li>
+<li><code>on_delete=models.CASCADE</code> specifies what happens when the parent is deleted.</li>
+<li><code>related_name='comments'</code> defines the reverse accessor name on the <code>Post</code> model.</li>
+</ul>
+<p>The <code>related_name</code> parameter is optional but highly recommended. Without it, Django creates a default reverse manager named <code>comment_set</code> (lowercase model name + <code>_set</code>). Using an explicit <code>related_name</code> makes your code more readable and self-documenting.</p>
+<p>If you have multiple ForeignKey fields pointing to the same model, you <strong>must</strong> specify different <code>related_name</code> values to avoid naming conflicts:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Transfer</span>(models<span style="color:#f92672">.</span>Model):
+</span></span><span style="display:flex;"><span>    from_account <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>ForeignKey(
+</span></span><span style="display:flex;"><span>        Account,
+</span></span><span style="display:flex;"><span>        on_delete<span style="color:#f92672">=</span>models<span style="color:#f92672">.</span>CASCADE,
+</span></span><span style="display:flex;"><span>        related_name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;outgoing_transfers&#39;</span>
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>    to_account <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>ForeignKey(
+</span></span><span style="display:flex;"><span>        Account,
+</span></span><span style="display:flex;"><span>        on_delete<span style="color:#f92672">=</span>models<span style="color:#f92672">.</span>CASCADE,
+</span></span><span style="display:flex;"><span>        related_name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;incoming_transfers&#39;</span>
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>    amount <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>DecimalField(max_digits<span style="color:#f92672">=</span><span style="color:#ae81ff">10</span>, decimal_places<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>)
+</span></span></code></pre></div><h2 id="on_delete-options-explained">on_delete Options Explained</h2>
+<p>The <code>on_delete</code> parameter is required for every <code>ForeignKey</code> field. It tells Django what to do with child records when the referenced parent object is deleted. Here are all available options:</p>
+<table>
+	<thead>
+			<tr>
+					<th>Option</th>
+					<th>Behavior</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>CASCADE</code></td>
+					<td>Delete all child objects when the parent is deleted. Most common choice.</td>
+			</tr>
+			<tr>
+					<td><code>PROTECT</code></td>
+					<td>Prevent deletion of the parent if child objects exist. Raises <code>ProtectedError</code>.</td>
+			</tr>
+			<tr>
+					<td><code>SET_NULL</code></td>
+					<td>Set the foreign key to <code>NULL</code> (requires <code>null=True</code> on the field).</td>
+			</tr>
+			<tr>
+					<td><code>SET_DEFAULT</code></td>
+					<td>Set the foreign key to its default value (requires <code>default</code> to be defined).</td>
+			</tr>
+			<tr>
+					<td><code>SET(...)</code></td>
+					<td>Set the foreign key to the value passed to <code>SET()</code>, or call a callable.</td>
+			</tr>
+			<tr>
+					<td><code>DO_NOTHING</code></td>
+					<td>Take no action. May cause database integrity errors if not handled at the DB level.</td>
+			</tr>
+			<tr>
+					<td><code>RESTRICT</code></td>
+					<td>Similar to PROTECT but allows deletion in some CASCADE scenarios (Django 3.1+).</td>
+			</tr>
+	</tbody>
+</table>
+<p>Choosing the right option depends on your business logic:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># CASCADE: Comments are deleted when the post is deleted</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Comment</span>(models<span style="color:#f92672">.</span>Model):
+</span></span><span style="display:flex;"><span>    post <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>ForeignKey(Post, on_delete<span style="color:#f92672">=</span>models<span style="color:#f92672">.</span>CASCADE)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># PROTECT: Cannot delete a category if products exist in it</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Product</span>(models<span style="color:#f92672">.</span>Model):
+</span></span><span style="display:flex;"><span>    category <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>ForeignKey(Category, on_delete<span style="color:#f92672">=</span>models<span style="color:#f92672">.</span>PROTECT)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># SET_NULL: Keep the order but set customer to NULL if customer is deleted</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Order</span>(models<span style="color:#f92672">.</span>Model):
+</span></span><span style="display:flex;"><span>    customer <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>ForeignKey(
+</span></span><span style="display:flex;"><span>        Customer,
+</span></span><span style="display:flex;"><span>        on_delete<span style="color:#f92672">=</span>models<span style="color:#f92672">.</span>SET_NULL,
+</span></span><span style="display:flex;"><span>        null<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>,
+</span></span><span style="display:flex;"><span>        blank<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># SET_DEFAULT: Reassign to a default author</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Article</span>(models<span style="color:#f92672">.</span>Model):
+</span></span><span style="display:flex;"><span>    author <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>ForeignKey(
+</span></span><span style="display:flex;"><span>        User,
+</span></span><span style="display:flex;"><span>        on_delete<span style="color:#f92672">=</span>models<span style="color:#f92672">.</span>SET_DEFAULT,
+</span></span><span style="display:flex;"><span>        default<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>  <span style="color:#75715e"># ID of a &#34;deleted user&#34; placeholder</span>
+</span></span><span style="display:flex;"><span>    )
+</span></span></code></pre></div><h2 id="querying-related-objects-forward--reverse">Querying Related Objects (Forward &amp; Reverse)</h2>
+<p>Django provides intuitive ways to traverse one-to-many relationships in both directions.</p>
+<h3 id="forward-query-child-to-parent">Forward Query (Child to Parent)</h3>
+<p>Accessing the parent from a child instance is straightforward &ndash; just access the ForeignKey field attribute:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Get a comment and access its parent post</span>
+</span></span><span style="display:flex;"><span>comment <span style="color:#f92672">=</span> Comment<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>get(pk<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>post <span style="color:#f92672">=</span> comment<span style="color:#f92672">.</span>post  <span style="color:#75715e"># Returns the related Post instance</span>
+</span></span><span style="display:flex;"><span>print(post<span style="color:#f92672">.</span>title)
+</span></span></code></pre></div><p>You can also filter child objects by parent attributes using double-underscore notation:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Get all comments on posts published in 2024</span>
+</span></span><span style="display:flex;"><span>comments <span style="color:#f92672">=</span> Comment<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>filter(post__created_at__year<span style="color:#f92672">=</span><span style="color:#ae81ff">2024</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Get all comments on posts with &#34;Django&#34; in the title</span>
+</span></span><span style="display:flex;"><span>comments <span style="color:#f92672">=</span> Comment<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>filter(post__title__icontains<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Django&#34;</span>)
+</span></span></code></pre></div><h3 id="reverse-query-parent-to-children">Reverse Query (Parent to Children)</h3>
+<p>To access all children from a parent instance, use the <code>related_name</code> (or the default <code>_set</code> manager):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Get a post and access all its comments</span>
+</span></span><span style="display:flex;"><span>post <span style="color:#f92672">=</span> Post<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>get(pk<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Using related_name=&#39;comments&#39;</span>
+</span></span><span style="display:flex;"><span>all_comments <span style="color:#f92672">=</span> post<span style="color:#f92672">.</span>comments<span style="color:#f92672">.</span>all()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Without related_name, Django uses the default manager</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># all_comments = post.comment_set.all()</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Filter comments on this post</span>
+</span></span><span style="display:flex;"><span>recent_comments <span style="color:#f92672">=</span> post<span style="color:#f92672">.</span>comments<span style="color:#f92672">.</span>filter(
+</span></span><span style="display:flex;"><span>    created_at__year<span style="color:#f92672">=</span><span style="color:#ae81ff">2024</span>
+</span></span><span style="display:flex;"><span>)<span style="color:#f92672">.</span>order_by(<span style="color:#e6db74">&#39;-created_at&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Count comments</span>
+</span></span><span style="display:flex;"><span>comment_count <span style="color:#f92672">=</span> post<span style="color:#f92672">.</span>comments<span style="color:#f92672">.</span>count()
+</span></span></code></pre></div><h3 id="using-select_related-and-prefetch_related">Using select_related and prefetch_related</h3>
+<p>For performance optimization, Django provides two methods to reduce database queries:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># select_related: Use for forward ForeignKey lookups (JOIN)</span>
+</span></span><span style="display:flex;"><span>comments <span style="color:#f92672">=</span> Comment<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>select_related(<span style="color:#e6db74">&#39;post&#39;</span>)<span style="color:#f92672">.</span>all()
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> comment <span style="color:#f92672">in</span> comments:
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># No additional query needed -- post is already loaded</span>
+</span></span><span style="display:flex;"><span>    print(comment<span style="color:#f92672">.</span>post<span style="color:#f92672">.</span>title)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># prefetch_related: Use for reverse (one-to-many) lookups</span>
+</span></span><span style="display:flex;"><span>posts <span style="color:#f92672">=</span> Post<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>prefetch_related(<span style="color:#e6db74">&#39;comments&#39;</span>)<span style="color:#f92672">.</span>all()
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> post <span style="color:#f92672">in</span> posts:
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># No additional query needed -- comments are pre-fetched</span>
+</span></span><span style="display:flex;"><span>    print(post<span style="color:#f92672">.</span>comments<span style="color:#f92672">.</span>count())
+</span></span></code></pre></div><p>Use <code>select_related</code> for forward ForeignKey relationships (it performs a SQL JOIN). Use <code>prefetch_related</code> for reverse relationships and many-to-many fields (it performs a separate query and joins in Python).</p>
+<h2 id="practical-example-blog-posts-and-comments">Practical Example: Blog Posts and Comments</h2>
+<p>Let us build a more complete example that demonstrates creating, querying, and managing one-to-many relationships in a blog application.</p>
+<h3 id="model-definition">Model Definition</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> django.db <span style="color:#f92672">import</span> models
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.contrib.auth.models <span style="color:#f92672">import</span> User
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Post</span>(models<span style="color:#f92672">.</span>Model):
+</span></span><span style="display:flex;"><span>    author <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>ForeignKey(
+</span></span><span style="display:flex;"><span>        User,
+</span></span><span style="display:flex;"><span>        on_delete<span style="color:#f92672">=</span>models<span style="color:#f92672">.</span>CASCADE,
+</span></span><span style="display:flex;"><span>        related_name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;posts&#39;</span>
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>    title <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>CharField(max_length<span style="color:#f92672">=</span><span style="color:#ae81ff">200</span>)
+</span></span><span style="display:flex;"><span>    slug <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>SlugField(max_length<span style="color:#f92672">=</span><span style="color:#ae81ff">200</span>, unique<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>    content <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>TextField()
+</span></span><span style="display:flex;"><span>    published <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>BooleanField(default<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>)
+</span></span><span style="display:flex;"><span>    created_at <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>DateTimeField(auto_now_add<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>    updated_at <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>DateTimeField(auto_now<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Meta</span>:
+</span></span><span style="display:flex;"><span>        ordering <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;-created_at&#39;</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__str__</span>(self):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>title
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Comment</span>(models<span style="color:#f92672">.</span>Model):
+</span></span><span style="display:flex;"><span>    post <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>ForeignKey(
+</span></span><span style="display:flex;"><span>        Post,
+</span></span><span style="display:flex;"><span>        on_delete<span style="color:#f92672">=</span>models<span style="color:#f92672">.</span>CASCADE,
+</span></span><span style="display:flex;"><span>        related_name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;comments&#39;</span>
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>    author_name <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>CharField(max_length<span style="color:#f92672">=</span><span style="color:#ae81ff">100</span>)
+</span></span><span style="display:flex;"><span>    email <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>EmailField()
+</span></span><span style="display:flex;"><span>    body <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>TextField()
+</span></span><span style="display:flex;"><span>    approved <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>BooleanField(default<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>)
+</span></span><span style="display:flex;"><span>    created_at <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>DateTimeField(auto_now_add<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Meta</span>:
+</span></span><span style="display:flex;"><span>        ordering <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;created_at&#39;</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__str__</span>(self):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Comment by </span><span style="color:#e6db74">{</span>self<span style="color:#f92672">.</span>author_name<span style="color:#e6db74">}</span><span style="color:#e6db74"> on </span><span style="color:#e6db74">{</span>self<span style="color:#f92672">.</span>post<span style="color:#f92672">.</span>title<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span></code></pre></div><h3 id="creating-related-objects">Creating Related Objects</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Create a post</span>
+</span></span><span style="display:flex;"><span>post <span style="color:#f92672">=</span> Post<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>create(
+</span></span><span style="display:flex;"><span>    author<span style="color:#f92672">=</span>user,
+</span></span><span style="display:flex;"><span>    title<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Django One-to-Many Relationships&#34;</span>,
+</span></span><span style="display:flex;"><span>    slug<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;django-one-to-many&#34;</span>,
+</span></span><span style="display:flex;"><span>    content<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;A comprehensive guide...&#34;</span>,
+</span></span><span style="display:flex;"><span>    published<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Create comments for the post</span>
+</span></span><span style="display:flex;"><span>Comment<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>create(
+</span></span><span style="display:flex;"><span>    post<span style="color:#f92672">=</span>post,
+</span></span><span style="display:flex;"><span>    author_name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Alice&#34;</span>,
+</span></span><span style="display:flex;"><span>    email<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;alice@example.com&#34;</span>,
+</span></span><span style="display:flex;"><span>    body<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Great tutorial!&#34;</span>,
+</span></span><span style="display:flex;"><span>    approved<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Comment<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>create(
+</span></span><span style="display:flex;"><span>    post<span style="color:#f92672">=</span>post,
+</span></span><span style="display:flex;"><span>    author_name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Bob&#34;</span>,
+</span></span><span style="display:flex;"><span>    email<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;bob@example.com&#34;</span>,
+</span></span><span style="display:flex;"><span>    body<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Very helpful, thanks!&#34;</span>,
+</span></span><span style="display:flex;"><span>    approved<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># You can also use the reverse manager to create</span>
+</span></span><span style="display:flex;"><span>post<span style="color:#f92672">.</span>comments<span style="color:#f92672">.</span>create(
+</span></span><span style="display:flex;"><span>    author_name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Charlie&#34;</span>,
+</span></span><span style="display:flex;"><span>    email<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;charlie@example.com&#34;</span>,
+</span></span><span style="display:flex;"><span>    body<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Can you cover many-to-many next?&#34;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><h3 id="querying-in-views">Querying in Views</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> django.shortcuts <span style="color:#f92672">import</span> get_object_or_404
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">post_detail</span>(request, slug):
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Efficiently load the post and prefetch approved comments</span>
+</span></span><span style="display:flex;"><span>    post <span style="color:#f92672">=</span> get_object_or_404(
+</span></span><span style="display:flex;"><span>        Post<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>prefetch_related(<span style="color:#e6db74">&#39;comments&#39;</span>),
+</span></span><span style="display:flex;"><span>        slug<span style="color:#f92672">=</span>slug,
+</span></span><span style="display:flex;"><span>        published<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>    approved_comments <span style="color:#f92672">=</span> post<span style="color:#f92672">.</span>comments<span style="color:#f92672">.</span>filter(approved<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> render(request, <span style="color:#e6db74">&#39;blog/post_detail.html&#39;</span>, {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;post&#39;</span>: post,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;comments&#39;</span>: approved_comments,
+</span></span><span style="display:flex;"><span>    })
+</span></span></code></pre></div><h3 id="aggregation-with-related-objects">Aggregation with Related Objects</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> django.db.models <span style="color:#f92672">import</span> Count, Q
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Get posts with their comment count</span>
+</span></span><span style="display:flex;"><span>posts_with_counts <span style="color:#f92672">=</span> Post<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>annotate(
+</span></span><span style="display:flex;"><span>    total_comments<span style="color:#f92672">=</span>Count(<span style="color:#e6db74">&#39;comments&#39;</span>),
+</span></span><span style="display:flex;"><span>    approved_comments<span style="color:#f92672">=</span>Count(
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;comments&#39;</span>,
+</span></span><span style="display:flex;"><span>        filter<span style="color:#f92672">=</span>Q(comments__approved<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> post <span style="color:#f92672">in</span> posts_with_counts:
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>post<span style="color:#f92672">.</span>title<span style="color:#e6db74">}</span><span style="color:#e6db74">: </span><span style="color:#e6db74">{</span>post<span style="color:#f92672">.</span>approved_comments<span style="color:#e6db74">}</span><span style="color:#e6db74"> approved comments&#34;</span>)
+</span></span></code></pre></div><h2 id="common-patterns-and-tips">Common Patterns and Tips</h2>
+<p>Here are practical patterns and tips for working with Django one-to-many relationships effectively:</p>
+<h3 id="1-use-related_name-consistently">1. Use related_name Consistently</h3>
+<p>Always define <code>related_name</code> explicitly. It serves as documentation and prevents confusion when models have multiple foreign keys to the same parent:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Good: explicit and descriptive</span>
+</span></span><span style="display:flex;"><span>post <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>ForeignKey(Post, on_delete<span style="color:#f92672">=</span>models<span style="color:#f92672">.</span>CASCADE, related_name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;comments&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Avoid: relying on default _set naming</span>
+</span></span><span style="display:flex;"><span>post <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>ForeignKey(Post, on_delete<span style="color:#f92672">=</span>models<span style="color:#f92672">.</span>CASCADE)
+</span></span></code></pre></div><h3 id="2-limit-reverse-querysets-with-custom-managers">2. Limit Reverse Querysets with Custom Managers</h3>
+<p>If you frequently need filtered subsets of related objects, consider adding methods:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">CommentManager</span>(models<span style="color:#f92672">.</span>Manager):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">approved</span>(self):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>filter(approved<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Comment</span>(models<span style="color:#f92672">.</span>Model):
+</span></span><span style="display:flex;"><span>    objects <span style="color:#f92672">=</span> CommentManager()
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># ... fields ...</span>
+</span></span></code></pre></div><h3 id="3-use-bulk_create-for-performance">3. Use bulk_create for Performance</h3>
+<p>When inserting many related objects at once, use <code>bulk_create</code> to minimize database queries:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>comments <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    Comment(post<span style="color:#f92672">=</span>post, author_name<span style="color:#f92672">=</span><span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;User </span><span style="color:#e6db74">{</span>i<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>, body<span style="color:#f92672">=</span><span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Comment </span><span style="color:#e6db74">{</span>i<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">100</span>)
+</span></span><span style="display:flex;"><span>]
+</span></span><span style="display:flex;"><span>Comment<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>bulk_create(comments)
+</span></span></code></pre></div><h3 id="4-handle-circular-imports-with-string-references">4. Handle Circular Imports with String References</h3>
+<p>If your models are in different apps, use a string reference instead of importing the model directly:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Comment</span>(models<span style="color:#f92672">.</span>Model):
+</span></span><span style="display:flex;"><span>    post <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>ForeignKey(
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;blog.Post&#39;</span>,  <span style="color:#75715e"># String reference: &#39;app_label.ModelName&#39;</span>
+</span></span><span style="display:flex;"><span>        on_delete<span style="color:#f92672">=</span>models<span style="color:#f92672">.</span>CASCADE,
+</span></span><span style="display:flex;"><span>        related_name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;comments&#39;</span>
+</span></span><span style="display:flex;"><span>    )
+</span></span></code></pre></div><h3 id="5-index-foreign-key-fields">5. Index Foreign Key Fields</h3>
+<p>Django automatically creates a database index on ForeignKey fields, so you do not need to add <code>db_index=True</code> manually. However, if you frequently filter by a combination of the foreign key and another field, consider a composite index:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Comment</span>(models<span style="color:#f92672">.</span>Model):
+</span></span><span style="display:flex;"><span>    post <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>ForeignKey(Post, on_delete<span style="color:#f92672">=</span>models<span style="color:#f92672">.</span>CASCADE)
+</span></span><span style="display:flex;"><span>    approved <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>BooleanField(default<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Meta</span>:
+</span></span><span style="display:flex;"><span>        indexes <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>            models<span style="color:#f92672">.</span>Index(fields<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#39;post&#39;</span>, <span style="color:#e6db74">&#39;approved&#39;</span>]),
+</span></span><span style="display:flex;"><span>        ]
+</span></span></code></pre></div><h3 id="6-avoid-n1-query-problems">6. Avoid N+1 Query Problems</h3>
+<p>Always use <code>select_related</code> (for forward lookups) or <code>prefetch_related</code> (for reverse lookups) when you know you will access related objects in a loop. This is one of the most common performance pitfalls in Django applications.</p>
+<p>By following these patterns, you can build efficient, maintainable Django applications that properly leverage one-to-many relationships through ForeignKey fields.</p></div>
+        
+        
+
+        
+        <div class="mt-8">
+          
+<div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose">
+  <div>
+    <div class="flex items-center gap-2 mb-1">
+      <a href="/en/about" class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">
+        BenZ
+      </a>
+      
+      <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span>
+      
+    </div>
+    <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">
+      Software developer passionate about technology. Sharing programming experiences and learning notes.
+    </p>
+    <div class="flex items-center gap-3">
+      
+      <a href="https://github.com/benzhub" target="_blank" rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label="GitHub">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      
+      
+      
+    </div>
+  </div>
+</div>
+
+        </div>
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        
+
+
+
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            
+            <a href="http://localhost:1313/en/post/flutter/001-flutter-vs-react-native/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; Previous</span>
+                <span class="text-sm font-medium">Flutter vs React Native: Which Cross-Platform Framework to Choose?</span>
+            </a>
+            
+          </div>
+          <div>
+            
+            <a href="http://localhost:1313/en/post/linux/005-what-is-unix/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">Next &rarr;</span>
+                <span class="text-sm font-medium">What Is Unix? | Linux</span>
+            </a>
+            
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        
+<script src="https://giscus.app/client.js"
+        data-repo="benzhub/benzhub.github.io"
+        data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM="
+        data-category="Announcements"
+        data-category-id="MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme="preferred_color_scheme"
+        data-lang="en"
+        crossorigin="anonymous"
+        async>
+</script>
+
+
+      </div>
+    </div>
+    
+    <div class="hidden lg:block lg:col-span-1 mt-4">
+    
+    
+            
+            <div class="widget fade-in">
+    <p class="widget-title">Search</p>
+    <form role="search" method="get" action="https://google.com/search">
+        <input class="search-input" type="search" placeholder="Search articles..." name="q" aria-label="Search">
+        <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
+    </form>
+</div>
+
+        
+            
+            
+
+        
+            
+            
+<div class="widget fade-in">
+    <p class="widget-title">Tags</p>
+    <div class="flex flex-wrap gap-1.5">
+        <a href='/en/tags/ai'>
+            <span class="tag-pill">ai</span>
+        </a>
+        <a href='/en/tags/ai-insights'>
+            <span class="tag-pill">ai-insights</span>
+        </a>
+        <a href='/en/tags/api'>
+            <span class="tag-pill">api</span>
+        </a>
+        <a href='/en/tags/automation'>
+            <span class="tag-pill">automation</span>
+        </a>
+        <a href='/en/tags/claude-code'>
+            <span class="tag-pill">claude code</span>
+        </a>
+        <a href='/en/tags/cron'>
+            <span class="tag-pill">cron</span>
+        </a>
+        <a href='/en/tags/cursor'>
+            <span class="tag-pill">cursor</span>
+        </a>
+        <a href='/en/tags/database'>
+            <span class="tag-pill">database</span>
+        </a>
+        <a href='/en/tags/debugging'>
+            <span class="tag-pill">debugging</span>
+        </a>
+        <a href='/en/tags/design-pattern'>
+            <span class="tag-pill">design-pattern</span>
+        </a>
+        <a href='/en/tags/devops'>
+            <span class="tag-pill">devops</span>
+        </a>
+        <a href='/en/tags/django'>
+            <span class="tag-pill">django</span>
+        </a>
+        <a href='/en/tags/flutter'>
+            <span class="tag-pill">flutter</span>
+        </a>
+        <a href='/en/tags/fnm'>
+            <span class="tag-pill">fnm</span>
+        </a>
+        <a href='/en/tags/git'>
+            <span class="tag-pill">git</span>
+        </a>
+        <a href='/en/tags/github-copilot'>
+            <span class="tag-pill">github copilot</span>
+        </a>
+        <a href='/en/tags/harness-engineering'>
+            <span class="tag-pill">harness engineering</span>
+        </a>
+        <a href='/en/tags/html'>
+            <span class="tag-pill">html</span>
+        </a>
+        <a href='/en/tags/javascript'>
+            <span class="tag-pill">javascript</span>
+        </a>
+        <a href='/en/tags/linux'>
+            <span class="tag-pill">linux</span>
+        </a>
+    </div>
+</div>
+
+
+        
+            
+            
+<div class="widget fade-in">
+    <p class="widget-title">Article Series</p>
+    <div class="flex flex-wrap gap-1.5">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </div>
+</div>
+
+
+        
+            
+            
+
+<div class="widget fade-in">
+    <p class="widget-title">Recent Posts</p>
+    <div class="flex flex-col gap-1">
+        <a href="/en/post/linux/027-cron-job-not-running/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Cron Job Not Running? 10 Fixes for Common Cron Issues</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/05/16
+            </p>
+        </a>
+        <a href="/en/post/linux/025-cron-every-5-minutes/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">How to Run a Cron Job Every 5 Minutes (and Other Intervals)</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/05/15
+            </p>
+        </a>
+        <a href="/en/post/linux/026-systemd-timer-vs-cron/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Systemd Timer vs Cron: Which Linux Scheduler Should You Use?</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/05/15
+            </p>
+        </a>
+        <a href="/en/post/linux/024-crontab-syntax/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Crontab Syntax Explained: The Complete Time Format Guide</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/05/14
+            </p>
+        </a>
+        <a href="/en/post/linux/023-crontab-examples/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">30&#43; Crontab Examples for Every Use Case | Linux Cron Scheduling</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/05/13
+            </p>
+        </a>
+    </div>
+</div>
+
+        
+    
+</div>
+
+    
+</div>
+
+        </div>
+    </div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]">
+    
+    <p>&copy; 2026 <a href="http://localhost:1313/" class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p>
+</footer>
+
+
+<script>
+    (function (window, document) {
+        function main() {
+            var ad = document.createElement('script');
+            ad.async = true;
+            ad.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606';
+            ad.crossOrigin = "anonymous";
+            var sc = document.getElementsByTagName('script')[0];
+            sc.parentNode.insertBefore(ad, sc);
+        }
+        var lazyLoad = false;
+        function onLazyLoad() {
+            if (lazyLoad === false) {
+                lazyLoad = true;
+                window.removeEventListener('scroll', onLazyLoad);
+                window.removeEventListener('mousemove', onLazyLoad);
+                window.removeEventListener('mousedown', onLazyLoad);
+                window.removeEventListener('touchstart', onLazyLoad);
+                window.removeEventListener('keydown', onLazyLoad);
+                main();
+            }
+        }
+        window.addEventListener('scroll', onLazyLoad);
+        window.addEventListener('mousemove', onLazyLoad);
+        window.addEventListener('mousedown', onLazyLoad);
+        window.addEventListener('touchstart', onLazyLoad);
+        window.addEventListener('keydown', onLazyLoad);
+        window.addEventListener('load', function () {
+            if (window.pageYOffset) {
+                onLazyLoad();
+                window.setTimeout(onLazyLoad, 3000);
+            }
+        });
+    })(window, document);
+</script>
+
+
+<script>
+    
+    var icon = document.getElementById("icon");
+    var icon2 = document.getElementById("icon2");
+    if (document.documentElement.classList.contains("dark") || localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+        if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+    function toggleDarkMode() {
+        if (document.documentElement.classList.contains('dark')) {
+            if (icon) { icon.classList.remove("icon-sun"); icon.classList.add("icon-moon"); }
+            if (icon2) { icon2.classList.remove("icon-sun"); icon2.classList.add("icon-moon"); }
+            document.documentElement.classList.remove('dark');
+            localStorage.theme = 'light';
+        } else {
+            if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+            if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+            document.documentElement.classList.add('dark');
+            localStorage.theme = 'dark';
+        }
+    }
+
+    
+    document.addEventListener('DOMContentLoaded', function () {
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0 });
+
+        document.querySelectorAll('.fade-in').forEach(function (el) {
+            observer.observe(el);
+        });
+    });
+</script>
+</body>
+
+</html>

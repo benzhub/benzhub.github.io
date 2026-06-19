@@ -1,241 +1,1201 @@
-<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>Python 環境安裝與設定 | Django 教學 | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="Python 環境安裝與設定 | Django 教學 | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="完整圖文教學如何在 Windows、macOS 與 Linux 三大平台安裝 Python 3.10+ 開發環境。涵蓋 pip 套件管理器常用指令、venv 虛擬環境建立與啟用、VS Code 編輯器推薦擴充套件設定，以及完整的安裝驗證步驟，為你的 Django 開發之旅做好萬全準備。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="完整圖文教學如何在 Windows、macOS 與 Linux 三大平台安裝 Python 3.10+ 開發環境。涵蓋 pip 套件管理器常用指令、venv 虛擬環境建立與啟用、VS Code 編輯器推薦擴充套件設定，以及完整的安裝驗證步驟，為你的 Django 開發之旅做好萬全準備。"><meta property="og:url" content="https://benzhub.github.io/post/django/002-python-environment-setup/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/django/002-python-environment-setup/><meta name=twitter:description content="完整圖文教學如何在 Windows、macOS 與 Linux 三大平台安裝 Python 3.10+ 開發環境。涵蓋 pip 套件管理器常用指令、venv 虛擬環境建立與啟用、VS Code 編輯器推薦擴充套件設定，以及完整的安裝驗證步驟，為你的 Django 開發之旅做好萬全準備。"><meta property="article:published_time" content="2026-05-22T00:00:00+00:00"><meta property="article:updated_time" content="2026-05-21T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/django/002-Python-Environment-Setup.png"><meta property="og:image:url" content="https://benzhub.github.io/img/django/002-Python-Environment-Setup.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
-<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/django/002-python-environment-setup/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/django/002-python-environment-setup/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"Python 環境安裝與設定 | Django 教學\"","description":"\"完整圖文教學如何在 Windows、macOS 與 Linux 三大平台安裝 Python 3.10+ 開發環境。涵蓋 pip 套件管理器常用指令、venv 虛擬環境建立與啟用、VS Code 編輯器推薦擴充套件設定，以及完整的安裝驗證步驟，為你的 Django 開發之旅做好萬全準備。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-05-22T00:00:00\u002b00:00","dateModified":"2026-05-21T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/django\/002-Python-Environment-Setup.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/django\/002-python-environment-setup\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/django\/"},{"@type":"ListItem","position":3,"name":"\"Python 環境安裝與設定 | Django 教學\""}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"\"學 Django 應該安裝哪個版本的 Python？\"","acceptedAnswer":{"@type":"Answer","text":"\"建議安裝 Python 3.10 或以上版本。Django 5.x 最低要求 Python 3.10，而且新版 Python 提供了更好的型別提示語法（如 match-case 語句）和效能改進，對開發體驗有顯著提升。\""}},{"@type":"Question","name":"\"為什麼需要使用虛擬環境（venv）？\"","acceptedAnswer":{"@type":"Answer","text":"\"虛擬環境能為每個專案建立獨立的 Python 套件空間，避免不同專案之間的套件版本衝突。例如專案 A 需要 Django 4.2，專案 B 需要 Django 5.1，虛擬環境讓兩者可以共存而不互相干擾。這是 Python 開發的最佳實踐。\""}},{"@type":"Question","name":"\"pip 和 venv 有什麼差別？\"","acceptedAnswer":{"@type":"Answer","text":"\"pip 是 Python 的套件管理器（Package Manager），負責安裝、更新和移除第三方套件，類似 JavaScript 的 npm。venv 是虛擬環境工具（Virtual Environment），負責建立隔離的 Python 執行環境。兩者搭配使用：先用 venv 建立虛擬環境，再用 pip 在該環境中安裝套件。\""}},{"@type":"Question","name":"\"Windows 安裝 Python 時為什麼一定要勾選 Add to PATH？\"","acceptedAnswer":{"@type":"Answer","text":"\"勾選 Add Python to PATH 會將 Python 的執行路徑加入系統環境變數，讓你可以在任何終端機位置直接輸入 python 和 pip 指令。如果沒有勾選，系統會找不到 Python 執行檔，你就必須手動設定環境變數或使用完整路徑來執行 Python。\""}},{"@type":"Question","name":"\"macOS 內建的 Python 可以用來開發 Django 嗎？\"","acceptedAnswer":{"@type":"Answer","text":"\"不建議。macOS 過去內建的是 Python 2.x，而較新版本的 macOS 已經不再預裝 Python。即使系統有 Python 3，版本通常較舊且不適合作為開發環境。建議透過 Homebrew 安裝最新版 Python 3.12+，可以獲得最新功能和安全性更新，也不會影響系統原有的 Python 環境。\""}}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
-</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
-</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
-</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
-<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
-<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-<span>🌐</span>
-<span>繁體中文</span>
-<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
-<a href=https://benzhub.github.io/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-<a href=https://benzhub.github.io/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
-<a href=https://benzhub.github.io/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-<a href=https://benzhub.github.io/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
-</button>
-<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
-<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
-</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
-</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
-</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
-<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-<span>🌐</span>
-<span>繁體中文</span>
-<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
-<a href=https://benzhub.github.io/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-<a href=https://benzhub.github.io/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
-<a href=https://benzhub.github.io/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-<a href=https://benzhub.github.io/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Python 環境安裝與設定 | Django 教學</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/05/22
-</span><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001.0 004.582 9m0 0H9m11 11v-5h-.581m0 0A8.003 8.003.0 014.062 13m15.357 2H15"/></svg>
-2026/05/21</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/python class="tag-pill no-underline">python</a>
-<a href=/tags/django class="tag-pill no-underline">django</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/django/002-Python-Environment-Setup.png alt="Python 環境安裝與設定 | Django 教學"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p>在開始學習 <strong>Django</strong> 之前，第一步是建立一個穩定且正確的 <strong>Python</strong> 開發環境。本篇教學將手把手帶你在 <strong>Windows</strong> 、 <strong>macOS</strong> 與 <strong>Linux</strong> 三大平台安裝 <strong>Python 3.10+</strong> ，並介紹 <strong>pip</strong> 套件管理器、 <strong>venv</strong> 虛擬環境的使用方式，以及 <strong>VS Code</strong> 編輯器的推薦設定，為後續的 Django 開發之旅打下堅實基礎。</p></blockquote><h3 id=為什麼選擇-python-310-以上版本>為什麼選擇 Python 3.10 以上版本</h3><p>Django 5.x 的最低要求是 Python 3.10，而截至 2026 年，Python 最新穩定版本為 3.12+。選擇 3.10 以上版本有幾個重要原因：</p><ul><li><strong>Django 相容性</strong>：Django 5.0 起要求 Python 3.10+，使用較舊版本將無法安裝最新的 Django</li><li><strong>結構化模式比對（Structural Pattern Matching）</strong>：Python 3.10 引入的 <code>match-case</code> 語句讓程式碼更簡潔易讀</li><li><strong>更好的型別提示（Type Hints）</strong>：Python 3.10+ 支援 <code>X | Y</code> 聯合型別語法，取代冗長的 <code>Union[X, Y]</code></li><li><strong>效能改進</strong>：每個新版本都帶來顯著的效能提升</li></ul><p>建議直接安裝目前最新的穩定版 <strong>Python 3.12</strong> ，以獲得最佳的開發體驗。</p><hr><h3 id=windows-安裝-python>Windows 安裝 Python</h3><h4 id=步驟一下載安裝檔>步驟一：下載安裝檔</h4><p>前往 Python 官方網站 <a href=https://www.python.org/downloads/>https://www.python.org/downloads/</a>，點擊「Download Python 3.12.x」按鈕下載 Windows 安裝檔（.exe）。</p><h4 id=步驟二執行安裝程式>步驟二：執行安裝程式</h4><p><strong>重要：安裝時務必勾選底部的「Add python.exe to PATH」選項。</strong> 這個步驟會將 Python 加入系統環境變數（Environment Variable），讓你可以在命令提示字元（Command Prompt）或 PowerShell 中直接使用 <code>python</code> 指令。</p><p>勾選後，點擊「Install Now」即可使用預設設定安裝。如果你需要自訂安裝路徑，可以選擇「Customize installation」。</p><h4 id=步驟三驗證安裝>步驟三：驗證安裝</h4><p>安裝完成後，開啟命令提示字元（按 <code>Win + R</code>，輸入 <code>cmd</code>，按 Enter），執行以下指令：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 檢查 Python 版本</span>
-</span></span><span style=display:flex><span>python --version
-</span></span><span style=display:flex><span><span style=color:#75715e># 輸出範例：Python 3.12.7</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 檢查 pip 版本</span>
-</span></span><span style=display:flex><span>pip --version
-</span></span><span style=display:flex><span><span style=color:#75715e># 輸出範例：pip 24.3.1 from C:\Users\...\pip (python 3.12)</span>
-</span></span></code></pre></div><p>如果兩個指令都正確顯示版本號，代表 Python 已成功安裝。</p><h4 id=常見問題排除>常見問題排除</h4><p>如果出現「&lsquo;python&rsquo; 不是內部或外部命令」的錯誤，代表 PATH 未正確設定。你可以：</p><ol><li>重新執行安裝程式，選擇「Modify」並確認勾選「Add Python to environment variables」</li><li>或手動在系統環境變數中加入 Python 的安裝路徑（通常是 <code>C:\Users\你的使用者名稱\AppData\Local\Programs\Python\Python312\</code>）</li></ol><hr><h3 id=macos-安裝-python>macOS 安裝 Python</h3><p>macOS 建議使用 <strong>Homebrew</strong> 套件管理器來安裝 Python，這是 macOS 開發者最常用的方式。</p><h4 id=步驟一安裝-homebrew>步驟一：安裝 Homebrew</h4><p>如果你還沒有安裝 Homebrew，開啟終端機（Terminal），執行以下指令：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 安裝 Homebrew</span>
-</span></span><span style=display:flex><span>/bin/bash -c <span style=color:#e6db74>&#34;</span><span style=color:#66d9ef>$(</span>curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh<span style=color:#66d9ef>)</span><span style=color:#e6db74>&#34;</span>
-</span></span></code></pre></div><p>安裝完成後，依照終端機提示將 Homebrew 加入 PATH（通常需要執行兩行 <code>eval</code> 指令）。驗證安裝：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 檢查 Homebrew 是否安裝成功</span>
-</span></span><span style=display:flex><span>brew --version
-</span></span><span style=display:flex><span><span style=color:#75715e># 輸出範例：Homebrew 4.4.x</span>
-</span></span></code></pre></div><h4 id=步驟二使用-homebrew-安裝-python>步驟二：使用 Homebrew 安裝 Python</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 更新 Homebrew 套件清單</span>
-</span></span><span style=display:flex><span>brew update
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 安裝最新版 Python</span>
-</span></span><span style=display:flex><span>brew install python@3.12
-</span></span></code></pre></div><h4 id=步驟三驗證安裝-1>步驟三：驗證安裝</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 檢查 Python 版本</span>
-</span></span><span style=display:flex><span>python3 --version
-</span></span><span style=display:flex><span><span style=color:#75715e># 輸出範例：Python 3.12.7</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 檢查 pip 版本</span>
-</span></span><span style=display:flex><span>pip3 --version
-</span></span><span style=display:flex><span><span style=color:#75715e># 輸出範例：pip 24.3.1 from /opt/homebrew/lib/python3.12/site-packages/pip (python 3.12)</span>
-</span></span></code></pre></div><blockquote><p><strong>注意：</strong> 在 macOS 上，Python 3 的指令預設為 <code>python3</code> 和 <code>pip3</code>。如果你希望直接使用 <code>python</code> 指令，可以在 Shell 設定檔（如 <code>~/.zshrc</code>）中加入別名（Alias）：</p></blockquote><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 在 ~/.zshrc 中加入以下內容</span>
-</span></span><span style=display:flex><span>alias python<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;python3&#39;</span>
-</span></span><span style=display:flex><span>alias pip<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;pip3&#39;</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 重新載入設定</span>
-</span></span><span style=display:flex><span>source ~/.zshrc
-</span></span></code></pre></div><hr><h3 id=linux-安裝-python>Linux 安裝 Python</h3><p>大多數 Linux 發行版（Distribution）已預裝 Python，但版本可能較舊。以下分別介紹 Ubuntu/Debian 與 Fedora/RHEL 的安裝方式。</p><h4 id=ubuntu--debian-系列使用-apt>Ubuntu / Debian 系列（使用 apt）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 更新套件清單</span>
-</span></span><span style=display:flex><span>sudo apt update
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 安裝 Python 3.12 與相關工具</span>
-</span></span><span style=display:flex><span>sudo apt install python3.12 python3.12-venv python3-pip -y
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 驗證安裝</span>
-</span></span><span style=display:flex><span>python3.12 --version
-</span></span><span style=display:flex><span><span style=color:#75715e># 輸出範例：Python 3.12.7</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>pip3 --version
-</span></span><span style=display:flex><span><span style=color:#75715e># 輸出範例：pip 24.x.x from /usr/lib/python3/dist-packages/pip (python 3.12)</span>
-</span></span></code></pre></div><p>如果預設的套件庫（Repository）中沒有 Python 3.12，需要先加入 deadsnakes PPA：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 加入 deadsnakes PPA</span>
-</span></span><span style=display:flex><span>sudo add-apt-repository ppa:deadsnakes/ppa -y
-</span></span><span style=display:flex><span>sudo apt update
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 安裝 Python 3.12</span>
-</span></span><span style=display:flex><span>sudo apt install python3.12 python3.12-venv python3.12-dev -y
-</span></span></code></pre></div><h4 id=fedora--rhel-系列使用-dnf>Fedora / RHEL 系列（使用 dnf）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 安裝 Python 3.12</span>
-</span></span><span style=display:flex><span>sudo dnf install python3.12 python3.12-pip -y
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 驗證安裝</span>
-</span></span><span style=display:flex><span>python3.12 --version
-</span></span><span style=display:flex><span><span style=color:#75715e># 輸出範例：Python 3.12.7</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>pip3 --version
-</span></span><span style=display:flex><span><span style=color:#75715e># 輸出範例：pip 24.x.x from /usr/lib/python3.12/site-packages/pip (python 3.12)</span>
-</span></span></code></pre></div><h4 id=設定預設-python-版本選用>設定預設 Python 版本（選用）</h4><p>如果系統中有多個 Python 版本，可以使用 <code>update-alternatives</code> 來管理預設版本：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 註冊 Python 版本（Ubuntu/Debian）</span>
-</span></span><span style=display:flex><span>sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 <span style=color:#ae81ff>1</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 選擇預設版本</span>
-</span></span><span style=display:flex><span>sudo update-alternatives --config python3
-</span></span></code></pre></div><hr><h3 id=pip-套件管理器介紹與使用>pip 套件管理器介紹與使用</h3><p><strong>pip</strong> 是 Python 的標準套件管理器（Package Manager），類似 JavaScript 的 npm 或 Rust 的 cargo。它可以從 <strong>PyPI</strong>（Python Package Index，Python 套件索引）上下載並安裝第三方套件。</p><h4 id=基本指令>基本指令</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 安裝套件</span>
-</span></span><span style=display:flex><span>pip install django
-</span></span><span style=display:flex><span><span style=color:#75715e># 輸出範例：Successfully installed django-5.1.x</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 安裝指定版本的套件</span>
-</span></span><span style=display:flex><span>pip install django<span style=color:#f92672>==</span>5.1.4
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 升級已安裝的套件</span>
-</span></span><span style=display:flex><span>pip install --upgrade django
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 查看已安裝的套件清單</span>
-</span></span><span style=display:flex><span>pip list
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 查看特定套件的詳細資訊</span>
-</span></span><span style=display:flex><span>pip show django
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 移除套件</span>
-</span></span><span style=display:flex><span>pip uninstall django
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 將目前環境的套件清單輸出到 requirements.txt</span>
-</span></span><span style=display:flex><span>pip freeze &gt; requirements.txt
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 從 requirements.txt 批次安裝套件</span>
-</span></span><span style=display:flex><span>pip install -r requirements.txt
-</span></span></code></pre></div><h4 id=升級-pip-本身>升級 pip 本身</h4><p>pip 會不定期更新，建議保持最新版本：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 升級 pip</span>
-</span></span><span style=display:flex><span>python -m pip install --upgrade pip
-</span></span></code></pre></div><blockquote><p><strong>最佳實踐：</strong> 建議使用 <code>python -m pip</code> 而非直接使用 <code>pip</code> 指令，這樣可以確保 pip 對應的是正確的 Python 版本，避免在多版本共存的環境中產生混淆。</p></blockquote><hr><h3 id=虛擬環境venv建立與啟用>虛擬環境（venv）建立與啟用</h3><p><strong>venv</strong> 是 Python 內建的虛擬環境（Virtual Environment）模組，它可以為每個專案建立獨立的套件安裝空間。這是 Python 開發中非常重要的最佳實踐。</p><h4 id=為什麼需要虛擬環境>為什麼需要虛擬環境</h4><p>假設你有兩個專案：</p><ul><li>專案 A 使用 Django 4.2</li><li>專案 B 使用 Django 5.1</li></ul><p>如果所有套件都安裝在系統全域（Global）環境中，兩個版本會互相衝突。虛擬環境讓每個專案擁有自己獨立的套件目錄，徹底解決版本衝突問題。</p><h4 id=建立虛擬環境>建立虛擬環境</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 建立一個新的專案資料夾</span>
-</span></span><span style=display:flex><span>mkdir my-django-project
-</span></span><span style=display:flex><span>cd my-django-project
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 建立虛擬環境（慣例命名為 .venv 或 venv）</span>
-</span></span><span style=display:flex><span>python -m venv .venv
-</span></span></code></pre></div><p>執行後，會在專案目錄下產生一個 <code>.venv</code> 資料夾，裡面包含獨立的 Python 直譯器（Interpreter）和套件目錄。</p><h4 id=啟用虛擬環境>啟用虛擬環境</h4><p>啟用方式依作業系統而不同：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># Windows（命令提示字元）</span>
-</span></span><span style=display:flex><span>.venv<span style=color:#ae81ff>\S</span>cripts<span style=color:#ae81ff>\a</span>ctivate
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># Windows（PowerShell）</span>
-</span></span><span style=display:flex><span>.venv<span style=color:#ae81ff>\S</span>cripts<span style=color:#ae81ff>\A</span>ctivate.ps1
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># macOS / Linux</span>
-</span></span><span style=display:flex><span>source .venv/bin/activate
-</span></span></code></pre></div><p>啟用成功後，終端機的提示符號（Prompt）前方會出現 <code>(.venv)</code> 字樣，表示你已進入虛擬環境：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 啟用前</span>
-</span></span><span style=display:flex><span>$ python --version
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 啟用後（注意前方的 (.venv)）</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>(</span>.venv<span style=color:#f92672>)</span> $ python --version
-</span></span></code></pre></div><h4 id=在虛擬環境中安裝套件>在虛擬環境中安裝套件</h4><p>啟用虛擬環境後，透過 pip 安裝的套件只會存在於該虛擬環境中，不會影響系統全域環境：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 確認虛擬環境已啟用（提示符號前有 (.venv)）</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>(</span>.venv<span style=color:#f92672>)</span> $ pip install django
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 確認 Django 安裝成功</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>(</span>.venv<span style=color:#f92672>)</span> $ python -m django --version
-</span></span><span style=display:flex><span><span style=color:#75715e># 輸出範例：5.1.4</span>
-</span></span></code></pre></div><h4 id=停用虛擬環境>停用虛擬環境</h4><p>完成工作後，可以輸入以下指令離開虛擬環境：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 停用虛擬環境</span>
-</span></span><span style=display:flex><span>deactivate
-</span></span></code></pre></div><h4 id=gitignore-設定>.gitignore 設定</h4><p>虛擬環境資料夾不應該提交到版本控制系統（Version Control System）。確保你的 <code>.gitignore</code> 檔案中包含以下內容：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-text data-lang=text><span style=display:flex><span># 虛擬環境
-</span></span><span style=display:flex><span>.venv/
-</span></span><span style=display:flex><span>venv/
-</span></span></code></pre></div><hr><h3 id=vs-code-推薦設定>VS Code 推薦設定</h3><p><strong>Visual Studio Code</strong>（簡稱 VS Code）是目前最受歡迎的程式碼編輯器之一，對 Python 和 Django 開發有極佳的支援。</p><h4 id=必裝擴充套件extensions>必裝擴充套件（Extensions）</h4><ol><li><strong>Python</strong>（Microsoft 官方）：提供語法高亮（Syntax Highlighting）、自動補全（IntelliSense）、程式碼除錯（Debugging）等核心功能</li><li><strong>Pylance</strong>（Microsoft 官方）：Python 語言伺服器（Language Server），提供更快速的型別檢查和程式碼分析</li><li><strong>Django</strong>（Baptiste Darthenay）：Django 模板語法高亮與程式碼片段（Snippets）</li></ol><h4 id=工作區設定>工作區設定</h4><p>在專案根目錄建立 <code>.vscode/settings.json</code>，加入以下推薦設定：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-json data-lang=json><span style=display:flex><span>{
-</span></span><span style=display:flex><span>  <span style=color:#75715e>// 指定 Python 直譯器路徑（使用虛擬環境）
-</span></span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;python.defaultInterpreterPath&#34;</span>: <span style=color:#e6db74>&#34;${workspaceFolder}/.venv/bin/python&#34;</span>,
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>  <span style=color:#75715e>// 啟用型別檢查
-</span></span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;python.analysis.typeCheckingMode&#34;</span>: <span style=color:#e6db74>&#34;basic&#34;</span>,
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>  <span style=color:#75715e>// 儲存時自動格式化
-</span></span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;editor.formatOnSave&#34;</span>: <span style=color:#66d9ef>true</span>,
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>  <span style=color:#75715e>// 使用 Black 作為格式化工具
-</span></span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;python.formatting.provider&#34;</span>: <span style=color:#e6db74>&#34;black&#34;</span>,
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>  <span style=color:#75715e>// 終端機自動啟用虛擬環境
-</span></span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;python.terminal.activateEnvironment&#34;</span>: <span style=color:#66d9ef>true</span>
-</span></span><span style=display:flex><span>}
-</span></span></code></pre></div><h4 id=選擇-python-直譯器>選擇 Python 直譯器</h4><p>在 VS Code 中按下 <code>Ctrl + Shift + P</code>（macOS 為 <code>Cmd + Shift + P</code>），輸入「Python: Select Interpreter」，選擇虛擬環境中的 Python 直譯器（路徑中包含 <code>.venv</code>）。這樣 VS Code 就會使用虛擬環境來執行和除錯你的程式碼。</p><hr><h3 id=驗證安裝成功>驗證安裝成功</h3><p>完成以上所有步驟後，讓我們做一個完整的驗證，確認開發環境已正確建立：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 1. 檢查 Python 版本</span>
-</span></span><span style=display:flex><span>python --version
-</span></span><span style=display:flex><span><span style=color:#75715e># 預期輸出：Python 3.12.x（3.10 以上即可）</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 2. 檢查 pip 版本</span>
-</span></span><span style=display:flex><span>pip --version
-</span></span><span style=display:flex><span><span style=color:#75715e># 預期輸出：pip 24.x.x from ... (python 3.12)</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 3. 建立並啟用虛擬環境</span>
-</span></span><span style=display:flex><span>mkdir django-test <span style=color:#f92672>&amp;&amp;</span> cd django-test
-</span></span><span style=display:flex><span>python -m venv .venv
-</span></span><span style=display:flex><span>source .venv/bin/activate  <span style=color:#75715e># Windows 使用 .venv\Scripts\activate</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 4. 在虛擬環境中安裝 Django</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>(</span>.venv<span style=color:#f92672>)</span> $ pip install django
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 5. 驗證 Django 安裝</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>(</span>.venv<span style=color:#f92672>)</span> $ python -m django --version
-</span></span><span style=display:flex><span><span style=color:#75715e># 預期輸出：5.1.x</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 6. 快速測試 Django 是否正常運作</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>(</span>.venv<span style=color:#f92672>)</span> $ django-admin startproject testproject
-</span></span><span style=display:flex><span><span style=color:#f92672>(</span>.venv<span style=color:#f92672>)</span> $ cd testproject
-</span></span><span style=display:flex><span><span style=color:#f92672>(</span>.venv<span style=color:#f92672>)</span> $ python manage.py runserver
-</span></span><span style=display:flex><span><span style=color:#75715e># 預期輸出：Starting development server at http://127.0.0.1:8000/</span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 在瀏覽器開啟 http://127.0.0.1:8000/ 應該看到 Django 歡迎頁面</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 7. 按 Ctrl + C 停止伺服器，清理測試專案</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>(</span>.venv<span style=color:#f92672>)</span> $ cd ..
-</span></span><span style=display:flex><span><span style=color:#f92672>(</span>.venv<span style=color:#f92672>)</span> $ rm -rf testproject
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 8. 停用虛擬環境</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>(</span>.venv<span style=color:#f92672>)</span> $ deactivate
-</span></span></code></pre></div><p>如果以上步驟都順利完成，恭喜你，Python 開發環境已經準備就緒，可以正式開始 Django 的學習之旅了。</p><hr><h3 id=總結>總結</h3><p>本篇教學涵蓋了 Django 開發所需的 Python 環境建置全流程：</p><ul><li><strong>版本選擇</strong>：建議安裝 Python 3.10+（推薦 3.12），以確保與 Django 5.x 相容</li><li><strong>跨平台安裝</strong>：Windows 使用官方安裝檔（記得勾選 Add to PATH）、macOS 使用 Homebrew、Linux 使用系統套件管理器（apt 或 dnf）</li><li><strong>pip 套件管理器</strong>：掌握 <code>install</code>、<code>list</code>、<code>freeze</code>、<code>uninstall</code> 等核心指令</li><li><strong>venv 虛擬環境</strong>：為每個專案建立獨立的套件空間，避免版本衝突</li><li><strong>VS Code 設定</strong>：安裝 Python 與 Django 相關擴充套件，配置直譯器路徑與格式化工具</li></ul><p>環境建置是開發的第一步，也是最容易被忽略的一步。一個正確設定的開發環境能讓你在後續的學習過程中少走很多彎路。下一篇我們將正式進入 Django 的世界，建立你的第一個 Django 專案。</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
-</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/django/001-what-is-web-development/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">什麼是 Web 開發？前端、後端、全端入門 | Django 教學</span>
-<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/05/21</span>
-</a><a href=https://benzhub.github.io/post/python/036-regular-expressions/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Python 正規表達式（Regular Expressions）入門 | Python</span>
-<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/04/30</span>
-</a><a href=https://benzhub.github.io/post/python/037-async-await/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Python 非同步程式設計（Async/Await）入門 | Python</span>
-<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/04/30</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/django/001-what-is-web-development/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
-<span class="text-sm font-medium">什麼是 Web 開發？前端、後端、全端入門 | Django 教學</span></a></div><div><a href=https://benzhub.github.io/post/django/003-python-basics-for-django/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
-<span class="text-sm font-medium">Python 基礎語法速覽：給 Django 學習者的快速入門 | Django 教學</span></a></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
-<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
-</a><a href=/tags/acid><span class=tag-pill>acid</span>
-</a><a href=/tags/ai><span class=tag-pill>ai</span>
-</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
-</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
-</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
-</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
-</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
-</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
-</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
-</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
-</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
-</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
-</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
-</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
-</a><a href=/tags/api><span class=tag-pill>api</span>
-</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
-</a><a href=/tags/autovacuum><span class=tag-pill>autovacuum</span>
-</a><a href=/tags/background-processes><span class=tag-pill>background-processes</span>
-</a><a href=/tags/big-o><span class=tag-pill>big o</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (12)</span>
-</a><a href=/post/javascript/><span class=tag-pill>JavaScript (67)</span>
-</a><a href=/post/django/><span class=tag-pill>Django (29)</span>
-</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
-</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
-</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
-</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
-</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/django/029-django-authentication/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Authentication 使用者認證系統完全指南 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/18</p></a><a href=/post/postgresql/012-data-types/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/18</p></a><a href=/post/javascript/data-structures--algorithms/005-hash-table/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">雜湊表 — Hash Table 原理、碰撞處理與實作完整指南 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/18</p></a><a href=/post/django/028-django-middleware/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Middleware 中介軟體原理與實作 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/17</p></a><a href=/post/postgresql/011-background-processes/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">背景進程：PostgreSQL 的幕後工作者們 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/17</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>
+<!DOCTYPE html>
+
+<html lang="zh-TW">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><title>Python 環境安裝與設定 | Django 教學 | BenzHub</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="apple-touch-icon" sizes="180x180" href='/favicon/apple-touch-icon.png'>
+    <link rel="icon" type="image/png" sizes="32x32" href='/favicon/favicon-32x32.png'>
+    <link rel="icon" type="image/png" sizes="16x16" href='/favicon/favicon-16x16.png'>
+    <link rel="manifest" href='/favicon/site.webmanifest' />
+    <link rel="mask-icon" href=' /favicon/safari-pinned-tab.svg' color="#5bbad5" />
+    <link rel="shortcut icon" href='/favicon/favicon.ico' />
+    <meta name="theme-color" content="#fafafa">
+    <meta property="og:title" content="Python 環境安裝與設定 | Django 教學 | BenzHub" />
+    
+    
+    <link rel="stylesheet" href="/css/style.css" />
+    
+    <link href=' /css/blonde.min.css' rel="stylesheet" type="text/css" media="print"
+        onload="this.media=' all'">
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+
+<meta name="description" content="完整圖文教學如何在 Windows、macOS 與 Linux 三大平台安裝 Python 3.10&#43; 開發環境。涵蓋 pip 套件管理器常用指令、venv 虛擬環境建立與啟用、VS Code 編輯器推薦擴充套件設定，以及完整的安裝驗證步驟，為你的 Django 開發之旅做好萬全準備。">
+<meta property="og:site_name" content="BenzHub">
+<meta property="og:description" content="完整圖文教學如何在 Windows、macOS 與 Linux 三大平台安裝 Python 3.10&#43; 開發環境。涵蓋 pip 套件管理器常用指令、venv 虛擬環境建立與啟用、VS Code 編輯器推薦擴充套件設定，以及完整的安裝驗證步驟，為你的 Django 開發之旅做好萬全準備。">
+<meta property="og:url" content="http://localhost:1313/post/django/002-python-environment-setup/">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="zh_TW">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="">
+
+<link rel="canonical" href="http://localhost:1313/post/django/002-python-environment-setup/">
+
+<meta name="twitter:description" content="完整圖文教學如何在 Windows、macOS 與 Linux 三大平台安裝 Python 3.10&#43; 開發環境。涵蓋 pip 套件管理器常用指令、venv 虛擬環境建立與啟用、VS Code 編輯器推薦擴充套件設定，以及完整的安裝驗證步驟，為你的 Django 開發之旅做好萬全準備。">
+<meta property="article:published_time" content="2026-05-22T00:00:00&#43;00:00">
+<meta property="article:updated_time" content="2026-05-21T00:00:00&#43;00:00">
+
+
+
+
+
+    
+<meta property="og:image" content="http://localhost:1313/img/django/002-Python-Environment-Setup.png">
+<meta property="og:image:url" content="http://localhost:1313/img/django/002-Python-Environment-Setup.png">
+    
+
+    
+    <link rel="stylesheet" href='/css/custom.css'>
+    <i class="dark hidden"></i>
+    
+<link rel="alternate" hreflang="zh-TW" href="http://localhost:1313/post/django/002-python-environment-setup/" />
+
+<link rel="alternate" hreflang="x-default" href="http://localhost:1313/post/django/002-python-environment-setup/" />
+
+    
+
+
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "\"Python 環境安裝與設定 | Django 教學\"",
+  "description": "\"完整圖文教學如何在 Windows、macOS 與 Linux 三大平台安裝 Python 3.10+ 開發環境。涵蓋 pip 套件管理器常用指令、venv 虛擬環境建立與啟用、VS Code 編輯器推薦擴充套件設定，以及完整的安裝驗證步驟，為你的 Django 開發之旅做好萬全準備。\"",
+  "author": {
+    "@type": "Person",
+    "name": "\"BenzHub\"",
+    "url": "http:\/\/localhost:1313\/about",
+    "jobTitle": "\"Software Developer\"",
+    "sameAs": [
+      "\"https://github.com/benzhub\""
+    ]
+  },
+  "datePublished": "2026-05-22T00:00:00\u002b00:00",
+  "dateModified": "2026-05-21T00:00:00\u002b00:00",
+  "image": "http:\/\/localhost:1313\/img\/django\/002-Python-Environment-Setup.png",
+  "publisher": {
+    "@type": "Organization",
+    "name": "\"BenzHub\"",
+    "url": "\"http://localhost:1313/\"",
+    "sameAs": [
+      "\"https://github.com/benzhub\""
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http:\/\/localhost:1313\/post\/django\/002-python-environment-setup\/"
+  },
+  "inLanguage": "zh-TW"
+}
+</script>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "\"BenzHub\"",
+      "item": "http:\/\/localhost:1313\/"
+    }
+    
+    
+      
+      
+    ,{
+      "@type": "ListItem",
+      "position": 2,
+      "name": "\"Blog\"",
+      "item": "http:\/\/localhost:1313\/post\/django\/"
+    }
+      
+      
+    
+    ,{
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "\"Python 環境安裝與設定 | Django 教學\""
+    }
+  ]
+}
+</script>
+
+
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    
+    
+    {
+      "@type": "Question",
+      "name": "\"學 Django 應該安裝哪個版本的 Python？\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"建議安裝 Python 3.10 或以上版本。Django 5.x 最低要求 Python 3.10，而且新版 Python 提供了更好的型別提示語法（如 match-case 語句）和效能改進，對開發體驗有顯著提升。\""
+      }
+    }
+    
+    ,
+    {
+      "@type": "Question",
+      "name": "\"為什麼需要使用虛擬環境（venv）？\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"虛擬環境能為每個專案建立獨立的 Python 套件空間，避免不同專案之間的套件版本衝突。例如專案 A 需要 Django 4.2，專案 B 需要 Django 5.1，虛擬環境讓兩者可以共存而不互相干擾。這是 Python 開發的最佳實踐。\""
+      }
+    }
+    
+    ,
+    {
+      "@type": "Question",
+      "name": "\"pip 和 venv 有什麼差別？\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"pip 是 Python 的套件管理器（Package Manager），負責安裝、更新和移除第三方套件，類似 JavaScript 的 npm。venv 是虛擬環境工具（Virtual Environment），負責建立隔離的 Python 執行環境。兩者搭配使用：先用 venv 建立虛擬環境，再用 pip 在該環境中安裝套件。\""
+      }
+    }
+    
+    ,
+    {
+      "@type": "Question",
+      "name": "\"Windows 安裝 Python 時為什麼一定要勾選 Add to PATH？\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"勾選 Add Python to PATH 會將 Python 的執行路徑加入系統環境變數，讓你可以在任何終端機位置直接輸入 python 和 pip 指令。如果沒有勾選，系統會找不到 Python 執行檔，你就必須手動設定環境變數或使用完整路徑來執行 Python。\""
+      }
+    }
+    
+    ,
+    {
+      "@type": "Question",
+      "name": "\"macOS 內建的 Python 可以用來開發 Django 嗎？\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"不建議。macOS 過去內建的是 Python 2.x，而較新版本的 macOS 已經不再預裝 Python。即使系統有 Python 3，版本通常較舊且不適合作為開發環境。建議透過 Homebrew 安裝最新版 Python 3.12+，可以獲得最新功能和安全性更新，也不會影響系統原有的 Python 環境。\""
+      }
+    }
+    
+  ]
+}
+</script>
+
+
+
+
+
+</head>
+<body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class="site-nav" id="siteNav">
+    <div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full">
+        
+        <a href="http://localhost:1313/" class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">
+            BenzHub
+        </a>
+
+        
+        <div class="hidden md:flex items-center gap-6">
+            
+            <a href="/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                首頁
+            </a>
+            
+            <a href="/about/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                關於
+            </a>
+            
+            <a href="/contact/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                聯絡
+            </a>
+            
+            <a href="/resourses/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                資源
+            </a>
+            
+
+            
+            <div class="flex items-center gap-2">
+                <form class="flex items-center" role="search" method="get" action="https://google.com/search" id="navSearchForm">
+                    <input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50"
+                        type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋" id="navSearchInput">
+                    <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
+                </form>
+                <button onclick="toggleNavSearch()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+                    <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                    </svg>
+                </button>
+            </div>
+
+            
+            <span class="text-zinc-200 dark:text-zinc-700">|</span>
+
+            
+            
+
+
+
+
+<div class="lang-switcher relative hidden md:block">
+    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+        <span>🌐</span>
+        <span>繁體中文</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
+        
+            
+            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
+    <div class="flex gap-2">
+        
+            
+            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+            
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon2" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+        </div>
+
+        
+        <div class="flex md:hidden items-center gap-1">
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+            <button id="hamburgerbtn" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Menu">
+                <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    
+    <div class="mobile-menu md:hidden" id="mobileMenu">
+        
+        <a href="/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            首頁
+        </a>
+        
+        <a href="/about/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            關於
+        </a>
+        
+        <a href="/contact/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            聯絡
+        </a>
+        
+        <a href="/resourses/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            資源
+        </a>
+        
+        <form class="mt-2" role="search" method="get" action="https://google.com/search">
+            <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
+            <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
+        </form>
+        
+        
+
+
+
+
+<div class="lang-switcher relative hidden md:block">
+    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+        <span>🌐</span>
+        <span>繁體中文</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
+        
+            
+            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
+    <div class="flex gap-2">
+        
+            
+            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+    </div>
+</nav>
+
+<script>
+    
+    document.getElementById('hamburgerbtn').addEventListener('click', function () {
+        document.getElementById('mobileMenu').classList.toggle('active');
+    });
+
+    
+    window.addEventListener('scroll', function () {
+        var nav = document.getElementById('siteNav');
+        if (window.scrollY > 50) {
+            nav.classList.add('scrolled');
+        } else {
+            nav.classList.remove('scrolled');
+        }
+    });
+
+    
+    function toggleNavSearch() {
+        var input = document.getElementById('navSearchInput');
+        input.classList.toggle('expanded');
+        if (input.classList.contains('expanded')) {
+            input.focus();
+        }
+    }
+
+    
+    function toggleLangMenu() {
+        var dropdown = document.getElementById('langDropdown');
+        dropdown.classList.toggle('hidden');
+    }
+
+    
+    document.addEventListener('click', function (e) {
+        
+        var form = document.getElementById('navSearchForm');
+        var input = document.getElementById('navSearchInput');
+        if (form && input && !form.contains(e.target) && !e.target.closest('[aria-label="Toggle Search"]')) {
+            input.classList.remove('expanded');
+        }
+        
+        var langSwitcher = e.target.closest('.lang-switcher');
+        if (!langSwitcher) {
+            var dropdown = document.getElementById('langDropdown');
+            if (dropdown) dropdown.classList.add('hidden');
+        }
+    });
+</script>
+<div class="nav-spacer"></div>
+    <div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id="content">
+        <div class="lg:mx-5">
+<div class="grid grid-cols-3 gap-6">
+  
+  <div class="col-span-3 lg:col-span-2">
+  
+      
+      <div class="post-detail fade-in my-4">
+        <h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Python 環境安裝與設定 | Django 教學</h1>
+        <div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4">
+            <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/05/22
+            </span>
+            
+            <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                2026/05/21
+            </span>
+            
+        </div>
+        
+        <div class="flex flex-wrap gap-1.5 mb-5">
+            
+            <a href='/tags/python' class="tag-pill no-underline">python</a>
+            
+            <a href='/tags/django' class="tag-pill no-underline">django</a>
+            
+        </div>
+        
+        
+        <img class="py-4 m-auto rounded-lg thumb-img" src="http://localhost:1313/img/django/002-Python-Environment-Setup.png" alt="Python 環境安裝與設定 | Django 教學">
+        
+        
+        <div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote>
+<p>在開始學習 <strong>Django</strong> 之前，第一步是建立一個穩定且正確的 <strong>Python</strong> 開發環境。本篇教學將手把手帶你在 <strong>Windows</strong> 、 <strong>macOS</strong> 與 <strong>Linux</strong> 三大平台安裝 <strong>Python 3.10+</strong> ，並介紹 <strong>pip</strong> 套件管理器、 <strong>venv</strong> 虛擬環境的使用方式，以及 <strong>VS Code</strong> 編輯器的推薦設定，為後續的 Django 開發之旅打下堅實基礎。</p>
+</blockquote>
+<h3 id="為什麼選擇-python-310-以上版本">為什麼選擇 Python 3.10 以上版本</h3>
+<p>Django 5.x 的最低要求是 Python 3.10，而截至 2026 年，Python 最新穩定版本為 3.12+。選擇 3.10 以上版本有幾個重要原因：</p>
+<ul>
+<li><strong>Django 相容性</strong>：Django 5.0 起要求 Python 3.10+，使用較舊版本將無法安裝最新的 Django</li>
+<li><strong>結構化模式比對（Structural Pattern Matching）</strong>：Python 3.10 引入的 <code>match-case</code> 語句讓程式碼更簡潔易讀</li>
+<li><strong>更好的型別提示（Type Hints）</strong>：Python 3.10+ 支援 <code>X | Y</code> 聯合型別語法，取代冗長的 <code>Union[X, Y]</code></li>
+<li><strong>效能改進</strong>：每個新版本都帶來顯著的效能提升</li>
+</ul>
+<p>建議直接安裝目前最新的穩定版 <strong>Python 3.12</strong> ，以獲得最佳的開發體驗。</p>
+<hr>
+<h3 id="windows-安裝-python">Windows 安裝 Python</h3>
+<h4 id="步驟一下載安裝檔">步驟一：下載安裝檔</h4>
+<p>前往 Python 官方網站 <a href="https://www.python.org/downloads/">https://www.python.org/downloads/</a>，點擊「Download Python 3.12.x」按鈕下載 Windows 安裝檔（.exe）。</p>
+<h4 id="步驟二執行安裝程式">步驟二：執行安裝程式</h4>
+<p><strong>重要：安裝時務必勾選底部的「Add python.exe to PATH」選項。</strong> 這個步驟會將 Python 加入系統環境變數（Environment Variable），讓你可以在命令提示字元（Command Prompt）或 PowerShell 中直接使用 <code>python</code> 指令。</p>
+<p>勾選後，點擊「Install Now」即可使用預設設定安裝。如果你需要自訂安裝路徑，可以選擇「Customize installation」。</p>
+<h4 id="步驟三驗證安裝">步驟三：驗證安裝</h4>
+<p>安裝完成後，開啟命令提示字元（按 <code>Win + R</code>，輸入 <code>cmd</code>，按 Enter），執行以下指令：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 檢查 Python 版本</span>
+</span></span><span style="display:flex;"><span>python --version
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出範例：Python 3.12.7</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 檢查 pip 版本</span>
+</span></span><span style="display:flex;"><span>pip --version
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出範例：pip 24.3.1 from C:\Users\...\pip (python 3.12)</span>
+</span></span></code></pre></div><p>如果兩個指令都正確顯示版本號，代表 Python 已成功安裝。</p>
+<h4 id="常見問題排除">常見問題排除</h4>
+<p>如果出現「&lsquo;python&rsquo; 不是內部或外部命令」的錯誤，代表 PATH 未正確設定。你可以：</p>
+<ol>
+<li>重新執行安裝程式，選擇「Modify」並確認勾選「Add Python to environment variables」</li>
+<li>或手動在系統環境變數中加入 Python 的安裝路徑（通常是 <code>C:\Users\你的使用者名稱\AppData\Local\Programs\Python\Python312\</code>）</li>
+</ol>
+<hr>
+<h3 id="macos-安裝-python">macOS 安裝 Python</h3>
+<p>macOS 建議使用 <strong>Homebrew</strong> 套件管理器來安裝 Python，這是 macOS 開發者最常用的方式。</p>
+<h4 id="步驟一安裝-homebrew">步驟一：安裝 Homebrew</h4>
+<p>如果你還沒有安裝 Homebrew，開啟終端機（Terminal），執行以下指令：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 安裝 Homebrew</span>
+</span></span><span style="display:flex;"><span>/bin/bash -c <span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">$(</span>curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span>
+</span></span></code></pre></div><p>安裝完成後，依照終端機提示將 Homebrew 加入 PATH（通常需要執行兩行 <code>eval</code> 指令）。驗證安裝：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 檢查 Homebrew 是否安裝成功</span>
+</span></span><span style="display:flex;"><span>brew --version
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出範例：Homebrew 4.4.x</span>
+</span></span></code></pre></div><h4 id="步驟二使用-homebrew-安裝-python">步驟二：使用 Homebrew 安裝 Python</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 更新 Homebrew 套件清單</span>
+</span></span><span style="display:flex;"><span>brew update
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 安裝最新版 Python</span>
+</span></span><span style="display:flex;"><span>brew install python@3.12
+</span></span></code></pre></div><h4 id="步驟三驗證安裝-1">步驟三：驗證安裝</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 檢查 Python 版本</span>
+</span></span><span style="display:flex;"><span>python3 --version
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出範例：Python 3.12.7</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 檢查 pip 版本</span>
+</span></span><span style="display:flex;"><span>pip3 --version
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出範例：pip 24.3.1 from /opt/homebrew/lib/python3.12/site-packages/pip (python 3.12)</span>
+</span></span></code></pre></div><blockquote>
+<p><strong>注意：</strong> 在 macOS 上，Python 3 的指令預設為 <code>python3</code> 和 <code>pip3</code>。如果你希望直接使用 <code>python</code> 指令，可以在 Shell 設定檔（如 <code>~/.zshrc</code>）中加入別名（Alias）：</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 在 ~/.zshrc 中加入以下內容</span>
+</span></span><span style="display:flex;"><span>alias python<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;python3&#39;</span>
+</span></span><span style="display:flex;"><span>alias pip<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;pip3&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 重新載入設定</span>
+</span></span><span style="display:flex;"><span>source ~/.zshrc
+</span></span></code></pre></div><hr>
+<h3 id="linux-安裝-python">Linux 安裝 Python</h3>
+<p>大多數 Linux 發行版（Distribution）已預裝 Python，但版本可能較舊。以下分別介紹 Ubuntu/Debian 與 Fedora/RHEL 的安裝方式。</p>
+<h4 id="ubuntu--debian-系列使用-apt">Ubuntu / Debian 系列（使用 apt）</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 更新套件清單</span>
+</span></span><span style="display:flex;"><span>sudo apt update
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 安裝 Python 3.12 與相關工具</span>
+</span></span><span style="display:flex;"><span>sudo apt install python3.12 python3.12-venv python3-pip -y
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 驗證安裝</span>
+</span></span><span style="display:flex;"><span>python3.12 --version
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出範例：Python 3.12.7</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>pip3 --version
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出範例：pip 24.x.x from /usr/lib/python3/dist-packages/pip (python 3.12)</span>
+</span></span></code></pre></div><p>如果預設的套件庫（Repository）中沒有 Python 3.12，需要先加入 deadsnakes PPA：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 加入 deadsnakes PPA</span>
+</span></span><span style="display:flex;"><span>sudo add-apt-repository ppa:deadsnakes/ppa -y
+</span></span><span style="display:flex;"><span>sudo apt update
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 安裝 Python 3.12</span>
+</span></span><span style="display:flex;"><span>sudo apt install python3.12 python3.12-venv python3.12-dev -y
+</span></span></code></pre></div><h4 id="fedora--rhel-系列使用-dnf">Fedora / RHEL 系列（使用 dnf）</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 安裝 Python 3.12</span>
+</span></span><span style="display:flex;"><span>sudo dnf install python3.12 python3.12-pip -y
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 驗證安裝</span>
+</span></span><span style="display:flex;"><span>python3.12 --version
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出範例：Python 3.12.7</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>pip3 --version
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出範例：pip 24.x.x from /usr/lib/python3.12/site-packages/pip (python 3.12)</span>
+</span></span></code></pre></div><h4 id="設定預設-python-版本選用">設定預設 Python 版本（選用）</h4>
+<p>如果系統中有多個 Python 版本，可以使用 <code>update-alternatives</code> 來管理預設版本：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 註冊 Python 版本（Ubuntu/Debian）</span>
+</span></span><span style="display:flex;"><span>sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 選擇預設版本</span>
+</span></span><span style="display:flex;"><span>sudo update-alternatives --config python3
+</span></span></code></pre></div><hr>
+<h3 id="pip-套件管理器介紹與使用">pip 套件管理器介紹與使用</h3>
+<p><strong>pip</strong> 是 Python 的標準套件管理器（Package Manager），類似 JavaScript 的 npm 或 Rust 的 cargo。它可以從 <strong>PyPI</strong>（Python Package Index，Python 套件索引）上下載並安裝第三方套件。</p>
+<h4 id="基本指令">基本指令</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 安裝套件</span>
+</span></span><span style="display:flex;"><span>pip install django
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出範例：Successfully installed django-5.1.x</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 安裝指定版本的套件</span>
+</span></span><span style="display:flex;"><span>pip install django<span style="color:#f92672">==</span>5.1.4
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 升級已安裝的套件</span>
+</span></span><span style="display:flex;"><span>pip install --upgrade django
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 查看已安裝的套件清單</span>
+</span></span><span style="display:flex;"><span>pip list
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 查看特定套件的詳細資訊</span>
+</span></span><span style="display:flex;"><span>pip show django
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 移除套件</span>
+</span></span><span style="display:flex;"><span>pip uninstall django
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 將目前環境的套件清單輸出到 requirements.txt</span>
+</span></span><span style="display:flex;"><span>pip freeze &gt; requirements.txt
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 從 requirements.txt 批次安裝套件</span>
+</span></span><span style="display:flex;"><span>pip install -r requirements.txt
+</span></span></code></pre></div><h4 id="升級-pip-本身">升級 pip 本身</h4>
+<p>pip 會不定期更新，建議保持最新版本：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 升級 pip</span>
+</span></span><span style="display:flex;"><span>python -m pip install --upgrade pip
+</span></span></code></pre></div><blockquote>
+<p><strong>最佳實踐：</strong> 建議使用 <code>python -m pip</code> 而非直接使用 <code>pip</code> 指令，這樣可以確保 pip 對應的是正確的 Python 版本，避免在多版本共存的環境中產生混淆。</p>
+</blockquote>
+<hr>
+<h3 id="虛擬環境venv建立與啟用">虛擬環境（venv）建立與啟用</h3>
+<p><strong>venv</strong> 是 Python 內建的虛擬環境（Virtual Environment）模組，它可以為每個專案建立獨立的套件安裝空間。這是 Python 開發中非常重要的最佳實踐。</p>
+<h4 id="為什麼需要虛擬環境">為什麼需要虛擬環境</h4>
+<p>假設你有兩個專案：</p>
+<ul>
+<li>專案 A 使用 Django 4.2</li>
+<li>專案 B 使用 Django 5.1</li>
+</ul>
+<p>如果所有套件都安裝在系統全域（Global）環境中，兩個版本會互相衝突。虛擬環境讓每個專案擁有自己獨立的套件目錄，徹底解決版本衝突問題。</p>
+<h4 id="建立虛擬環境">建立虛擬環境</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 建立一個新的專案資料夾</span>
+</span></span><span style="display:flex;"><span>mkdir my-django-project
+</span></span><span style="display:flex;"><span>cd my-django-project
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 建立虛擬環境（慣例命名為 .venv 或 venv）</span>
+</span></span><span style="display:flex;"><span>python -m venv .venv
+</span></span></code></pre></div><p>執行後，會在專案目錄下產生一個 <code>.venv</code> 資料夾，裡面包含獨立的 Python 直譯器（Interpreter）和套件目錄。</p>
+<h4 id="啟用虛擬環境">啟用虛擬環境</h4>
+<p>啟用方式依作業系統而不同：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Windows（命令提示字元）</span>
+</span></span><span style="display:flex;"><span>.venv<span style="color:#ae81ff">\S</span>cripts<span style="color:#ae81ff">\a</span>ctivate
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Windows（PowerShell）</span>
+</span></span><span style="display:flex;"><span>.venv<span style="color:#ae81ff">\S</span>cripts<span style="color:#ae81ff">\A</span>ctivate.ps1
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># macOS / Linux</span>
+</span></span><span style="display:flex;"><span>source .venv/bin/activate
+</span></span></code></pre></div><p>啟用成功後，終端機的提示符號（Prompt）前方會出現 <code>(.venv)</code> 字樣，表示你已進入虛擬環境：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 啟用前</span>
+</span></span><span style="display:flex;"><span>$ python --version
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 啟用後（注意前方的 (.venv)）</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>.venv<span style="color:#f92672">)</span> $ python --version
+</span></span></code></pre></div><h4 id="在虛擬環境中安裝套件">在虛擬環境中安裝套件</h4>
+<p>啟用虛擬環境後，透過 pip 安裝的套件只會存在於該虛擬環境中，不會影響系統全域環境：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 確認虛擬環境已啟用（提示符號前有 (.venv)）</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>.venv<span style="color:#f92672">)</span> $ pip install django
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 確認 Django 安裝成功</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>.venv<span style="color:#f92672">)</span> $ python -m django --version
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出範例：5.1.4</span>
+</span></span></code></pre></div><h4 id="停用虛擬環境">停用虛擬環境</h4>
+<p>完成工作後，可以輸入以下指令離開虛擬環境：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 停用虛擬環境</span>
+</span></span><span style="display:flex;"><span>deactivate
+</span></span></code></pre></div><h4 id="gitignore-設定">.gitignore 設定</h4>
+<p>虛擬環境資料夾不應該提交到版本控制系統（Version Control System）。確保你的 <code>.gitignore</code> 檔案中包含以下內容：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span># 虛擬環境
+</span></span><span style="display:flex;"><span>.venv/
+</span></span><span style="display:flex;"><span>venv/
+</span></span></code></pre></div><hr>
+<h3 id="vs-code-推薦設定">VS Code 推薦設定</h3>
+<p><strong>Visual Studio Code</strong>（簡稱 VS Code）是目前最受歡迎的程式碼編輯器之一，對 Python 和 Django 開發有極佳的支援。</p>
+<h4 id="必裝擴充套件extensions">必裝擴充套件（Extensions）</h4>
+<ol>
+<li><strong>Python</strong>（Microsoft 官方）：提供語法高亮（Syntax Highlighting）、自動補全（IntelliSense）、程式碼除錯（Debugging）等核心功能</li>
+<li><strong>Pylance</strong>（Microsoft 官方）：Python 語言伺服器（Language Server），提供更快速的型別檢查和程式碼分析</li>
+<li><strong>Django</strong>（Baptiste Darthenay）：Django 模板語法高亮與程式碼片段（Snippets）</li>
+</ol>
+<h4 id="工作區設定">工作區設定</h4>
+<p>在專案根目錄建立 <code>.vscode/settings.json</code>，加入以下推薦設定：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 指定 Python 直譯器路徑（使用虛擬環境）
+</span></span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;python.defaultInterpreterPath&#34;</span>: <span style="color:#e6db74">&#34;${workspaceFolder}/.venv/bin/python&#34;</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 啟用型別檢查
+</span></span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;python.analysis.typeCheckingMode&#34;</span>: <span style="color:#e6db74">&#34;basic&#34;</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 儲存時自動格式化
+</span></span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;editor.formatOnSave&#34;</span>: <span style="color:#66d9ef">true</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 使用 Black 作為格式化工具
+</span></span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;python.formatting.provider&#34;</span>: <span style="color:#e6db74">&#34;black&#34;</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 終端機自動啟用虛擬環境
+</span></span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;python.terminal.activateEnvironment&#34;</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h4 id="選擇-python-直譯器">選擇 Python 直譯器</h4>
+<p>在 VS Code 中按下 <code>Ctrl + Shift + P</code>（macOS 為 <code>Cmd + Shift + P</code>），輸入「Python: Select Interpreter」，選擇虛擬環境中的 Python 直譯器（路徑中包含 <code>.venv</code>）。這樣 VS Code 就會使用虛擬環境來執行和除錯你的程式碼。</p>
+<hr>
+<h3 id="驗證安裝成功">驗證安裝成功</h3>
+<p>完成以上所有步驟後，讓我們做一個完整的驗證，確認開發環境已正確建立：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 1. 檢查 Python 版本</span>
+</span></span><span style="display:flex;"><span>python --version
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 預期輸出：Python 3.12.x（3.10 以上即可）</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 2. 檢查 pip 版本</span>
+</span></span><span style="display:flex;"><span>pip --version
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 預期輸出：pip 24.x.x from ... (python 3.12)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 3. 建立並啟用虛擬環境</span>
+</span></span><span style="display:flex;"><span>mkdir django-test <span style="color:#f92672">&amp;&amp;</span> cd django-test
+</span></span><span style="display:flex;"><span>python -m venv .venv
+</span></span><span style="display:flex;"><span>source .venv/bin/activate  <span style="color:#75715e"># Windows 使用 .venv\Scripts\activate</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 4. 在虛擬環境中安裝 Django</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>.venv<span style="color:#f92672">)</span> $ pip install django
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 5. 驗證 Django 安裝</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>.venv<span style="color:#f92672">)</span> $ python -m django --version
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 預期輸出：5.1.x</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 6. 快速測試 Django 是否正常運作</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>.venv<span style="color:#f92672">)</span> $ django-admin startproject testproject
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>.venv<span style="color:#f92672">)</span> $ cd testproject
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>.venv<span style="color:#f92672">)</span> $ python manage.py runserver
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 預期輸出：Starting development server at http://127.0.0.1:8000/</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 在瀏覽器開啟 http://127.0.0.1:8000/ 應該看到 Django 歡迎頁面</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 7. 按 Ctrl + C 停止伺服器，清理測試專案</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>.venv<span style="color:#f92672">)</span> $ cd ..
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>.venv<span style="color:#f92672">)</span> $ rm -rf testproject
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 8. 停用虛擬環境</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>.venv<span style="color:#f92672">)</span> $ deactivate
+</span></span></code></pre></div><p>如果以上步驟都順利完成，恭喜你，Python 開發環境已經準備就緒，可以正式開始 Django 的學習之旅了。</p>
+<hr>
+<h3 id="總結">總結</h3>
+<p>本篇教學涵蓋了 Django 開發所需的 Python 環境建置全流程：</p>
+<ul>
+<li><strong>版本選擇</strong>：建議安裝 Python 3.10+（推薦 3.12），以確保與 Django 5.x 相容</li>
+<li><strong>跨平台安裝</strong>：Windows 使用官方安裝檔（記得勾選 Add to PATH）、macOS 使用 Homebrew、Linux 使用系統套件管理器（apt 或 dnf）</li>
+<li><strong>pip 套件管理器</strong>：掌握 <code>install</code>、<code>list</code>、<code>freeze</code>、<code>uninstall</code> 等核心指令</li>
+<li><strong>venv 虛擬環境</strong>：為每個專案建立獨立的套件空間，避免版本衝突</li>
+<li><strong>VS Code 設定</strong>：安裝 Python 與 Django 相關擴充套件，配置直譯器路徑與格式化工具</li>
+</ul>
+<p>環境建置是開發的第一步，也是最容易被忽略的一步。一個正確設定的開發環境能讓你在後續的學習過程中少走很多彎路。下一篇我們將正式進入 Django 的世界，建立你的第一個 Django 專案。</p></div>
+        
+        
+
+        
+        <div class="mt-8">
+          
+<div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose">
+  <div>
+    <div class="flex items-center gap-2 mb-1">
+      <a href="/about" class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">
+        BenZ
+      </a>
+      
+      <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span>
+      
+    </div>
+    <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">
+      熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。
+    </p>
+    <div class="flex items-center gap-3">
+      
+      <a href="https://github.com/benzhub" target="_blank" rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label="GitHub">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      
+      
+      
+    </div>
+  </div>
+</div>
+
+        </div>
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        
+
+
+<div>
+  <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3>
+  <div class="grid gap-2">
+    
+    <a href="http://localhost:1313/post/django/001-what-is-web-development/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">什麼是 Web 開發？前端、後端、全端入門 | Django 教學</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/05/21</span>
+    </a>
+    
+    <a href="http://localhost:1313/post/python/036-regular-expressions/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Python 正規表達式（Regular Expressions）入門 | Python</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/04/30</span>
+    </a>
+    
+    <a href="http://localhost:1313/post/python/037-async-await/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Python 非同步程式設計（Async/Await）入門 | Python</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/04/30</span>
+    </a>
+    
+  </div>
+</div>
+
+
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            
+            <a href="http://localhost:1313/post/django/001-what-is-web-development/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+                <span class="text-sm font-medium">什麼是 Web 開發？前端、後端、全端入門 | Django 教學</span>
+            </a>
+            
+          </div>
+          <div>
+            
+            <a href="http://localhost:1313/post/django/003-python-basics-for-django/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+                <span class="text-sm font-medium">Python 基礎語法速覽：給 Django 學習者的快速入門 | Django 教學</span>
+            </a>
+            
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        
+<script src="https://giscus.app/client.js"
+        data-repo="benzhub/benzhub.github.io"
+        data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM="
+        data-category="Announcements"
+        data-category-id="MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme="preferred_color_scheme"
+        data-lang="zh-TW"
+        crossorigin="anonymous"
+        async>
+</script>
+
+
+      </div>
+    </div>
+    
+    <div class="hidden lg:block lg:col-span-1 mt-4">
+    
+    
+            
+            <div class="widget fade-in">
+    <p class="widget-title">搜尋</p>
+    <form role="search" method="get" action="https://google.com/search">
+        <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
+        <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
+    </form>
+</div>
+
+        
+            
+            
+
+        
+            
+            
+<div class="widget fade-in">
+    <p class="widget-title">標籤</p>
+    <div class="flex flex-wrap gap-1.5">
+        <a href='/tags/80/20-%E6%B3%95%E5%89%87'>
+            <span class="tag-pill">80/20 法則</span>
+        </a>
+        <a href='/tags/acid'>
+            <span class="tag-pill">acid</span>
+        </a>
+        <a href='/tags/ai'>
+            <span class="tag-pill">ai</span>
+        </a>
+        <a href='/tags/ai-agent'>
+            <span class="tag-pill">ai agent</span>
+        </a>
+        <a href='/tags/ai-workflow'>
+            <span class="tag-pill">ai workflow</span>
+        </a>
+        <a href='/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE'>
+            <span class="tag-pill">ai 工具焦慮</span>
+        </a>
+        <a href='/tags/ai-%E6%8E%A5%E5%96%AE'>
+            <span class="tag-pill">ai 接單</span>
+        </a>
+        <a href='/tags/ai-%E7%B9%AA%E5%9C%96'>
+            <span class="tag-pill">ai 繪圖</span>
+        </a>
+        <a href='/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA'>
+            <span class="tag-pill">ai 虛擬人</span>
+        </a>
+        <a href='/tags/ai-%E8%A1%8C%E9%8A%B7'>
+            <span class="tag-pill">ai 行銷</span>
+        </a>
+        <a href='/tags/ai-%E8%A8%AD%E8%A8%88'>
+            <span class="tag-pill">ai 設計</span>
+        </a>
+        <a href='/tags/ai-%E8%AE%8A%E7%8F%BE'>
+            <span class="tag-pill">ai 變現</span>
+        </a>
+        <a href='/tags/ai-%E8%B3%BA%E9%8C%A2'>
+            <span class="tag-pill">ai 賺錢</span>
+        </a>
+        <a href='/tags/ai-income'>
+            <span class="tag-pill">ai-income</span>
+        </a>
+        <a href='/tags/ai-insights'>
+            <span class="tag-pill">ai-insights</span>
+        </a>
+        <a href='/tags/api'>
+            <span class="tag-pill">api</span>
+        </a>
+        <a href='/tags/architecture'>
+            <span class="tag-pill">architecture</span>
+        </a>
+        <a href='/tags/autovacuum'>
+            <span class="tag-pill">autovacuum</span>
+        </a>
+        <a href='/tags/background-processes'>
+            <span class="tag-pill">background-processes</span>
+        </a>
+        <a href='/tags/big-o'>
+            <span class="tag-pill">big o</span>
+        </a>
+    </div>
+</div>
+
+
+        
+            
+            
+<div class="widget fade-in">
+    <p class="widget-title">文章系列</p>
+    <div class="flex flex-wrap gap-1.5">
+        
+        
+        
+        
+        <a href='/post/postgresql/'>
+            <span class="tag-pill">PostgreSQL (13)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/javascript/'>
+            <span class="tag-pill">JavaScript (68)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/django/'>
+            <span class="tag-pill">Django (30)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/python/'>
+            <span class="tag-pill">Python (37)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/htmlcss/'>
+            <span class="tag-pill">HTML &amp; CSS (23)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/linux/'>
+            <span class="tag-pill">Linux (22)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/git/'>
+            <span class="tag-pill">Git (18)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/ai-insights/'>
+            <span class="tag-pill">AI Insights (13)</span>
+        </a>
+        
+        
+    </div>
+</div>
+
+
+        
+            
+            
+
+<div class="widget fade-in">
+    <p class="widget-title">最新文章</p>
+    <div class="flex flex-col gap-1">
+        <a href="/post/postgresql/013-ddl-schema/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/19
+            </p>
+        </a>
+        <a href="/post/django/030-django-custom-user-model/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django 自訂使用者模型：AbstractUser 與 AbstractBaseUser | Django 教學</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/19
+            </p>
+        </a>
+        <a href="/post/javascript/data-structures--algorithms/006-heap-priority-queue/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">堆積與優先佇列 — Min/Max Heap 原理與 Heap Sort 完整實作 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/19
+            </p>
+        </a>
+        <a href="/post/django/029-django-authentication/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Authentication 使用者認證系統完全指南 | Django 教學</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/18
+            </p>
+        </a>
+        <a href="/post/postgresql/012-data-types/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/18
+            </p>
+        </a>
+    </div>
+</div>
+
+        
+    
+</div>
+
+    
+</div>
+
+        </div>
+    </div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]">
+    
+    <p>&copy; 2026 <a href="http://localhost:1313/" class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p>
+</footer>
+
+
+<script>
+    (function (window, document) {
+        function main() {
+            var ad = document.createElement('script');
+            ad.async = true;
+            ad.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606';
+            ad.crossOrigin = "anonymous";
+            var sc = document.getElementsByTagName('script')[0];
+            sc.parentNode.insertBefore(ad, sc);
+        }
+        var lazyLoad = false;
+        function onLazyLoad() {
+            if (lazyLoad === false) {
+                lazyLoad = true;
+                window.removeEventListener('scroll', onLazyLoad);
+                window.removeEventListener('mousemove', onLazyLoad);
+                window.removeEventListener('mousedown', onLazyLoad);
+                window.removeEventListener('touchstart', onLazyLoad);
+                window.removeEventListener('keydown', onLazyLoad);
+                main();
+            }
+        }
+        window.addEventListener('scroll', onLazyLoad);
+        window.addEventListener('mousemove', onLazyLoad);
+        window.addEventListener('mousedown', onLazyLoad);
+        window.addEventListener('touchstart', onLazyLoad);
+        window.addEventListener('keydown', onLazyLoad);
+        window.addEventListener('load', function () {
+            if (window.pageYOffset) {
+                onLazyLoad();
+                window.setTimeout(onLazyLoad, 3000);
+            }
+        });
+    })(window, document);
+</script>
+
+
+<script>
+    
+    var icon = document.getElementById("icon");
+    var icon2 = document.getElementById("icon2");
+    if (document.documentElement.classList.contains("dark") || localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+        if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+    function toggleDarkMode() {
+        if (document.documentElement.classList.contains('dark')) {
+            if (icon) { icon.classList.remove("icon-sun"); icon.classList.add("icon-moon"); }
+            if (icon2) { icon2.classList.remove("icon-sun"); icon2.classList.add("icon-moon"); }
+            document.documentElement.classList.remove('dark');
+            localStorage.theme = 'light';
+        } else {
+            if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+            if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+            document.documentElement.classList.add('dark');
+            localStorage.theme = 'dark';
+        }
+    }
+
+    
+    document.addEventListener('DOMContentLoaded', function () {
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0 });
+
+        document.querySelectorAll('.fade-in').forEach(function (el) {
+            observer.observe(el);
+        });
+    });
+</script>
+</body>
+
+</html>

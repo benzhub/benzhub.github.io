@@ -1,183 +1,744 @@
-<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>Gateway 是什麼？網路閘道器完整教學 | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="Gateway 是什麼？網路閘道器完整教學 | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="Gateway 閘道器白話教學！封包轉發原理、預設閘道設定、路由表查看、ARP 解析流程完整圖解。含 NAT 轉換、雲端 VPC Gateway、Linux/macOS/Windows 操作範例與常見問題排查。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="Gateway 閘道器白話教學！封包轉發原理、預設閘道設定、路由表查看、ARP 解析流程完整圖解。含 NAT 轉換、雲端 VPC Gateway、Linux/macOS/Windows 操作範例與常見問題排查。"><meta property="og:url" content="https://benzhub.github.io/post/networking/003-what-is-gateway/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/networking/003-what-is-gateway/><meta name=twitter:description content="Gateway 閘道器白話教學！封包轉發原理、預設閘道設定、路由表查看、ARP 解析流程完整圖解。含 NAT 轉換、雲端 VPC Gateway、Linux/macOS/Windows 操作範例與常見問題排查。"><meta property="article:published_time" content="2026-04-27T00:00:00+00:00"><meta property="article:updated_time" content="2026-05-16T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/networking/003-What-is-Gateway.png"><meta property="og:image:url" content="https://benzhub.github.io/img/networking/003-What-is-Gateway.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
-<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/networking/003-what-is-gateway/><link rel=alternate hreflang=zh-CN href=https://benzhub.github.io/zh-cn/post/networking/003-what-is-gateway/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/networking/003-what-is-gateway/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"Gateway 是什麼？網路閘道器完整教學\"","description":"\"Gateway 閘道器白話教學！封包轉發原理、預設閘道設定、路由表查看、ARP 解析流程完整圖解。含 NAT 轉換、雲端 VPC Gateway、Linux/macOS/Windows 操作範例與常見問題排查。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-04-27T00:00:00\u002b00:00","dateModified":"2026-05-16T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/networking\/003-What-is-Gateway.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/networking\/003-what-is-gateway\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/networking\/"},{"@type":"ListItem","position":3,"name":"\"Gateway 是什麼？網路閘道器完整教學\""}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"\"Gateway 和 Router 有什麼不同？\"","acceptedAnswer":{"@type":"Answer","text":"\"在家用環境中兩者通常是同一台設備。Router（路由器）是設備名稱，Gateway（閘道器）是功能描述——指網路的出口點。企業環境中 Gateway 可能是獨立的防火牆或負載均衡器。\""}},{"@type":"Question","name":"\"為什麼需要 Default Gateway？\"","acceptedAnswer":{"@type":"Answer","text":"\"你的電腦使用私有 IP（如 192.168.1.100），無法直接在網際網路上路由。Default Gateway 負責透過 NAT 將私有 IP 轉換為公有 IP，並在區域網路和網際網路之間橋接封包。沒有 Gateway 就無法連外網。\""}},{"@type":"Question","name":"\"怎麼查看我的 Gateway IP？\"","acceptedAnswer":{"@type":"Answer","text":"\"Linux 使用 ip route show default，macOS 使用 netstat -nr | grep default 或 route get default，Windows 使用 ipconfig 查看「預設閘道」欄位。\""}},{"@type":"Question","name":"\"ping Gateway 沒回應怎麼辦？\"","acceptedAnswer":{"@type":"Answer","text":"\"先確認 IP 和 Gateway 在同一網段（例如都是 192.168.1.x/24）。再檢查網路線是否連接、路由器是否開機。若路由器正常但禁 ping，改用 arping 測試二層連通性。\""}},{"@type":"Question","name":"\"可以設定多個 Gateway 嗎？\"","acceptedAnswer":{"@type":"Answer","text":"\"可以，但需要搭配策略路由（Policy Routing）。一般設備只設一個 Default Gateway，多條線路時透過 ip rule 和路由表分流不同目的地的流量。\""}},{"@type":"Question","name":"\"Gateway 和 NAT 是什麼關係？\"","acceptedAnswer":{"@type":"Answer","text":"\"Gateway 負責轉發跨網段封包，NAT（Network Address Translation）是 Gateway 上的功能之一，將區域網路的私有 IP 轉換為公有 IP 讓內部設備能上網。家用路由器同時兼任 Gateway 和 NAT 設備。\""}}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
-</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
-</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
-</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
-<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
-<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-<span>🌐</span>
-<span>繁體中文</span>
-<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
-<a href=https://benzhub.github.io/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-<a href=https://benzhub.github.io/zh-cn/post/networking/003-what-is-gateway/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
-<a href=https://benzhub.github.io/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-<a href=https://benzhub.github.io/zh-cn/post/networking/003-what-is-gateway/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
-</button>
-<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
-<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
-</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
-</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
-</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
-<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-<span>🌐</span>
-<span>繁體中文</span>
-<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
-<a href=https://benzhub.github.io/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-<a href=https://benzhub.github.io/zh-cn/post/networking/003-what-is-gateway/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
-<a href=https://benzhub.github.io/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-<a href=https://benzhub.github.io/zh-cn/post/networking/003-what-is-gateway/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Gateway 是什麼？網路閘道器完整教學</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/04/27
-</span><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001.0 004.582 9m0 0H9m11 11v-5h-.581m0 0A8.003 8.003.0 014.062 13m15.357 2H15"/></svg>
-2026/05/16</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/networking class="tag-pill no-underline">networking</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/networking/003-What-is-Gateway.png alt="Gateway 是什麼？網路閘道器完整教學"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p>Gateway（閘道器）是網路通訊中負責「跨網段轉發封包」的關鍵設備。當你的電腦要連上網際網路，或是與不同子網路的設備通訊，封包都必須先經過 Gateway。本文用白話解說 Gateway 的定義、運作原理、查看與設定方式，並示範常見問題排查。</p></blockquote><p>更多網路基礎概念，請參考 <a href=/post/networking/001-macaddress-ip-subnetmask-gateway/>IP、Subnet Mask、Gateway 完整教學</a>。</p><h2 id=什麼是-gateway>什麼是 Gateway？</h2><h3 id=gateway-的定義>Gateway 的定義</h3><p>Gateway（閘道器，也稱為預設閘道，Default Gateway）是一台在不同網路之間<strong>轉發封包</strong>的設備，通常就是你家裡或公司的路由器（Router）。</p><p>用生活中的例子來比喻：假設你住在台北，要寄一封信給高雄的朋友。你不會直接跑去高雄投遞，而是先把信投進附近的郵筒（Gateway），再由郵局系統（網際網路路由）一站一站地把信送到目的地。Gateway 扮演的就是這個「第一個郵筒」的角色——你只需要知道它在哪裡，剩下的路由工作交給它處理。</p><h3 id=default-gateway預設閘道>Default Gateway（預設閘道）</h3><p>在實際設定中，我們通常設定的是 <strong>Default Gateway（預設閘道）</strong>。它的意思是：當設備的路由表中找不到更精確的路由規則時，就把封包送到這個預設的 Gateway，由它決定下一步怎麼走。</p><p>家用環境中，Default Gateway 幾乎都是你的 Wi-Fi 路由器，常見 IP 為：</p><ul><li><code>192.168.1.1</code>（最常見）</li><li><code>192.168.0.1</code></li><li><code>10.0.0.1</code></li></ul><p>你可以把 Default Gateway 理解成你的網路「出口」：所有要離開你的區域網路的流量，都要先經過它。</p><hr><h2 id=gateway-的運作原理>Gateway 的運作原理</h2><h3 id=封包轉發的決策步驟>封包轉發的決策步驟</h3><p>當你的電腦（假設 IP 為 <code>192.168.1.100/24</code>）要發送一個封包到目標 IP，以下是系統的判斷流程：</p><p><strong>步驟 1：判斷目標是否在同一個網段</strong></p><p>電腦會用自己的 Subnet Mask（<code>255.255.255.0</code>）對自己的 IP 和目標 IP 各做一次 AND 位元運算：</p><pre tabindex=0><code>自己的網路位址：
+<!DOCTYPE html>
+
+<html lang="zh-TW">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><title>Gateway 是什麼？網路閘道器完整教學 | BenzHub</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="apple-touch-icon" sizes="180x180" href='/favicon/apple-touch-icon.png'>
+    <link rel="icon" type="image/png" sizes="32x32" href='/favicon/favicon-32x32.png'>
+    <link rel="icon" type="image/png" sizes="16x16" href='/favicon/favicon-16x16.png'>
+    <link rel="manifest" href='/favicon/site.webmanifest' />
+    <link rel="mask-icon" href=' /favicon/safari-pinned-tab.svg' color="#5bbad5" />
+    <link rel="shortcut icon" href='/favicon/favicon.ico' />
+    <meta name="theme-color" content="#fafafa">
+    <meta property="og:title" content="Gateway 是什麼？網路閘道器完整教學 | BenzHub" />
+    
+    
+    <link rel="stylesheet" href="/css/style.css" />
+    
+    <link href=' /css/blonde.min.css' rel="stylesheet" type="text/css" media="print"
+        onload="this.media=' all'">
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+
+<meta name="description" content="Gateway 閘道器白話教學！封包轉發原理、預設閘道設定、路由表查看、ARP 解析流程完整圖解。含 NAT 轉換、雲端 VPC Gateway、Linux/macOS/Windows 操作範例與常見問題排查。">
+<meta property="og:site_name" content="BenzHub">
+<meta property="og:description" content="Gateway 閘道器白話教學！封包轉發原理、預設閘道設定、路由表查看、ARP 解析流程完整圖解。含 NAT 轉換、雲端 VPC Gateway、Linux/macOS/Windows 操作範例與常見問題排查。">
+<meta property="og:url" content="http://localhost:1313/post/networking/003-what-is-gateway/">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="zh_TW">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="">
+
+<link rel="canonical" href="http://localhost:1313/post/networking/003-what-is-gateway/">
+
+<meta name="twitter:description" content="Gateway 閘道器白話教學！封包轉發原理、預設閘道設定、路由表查看、ARP 解析流程完整圖解。含 NAT 轉換、雲端 VPC Gateway、Linux/macOS/Windows 操作範例與常見問題排查。">
+<meta property="article:published_time" content="2026-04-27T00:00:00&#43;00:00">
+<meta property="article:updated_time" content="2026-05-16T00:00:00&#43;00:00">
+
+
+
+
+
+    
+<meta property="og:image" content="http://localhost:1313/img/networking/003-What-is-Gateway.png">
+<meta property="og:image:url" content="http://localhost:1313/img/networking/003-What-is-Gateway.png">
+    
+
+    
+    <link rel="stylesheet" href='/css/custom.css'>
+    <i class="dark hidden"></i>
+    
+<link rel="alternate" hreflang="zh-TW" href="http://localhost:1313/post/networking/003-what-is-gateway/" />
+
+<link rel="alternate" hreflang="zh-CN" href="http://localhost:1313/zh-cn/post/networking/003-what-is-gateway/" />
+
+<link rel="alternate" hreflang="x-default" href="http://localhost:1313/post/networking/003-what-is-gateway/" />
+
+    
+
+
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "\"Gateway 是什麼？網路閘道器完整教學\"",
+  "description": "\"Gateway 閘道器白話教學！封包轉發原理、預設閘道設定、路由表查看、ARP 解析流程完整圖解。含 NAT 轉換、雲端 VPC Gateway、Linux/macOS/Windows 操作範例與常見問題排查。\"",
+  "author": {
+    "@type": "Person",
+    "name": "\"BenzHub\"",
+    "url": "http:\/\/localhost:1313\/about",
+    "jobTitle": "\"Software Developer\"",
+    "sameAs": [
+      "\"https://github.com/benzhub\""
+    ]
+  },
+  "datePublished": "2026-04-27T00:00:00\u002b00:00",
+  "dateModified": "2026-05-16T00:00:00\u002b00:00",
+  "image": "http:\/\/localhost:1313\/img\/networking\/003-What-is-Gateway.png",
+  "publisher": {
+    "@type": "Organization",
+    "name": "\"BenzHub\"",
+    "url": "\"http://localhost:1313/\"",
+    "sameAs": [
+      "\"https://github.com/benzhub\""
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http:\/\/localhost:1313\/post\/networking\/003-what-is-gateway\/"
+  },
+  "inLanguage": "zh-TW"
+}
+</script>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "\"BenzHub\"",
+      "item": "http:\/\/localhost:1313\/"
+    }
+    
+    
+      
+      
+    ,{
+      "@type": "ListItem",
+      "position": 2,
+      "name": "\"Blog\"",
+      "item": "http:\/\/localhost:1313\/post\/networking\/"
+    }
+      
+      
+    
+    ,{
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "\"Gateway 是什麼？網路閘道器完整教學\""
+    }
+  ]
+}
+</script>
+
+
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    
+    
+    {
+      "@type": "Question",
+      "name": "\"Gateway 和 Router 有什麼不同？\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"在家用環境中兩者通常是同一台設備。Router（路由器）是設備名稱，Gateway（閘道器）是功能描述——指網路的出口點。企業環境中 Gateway 可能是獨立的防火牆或負載均衡器。\""
+      }
+    }
+    
+    ,
+    {
+      "@type": "Question",
+      "name": "\"為什麼需要 Default Gateway？\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"你的電腦使用私有 IP（如 192.168.1.100），無法直接在網際網路上路由。Default Gateway 負責透過 NAT 將私有 IP 轉換為公有 IP，並在區域網路和網際網路之間橋接封包。沒有 Gateway 就無法連外網。\""
+      }
+    }
+    
+    ,
+    {
+      "@type": "Question",
+      "name": "\"怎麼查看我的 Gateway IP？\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Linux 使用 ip route show default，macOS 使用 netstat -nr | grep default 或 route get default，Windows 使用 ipconfig 查看「預設閘道」欄位。\""
+      }
+    }
+    
+    ,
+    {
+      "@type": "Question",
+      "name": "\"ping Gateway 沒回應怎麼辦？\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"先確認 IP 和 Gateway 在同一網段（例如都是 192.168.1.x/24）。再檢查網路線是否連接、路由器是否開機。若路由器正常但禁 ping，改用 arping 測試二層連通性。\""
+      }
+    }
+    
+    ,
+    {
+      "@type": "Question",
+      "name": "\"可以設定多個 Gateway 嗎？\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"可以，但需要搭配策略路由（Policy Routing）。一般設備只設一個 Default Gateway，多條線路時透過 ip rule 和路由表分流不同目的地的流量。\""
+      }
+    }
+    
+    ,
+    {
+      "@type": "Question",
+      "name": "\"Gateway 和 NAT 是什麼關係？\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Gateway 負責轉發跨網段封包，NAT（Network Address Translation）是 Gateway 上的功能之一，將區域網路的私有 IP 轉換為公有 IP 讓內部設備能上網。家用路由器同時兼任 Gateway 和 NAT 設備。\""
+      }
+    }
+    
+  ]
+}
+</script>
+
+
+
+
+
+</head>
+<body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class="site-nav" id="siteNav">
+    <div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full">
+        
+        <a href="http://localhost:1313/" class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">
+            BenzHub
+        </a>
+
+        
+        <div class="hidden md:flex items-center gap-6">
+            
+            <a href="/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                首頁
+            </a>
+            
+            <a href="/about/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                關於
+            </a>
+            
+            <a href="/contact/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                聯絡
+            </a>
+            
+            <a href="/resourses/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                資源
+            </a>
+            
+
+            
+            <div class="flex items-center gap-2">
+                <form class="flex items-center" role="search" method="get" action="https://google.com/search" id="navSearchForm">
+                    <input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50"
+                        type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋" id="navSearchInput">
+                    <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
+                </form>
+                <button onclick="toggleNavSearch()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+                    <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                    </svg>
+                </button>
+            </div>
+
+            
+            <span class="text-zinc-200 dark:text-zinc-700">|</span>
+
+            
+            
+
+
+    
+
+
+
+<div class="lang-switcher relative hidden md:block">
+    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+        <span>🌐</span>
+        <span>繁體中文</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
+        
+            
+            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/zh-cn/post/networking/003-what-is-gateway/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
+    <div class="flex gap-2">
+        
+            
+            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/zh-cn/post/networking/003-what-is-gateway/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+            
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon2" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+        </div>
+
+        
+        <div class="flex md:hidden items-center gap-1">
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+            <button id="hamburgerbtn" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Menu">
+                <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    
+    <div class="mobile-menu md:hidden" id="mobileMenu">
+        
+        <a href="/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            首頁
+        </a>
+        
+        <a href="/about/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            關於
+        </a>
+        
+        <a href="/contact/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            聯絡
+        </a>
+        
+        <a href="/resourses/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            資源
+        </a>
+        
+        <form class="mt-2" role="search" method="get" action="https://google.com/search">
+            <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
+            <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
+        </form>
+        
+        
+
+
+    
+
+
+
+<div class="lang-switcher relative hidden md:block">
+    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+        <span>🌐</span>
+        <span>繁體中文</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
+        
+            
+            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/zh-cn/post/networking/003-what-is-gateway/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
+    <div class="flex gap-2">
+        
+            
+            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="http://localhost:1313/zh-cn/post/networking/003-what-is-gateway/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+    </div>
+</nav>
+
+<script>
+    
+    document.getElementById('hamburgerbtn').addEventListener('click', function () {
+        document.getElementById('mobileMenu').classList.toggle('active');
+    });
+
+    
+    window.addEventListener('scroll', function () {
+        var nav = document.getElementById('siteNav');
+        if (window.scrollY > 50) {
+            nav.classList.add('scrolled');
+        } else {
+            nav.classList.remove('scrolled');
+        }
+    });
+
+    
+    function toggleNavSearch() {
+        var input = document.getElementById('navSearchInput');
+        input.classList.toggle('expanded');
+        if (input.classList.contains('expanded')) {
+            input.focus();
+        }
+    }
+
+    
+    function toggleLangMenu() {
+        var dropdown = document.getElementById('langDropdown');
+        dropdown.classList.toggle('hidden');
+    }
+
+    
+    document.addEventListener('click', function (e) {
+        
+        var form = document.getElementById('navSearchForm');
+        var input = document.getElementById('navSearchInput');
+        if (form && input && !form.contains(e.target) && !e.target.closest('[aria-label="Toggle Search"]')) {
+            input.classList.remove('expanded');
+        }
+        
+        var langSwitcher = e.target.closest('.lang-switcher');
+        if (!langSwitcher) {
+            var dropdown = document.getElementById('langDropdown');
+            if (dropdown) dropdown.classList.add('hidden');
+        }
+    });
+</script>
+<div class="nav-spacer"></div>
+    <div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id="content">
+        <div class="lg:mx-5">
+<div class="grid grid-cols-3 gap-6">
+  
+  <div class="col-span-3 lg:col-span-2">
+  
+      
+      <div class="post-detail fade-in my-4">
+        <h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Gateway 是什麼？網路閘道器完整教學</h1>
+        <div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4">
+            <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/04/27
+            </span>
+            
+            <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                2026/05/16
+            </span>
+            
+        </div>
+        
+        <div class="flex flex-wrap gap-1.5 mb-5">
+            
+            <a href='/tags/networking' class="tag-pill no-underline">networking</a>
+            
+        </div>
+        
+        
+        <img class="py-4 m-auto rounded-lg thumb-img" src="http://localhost:1313/img/networking/003-What-is-Gateway.png" alt="Gateway 是什麼？網路閘道器完整教學">
+        
+        
+        <div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote>
+<p>Gateway（閘道器）是網路通訊中負責「跨網段轉發封包」的關鍵設備。當你的電腦要連上網際網路，或是與不同子網路的設備通訊，封包都必須先經過 Gateway。本文用白話解說 Gateway 的定義、運作原理、查看與設定方式，並示範常見問題排查。</p>
+</blockquote>
+<p>更多網路基礎概念，請參考 <a href="/post/networking/001-macaddress-ip-subnetmask-gateway/">IP、Subnet Mask、Gateway 完整教學</a>。</p>
+<h2 id="什麼是-gateway">什麼是 Gateway？</h2>
+<h3 id="gateway-的定義">Gateway 的定義</h3>
+<p>Gateway（閘道器，也稱為預設閘道，Default Gateway）是一台在不同網路之間<strong>轉發封包</strong>的設備，通常就是你家裡或公司的路由器（Router）。</p>
+<p>用生活中的例子來比喻：假設你住在台北，要寄一封信給高雄的朋友。你不會直接跑去高雄投遞，而是先把信投進附近的郵筒（Gateway），再由郵局系統（網際網路路由）一站一站地把信送到目的地。Gateway 扮演的就是這個「第一個郵筒」的角色——你只需要知道它在哪裡，剩下的路由工作交給它處理。</p>
+<h3 id="default-gateway預設閘道">Default Gateway（預設閘道）</h3>
+<p>在實際設定中，我們通常設定的是 <strong>Default Gateway（預設閘道）</strong>。它的意思是：當設備的路由表中找不到更精確的路由規則時，就把封包送到這個預設的 Gateway，由它決定下一步怎麼走。</p>
+<p>家用環境中，Default Gateway 幾乎都是你的 Wi-Fi 路由器，常見 IP 為：</p>
+<ul>
+<li><code>192.168.1.1</code>（最常見）</li>
+<li><code>192.168.0.1</code></li>
+<li><code>10.0.0.1</code></li>
+</ul>
+<p>你可以把 Default Gateway 理解成你的網路「出口」：所有要離開你的區域網路的流量，都要先經過它。</p>
+<hr>
+<h2 id="gateway-的運作原理">Gateway 的運作原理</h2>
+<h3 id="封包轉發的決策步驟">封包轉發的決策步驟</h3>
+<p>當你的電腦（假設 IP 為 <code>192.168.1.100/24</code>）要發送一個封包到目標 IP，以下是系統的判斷流程：</p>
+<p><strong>步驟 1：判斷目標是否在同一個網段</strong></p>
+<p>電腦會用自己的 Subnet Mask（<code>255.255.255.0</code>）對自己的 IP 和目標 IP 各做一次 AND 位元運算：</p>
+<pre tabindex="0"><code>自己的網路位址：
 192.168.1.100 AND 255.255.255.0 = 192.168.1.0
 
 目標 IP 142.250.185.78 的網路位址：
 142.250.185.78 AND 255.255.255.0 = 142.250.185.0
 
 兩個結果不同 → 不在同一個網段
-</code></pre><p><strong>步驟 2：同網段 — 直接 ARP 查詢</strong></p><p>如果目標 IP 和自己在同一個網段（例如目標是 <code>192.168.1.200</code>），電腦會發送 ARP（Address Resolution Protocol）廣播，詢問「誰的 IP 是 192.168.1.200？請告訴我你的 MAC Address」，然後直接在區域網路內傳送。</p><p><strong>步驟 3：不同網段 — 送往 Gateway</strong></p><p>如果目標不在同一個網段，電腦查詢路由表，找到 Default Gateway（<code>192.168.1.1</code>），用 ARP 查出路由器的 MAC Address，然後把封包的目標 MAC Address 填成路由器的 MAC，將封包送給路由器。</p><p><strong>步驟 4：Gateway 查詢路由表繼續轉發</strong></p><p>路由器收到封包後，查詢自己的路由表，決定下一個 hop（跳點）是哪裡，再往前傳。這個過程在網際網路上會重複多次，直到封包抵達目的地。</p><h3 id=路由表routing-table>路由表（Routing Table）</h3><p>路由表是每台設備（包含路由器和一般電腦）都有的一份清單，記錄了「要到達某個網段，應該往哪個方向送」。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># Linux 查看路由表</span>
-</span></span><span style=display:flex><span>ip route show
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 典型輸出</span>
-</span></span><span style=display:flex><span>default via 192.168.1.1 dev eth0 proto dhcp src 192.168.1.100 metric <span style=color:#ae81ff>100</span>
-</span></span><span style=display:flex><span><span style=color:#75715e># ↑ default = 所有找不到精確路由的封包，都送到 192.168.1.1（Gateway）</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>192.168.1.0/24 dev eth0 proto kernel scope link src 192.168.1.100
-</span></span><span style=display:flex><span><span style=color:#75715e># ↑ 目標是 192.168.1.0/24 網段的封包，直接從 eth0 介面送出（不需要 Gateway）</span>
-</span></span></code></pre></div><p>路由表的匹配規則是<strong>最長前綴匹配（Longest Prefix Match）</strong>：越精確的路由規則優先級越高，只有在所有規則都不符合時，才會落到 <code>default</code> 那條（也就是送往 Gateway）。</p><hr><h2 id=如何查看你的-gateway>如何查看你的 Gateway</h2><h3 id=linux使用-ip-route>Linux（使用 <code>ip route</code>）</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 方法一：查看完整路由表</span>
-</span></span><span style=display:flex><span>ip route show
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 方法二：只看預設路由（Gateway）</span>
-</span></span><span style=display:flex><span>ip route show default
-</span></span><span style=display:flex><span><span style=color:#75715e># 輸出範例</span>
-</span></span><span style=display:flex><span><span style=color:#75715e># default via 192.168.1.1 dev eth0</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 方法三：舊版指令（部分系統仍支援）</span>
-</span></span><span style=display:flex><span>route -n
-</span></span><span style=display:flex><span><span style=color:#75715e># 輸出範例</span>
-</span></span><span style=display:flex><span><span style=color:#75715e># Destination     Gateway         Genmask         Flags Metric Ref    Use Iface</span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 0.0.0.0         192.168.1.1     0.0.0.0         UG    100    0        0 eth0</span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 192.168.1.0     0.0.0.0         255.255.255.0   U     100    0        0 eth0</span>
-</span></span><span style=display:flex><span><span style=color:#75715e># Destination 為 0.0.0.0（代表 default），Gateway 欄位就是 192.168.1.1</span>
-</span></span></code></pre></div><h3 id=macos使用-netstat--nr>macOS（使用 <code>netstat -nr</code>）</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 查看路由表，-n 不解析主機名稱，-r 顯示路由</span>
-</span></span><span style=display:flex><span>netstat -nr
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 或者只看 IPv4 預設路由</span>
-</span></span><span style=display:flex><span>netstat -nr | grep default
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 輸出範例</span>
-</span></span><span style=display:flex><span><span style=color:#75715e># default            192.168.1.1        UGScg          en0</span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 第二欄 192.168.1.1 就是 Gateway</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># macOS 也可以用</span>
-</span></span><span style=display:flex><span>route get default
-</span></span><span style=display:flex><span><span style=color:#75715e># 輸出範例</span>
-</span></span><span style=display:flex><span><span style=color:#75715e>#    route to: default</span>
-</span></span><span style=display:flex><span><span style=color:#75715e># destination: default</span>
-</span></span><span style=display:flex><span><span style=color:#75715e>#        mask: default</span>
-</span></span><span style=display:flex><span><span style=color:#75715e>#     gateway: 192.168.1.1     ← 這就是 Gateway</span>
-</span></span><span style=display:flex><span><span style=color:#75715e>#   interface: en0</span>
-</span></span></code></pre></div><h3 id=windows使用-ipconfig>Windows（使用 <code>ipconfig</code>）</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-cmd data-lang=cmd><span style=display:flex><span># 查看網路設定，包含 Gateway
-</span></span><span style=display:flex><span>ipconfig
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span># 輸出範例
-</span></span><span style=display:flex><span># 無線區域網路介面卡 Wi-Fi:
-</span></span><span style=display:flex><span>#    連線特定 DNS 尾碼 . . . . . .:
-</span></span><span style=display:flex><span>#    IPv4 位址 . . . . . . . . . . : 192.168.1.100
-</span></span><span style=display:flex><span>#    子網路遮罩 . . . . . . . . . . : 255.255.255.0
-</span></span><span style=display:flex><span>#    預設閘道 . . . . . . . . . . . : 192.168.1.1
-</span></span><span style=display:flex><span>#    ↑ 「預設閘道」就是 Gateway
-</span></span></code></pre></div><hr><h2 id=如何設定-gateway>如何設定 Gateway</h2><h3 id=臨時設定重開機後失效>臨時設定（重開機後失效）</h3><p>這種方式適合臨時測試，重開機或重啟網路服務後設定就會消失。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 新增預設路由（設定 Gateway）</span>
-</span></span><span style=display:flex><span>sudo ip route add default via 192.168.1.1 dev eth0
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 如果已有預設路由，需要先刪除再新增</span>
-</span></span><span style=display:flex><span>sudo ip route del default
-</span></span><span style=display:flex><span>sudo ip route add default via 192.168.1.1 dev eth0
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 驗證</span>
-</span></span><span style=display:flex><span>ip route show default
-</span></span></code></pre></div><h3 id=永久設定ubuntu使用-netplan>永久設定（Ubuntu，使用 Netplan）</h3><p>Ubuntu 18.04 以後使用 Netplan 管理網路設定，設定為永久生效。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 找到 Netplan 設定檔</span>
-</span></span><span style=display:flex><span>ls /etc/netplan/
-</span></span><span style=display:flex><span><span style=color:#75715e># 通常是 01-netcfg.yaml 或 00-installer-config.yaml</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 編輯設定檔</span>
-</span></span><span style=display:flex><span>sudo nano /etc/netplan/01-netcfg.yaml
-</span></span></code></pre></div><p>設定靜態 IP 和 Gateway 的範例：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#f92672>network</span>:
-</span></span><span style=display:flex><span>  <span style=color:#f92672>version</span>: <span style=color:#ae81ff>2</span>
-</span></span><span style=display:flex><span>  <span style=color:#f92672>ethernets</span>:
-</span></span><span style=display:flex><span>    <span style=color:#f92672>eth0</span>:
-</span></span><span style=display:flex><span>      <span style=color:#f92672>dhcp4</span>: <span style=color:#66d9ef>false</span>                    <span style=color:#75715e># 關閉自動取得 IP</span>
-</span></span><span style=display:flex><span>      <span style=color:#f92672>addresses</span>:
-</span></span><span style=display:flex><span>        - <span style=color:#ae81ff>192.168.1.100</span><span style=color:#ae81ff>/24           </span> <span style=color:#75715e># 靜態 IP（CIDR 格式）</span>
-</span></span><span style=display:flex><span>      <span style=color:#f92672>routes</span>:
-</span></span><span style=display:flex><span>        - <span style=color:#f92672>to</span>: <span style=color:#ae81ff>default</span>
-</span></span><span style=display:flex><span>          <span style=color:#f92672>via</span>: <span style=color:#ae81ff>192.168.1.1</span>            <span style=color:#75715e># 設定 Gateway</span>
-</span></span><span style=display:flex><span>      <span style=color:#f92672>nameservers</span>:
-</span></span><span style=display:flex><span>        <span style=color:#f92672>addresses</span>:
-</span></span><span style=display:flex><span>          - <span style=color:#ae81ff>8.8.8.8</span>                   <span style=color:#75715e># DNS 伺服器</span>
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 套用設定（立即生效）</span>
-</span></span><span style=display:flex><span>sudo netplan apply
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 驗證</span>
-</span></span><span style=display:flex><span>ip route show
-</span></span></code></pre></div><h3 id=永久設定centosrhel使用-nmcli>永久設定（CentOS/RHEL，使用 nmcli）</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 查看目前連線名稱</span>
-</span></span><span style=display:flex><span>nmcli connection show
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 設定 Gateway</span>
-</span></span><span style=display:flex><span>nmcli connection modify eth0 ipv4.gateway 192.168.1.1
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 重新連線套用設定</span>
-</span></span><span style=display:flex><span>nmcli connection up eth0
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 驗證</span>
-</span></span><span style=display:flex><span>ip route show
-</span></span></code></pre></div><p>Gateway 需要搭配 Subnet Mask 使用，詳見 <a href=/post/networking/004-what-is-subnet-mask/>Subnet Mask 是什麼？</a>。</p><hr><h2 id=gateway-常見問題排查>Gateway 常見問題排查</h2><h3 id=問題-1無法連上網際網路>問題 1：無法連上網際網路</h3><p>當你無法上網時，先確認 Gateway 是否可達：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 步驟 1：先確認自己有 IP 位址</span>
-</span></span><span style=display:flex><span>ip addr show
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 步驟 2：查看 Gateway IP</span>
-</span></span><span style=display:flex><span>ip route show default
-</span></span><span style=display:flex><span><span style=color:#75715e># 記下 via 後面的 IP（例如 192.168.1.1）</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 步驟 3：ping Gateway，確認區域網路通訊正常</span>
-</span></span><span style=display:flex><span>ping -c <span style=color:#ae81ff>4</span> 192.168.1.1
-</span></span><span style=display:flex><span><span style=color:#75715e># 如果有回應：Gateway 可達，問題可能在 Gateway 以外（ISP 或 DNS）</span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 如果沒有回應：Gateway 不可達，問題在區域網路層面</span>
-</span></span></code></pre></div><h3 id=問題-2ping-gateway-沒有回應>問題 2：ping Gateway 沒有回應</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 確認自己的 IP 和 Gateway 在同一個網段</span>
-</span></span><span style=display:flex><span>ip addr show eth0
-</span></span><span style=display:flex><span><span style=color:#75715e># 例如 IP 是 192.168.1.100/24，那 Gateway 應該是 192.168.1.x</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 確認路由表正確</span>
-</span></span><span style=display:flex><span>ip route show
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 如果 Gateway 設定錯誤，重新設定</span>
-</span></span><span style=display:flex><span>sudo ip route del default
-</span></span><span style=display:flex><span>sudo ip route add default via 192.168.1.1  <span style=color:#75715e># 替換成正確的 Gateway IP</span>
-</span></span></code></pre></div><h3 id=問題-3使用-traceroute-追蹤封包路徑>問題 3：使用 traceroute 追蹤封包路徑</h3><p><code>traceroute</code> 可以顯示封包從你的電腦出發，每經過一個路由器（hop）的 IP 和延遲：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># Linux/macOS</span>
-</span></span><span style=display:flex><span>traceroute google.com
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># Windows</span>
-</span></span><span style=display:flex><span>tracert google.com
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 輸出範例（簡化）</span>
-</span></span><span style=display:flex><span><span style=color:#75715e># traceroute to google.com (142.250.185.78), 30 hops max</span>
-</span></span><span style=display:flex><span><span style=color:#75715e>#  1  192.168.1.1 (192.168.1.1)   2.345 ms   ← 第一跳就是你的 Gateway</span>
-</span></span><span style=display:flex><span><span style=color:#75715e>#  2  10.20.30.1 (10.20.30.1)    15.234 ms   ← ISP 的路由器</span>
-</span></span><span style=display:flex><span><span style=color:#75715e>#  3  ...</span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 10  142.250.185.78              30.123 ms   ← 目標伺服器</span>
-</span></span></code></pre></div><p>第一個 hop 通常就是你的 Gateway（家用路由器）。如果第一跳就逾時（<code>* * *</code>），代表 Gateway 有問題。</p><h3 id=問題-4no-route-to-host錯誤>問題 4：「No route to host」錯誤</h3><p>這個錯誤通常代表路由表中沒有可以到達目標 IP 的路由：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 查看路由表確認有 default 路由</span>
-</span></span><span style=display:flex><span>ip route show
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 如果沒有 default 路由，新增它</span>
-</span></span><span style=display:flex><span>sudo ip route add default via 192.168.1.1
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e># 確認 Gateway 本身可達</span>
-</span></span><span style=display:flex><span>ping -c <span style=color:#ae81ff>2</span> 192.168.1.1
-</span></span></code></pre></div><hr><h2 id=gateway-與-nat-轉換>Gateway 與 NAT 轉換</h2><p>家用路由器除了當 Gateway 轉發封包，還負責 <strong>NAT（Network Address Translation）</strong> —— 將區域網路的私有 IP 轉換為公有 IP，讓所有內部設備共用一個公網 IP 上網。</p><h3 id=nat-的運作流程>NAT 的運作流程</h3><pre tabindex=0><code>你的電腦                   路由器（Gateway + NAT）           Internet
+</code></pre><p><strong>步驟 2：同網段 — 直接 ARP 查詢</strong></p>
+<p>如果目標 IP 和自己在同一個網段（例如目標是 <code>192.168.1.200</code>），電腦會發送 ARP（Address Resolution Protocol）廣播，詢問「誰的 IP 是 192.168.1.200？請告訴我你的 MAC Address」，然後直接在區域網路內傳送。</p>
+<p><strong>步驟 3：不同網段 — 送往 Gateway</strong></p>
+<p>如果目標不在同一個網段，電腦查詢路由表，找到 Default Gateway（<code>192.168.1.1</code>），用 ARP 查出路由器的 MAC Address，然後把封包的目標 MAC Address 填成路由器的 MAC，將封包送給路由器。</p>
+<p><strong>步驟 4：Gateway 查詢路由表繼續轉發</strong></p>
+<p>路由器收到封包後，查詢自己的路由表，決定下一個 hop（跳點）是哪裡，再往前傳。這個過程在網際網路上會重複多次，直到封包抵達目的地。</p>
+<h3 id="路由表routing-table">路由表（Routing Table）</h3>
+<p>路由表是每台設備（包含路由器和一般電腦）都有的一份清單，記錄了「要到達某個網段，應該往哪個方向送」。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Linux 查看路由表</span>
+</span></span><span style="display:flex;"><span>ip route show
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 典型輸出</span>
+</span></span><span style="display:flex;"><span>default via 192.168.1.1 dev eth0 proto dhcp src 192.168.1.100 metric <span style="color:#ae81ff">100</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># ↑ default = 所有找不到精確路由的封包，都送到 192.168.1.1（Gateway）</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>192.168.1.0/24 dev eth0 proto kernel scope link src 192.168.1.100
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># ↑ 目標是 192.168.1.0/24 網段的封包，直接從 eth0 介面送出（不需要 Gateway）</span>
+</span></span></code></pre></div><p>路由表的匹配規則是<strong>最長前綴匹配（Longest Prefix Match）</strong>：越精確的路由規則優先級越高，只有在所有規則都不符合時，才會落到 <code>default</code> 那條（也就是送往 Gateway）。</p>
+<hr>
+<h2 id="如何查看你的-gateway">如何查看你的 Gateway</h2>
+<h3 id="linux使用-ip-route">Linux（使用 <code>ip route</code>）</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 方法一：查看完整路由表</span>
+</span></span><span style="display:flex;"><span>ip route show
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 方法二：只看預設路由（Gateway）</span>
+</span></span><span style="display:flex;"><span>ip route show default
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出範例</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># default via 192.168.1.1 dev eth0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 方法三：舊版指令（部分系統仍支援）</span>
+</span></span><span style="display:flex;"><span>route -n
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出範例</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Destination     Gateway         Genmask         Flags Metric Ref    Use Iface</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 0.0.0.0         192.168.1.1     0.0.0.0         UG    100    0        0 eth0</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 192.168.1.0     0.0.0.0         255.255.255.0   U     100    0        0 eth0</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Destination 為 0.0.0.0（代表 default），Gateway 欄位就是 192.168.1.1</span>
+</span></span></code></pre></div><h3 id="macos使用-netstat--nr">macOS（使用 <code>netstat -nr</code>）</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 查看路由表，-n 不解析主機名稱，-r 顯示路由</span>
+</span></span><span style="display:flex;"><span>netstat -nr
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 或者只看 IPv4 預設路由</span>
+</span></span><span style="display:flex;"><span>netstat -nr | grep default
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出範例</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># default            192.168.1.1        UGScg          en0</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 第二欄 192.168.1.1 就是 Gateway</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># macOS 也可以用</span>
+</span></span><span style="display:flex;"><span>route get default
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出範例</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#    route to: default</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># destination: default</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#        mask: default</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#     gateway: 192.168.1.1     ← 這就是 Gateway</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#   interface: en0</span>
+</span></span></code></pre></div><h3 id="windows使用-ipconfig">Windows（使用 <code>ipconfig</code>）</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cmd" data-lang="cmd"><span style="display:flex;"><span># 查看網路設定，包含 Gateway
+</span></span><span style="display:flex;"><span>ipconfig
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span># 輸出範例
+</span></span><span style="display:flex;"><span># 無線區域網路介面卡 Wi-Fi:
+</span></span><span style="display:flex;"><span>#    連線特定 DNS 尾碼 . . . . . .:
+</span></span><span style="display:flex;"><span>#    IPv4 位址 . . . . . . . . . . : 192.168.1.100
+</span></span><span style="display:flex;"><span>#    子網路遮罩 . . . . . . . . . . : 255.255.255.0
+</span></span><span style="display:flex;"><span>#    預設閘道 . . . . . . . . . . . : 192.168.1.1
+</span></span><span style="display:flex;"><span>#    ↑ 「預設閘道」就是 Gateway
+</span></span></code></pre></div><hr>
+<h2 id="如何設定-gateway">如何設定 Gateway</h2>
+<h3 id="臨時設定重開機後失效">臨時設定（重開機後失效）</h3>
+<p>這種方式適合臨時測試，重開機或重啟網路服務後設定就會消失。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 新增預設路由（設定 Gateway）</span>
+</span></span><span style="display:flex;"><span>sudo ip route add default via 192.168.1.1 dev eth0
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 如果已有預設路由，需要先刪除再新增</span>
+</span></span><span style="display:flex;"><span>sudo ip route del default
+</span></span><span style="display:flex;"><span>sudo ip route add default via 192.168.1.1 dev eth0
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 驗證</span>
+</span></span><span style="display:flex;"><span>ip route show default
+</span></span></code></pre></div><h3 id="永久設定ubuntu使用-netplan">永久設定（Ubuntu，使用 Netplan）</h3>
+<p>Ubuntu 18.04 以後使用 Netplan 管理網路設定，設定為永久生效。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 找到 Netplan 設定檔</span>
+</span></span><span style="display:flex;"><span>ls /etc/netplan/
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 通常是 01-netcfg.yaml 或 00-installer-config.yaml</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 編輯設定檔</span>
+</span></span><span style="display:flex;"><span>sudo nano /etc/netplan/01-netcfg.yaml
+</span></span></code></pre></div><p>設定靜態 IP 和 Gateway 的範例：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">network</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">version</span>: <span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">ethernets</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">eth0</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">dhcp4</span>: <span style="color:#66d9ef">false</span>                    <span style="color:#75715e"># 關閉自動取得 IP</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">addresses</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#ae81ff">192.168.1.100</span><span style="color:#ae81ff">/24           </span> <span style="color:#75715e"># 靜態 IP（CIDR 格式）</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">routes</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">to</span>: <span style="color:#ae81ff">default</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">via</span>: <span style="color:#ae81ff">192.168.1.1</span>            <span style="color:#75715e"># 設定 Gateway</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">nameservers</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">addresses</span>:
+</span></span><span style="display:flex;"><span>          - <span style="color:#ae81ff">8.8.8.8</span>                   <span style="color:#75715e"># DNS 伺服器</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 套用設定（立即生效）</span>
+</span></span><span style="display:flex;"><span>sudo netplan apply
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 驗證</span>
+</span></span><span style="display:flex;"><span>ip route show
+</span></span></code></pre></div><h3 id="永久設定centosrhel使用-nmcli">永久設定（CentOS/RHEL，使用 nmcli）</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 查看目前連線名稱</span>
+</span></span><span style="display:flex;"><span>nmcli connection show
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 設定 Gateway</span>
+</span></span><span style="display:flex;"><span>nmcli connection modify eth0 ipv4.gateway 192.168.1.1
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 重新連線套用設定</span>
+</span></span><span style="display:flex;"><span>nmcli connection up eth0
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 驗證</span>
+</span></span><span style="display:flex;"><span>ip route show
+</span></span></code></pre></div><p>Gateway 需要搭配 Subnet Mask 使用，詳見 <a href="/post/networking/004-what-is-subnet-mask/">Subnet Mask 是什麼？</a>。</p>
+<hr>
+<h2 id="gateway-常見問題排查">Gateway 常見問題排查</h2>
+<h3 id="問題-1無法連上網際網路">問題 1：無法連上網際網路</h3>
+<p>當你無法上網時，先確認 Gateway 是否可達：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 步驟 1：先確認自己有 IP 位址</span>
+</span></span><span style="display:flex;"><span>ip addr show
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 步驟 2：查看 Gateway IP</span>
+</span></span><span style="display:flex;"><span>ip route show default
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 記下 via 後面的 IP（例如 192.168.1.1）</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 步驟 3：ping Gateway，確認區域網路通訊正常</span>
+</span></span><span style="display:flex;"><span>ping -c <span style="color:#ae81ff">4</span> 192.168.1.1
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 如果有回應：Gateway 可達，問題可能在 Gateway 以外（ISP 或 DNS）</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 如果沒有回應：Gateway 不可達，問題在區域網路層面</span>
+</span></span></code></pre></div><h3 id="問題-2ping-gateway-沒有回應">問題 2：ping Gateway 沒有回應</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 確認自己的 IP 和 Gateway 在同一個網段</span>
+</span></span><span style="display:flex;"><span>ip addr show eth0
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 例如 IP 是 192.168.1.100/24，那 Gateway 應該是 192.168.1.x</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 確認路由表正確</span>
+</span></span><span style="display:flex;"><span>ip route show
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 如果 Gateway 設定錯誤，重新設定</span>
+</span></span><span style="display:flex;"><span>sudo ip route del default
+</span></span><span style="display:flex;"><span>sudo ip route add default via 192.168.1.1  <span style="color:#75715e"># 替換成正確的 Gateway IP</span>
+</span></span></code></pre></div><h3 id="問題-3使用-traceroute-追蹤封包路徑">問題 3：使用 traceroute 追蹤封包路徑</h3>
+<p><code>traceroute</code> 可以顯示封包從你的電腦出發，每經過一個路由器（hop）的 IP 和延遲：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Linux/macOS</span>
+</span></span><span style="display:flex;"><span>traceroute google.com
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Windows</span>
+</span></span><span style="display:flex;"><span>tracert google.com
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出範例（簡化）</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># traceroute to google.com (142.250.185.78), 30 hops max</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#  1  192.168.1.1 (192.168.1.1)   2.345 ms   ← 第一跳就是你的 Gateway</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#  2  10.20.30.1 (10.20.30.1)    15.234 ms   ← ISP 的路由器</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#  3  ...</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 10  142.250.185.78              30.123 ms   ← 目標伺服器</span>
+</span></span></code></pre></div><p>第一個 hop 通常就是你的 Gateway（家用路由器）。如果第一跳就逾時（<code>* * *</code>），代表 Gateway 有問題。</p>
+<h3 id="問題-4no-route-to-host錯誤">問題 4：「No route to host」錯誤</h3>
+<p>這個錯誤通常代表路由表中沒有可以到達目標 IP 的路由：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 查看路由表確認有 default 路由</span>
+</span></span><span style="display:flex;"><span>ip route show
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 如果沒有 default 路由，新增它</span>
+</span></span><span style="display:flex;"><span>sudo ip route add default via 192.168.1.1
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 確認 Gateway 本身可達</span>
+</span></span><span style="display:flex;"><span>ping -c <span style="color:#ae81ff">2</span> 192.168.1.1
+</span></span></code></pre></div><hr>
+<h2 id="gateway-與-nat-轉換">Gateway 與 NAT 轉換</h2>
+<p>家用路由器除了當 Gateway 轉發封包，還負責 <strong>NAT（Network Address Translation）</strong> —— 將區域網路的私有 IP 轉換為公有 IP，讓所有內部設備共用一個公網 IP 上網。</p>
+<h3 id="nat-的運作流程">NAT 的運作流程</h3>
+<pre tabindex="0"><code>你的電腦                   路由器（Gateway + NAT）           Internet
 192.168.1.100:54321  →  [來源 IP 替換為公有 IP]  →  203.75.100.50:54321  →  8.8.8.8:443
                      ←  [目標 IP 還原為私有 IP]  ←  203.75.100.50:54321  ←  8.8.8.8:443
-</code></pre><pre tabindex=0><code>NAT 轉換表（路由器內部維護）：
+</code></pre><pre tabindex="0"><code>NAT 轉換表（路由器內部維護）：
 ┌──────────────────────┬─────────────────────────┬───────────────┐
 │ 內部位址              │ 外部位址                 │ 目標           │
 ├──────────────────────┼─────────────────────────┼───────────────┤
@@ -185,7 +746,10 @@
 │ 192.168.1.101:60001  │ 203.75.100.50:60001     │ 8.8.8.8:443   │
 │ 192.168.1.102:45678  │ 203.75.100.50:45678     │ 1.1.1.1:53    │
 └──────────────────────┴─────────────────────────┴───────────────┘
-</code></pre><p>路由器靠「來源 Port」區分不同內部設備的連線，這就是為什麼多台電腦能同時上網卻只用一個公有 IP。</p><h3 id=封包經過-gateway-時的-mac-位址變化>封包經過 Gateway 時的 MAC 位址變化</h3><p>封包穿過 Gateway 時，<strong>IP 位址不變（NAT 情況除外），但 MAC 位址會被改寫</strong>：</p><pre tabindex=0><code>PC (192.168.1.100) → 路由器 (192.168.1.1) → 目標 (142.250.185.78)
+</code></pre><p>路由器靠「來源 Port」區分不同內部設備的連線，這就是為什麼多台電腦能同時上網卻只用一個公有 IP。</p>
+<h3 id="封包經過-gateway-時的-mac-位址變化">封包經過 Gateway 時的 MAC 位址變化</h3>
+<p>封包穿過 Gateway 時，<strong>IP 位址不變（NAT 情況除外），但 MAC 位址會被改寫</strong>：</p>
+<pre tabindex="0"><code>PC (192.168.1.100) → 路由器 (192.168.1.1) → 目標 (142.250.185.78)
 
 第一段（LAN 內）：
   來源 MAC: PC 的 MAC
@@ -198,7 +762,47 @@
   目標 MAC: 下一跳路由器的 MAC  ← 每一跳都會改變
   來源 IP:  203.75.100.50      ← NAT 後的公有 IP
   目標 IP:  142.250.185.78
-</code></pre><p>這就是為什麼 Gateway 需要先透過 ARP 查詢取得下一跳的 MAC 位址。</p><hr><h2 id=雲端環境中的-gateway>雲端環境中的 Gateway</h2><p>在 AWS、GCP、Azure 等雲端環境中，Gateway 的概念被延伸為多種類型：</p><table><thead><tr><th>Gateway 類型</th><th>用途</th><th>對應場景</th></tr></thead><tbody><tr><td>Internet Gateway（IGW）</td><td>VPC 連接 Internet 的出口</td><td>公有子網路的 EC2 上網</td></tr><tr><td>NAT Gateway</td><td>讓私有子網路存取 Internet</td><td>私有 EC2 下載套件、更新</td></tr><tr><td>Virtual Private Gateway</td><td>VPC 連接 VPN / Direct Connect</td><td>混合雲架構</td></tr><tr><td>Transit Gateway</td><td>多個 VPC 間的中樞路由</td><td>大型企業多帳號架構</td></tr><tr><td>API Gateway</td><td>HTTP API 的統一入口</td><td>微服務架構的 API 管理</td></tr></tbody></table><pre tabindex=0><code>雲端 VPC 架構中的 Gateway：
+</code></pre><p>這就是為什麼 Gateway 需要先透過 ARP 查詢取得下一跳的 MAC 位址。</p>
+<hr>
+<h2 id="雲端環境中的-gateway">雲端環境中的 Gateway</h2>
+<p>在 AWS、GCP、Azure 等雲端環境中，Gateway 的概念被延伸為多種類型：</p>
+<table>
+	<thead>
+			<tr>
+					<th>Gateway 類型</th>
+					<th>用途</th>
+					<th>對應場景</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Internet Gateway（IGW）</td>
+					<td>VPC 連接 Internet 的出口</td>
+					<td>公有子網路的 EC2 上網</td>
+			</tr>
+			<tr>
+					<td>NAT Gateway</td>
+					<td>讓私有子網路存取 Internet</td>
+					<td>私有 EC2 下載套件、更新</td>
+			</tr>
+			<tr>
+					<td>Virtual Private Gateway</td>
+					<td>VPC 連接 VPN / Direct Connect</td>
+					<td>混合雲架構</td>
+			</tr>
+			<tr>
+					<td>Transit Gateway</td>
+					<td>多個 VPC 間的中樞路由</td>
+					<td>大型企業多帳號架構</td>
+			</tr>
+			<tr>
+					<td>API Gateway</td>
+					<td>HTTP API 的統一入口</td>
+					<td>微服務架構的 API 管理</td>
+			</tr>
+	</tbody>
+</table>
+<pre tabindex="0"><code>雲端 VPC 架構中的 Gateway：
 
 ┌─────────────────────────────────────────────────────┐
 │ VPC: 10.0.0.0/16                                    │
@@ -218,44 +822,438 @@
 │  │ DB Server                 │   (VPN/專線)         │
 │  └─────────────────────────┘                        │
 └─────────────────────────────────────────────────────┘
-</code></pre><blockquote><p><strong>要點</strong>：雲端的路由表設定方式和 Linux 相似，只是透過 Console/CLI 設定。例如 AWS 中將 <code>0.0.0.0/0</code> 指向 Internet Gateway 等同於 Linux 中 <code>ip route add default via &lt;gateway-ip></code>。</p></blockquote><hr><h2 id=常見問題faq>常見問題（FAQ）</h2><h3 id=q1-路由器和-gateway-是同一件事嗎>Q1: 路由器和 Gateway 是同一件事嗎？</h3><p>在家用環境中，兩者通常指的是同一台設備。路由器（Router）是<strong>設備名稱</strong>，Gateway（閘道器）是<strong>功能描述</strong>。你家的路由器同時承擔了 Gateway（對外連線的出口）、DHCP 伺服器（分配 IP 給區域網路設備）、DNS 轉發等多種功能。在企業網路中，Gateway 可能是獨立的防火牆設備，和一般的路由器分開。</p><h3 id=q2-為什麼需要-default-gateway直接連網際網路不行嗎>Q2: 為什麼需要 Default Gateway？直接連網際網路不行嗎？</h3><p>你的電腦連接的是<strong>區域網路（LAN）</strong>，區域網路使用的是私有 IP（如 <code>192.168.1.100</code>），這個 IP 在網際網路上是無效的。Default Gateway（路由器）負責：</p><ol><li>把你的私有 IP 透過 NAT 轉換成公有 IP</li><li>在你的封包和網際網路之間做橋接</li><li>管理進出的流量（防火牆功能）</li></ol><p>如果沒有設定 Default Gateway，你的電腦就像一個沒有出口的房間，只能和同一個房間（同一個網段）裡的設備通訊。</p><h3 id=q3-可以設定多個-gateway-嗎>Q3: 可以設定多個 Gateway 嗎？</h3><p>可以，但需要搭配路由規則（Policy Routing）管理。一般情況下，一台設備只設定一個 Default Gateway（預設所有流量走這條）。如果有多條網路連線（例如同時接了兩個 ISP），可以透過路由表設定不同目標網段走不同的 Gateway，或是使用 <code>ip rule</code> 設定更進階的策略路由。這在企業或伺服器環境中較常見，家用環境幾乎不需要。</p><hr><p>延伸閱讀：</p><ul><li><a href=/post/networking/001-macaddress-ip-subnetmask-gateway/>IP、Subnet Mask、Gateway 完整教學</a> — 網路基礎三劍客一篇搞懂</li><li><a href=/post/networking/004-what-is-subnet-mask/>Subnet Mask 是什麼？</a> — 搞懂子網路遮罩與 CIDR 劃分</li><li><a href=/post/linux/022-cron-job/>Cron Job 完整教學</a> — 用排程自動監控 Gateway 可達性</li><li><a href=/post/javascript/039-backoff-strategy/>Backoff 退避策略教學</a> — 網路請求失敗時的重試與退避機制</li></ul></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
-</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/networking/004-what-is-subnet-mask/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Subnet Mask 是什麼？子網路遮罩白話教學</span>
-<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/04/27</span>
-</a><a href=https://benzhub.github.io/post/javascript/039-backoff-strategy/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Backoff 退避策略是什麼？Exponential Backoff 指數退避完整教學</span>
-<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2024/01/08</span>
-</a><a href=https://benzhub.github.io/post/javascript/038-frontend-polling/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">前端 Polling 輪詢技術：JavaScript 實作完整教學</span>
-<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2024/01/08</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/networking/004-what-is-subnet-mask/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
-<span class="text-sm font-medium">Subnet Mask 是什麼？子網路遮罩白話教學</span></a></div><div><a href=https://benzhub.github.io/post/networking/005-osi-model/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
-<span class="text-sm font-medium">OSI 七層模型完全解析：從實體層到應用層 | Networking</span></a></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
-<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
-</a><a href=/tags/acid><span class=tag-pill>acid</span>
-</a><a href=/tags/ai><span class=tag-pill>ai</span>
-</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
-</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
-</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
-</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
-</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
-</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
-</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
-</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
-</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
-</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
-</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
-</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
-</a><a href=/tags/api><span class=tag-pill>api</span>
-</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
-</a><a href=/tags/autovacuum><span class=tag-pill>autovacuum</span>
-</a><a href=/tags/background-processes><span class=tag-pill>background-processes</span>
-</a><a href=/tags/big-o><span class=tag-pill>big o</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (12)</span>
-</a><a href=/post/javascript/><span class=tag-pill>JavaScript (67)</span>
-</a><a href=/post/django/><span class=tag-pill>Django (29)</span>
-</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
-</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
-</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
-</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
-</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/django/029-django-authentication/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Authentication 使用者認證系統完全指南 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/18</p></a><a href=/post/postgresql/012-data-types/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/18</p></a><a href=/post/javascript/data-structures--algorithms/005-hash-table/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">雜湊表 — Hash Table 原理、碰撞處理與實作完整指南 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/18</p></a><a href=/post/django/028-django-middleware/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Middleware 中介軟體原理與實作 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/17</p></a><a href=/post/postgresql/011-background-processes/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">背景進程：PostgreSQL 的幕後工作者們 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-2026/06/17</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>
+</code></pre><blockquote>
+<p><strong>要點</strong>：雲端的路由表設定方式和 Linux 相似，只是透過 Console/CLI 設定。例如 AWS 中將 <code>0.0.0.0/0</code> 指向 Internet Gateway 等同於 Linux 中 <code>ip route add default via &lt;gateway-ip&gt;</code>。</p>
+</blockquote>
+<hr>
+<h2 id="常見問題faq">常見問題（FAQ）</h2>
+<h3 id="q1-路由器和-gateway-是同一件事嗎">Q1: 路由器和 Gateway 是同一件事嗎？</h3>
+<p>在家用環境中，兩者通常指的是同一台設備。路由器（Router）是<strong>設備名稱</strong>，Gateway（閘道器）是<strong>功能描述</strong>。你家的路由器同時承擔了 Gateway（對外連線的出口）、DHCP 伺服器（分配 IP 給區域網路設備）、DNS 轉發等多種功能。在企業網路中，Gateway 可能是獨立的防火牆設備，和一般的路由器分開。</p>
+<h3 id="q2-為什麼需要-default-gateway直接連網際網路不行嗎">Q2: 為什麼需要 Default Gateway？直接連網際網路不行嗎？</h3>
+<p>你的電腦連接的是<strong>區域網路（LAN）</strong>，區域網路使用的是私有 IP（如 <code>192.168.1.100</code>），這個 IP 在網際網路上是無效的。Default Gateway（路由器）負責：</p>
+<ol>
+<li>把你的私有 IP 透過 NAT 轉換成公有 IP</li>
+<li>在你的封包和網際網路之間做橋接</li>
+<li>管理進出的流量（防火牆功能）</li>
+</ol>
+<p>如果沒有設定 Default Gateway，你的電腦就像一個沒有出口的房間，只能和同一個房間（同一個網段）裡的設備通訊。</p>
+<h3 id="q3-可以設定多個-gateway-嗎">Q3: 可以設定多個 Gateway 嗎？</h3>
+<p>可以，但需要搭配路由規則（Policy Routing）管理。一般情況下，一台設備只設定一個 Default Gateway（預設所有流量走這條）。如果有多條網路連線（例如同時接了兩個 ISP），可以透過路由表設定不同目標網段走不同的 Gateway，或是使用 <code>ip rule</code> 設定更進階的策略路由。這在企業或伺服器環境中較常見，家用環境幾乎不需要。</p>
+<hr>
+<p>延伸閱讀：</p>
+<ul>
+<li><a href="/post/networking/001-macaddress-ip-subnetmask-gateway/">IP、Subnet Mask、Gateway 完整教學</a> — 網路基礎三劍客一篇搞懂</li>
+<li><a href="/post/networking/004-what-is-subnet-mask/">Subnet Mask 是什麼？</a> — 搞懂子網路遮罩與 CIDR 劃分</li>
+<li><a href="/post/linux/022-cron-job/">Cron Job 完整教學</a> — 用排程自動監控 Gateway 可達性</li>
+<li><a href="/post/javascript/039-backoff-strategy/">Backoff 退避策略教學</a> — 網路請求失敗時的重試與退避機制</li>
+</ul></div>
+        
+        
+
+        
+        <div class="mt-8">
+          
+<div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose">
+  <div>
+    <div class="flex items-center gap-2 mb-1">
+      <a href="/about" class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">
+        BenZ
+      </a>
+      
+      <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span>
+      
+    </div>
+    <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">
+      熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。
+    </p>
+    <div class="flex items-center gap-3">
+      
+      <a href="https://github.com/benzhub" target="_blank" rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label="GitHub">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      
+      
+      
+    </div>
+  </div>
+</div>
+
+        </div>
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        
+
+
+<div>
+  <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3>
+  <div class="grid gap-2">
+    
+    <a href="http://localhost:1313/post/networking/004-what-is-subnet-mask/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Subnet Mask 是什麼？子網路遮罩白話教學</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/04/27</span>
+    </a>
+    
+    <a href="http://localhost:1313/post/javascript/039-backoff-strategy/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Backoff 退避策略是什麼？Exponential Backoff 指數退避完整教學</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2024/01/08</span>
+    </a>
+    
+    <a href="http://localhost:1313/post/javascript/038-frontend-polling/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">前端 Polling 輪詢技術：JavaScript 實作完整教學</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2024/01/08</span>
+    </a>
+    
+  </div>
+</div>
+
+
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            
+            <a href="http://localhost:1313/post/networking/004-what-is-subnet-mask/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+                <span class="text-sm font-medium">Subnet Mask 是什麼？子網路遮罩白話教學</span>
+            </a>
+            
+          </div>
+          <div>
+            
+            <a href="http://localhost:1313/post/networking/005-osi-model/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+                <span class="text-sm font-medium">OSI 七層模型完全解析：從實體層到應用層 | Networking</span>
+            </a>
+            
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        
+<script src="https://giscus.app/client.js"
+        data-repo="benzhub/benzhub.github.io"
+        data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM="
+        data-category="Announcements"
+        data-category-id="MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme="preferred_color_scheme"
+        data-lang="zh-TW"
+        crossorigin="anonymous"
+        async>
+</script>
+
+
+      </div>
+    </div>
+    
+    <div class="hidden lg:block lg:col-span-1 mt-4">
+    
+    
+            
+            <div class="widget fade-in">
+    <p class="widget-title">搜尋</p>
+    <form role="search" method="get" action="https://google.com/search">
+        <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
+        <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
+    </form>
+</div>
+
+        
+            
+            
+
+        
+            
+            
+<div class="widget fade-in">
+    <p class="widget-title">標籤</p>
+    <div class="flex flex-wrap gap-1.5">
+        <a href='/tags/80/20-%E6%B3%95%E5%89%87'>
+            <span class="tag-pill">80/20 法則</span>
+        </a>
+        <a href='/tags/acid'>
+            <span class="tag-pill">acid</span>
+        </a>
+        <a href='/tags/ai'>
+            <span class="tag-pill">ai</span>
+        </a>
+        <a href='/tags/ai-agent'>
+            <span class="tag-pill">ai agent</span>
+        </a>
+        <a href='/tags/ai-workflow'>
+            <span class="tag-pill">ai workflow</span>
+        </a>
+        <a href='/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE'>
+            <span class="tag-pill">ai 工具焦慮</span>
+        </a>
+        <a href='/tags/ai-%E6%8E%A5%E5%96%AE'>
+            <span class="tag-pill">ai 接單</span>
+        </a>
+        <a href='/tags/ai-%E7%B9%AA%E5%9C%96'>
+            <span class="tag-pill">ai 繪圖</span>
+        </a>
+        <a href='/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA'>
+            <span class="tag-pill">ai 虛擬人</span>
+        </a>
+        <a href='/tags/ai-%E8%A1%8C%E9%8A%B7'>
+            <span class="tag-pill">ai 行銷</span>
+        </a>
+        <a href='/tags/ai-%E8%A8%AD%E8%A8%88'>
+            <span class="tag-pill">ai 設計</span>
+        </a>
+        <a href='/tags/ai-%E8%AE%8A%E7%8F%BE'>
+            <span class="tag-pill">ai 變現</span>
+        </a>
+        <a href='/tags/ai-%E8%B3%BA%E9%8C%A2'>
+            <span class="tag-pill">ai 賺錢</span>
+        </a>
+        <a href='/tags/ai-income'>
+            <span class="tag-pill">ai-income</span>
+        </a>
+        <a href='/tags/ai-insights'>
+            <span class="tag-pill">ai-insights</span>
+        </a>
+        <a href='/tags/api'>
+            <span class="tag-pill">api</span>
+        </a>
+        <a href='/tags/architecture'>
+            <span class="tag-pill">architecture</span>
+        </a>
+        <a href='/tags/autovacuum'>
+            <span class="tag-pill">autovacuum</span>
+        </a>
+        <a href='/tags/background-processes'>
+            <span class="tag-pill">background-processes</span>
+        </a>
+        <a href='/tags/big-o'>
+            <span class="tag-pill">big o</span>
+        </a>
+    </div>
+</div>
+
+
+        
+            
+            
+<div class="widget fade-in">
+    <p class="widget-title">文章系列</p>
+    <div class="flex flex-wrap gap-1.5">
+        
+        
+        
+        
+        <a href='/post/postgresql/'>
+            <span class="tag-pill">PostgreSQL (13)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/javascript/'>
+            <span class="tag-pill">JavaScript (68)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/django/'>
+            <span class="tag-pill">Django (30)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/python/'>
+            <span class="tag-pill">Python (37)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/htmlcss/'>
+            <span class="tag-pill">HTML &amp; CSS (23)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/linux/'>
+            <span class="tag-pill">Linux (22)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/git/'>
+            <span class="tag-pill">Git (18)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/ai-insights/'>
+            <span class="tag-pill">AI Insights (13)</span>
+        </a>
+        
+        
+    </div>
+</div>
+
+
+        
+            
+            
+
+<div class="widget fade-in">
+    <p class="widget-title">最新文章</p>
+    <div class="flex flex-col gap-1">
+        <a href="/post/postgresql/013-ddl-schema/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/19
+            </p>
+        </a>
+        <a href="/post/django/030-django-custom-user-model/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django 自訂使用者模型：AbstractUser 與 AbstractBaseUser | Django 教學</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/19
+            </p>
+        </a>
+        <a href="/post/javascript/data-structures--algorithms/006-heap-priority-queue/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">堆積與優先佇列 — Min/Max Heap 原理與 Heap Sort 完整實作 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/19
+            </p>
+        </a>
+        <a href="/post/django/029-django-authentication/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Authentication 使用者認證系統完全指南 | Django 教學</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/18
+            </p>
+        </a>
+        <a href="/post/postgresql/012-data-types/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/06/18
+            </p>
+        </a>
+    </div>
+</div>
+
+        
+    
+</div>
+
+    
+</div>
+
+        </div>
+    </div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]">
+    
+    <p>&copy; 2026 <a href="http://localhost:1313/" class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p>
+</footer>
+
+
+<script>
+    (function (window, document) {
+        function main() {
+            var ad = document.createElement('script');
+            ad.async = true;
+            ad.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606';
+            ad.crossOrigin = "anonymous";
+            var sc = document.getElementsByTagName('script')[0];
+            sc.parentNode.insertBefore(ad, sc);
+        }
+        var lazyLoad = false;
+        function onLazyLoad() {
+            if (lazyLoad === false) {
+                lazyLoad = true;
+                window.removeEventListener('scroll', onLazyLoad);
+                window.removeEventListener('mousemove', onLazyLoad);
+                window.removeEventListener('mousedown', onLazyLoad);
+                window.removeEventListener('touchstart', onLazyLoad);
+                window.removeEventListener('keydown', onLazyLoad);
+                main();
+            }
+        }
+        window.addEventListener('scroll', onLazyLoad);
+        window.addEventListener('mousemove', onLazyLoad);
+        window.addEventListener('mousedown', onLazyLoad);
+        window.addEventListener('touchstart', onLazyLoad);
+        window.addEventListener('keydown', onLazyLoad);
+        window.addEventListener('load', function () {
+            if (window.pageYOffset) {
+                onLazyLoad();
+                window.setTimeout(onLazyLoad, 3000);
+            }
+        });
+    })(window, document);
+</script>
+
+
+<script>
+    
+    var icon = document.getElementById("icon");
+    var icon2 = document.getElementById("icon2");
+    if (document.documentElement.classList.contains("dark") || localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+        if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+    function toggleDarkMode() {
+        if (document.documentElement.classList.contains('dark')) {
+            if (icon) { icon.classList.remove("icon-sun"); icon.classList.add("icon-moon"); }
+            if (icon2) { icon2.classList.remove("icon-sun"); icon2.classList.add("icon-moon"); }
+            document.documentElement.classList.remove('dark');
+            localStorage.theme = 'light';
+        } else {
+            if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+            if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+            document.documentElement.classList.add('dark');
+            localStorage.theme = 'dark';
+        }
+    }
+
+    
+    document.addEventListener('DOMContentLoaded', function () {
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0 });
+
+        document.querySelectorAll('.fade-in').forEach(function (el) {
+            observer.observe(el);
+        });
+    });
+</script>
+</body>
+
+</html>
