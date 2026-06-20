@@ -1,1307 +1,376 @@
-<!DOCTYPE html>
-
-<html lang="zh-TW">
-<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><title>Python 基礎語法速覽：給 Django 學習者的快速入門 | Django 教學 | BenzHub</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="apple-touch-icon" sizes="180x180" href='/favicon/apple-touch-icon.png'>
-    <link rel="icon" type="image/png" sizes="32x32" href='/favicon/favicon-32x32.png'>
-    <link rel="icon" type="image/png" sizes="16x16" href='/favicon/favicon-16x16.png'>
-    <link rel="manifest" href='/favicon/site.webmanifest' />
-    <link rel="mask-icon" href=' /favicon/safari-pinned-tab.svg' color="#5bbad5" />
-    <link rel="shortcut icon" href='/favicon/favicon.ico' />
-    <meta name="theme-color" content="#fafafa">
-    <meta property="og:title" content="Python 基礎語法速覽：給 Django 學習者的快速入門 | Django 教學 | BenzHub" />
-    
-    
-    <link rel="stylesheet" href="/css/style.css" />
-    
-    <link href=' /css/blonde.min.css' rel="stylesheet" type="text/css" media="print"
-        onload="this.media=' all'">
-    
-
-
-
-
-
-
-
-  
-
-
-
-
-  
-
-<meta name="description" content="專為 Django 學習者整理的 Python 基礎語法速覽，涵蓋變數與資料型別、list 與 dict 資料結構、控制流程、函數定義與 *args/**kwargs 參數、類別與物件導向繼承、裝飾器以及模組匯入等核心知識，幫助你快速掌握開發 Django 所需的 Python 基礎能力。">
-<meta property="og:site_name" content="BenzHub">
-<meta property="og:description" content="專為 Django 學習者整理的 Python 基礎語法速覽，涵蓋變數與資料型別、list 與 dict 資料結構、控制流程、函數定義與 *args/**kwargs 參數、類別與物件導向繼承、裝飾器以及模組匯入等核心知識，幫助你快速掌握開發 Django 所需的 Python 基礎能力。">
-<meta property="og:url" content="http://localhost:1313/post/django/003-python-basics-for-django/">
-<meta property="og:type" content="article">
-<meta property="og:locale" content="zh_TW">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="">
-
-<link rel="canonical" href="http://localhost:1313/post/django/003-python-basics-for-django/">
-
-<meta name="twitter:description" content="專為 Django 學習者整理的 Python 基礎語法速覽，涵蓋變數與資料型別、list 與 dict 資料結構、控制流程、函數定義與 *args/**kwargs 參數、類別與物件導向繼承、裝飾器以及模組匯入等核心知識，幫助你快速掌握開發 Django 所需的 Python 基礎能力。">
-<meta property="article:published_time" content="2026-05-23T00:00:00&#43;00:00">
-<meta property="article:updated_time" content="2026-05-26T00:00:00&#43;00:00">
-
-
-
-
-
-    
-<meta property="og:image" content="http://localhost:1313/img/django/003-Python-Basics-for-Django.png">
-<meta property="og:image:url" content="http://localhost:1313/img/django/003-Python-Basics-for-Django.png">
-    
-
-    
-    <link rel="stylesheet" href='/css/custom.css'>
-    <i class="dark hidden"></i>
-    
-<link rel="alternate" hreflang="zh-TW" href="http://localhost:1313/post/django/003-python-basics-for-django/" />
-
-<link rel="alternate" hreflang="x-default" href="http://localhost:1313/post/django/003-python-basics-for-django/" />
-
-    
-
-
-
-
-
-
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BlogPosting",
-  "headline": "\"Python 基礎語法速覽：給 Django 學習者的快速入門 | Django 教學\"",
-  "description": "\"專為 Django 學習者整理的 Python 基礎語法速覽，涵蓋變數與資料型別、list 與 dict 資料結構、控制流程、函數定義與 *args/**kwargs 參數、類別與物件導向繼承、裝飾器以及模組匯入等核心知識，幫助你快速掌握開發 Django 所需的 Python 基礎能力。\"",
-  "author": {
-    "@type": "Person",
-    "name": "\"BenzHub\"",
-    "url": "http:\/\/localhost:1313\/about",
-    "jobTitle": "\"Software Developer\"",
-    "sameAs": [
-      "\"https://github.com/benzhub\""
-    ]
-  },
-  "datePublished": "2026-05-23T00:00:00\u002b00:00",
-  "dateModified": "2026-05-26T00:00:00\u002b00:00",
-  "image": "http:\/\/localhost:1313\/img\/django\/003-Python-Basics-for-Django.png",
-  "publisher": {
-    "@type": "Organization",
-    "name": "\"BenzHub\"",
-    "url": "\"http://localhost:1313/\"",
-    "sameAs": [
-      "\"https://github.com/benzhub\""
-    ]
-  },
-  "mainEntityOfPage": {
-    "@type": "WebPage",
-    "@id": "http:\/\/localhost:1313\/post\/django\/003-python-basics-for-django\/"
-  },
-  "inLanguage": "zh-TW"
-}
-</script>
-
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    {
-      "@type": "ListItem",
-      "position": 1,
-      "name": "\"BenzHub\"",
-      "item": "http:\/\/localhost:1313\/"
-    }
-    
-    
-      
-      
-    ,{
-      "@type": "ListItem",
-      "position": 2,
-      "name": "\"Blog\"",
-      "item": "http:\/\/localhost:1313\/post\/django\/"
-    }
-      
-      
-    
-    ,{
-      "@type": "ListItem",
-      "position":  3 ,
-      "name": "\"Python 基礎語法速覽：給 Django 學習者的快速入門 | Django 教學\""
-    }
-  ]
-}
-</script>
-
-
-
-
-
-
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    
-    
-    {
-      "@type": "Question",
-      "name": "\"學 Django 之前需要把 Python 全部學完嗎？\"",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "\"不需要。Django 開發最常用到的 Python 知識包括：變數與資料型別、list 與 dict 操作、函數定義與參數傳遞（尤其是 *args 和 **kwargs）、類別與繼承、裝飾器，以及模組匯入。掌握這些核心語法就能順利開始 Django 開發，其他進階主題可以邊做邊學。\""
-      }
-    }
-    
-    ,
-    {
-      "@type": "Question",
-      "name": "\"Django 為什麼大量使用 class？可以只用函數嗎？\"",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "\"Django 提供了函數式視圖（Function-Based Views）和類別式視圖（Class-Based Views）兩種寫法，初學者可以先從函數式視圖入手。但 Django 的 Model、Form、Admin 等核心元件都是基於類別設計的，理解 class、__init__、self 和繼承是使用 Django 的必備知識。\""
-      }
-    }
-    
-    ,
-    {
-      "@type": "Question",
-      "name": "\"Python 的 *args 和 **kwargs 在 Django 中有什麼用途？\"",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "\"*args 和 **kwargs 讓函數能接收不定數量的參數。在 Django 中，它們常見於視圖函數接收 URL 參數、自訂裝飾器轉發參數、以及覆寫父類別方法時透過 super() 傳遞參數等場景，是理解 Django 原始碼的關鍵語法。\""
-      }
-    }
-    
-    ,
-    {
-      "@type": "Question",
-      "name": "\"Python 裝飾器在 Django 中常見的應用場景有哪些？\"",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "\"Django 大量使用裝飾器，例如 @login_required 檢查使用者是否登入、@require_http_methods 限制 HTTP 方法、@csrf_exempt 豁免 CSRF 驗證、@property 將方法轉為屬性存取，以及 @staticmethod 和 @classmethod 等。理解裝飾器的運作原理能幫助你讀懂 Django 原始碼並撰寫自訂裝飾器。\""
-      }
-    }
-    
-  ]
-}
-</script>
-
-
-
-
-
-</head>
-<body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class="site-nav" id="siteNav">
-    <div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full">
-        
-        <a href="http://localhost:1313/" class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">
-            BenzHub
-        </a>
-
-        
-        <div class="hidden md:flex items-center gap-6">
-            
-            <a href="/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                首頁
-            </a>
-            
-            <a href="/about/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                關於
-            </a>
-            
-            <a href="/contact/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                聯絡
-            </a>
-            
-            <a href="/resourses/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                資源
-            </a>
-            
-
-            
-            <div class="flex items-center gap-2">
-                <form class="flex items-center" role="search" method="get" action="https://google.com/search" id="navSearchForm">
-                    <input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50"
-                        type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋" id="navSearchInput">
-                    <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
-                </form>
-                <button onclick="toggleNavSearch()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
-                    <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-                    </svg>
-                </button>
-            </div>
-
-            
-            <span class="text-zinc-200 dark:text-zinc-700">|</span>
-
-            
-            
-
-
-
-
-<div class="lang-switcher relative hidden md:block">
-    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-        <span>🌐</span>
-        <span>繁體中文</span>
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-    </button>
-    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
-        
-            
-            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-                
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-
-<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
-    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
-    <div class="flex gap-2">
-        
-            
-            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-                
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-
-            
-            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-                <i id="icon2" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
-            </button>
-        </div>
-
-        
-        <div class="flex md:hidden items-center gap-1">
-            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-                <i id="icon" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
-            </button>
-            <button id="hamburgerbtn" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Menu">
-                <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
-            </button>
-        </div>
-    </div>
-
-    
-    <div class="mobile-menu md:hidden" id="mobileMenu">
-        
-        <a href="/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            首頁
-        </a>
-        
-        <a href="/about/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            關於
-        </a>
-        
-        <a href="/contact/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            聯絡
-        </a>
-        
-        <a href="/resourses/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            資源
-        </a>
-        
-        <form class="mt-2" role="search" method="get" action="https://google.com/search">
-            <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
-            <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
-        </form>
-        
-        
-
-
-
-
-<div class="lang-switcher relative hidden md:block">
-    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-        <span>🌐</span>
-        <span>繁體中文</span>
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-    </button>
-    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
-        
-            
-            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-                
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-
-<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
-    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
-    <div class="flex gap-2">
-        
-            
-            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-                
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-    </div>
-</nav>
-
-<script>
-    
-    document.getElementById('hamburgerbtn').addEventListener('click', function () {
-        document.getElementById('mobileMenu').classList.toggle('active');
-    });
-
-    
-    window.addEventListener('scroll', function () {
-        var nav = document.getElementById('siteNav');
-        if (window.scrollY > 50) {
-            nav.classList.add('scrolled');
-        } else {
-            nav.classList.remove('scrolled');
-        }
-    });
-
-    
-    function toggleNavSearch() {
-        var input = document.getElementById('navSearchInput');
-        input.classList.toggle('expanded');
-        if (input.classList.contains('expanded')) {
-            input.focus();
-        }
-    }
-
-    
-    function toggleLangMenu() {
-        var dropdown = document.getElementById('langDropdown');
-        dropdown.classList.toggle('hidden');
-    }
-
-    
-    document.addEventListener('click', function (e) {
-        
-        var form = document.getElementById('navSearchForm');
-        var input = document.getElementById('navSearchInput');
-        if (form && input && !form.contains(e.target) && !e.target.closest('[aria-label="Toggle Search"]')) {
-            input.classList.remove('expanded');
-        }
-        
-        var langSwitcher = e.target.closest('.lang-switcher');
-        if (!langSwitcher) {
-            var dropdown = document.getElementById('langDropdown');
-            if (dropdown) dropdown.classList.add('hidden');
-        }
-    });
-</script>
-<div class="nav-spacer"></div>
-    <div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id="content">
-        <div class="lg:mx-5">
-<div class="grid grid-cols-3 gap-6">
-  
-  <div class="col-span-3 lg:col-span-2">
-  
-      
-      <div class="post-detail fade-in my-4">
-        <h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Python 基礎語法速覽：給 Django 學習者的快速入門 | Django 教學</h1>
-        <div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4">
-            <span class="flex items-center gap-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/05/23
-            </span>
-            
-            <span class="flex items-center gap-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                2026/05/26
-            </span>
-            
-        </div>
-        
-        <div class="flex flex-wrap gap-1.5 mb-5">
-            
-            <a href='/tags/python' class="tag-pill no-underline">python</a>
-            
-            <a href='/tags/django' class="tag-pill no-underline">django</a>
-            
-        </div>
-        
-        
-        <img class="py-4 m-auto rounded-lg thumb-img" src="http://localhost:1313/img/django/003-Python-Basics-for-Django.png" alt="Python 基礎語法速覽：給 Django 學習者的快速入門 | Django 教學">
-        
-        
-        <div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote>
-<p>在開始學習 <strong>Django</strong> 之前，你需要具備一定的 <strong>Python</strong> 基礎。本篇文章是為 Django 學習者量身打造的 Python 語法速覽，聚焦於開發 Django 時最常用到的語法知識，包括 <strong>變數與資料型別</strong>、<strong>資料結構</strong>、<strong>控制流程</strong>、<strong>函數</strong>、<strong>類別與物件導向</strong>、<strong>裝飾器（Decorators）</strong> 以及 <strong>模組匯入</strong>，幫助你用最短時間做好準備。</p>
-</blockquote>
-<h3 id="變數與資料型別data-types">變數與資料型別（Data Types）</h3>
-<p>Python 是動態型別（Dynamically Typed）語言，宣告變數時不需要指定型別，直譯器會自動推斷。以下是 Django 開發中最常用的五種基本型別：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 字串（str）— 網頁內容、URL、模板文字</span>
-</span></span><span style="display:flex;"><span>title <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Django 教學&#34;</span>
-</span></span><span style="display:flex;"><span>url <span style="color:#f92672">=</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;/post/</span><span style="color:#e6db74">{</span>title<span style="color:#e6db74">}</span><span style="color:#e6db74">/&#34;</span>           <span style="color:#75715e"># f-string 格式化</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 整數（int）— 主鍵 ID、分頁、計數</span>
-</span></span><span style="display:flex;"><span>page <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>
-</span></span><span style="display:flex;"><span>per_page <span style="color:#f92672">=</span> <span style="color:#ae81ff">20</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 浮點數（float）— 價格、評分</span>
-</span></span><span style="display:flex;"><span>price <span style="color:#f92672">=</span> <span style="color:#ae81ff">299.99</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 布林值（bool）— 權限判斷、功能開關</span>
-</span></span><span style="display:flex;"><span>is_active <span style="color:#f92672">=</span> <span style="color:#66d9ef">True</span>
-</span></span><span style="display:flex;"><span>is_staff <span style="color:#f92672">=</span> <span style="color:#66d9ef">False</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 空值（None）— 預設值、可選欄位</span>
-</span></span><span style="display:flex;"><span>middle_name <span style="color:#f92672">=</span> <span style="color:#66d9ef">None</span>
-</span></span></code></pre></div><h4 id="型別轉換與檢查">型別轉換與檢查</h4>
-<p>在處理表單資料或 URL 參數時，經常需要型別轉換：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 型別轉換</span>
-</span></span><span style="display:flex;"><span>age <span style="color:#f92672">=</span> int(<span style="color:#e6db74">&#34;25&#34;</span>)           <span style="color:#75715e"># 字串轉整數</span>
-</span></span><span style="display:flex;"><span>price <span style="color:#f92672">=</span> float(<span style="color:#e6db74">&#34;19.99&#34;</span>)    <span style="color:#75715e"># 字串轉浮點數</span>
-</span></span><span style="display:flex;"><span>count <span style="color:#f92672">=</span> str(<span style="color:#ae81ff">100</span>)           <span style="color:#75715e"># 整數轉字串</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 型別檢查</span>
-</span></span><span style="display:flex;"><span>print(type(age))           <span style="color:#75715e"># 輸出：&lt;class &#39;int&#39;&gt;</span>
-</span></span><span style="display:flex;"><span>print(isinstance(age, int))  <span style="color:#75715e"># 輸出：True</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Falsy 值 — 在條件判斷中視為 False</span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># False, None, 0, 0.0, &#34;&#34;, [], (), {}, set()</span>
-</span></span><span style="display:flex;"><span>username <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> username:
-</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#34;使用者名稱不能為空&#34;</span>)  <span style="color:#75715e"># 輸出：使用者名稱不能為空</span>
-</span></span></code></pre></div><h3 id="資料結構data-structures">資料結構（Data Structures）</h3>
-<p>Django 大量使用 Python 的內建資料結構。掌握 <strong>串列（list）</strong>、<strong>字典（dict）</strong>、<strong>元組（tuple）</strong> 和 <strong>集合（set）</strong> 是必備技能。</p>
-<h4 id="串列list-可變有序序列">串列（List）— 可變有序序列</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 建立串列</span>
-</span></span><span style="display:flex;"><span>tags <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#34;python&#34;</span>, <span style="color:#e6db74">&#34;django&#34;</span>, <span style="color:#e6db74">&#34;web&#34;</span>]
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 存取元素</span>
-</span></span><span style="display:flex;"><span>print(tags[<span style="color:#ae81ff">0</span>])             <span style="color:#75715e"># 輸出：python</span>
-</span></span><span style="display:flex;"><span>print(tags[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>])            <span style="color:#75715e"># 輸出：web</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 修改操作</span>
-</span></span><span style="display:flex;"><span>tags<span style="color:#f92672">.</span>append(<span style="color:#e6db74">&#34;tutorial&#34;</span>)    <span style="color:#75715e"># 新增到尾端</span>
-</span></span><span style="display:flex;"><span>tags<span style="color:#f92672">.</span>insert(<span style="color:#ae81ff">0</span>, <span style="color:#e6db74">&#34;beginner&#34;</span>) <span style="color:#75715e"># 插入到指定位置</span>
-</span></span><span style="display:flex;"><span>tags<span style="color:#f92672">.</span>remove(<span style="color:#e6db74">&#34;web&#34;</span>)         <span style="color:#75715e"># 移除指定元素</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 串列推導式（List Comprehension）— Django 中常見</span>
-</span></span><span style="display:flex;"><span>active_users <span style="color:#f92672">=</span> [user <span style="color:#66d9ef">for</span> user <span style="color:#f92672">in</span> users <span style="color:#66d9ef">if</span> user<span style="color:#f92672">.</span>is_active]
-</span></span><span style="display:flex;"><span>usernames <span style="color:#f92672">=</span> [user<span style="color:#f92672">.</span>username<span style="color:#f92672">.</span>upper() <span style="color:#66d9ef">for</span> user <span style="color:#f92672">in</span> users]
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 切片（Slicing）</span>
-</span></span><span style="display:flex;"><span>recent_posts <span style="color:#f92672">=</span> posts[:<span style="color:#ae81ff">10</span>]  <span style="color:#75715e"># 取前 10 筆</span>
-</span></span></code></pre></div><h4 id="字典dictionary-鍵值對映射">字典（Dictionary）— 鍵值對映射</h4>
-<p>字典是 Django 中最重要的資料結構之一，模板上下文（Context）、設定檔、JSON 回應都是字典：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 建立字典</span>
-</span></span><span style="display:flex;"><span>context <span style="color:#f92672">=</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;title&#34;</span>: <span style="color:#e6db74">&#34;首頁&#34;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;posts&#34;</span>: post_list,
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;is_authenticated&#34;</span>: <span style="color:#66d9ef">True</span>,
-</span></span><span style="display:flex;"><span>}
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 存取值</span>
-</span></span><span style="display:flex;"><span>print(context[<span style="color:#e6db74">&#34;title&#34;</span>])           <span style="color:#75715e"># 輸出：首頁</span>
-</span></span><span style="display:flex;"><span>print(context<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#34;author&#34;</span>, <span style="color:#e6db74">&#34;匿名&#34;</span>))  <span style="color:#75715e"># 安全存取，不存在時回傳預設值</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 遍歷字典</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> key, value <span style="color:#f92672">in</span> context<span style="color:#f92672">.</span>items():
-</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>key<span style="color:#e6db74">}</span><span style="color:#e6db74">: </span><span style="color:#e6db74">{</span>value<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 合併字典（Python 3.9+）</span>
-</span></span><span style="display:flex;"><span>defaults <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#34;page&#34;</span>: <span style="color:#ae81ff">1</span>, <span style="color:#e6db74">&#34;per_page&#34;</span>: <span style="color:#ae81ff">20</span>}
-</span></span><span style="display:flex;"><span>params <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#34;page&#34;</span>: <span style="color:#ae81ff">3</span>, <span style="color:#e6db74">&#34;sort&#34;</span>: <span style="color:#e6db74">&#34;date&#34;</span>}
-</span></span><span style="display:flex;"><span>merged <span style="color:#f92672">=</span> defaults <span style="color:#f92672">|</span> params        <span style="color:#75715e"># {&#39;page&#39;: 3, &#39;per_page&#39;: 20, &#39;sort&#39;: &#39;date&#39;}</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 字典推導式</span>
-</span></span><span style="display:flex;"><span>field_errors <span style="color:#f92672">=</span> {field: err <span style="color:#66d9ef">for</span> field, err <span style="color:#f92672">in</span> form<span style="color:#f92672">.</span>errors<span style="color:#f92672">.</span>items()}
-</span></span></code></pre></div><h4 id="元組tuple與集合set">元組（Tuple）與集合（Set）</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 元組（Tuple）— 不可變序列，常用於 Django 設定</span>
-</span></span><span style="display:flex;"><span>INSTALLED_APPS <span style="color:#f92672">=</span> (
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;django.contrib.admin&#34;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;django.contrib.auth&#34;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;myapp&#34;</span>,
-</span></span><span style="display:flex;"><span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>STATUS_CHOICES <span style="color:#f92672">=</span> (
-</span></span><span style="display:flex;"><span>    (<span style="color:#e6db74">&#34;draft&#34;</span>, <span style="color:#e6db74">&#34;草稿&#34;</span>),
-</span></span><span style="display:flex;"><span>    (<span style="color:#e6db74">&#34;published&#34;</span>, <span style="color:#e6db74">&#34;已發布&#34;</span>),
-</span></span><span style="display:flex;"><span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 解包（Unpacking）</span>
-</span></span><span style="display:flex;"><span>status_code, status_text <span style="color:#f92672">=</span> (<span style="color:#e6db74">&#34;draft&#34;</span>, <span style="color:#e6db74">&#34;草稿&#34;</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 集合（Set）— 無序不重複，適合權限判斷</span>
-</span></span><span style="display:flex;"><span>user_permissions <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#34;read&#34;</span>, <span style="color:#e6db74">&#34;write&#34;</span>, <span style="color:#e6db74">&#34;delete&#34;</span>}
-</span></span><span style="display:flex;"><span>required_permissions <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#34;read&#34;</span>, <span style="color:#e6db74">&#34;write&#34;</span>}
-</span></span><span style="display:flex;"><span>print(required_permissions<span style="color:#f92672">.</span>issubset(user_permissions))  <span style="color:#75715e"># 輸出：True</span>
-</span></span></code></pre></div><h3 id="控制流程control-flow">控制流程（Control Flow）</h3>
-<h4 id="條件判斷--if--elif--else">條件判斷 — if / elif / else</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 基本條件判斷</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> request<span style="color:#f92672">.</span>method <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;POST&#34;</span>:
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 處理表單提交</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pass</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">elif</span> request<span style="color:#f92672">.</span>method <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;GET&#34;</span>:
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 顯示表單</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pass</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">else</span>:
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 其他 HTTP 方法</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pass</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 三元運算式（Ternary Expression）</span>
-</span></span><span style="display:flex;"><span>status <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;已發布&#34;</span> <span style="color:#66d9ef">if</span> post<span style="color:#f92672">.</span>is_published <span style="color:#66d9ef">else</span> <span style="color:#e6db74">&#34;草稿&#34;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 利用 Truthy / Falsy 簡化判斷</span>
-</span></span><span style="display:flex;"><span>name <span style="color:#f92672">=</span> user_input <span style="color:#f92672">or</span> <span style="color:#e6db74">&#34;匿名&#34;</span>  <span style="color:#75715e"># user_input 為空字串時使用預設值</span>
-</span></span></code></pre></div><h4 id="迴圈--for-與-while">迴圈 — for 與 while</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># for 迴圈 — 遍歷序列</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> post <span style="color:#f92672">in</span> posts:
-</span></span><span style="display:flex;"><span>    print(post<span style="color:#f92672">.</span>title)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 搭配 enumerate 取得索引</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> index, post <span style="color:#f92672">in</span> enumerate(posts, start<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>):
-</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>index<span style="color:#e6db74">}</span><span style="color:#e6db74">. </span><span style="color:#e6db74">{</span>post<span style="color:#f92672">.</span>title<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 搭配 zip 平行遍歷</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> name, email <span style="color:#f92672">in</span> zip(names, emails):
-</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>name<span style="color:#e6db74">}</span><span style="color:#e6db74">: </span><span style="color:#e6db74">{</span>email<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># range — 產生數字序列</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">5</span>):             <span style="color:#75715e"># 0, 1, 2, 3, 4</span>
-</span></span><span style="display:flex;"><span>    print(i)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># while 迴圈</span>
-</span></span><span style="display:flex;"><span>retry_count <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">while</span> retry_count <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">3</span>:
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> try_connection():
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">break</span>                  <span style="color:#75715e"># 成功則跳出</span>
-</span></span><span style="display:flex;"><span>    retry_count <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>
-</span></span></code></pre></div><h3 id="函數定義與參數functions">函數定義與參數（Functions）</h3>
-<p>函數（Function）是 Python 程式碼的基本組織單位。Django 的視圖（View）可以是函數，中介軟體（Middleware）也常用函數實作。</p>
-<h4 id="基本定義與預設參數">基本定義與預設參數</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">greet</span>(name, greeting<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Hello&#34;</span>):
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;打招呼函數。&#34;&#34;&#34;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>greeting<span style="color:#e6db74">}</span><span style="color:#e6db74">, </span><span style="color:#e6db74">{</span>name<span style="color:#e6db74">}</span><span style="color:#e6db74">!&#34;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>print(greet(<span style="color:#e6db74">&#34;Django&#34;</span>))            <span style="color:#75715e"># 輸出：Hello, Django!</span>
-</span></span><span style="display:flex;"><span>print(greet(<span style="color:#e6db74">&#34;Django&#34;</span>, <span style="color:#e6db74">&#34;Hi&#34;</span>))      <span style="color:#75715e"># 輸出：Hi, Django!</span>
-</span></span><span style="display:flex;"><span>print(greet(name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;World&#34;</span>))        <span style="color:#75715e"># 輸出：Hello, World!</span>
-</span></span></code></pre></div><h4 id="args-與-kwargs--不定長參數">*args 與 **kwargs — 不定長參數</h4>
-<p>這是理解 Django 原始碼的關鍵語法。<code>*args</code> 將多餘的位置引數（Positional Arguments）打包為元組，<code>**kwargs</code> 將多餘的關鍵字引數（Keyword Arguments）打包為字典：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># *args — 接收任意數量的位置引數</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">add</span>(<span style="color:#f92672">*</span>args):
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> sum(args)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>print(add(<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>))              <span style="color:#75715e"># 輸出：6</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># **kwargs — 接收任意數量的關鍵字引數</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">create_user</span>(<span style="color:#f92672">**</span>kwargs):
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> key, value <span style="color:#f92672">in</span> kwargs<span style="color:#f92672">.</span>items():
-</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>key<span style="color:#e6db74">}</span><span style="color:#e6db74"> = </span><span style="color:#e6db74">{</span>value<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>create_user(name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Alice&#34;</span>, age<span style="color:#f92672">=</span><span style="color:#ae81ff">30</span>, email<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;alice@example.com&#34;</span>)
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出：</span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># name = Alice</span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># age = 30</span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># email = alice@example.com</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 混合使用 — Django 原始碼中常見的模式</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">view</span>(request, <span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs):
-</span></span><span style="display:flex;"><span>    pk <span style="color:#f92672">=</span> kwargs<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#34;pk&#34;</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> render(request, <span style="color:#e6db74">&#34;detail.html&#34;</span>, {<span style="color:#e6db74">&#34;pk&#34;</span>: pk})
-</span></span></code></pre></div><h4 id="解包傳入函數">解包傳入函數</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 串列解包為位置引數</span>
-</span></span><span style="display:flex;"><span>args <span style="color:#f92672">=</span> [<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>]
-</span></span><span style="display:flex;"><span>print(add(<span style="color:#f92672">*</span>args))                 <span style="color:#75715e"># 等同 add(1, 2, 3)，輸出：6</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 字典解包為關鍵字引數</span>
-</span></span><span style="display:flex;"><span>config <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;Alice&#34;</span>, <span style="color:#e6db74">&#34;age&#34;</span>: <span style="color:#ae81ff">30</span>}
-</span></span><span style="display:flex;"><span>create_user(<span style="color:#f92672">**</span>config)             <span style="color:#75715e"># 等同 create_user(name=&#34;Alice&#34;, age=30)</span>
-</span></span></code></pre></div><h3 id="類別與物件導向基礎oop">類別與物件導向基礎（OOP）</h3>
-<p>Django 的核心元件 — Model、View、Form、Admin — 都基於類別（Class）設計。理解物件導向程式設計（Object-Oriented Programming，簡稱 OOP）是使用 Django 的必要條件。</p>
-<h4 id="類別定義__init__-與-self">類別定義、__init__ 與 self</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Article</span>:
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 類別變數 — 所有實例共用</span>
-</span></span><span style="display:flex;"><span>    platform <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;BenzHub&#34;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__init__</span>(self, title, content, author<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>):
-</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 實例變數 — 每個物件獨立</span>
-</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>title <span style="color:#f92672">=</span> title
-</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>content <span style="color:#f92672">=</span> content
-</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>author <span style="color:#f92672">=</span> author
-</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>is_published <span style="color:#f92672">=</span> <span style="color:#66d9ef">False</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">publish</span>(self):
-</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>is_published <span style="color:#f92672">=</span> <span style="color:#66d9ef">True</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;《</span><span style="color:#e6db74">{</span>self<span style="color:#f92672">.</span>title<span style="color:#e6db74">}</span><span style="color:#e6db74">》已發布&#34;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__str__</span>(self):
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Article: </span><span style="color:#e6db74">{</span>self<span style="color:#f92672">.</span>title<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 建立物件（實例化）</span>
-</span></span><span style="display:flex;"><span>post <span style="color:#f92672">=</span> Article(<span style="color:#e6db74">&#34;Django 入門&#34;</span>, <span style="color:#e6db74">&#34;本篇教學...&#34;</span>)
-</span></span><span style="display:flex;"><span>print(post<span style="color:#f92672">.</span>publish())             <span style="color:#75715e"># 輸出：《Django 入門》已發布</span>
-</span></span><span style="display:flex;"><span>print(post)                       <span style="color:#75715e"># 輸出：Article: Django 入門</span>
-</span></span></code></pre></div><ul>
-<li><code>__init__</code> 是建構方法（Constructor），在建立物件時自動呼叫</li>
-<li><code>self</code> 代表物件自身的實例（Instance），透過它存取物件的屬性與方法</li>
-<li><code>__str__</code> 是魔術方法（Magic Method），定義物件的字串表示</li>
-</ul>
-<h4 id="繼承inheritance">繼承（Inheritance）</h4>
-<p>繼承（Inheritance）讓子類別（Child Class）重用父類別（Parent Class）的程式碼，Django 的 Model 和 View 都大量使用這個特性：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">BaseModel</span>:
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__init__</span>(self, created_at<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>):
-</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>created_at <span style="color:#f92672">=</span> created_at <span style="color:#f92672">or</span> <span style="color:#e6db74">&#34;now&#34;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">save</span>(self):
-</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;儲存到資料庫，建立時間：</span><span style="color:#e6db74">{</span>self<span style="color:#f92672">.</span>created_at<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Article</span>(BaseModel):
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__init__</span>(self, title, content, <span style="color:#f92672">**</span>kwargs):
-</span></span><span style="display:flex;"><span>        super()<span style="color:#f92672">.</span><span style="color:#a6e22e">__init__</span>(<span style="color:#f92672">**</span>kwargs)  <span style="color:#75715e"># 呼叫父類別的 __init__</span>
-</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>title <span style="color:#f92672">=</span> title
-</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>content <span style="color:#f92672">=</span> content
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">save</span>(self):
-</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;儲存文章：</span><span style="color:#e6db74">{</span>self<span style="color:#f92672">.</span>title<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
-</span></span><span style="display:flex;"><span>        super()<span style="color:#f92672">.</span>save()             <span style="color:#75715e"># 呼叫父類別的 save</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>article <span style="color:#f92672">=</span> Article(<span style="color:#e6db74">&#34;Django ORM&#34;</span>, <span style="color:#e6db74">&#34;Django 的 ORM 教學...&#34;</span>)
-</span></span><span style="display:flex;"><span>article<span style="color:#f92672">.</span>save()
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出：</span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 儲存文章：Django ORM</span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 儲存到資料庫，建立時間：now</span>
-</span></span></code></pre></div><p>這個模式在 Django 中隨處可見，例如自訂 Model 繼承 <code>models.Model</code>、自訂 View 繼承 <code>View</code> 或 <code>ListView</code>，並透過 <code>super()</code> 呼叫父類別方法。</p>
-<h3 id="裝飾器decorators基礎">裝飾器（Decorators）基礎</h3>
-<p>裝飾器（Decorator）是 Python 中一個強大的語法特性，Django 大量使用裝飾器來實現權限控制、HTTP 方法限制等功能。</p>
-<h4 id="裝飾器的基本原理">裝飾器的基本原理</h4>
-<p>裝飾器本質上是一個函數，它接收一個函數作為參數，回傳一個新的函數：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> functools <span style="color:#f92672">import</span> wraps
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">log_calls</span>(func):
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@wraps</span>(func)  <span style="color:#75715e"># 保留原函數的名稱與文件字串</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">wrapper</span>(<span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs):
-</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;呼叫 </span><span style="color:#e6db74">{</span>func<span style="color:#f92672">.</span>__name__<span style="color:#e6db74">}</span><span style="color:#e6db74">()&#34;</span>)
-</span></span><span style="display:flex;"><span>        result <span style="color:#f92672">=</span> func(<span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs)
-</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>func<span style="color:#f92672">.</span>__name__<span style="color:#e6db74">}</span><span style="color:#e6db74">() 執行完畢&#34;</span>)
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> result
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> wrapper
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@log_calls</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">process_data</span>(data):
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;處理資料的函數。&#34;&#34;&#34;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> len(data)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>print(process_data([<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>]))
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出：</span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 呼叫 process_data()</span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># process_data() 執行完畢</span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 3</span>
-</span></span></code></pre></div><p><code>@log_calls</code> 放在函數定義上方，等同於 <code>process_data = log_calls(process_data)</code>。</p>
-<h4 id="django-中常見的裝飾器">Django 中常見的裝飾器</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> django.contrib.auth.decorators <span style="color:#f92672">import</span> login_required
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.views.decorators.http <span style="color:#f92672">import</span> require_POST
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># @login_required — 要求使用者登入</span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@login_required</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">dashboard</span>(request):
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> render(request, <span style="color:#e6db74">&#34;dashboard.html&#34;</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># @require_POST — 只允許 POST 請求</span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@require_POST</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">delete_post</span>(request, pk):
-</span></span><span style="display:flex;"><span>    post <span style="color:#f92672">=</span> Post<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>get(pk<span style="color:#f92672">=</span>pk)
-</span></span><span style="display:flex;"><span>    post<span style="color:#f92672">.</span>delete()
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> redirect(<span style="color:#e6db74">&#34;post_list&#34;</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 堆疊多個裝飾器（由下往上套用）</span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@login_required</span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@require_POST</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">create_post</span>(request):
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 先檢查是否為 POST，再檢查是否登入</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pass</span>
-</span></span></code></pre></div><h4 id="帶參數的裝飾器">帶參數的裝飾器</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">permission_required</span>(permission):
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">decorator</span>(func):
-</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">@wraps</span>(func)
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">wrapper</span>(request, <span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs):
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> permission <span style="color:#f92672">not</span> <span style="color:#f92672">in</span> request<span style="color:#f92672">.</span>user<span style="color:#f92672">.</span>permissions:
-</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span> HttpResponseForbidden(<span style="color:#e6db74">&#34;權限不足&#34;</span>)
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> func(request, <span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs)
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> wrapper
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> decorator
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@permission_required</span>(<span style="color:#e6db74">&#34;can_edit&#34;</span>)
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">edit_post</span>(request, pk):
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pass</span>
-</span></span></code></pre></div><h3 id="模組與套件匯入modules--packages">模組與套件匯入（Modules &amp; Packages）</h3>
-<p>Python 使用模組（Module）和套件（Package）來組織程式碼。Django 專案本身就是由多個套件（app）組成的，理解匯入語法是閱讀和編寫 Django 程式碼的基礎。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 匯入整個模組</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> os
-</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> json
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>print(os<span style="color:#f92672">.</span>path<span style="color:#f92672">.</span>join(<span style="color:#e6db74">&#34;templates&#34;</span>, <span style="color:#e6db74">&#34;index.html&#34;</span>))
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 從模組匯入特定物件</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> datetime <span style="color:#f92672">import</span> datetime, timedelta
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> pathlib <span style="color:#f92672">import</span> Path
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>now <span style="color:#f92672">=</span> datetime<span style="color:#f92672">.</span>now()
-</span></span><span style="display:flex;"><span>tomorrow <span style="color:#f92672">=</span> now <span style="color:#f92672">+</span> timedelta(days<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Django 中常見的匯入模式</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.shortcuts <span style="color:#f92672">import</span> render, redirect, get_object_or_404
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.http <span style="color:#f92672">import</span> HttpResponse, JsonResponse
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.views <span style="color:#f92672">import</span> View
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.db <span style="color:#f92672">import</span> models
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 匯入自己的模組（相對匯入）</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> .models <span style="color:#f92672">import</span> Article        <span style="color:#75715e"># 從同一套件匯入</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> .forms <span style="color:#f92672">import</span> ArticleForm
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> myapp.utils <span style="color:#f92672">import</span> helper     <span style="color:#75715e"># 從指定套件匯入</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 使用別名（Alias）</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> numpy <span style="color:#66d9ef">as</span> np
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.contrib.auth.models <span style="color:#f92672">import</span> User <span style="color:#66d9ef">as</span> AuthUser
-</span></span></code></pre></div><h4 id="django-專案的匯入慣例">Django 專案的匯入慣例</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># views.py — 一個典型的 Django 視圖檔案的匯入結構</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 1. 標準函式庫</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> json
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> datetime <span style="color:#f92672">import</span> datetime
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 2. 第三方套件</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.shortcuts <span style="color:#f92672">import</span> render, redirect
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.contrib.auth.decorators <span style="color:#f92672">import</span> login_required
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 3. 本地應用</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> .models <span style="color:#f92672">import</span> Post
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> .forms <span style="color:#f92672">import</span> PostForm
-</span></span></code></pre></div><p>這種分組匯入的慣例讓程式碼更容易閱讀和維護。</p>
-<h3 id="總結">總結</h3>
-<p>本篇文章快速回顧了 Django 開發所需的 Python 核心語法。以下是各主題與 Django 的對應關係：</p>
-<table>
-	<thead>
-			<tr>
-					<th>Python 語法</th>
-					<th>Django 應用場景</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td><code>str</code>、<code>int</code>、<code>bool</code></td>
-					<td>模型欄位、表單驗證、模板渲染</td>
-			</tr>
-			<tr>
-					<td><code>list</code>、<code>dict</code></td>
-					<td>模板上下文、QuerySet 操作、JSON 回應</td>
-			</tr>
-			<tr>
-					<td><code>if/elif/else</code>、<code>for</code></td>
-					<td>視圖邏輯、模板標籤</td>
-			</tr>
-			<tr>
-					<td>函數、<code>*args</code>、<code>**kwargs</code></td>
-					<td>視圖函數、裝飾器、訊號處理</td>
-			</tr>
-			<tr>
-					<td><code>class</code>、繼承、<code>super()</code></td>
-					<td>Model、View、Form、Admin</td>
-			</tr>
-			<tr>
-					<td>裝飾器</td>
-					<td>權限控制、HTTP 方法限制、快取</td>
-			</tr>
-			<tr>
-					<td><code>import</code>、<code>from...import</code></td>
-					<td>專案結構、app 間的相互引用</td>
-			</tr>
-	</tbody>
-</table>
-<p>你不需要精通 Python 的所有語法才能開始學 Django，但上述這些基礎知識會讓你在學習過程中更加順利。如果對某個主題想要深入了解，可以參考本站的 Python 系列教學。</p>
-<p>在下一篇文章中，我們將正式進入 Django 的世界，建立你的第一個 Django 專案。</p></div>
-        
-        
-
-        
-        <div class="mt-8">
-          
-<div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose">
-  <div>
-    <div class="flex items-center gap-2 mb-1">
-      <a href="/about" class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">
-        BenZ
-      </a>
-      
-      <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span>
-      
-    </div>
-    <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">
-      熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。
-    </p>
-    <div class="flex items-center gap-3">
-      
-      <a href="https://github.com/benzhub" target="_blank" rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label="GitHub">
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-      </a>
-      
-      
-      
-    </div>
-  </div>
-</div>
-
-        </div>
-      </div>
-
-      
-      <div class="post-detail fade-in my-4">
-        
-
-
-<div>
-  <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3>
-  <div class="grid gap-2">
-    
-    <a href="http://localhost:1313/post/django/002-python-environment-setup/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
-      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Python 環境安裝與設定 | Django 教學</span>
-      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/05/22</span>
-    </a>
-    
-    <a href="http://localhost:1313/post/django/001-what-is-web-development/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
-      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">什麼是 Web 開發？前端、後端、全端入門 | Django 教學</span>
-      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/05/21</span>
-    </a>
-    
-    <a href="http://localhost:1313/post/python/036-regular-expressions/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
-      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Python 正規表達式（Regular Expressions）入門 | Python</span>
-      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/04/30</span>
-    </a>
-    
-  </div>
-</div>
-
-
-      </div>
-
-      
-      <div class="post-detail fade-in my-4">
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            
-            <a href="http://localhost:1313/post/django/002-python-environment-setup/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
-                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
-                <span class="text-sm font-medium">Python 環境安裝與設定 | Django 教學</span>
-            </a>
-            
-          </div>
-          <div>
-            
-            <a href="http://localhost:1313/post/django/004-django-introduction-and-installation/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
-                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
-                <span class="text-sm font-medium">Django 是什麼？框架介紹與安裝 | Django 教學</span>
-            </a>
-            
-          </div>
-        </div>
-      </div>
-
-      
-      <div class="post-detail fade-in my-4">
-        
-<script src="https://giscus.app/client.js"
-        data-repo="benzhub/benzhub.github.io"
-        data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM="
-        data-category="Announcements"
-        data-category-id="MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1"
-        data-mapping="pathname"
-        data-strict="0"
-        data-reactions-enabled="1"
-        data-emit-metadata="0"
-        data-input-position="top"
-        data-theme="preferred_color_scheme"
-        data-lang="zh-TW"
-        crossorigin="anonymous"
-        async>
-</script>
-
-
-      </div>
-    </div>
-    
-    <div class="hidden lg:block lg:col-span-1 mt-4">
-    
-    
-            
-            <div class="widget fade-in">
-    <p class="widget-title">搜尋</p>
-    <form role="search" method="get" action="https://google.com/search">
-        <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
-        <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
-    </form>
-</div>
-
-        
-            
-            
-
-        
-            
-            
-<div class="widget fade-in">
-    <p class="widget-title">標籤</p>
-    <div class="flex flex-wrap gap-1.5">
-        <a href='/tags/80/20-%E6%B3%95%E5%89%87'>
-            <span class="tag-pill">80/20 法則</span>
-        </a>
-        <a href='/tags/acid'>
-            <span class="tag-pill">acid</span>
-        </a>
-        <a href='/tags/ai'>
-            <span class="tag-pill">ai</span>
-        </a>
-        <a href='/tags/ai-agent'>
-            <span class="tag-pill">ai agent</span>
-        </a>
-        <a href='/tags/ai-workflow'>
-            <span class="tag-pill">ai workflow</span>
-        </a>
-        <a href='/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE'>
-            <span class="tag-pill">ai 工具焦慮</span>
-        </a>
-        <a href='/tags/ai-%E6%8E%A5%E5%96%AE'>
-            <span class="tag-pill">ai 接單</span>
-        </a>
-        <a href='/tags/ai-%E7%B9%AA%E5%9C%96'>
-            <span class="tag-pill">ai 繪圖</span>
-        </a>
-        <a href='/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA'>
-            <span class="tag-pill">ai 虛擬人</span>
-        </a>
-        <a href='/tags/ai-%E8%A1%8C%E9%8A%B7'>
-            <span class="tag-pill">ai 行銷</span>
-        </a>
-        <a href='/tags/ai-%E8%A8%AD%E8%A8%88'>
-            <span class="tag-pill">ai 設計</span>
-        </a>
-        <a href='/tags/ai-%E8%AE%8A%E7%8F%BE'>
-            <span class="tag-pill">ai 變現</span>
-        </a>
-        <a href='/tags/ai-%E8%B3%BA%E9%8C%A2'>
-            <span class="tag-pill">ai 賺錢</span>
-        </a>
-        <a href='/tags/ai-income'>
-            <span class="tag-pill">ai-income</span>
-        </a>
-        <a href='/tags/ai-insights'>
-            <span class="tag-pill">ai-insights</span>
-        </a>
-        <a href='/tags/api'>
-            <span class="tag-pill">api</span>
-        </a>
-        <a href='/tags/architecture'>
-            <span class="tag-pill">architecture</span>
-        </a>
-        <a href='/tags/autovacuum'>
-            <span class="tag-pill">autovacuum</span>
-        </a>
-        <a href='/tags/background-processes'>
-            <span class="tag-pill">background-processes</span>
-        </a>
-        <a href='/tags/big-o'>
-            <span class="tag-pill">big o</span>
-        </a>
-    </div>
-</div>
-
-
-        
-            
-            
-<div class="widget fade-in">
-    <p class="widget-title">文章系列</p>
-    <div class="flex flex-wrap gap-1.5">
-        
-        
-        
-        
-        <a href='/post/postgresql/'>
-            <span class="tag-pill">PostgreSQL (13)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/javascript/'>
-            <span class="tag-pill">JavaScript (68)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/django/'>
-            <span class="tag-pill">Django (30)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/python/'>
-            <span class="tag-pill">Python (37)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/htmlcss/'>
-            <span class="tag-pill">HTML &amp; CSS (23)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/linux/'>
-            <span class="tag-pill">Linux (22)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/git/'>
-            <span class="tag-pill">Git (18)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/ai-insights/'>
-            <span class="tag-pill">AI Insights (13)</span>
-        </a>
-        
-        
-    </div>
-</div>
-
-
-        
-            
-            
-
-<div class="widget fade-in">
-    <p class="widget-title">最新文章</p>
-    <div class="flex flex-col gap-1">
-        <a href="/post/postgresql/013-ddl-schema/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/19
-            </p>
-        </a>
-        <a href="/post/django/030-django-custom-user-model/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django 自訂使用者模型：AbstractUser 與 AbstractBaseUser | Django 教學</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/19
-            </p>
-        </a>
-        <a href="/post/javascript/data-structures--algorithms/006-heap-priority-queue/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">堆積與優先佇列 — Min/Max Heap 原理與 Heap Sort 完整實作 | 資料結構與演算法</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/19
-            </p>
-        </a>
-        <a href="/post/django/029-django-authentication/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Authentication 使用者認證系統完全指南 | Django 教學</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/18
-            </p>
-        </a>
-        <a href="/post/postgresql/012-data-types/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/18
-            </p>
-        </a>
-    </div>
-</div>
-
-        
-    
-</div>
-
-    
-</div>
-
-        </div>
-    </div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]">
-    
-    <p>&copy; 2026 <a href="http://localhost:1313/" class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p>
-</footer>
-
-
-<script>
-    (function (window, document) {
-        function main() {
-            var ad = document.createElement('script');
-            ad.async = true;
-            ad.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606';
-            ad.crossOrigin = "anonymous";
-            var sc = document.getElementsByTagName('script')[0];
-            sc.parentNode.insertBefore(ad, sc);
-        }
-        var lazyLoad = false;
-        function onLazyLoad() {
-            if (lazyLoad === false) {
-                lazyLoad = true;
-                window.removeEventListener('scroll', onLazyLoad);
-                window.removeEventListener('mousemove', onLazyLoad);
-                window.removeEventListener('mousedown', onLazyLoad);
-                window.removeEventListener('touchstart', onLazyLoad);
-                window.removeEventListener('keydown', onLazyLoad);
-                main();
-            }
-        }
-        window.addEventListener('scroll', onLazyLoad);
-        window.addEventListener('mousemove', onLazyLoad);
-        window.addEventListener('mousedown', onLazyLoad);
-        window.addEventListener('touchstart', onLazyLoad);
-        window.addEventListener('keydown', onLazyLoad);
-        window.addEventListener('load', function () {
-            if (window.pageYOffset) {
-                onLazyLoad();
-                window.setTimeout(onLazyLoad, 3000);
-            }
-        });
-    })(window, document);
-</script>
-
-
-<script>
-    
-    var icon = document.getElementById("icon");
-    var icon2 = document.getElementById("icon2");
-    if (document.documentElement.classList.contains("dark") || localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
-        if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
-        document.documentElement.classList.add('dark');
-    } else {
-        document.documentElement.classList.remove('dark');
-    }
-    function toggleDarkMode() {
-        if (document.documentElement.classList.contains('dark')) {
-            if (icon) { icon.classList.remove("icon-sun"); icon.classList.add("icon-moon"); }
-            if (icon2) { icon2.classList.remove("icon-sun"); icon2.classList.add("icon-moon"); }
-            document.documentElement.classList.remove('dark');
-            localStorage.theme = 'light';
-        } else {
-            if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
-            if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
-            document.documentElement.classList.add('dark');
-            localStorage.theme = 'dark';
-        }
-    }
-
-    
-    document.addEventListener('DOMContentLoaded', function () {
-        var observer = new IntersectionObserver(function (entries) {
-            entries.forEach(function (entry) {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0 });
-
-        document.querySelectorAll('.fade-in').forEach(function (el) {
-            observer.observe(el);
-        });
-    });
-</script>
-</body>
-
-</html>
+<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>Python 基礎語法速覽：給 Django 學習者的快速入門 | Django 教學 | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="Python 基礎語法速覽：給 Django 學習者的快速入門 | Django 教學 | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="專為 Django 學習者整理的 Python 基礎語法速覽，涵蓋變數與資料型別、list 與 dict 資料結構、控制流程、函數定義與 *args/**kwargs 參數、類別與物件導向繼承、裝飾器以及模組匯入等核心知識，幫助你快速掌握開發 Django 所需的 Python 基礎能力。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="專為 Django 學習者整理的 Python 基礎語法速覽，涵蓋變數與資料型別、list 與 dict 資料結構、控制流程、函數定義與 *args/**kwargs 參數、類別與物件導向繼承、裝飾器以及模組匯入等核心知識，幫助你快速掌握開發 Django 所需的 Python 基礎能力。"><meta property="og:url" content="https://benzhub.github.io/post/django/003-python-basics-for-django/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/django/003-python-basics-for-django/><meta name=twitter:description content="專為 Django 學習者整理的 Python 基礎語法速覽，涵蓋變數與資料型別、list 與 dict 資料結構、控制流程、函數定義與 *args/**kwargs 參數、類別與物件導向繼承、裝飾器以及模組匯入等核心知識，幫助你快速掌握開發 Django 所需的 Python 基礎能力。"><meta property="article:published_time" content="2026-05-23T00:00:00+00:00"><meta property="article:updated_time" content="2026-05-26T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/django/003-Python-Basics-for-Django.png"><meta property="og:image:url" content="https://benzhub.github.io/img/django/003-Python-Basics-for-Django.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/django/003-python-basics-for-django/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/django/003-python-basics-for-django/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"Python 基礎語法速覽：給 Django 學習者的快速入門 | Django 教學\"","description":"\"專為 Django 學習者整理的 Python 基礎語法速覽，涵蓋變數與資料型別、list 與 dict 資料結構、控制流程、函數定義與 *args/**kwargs 參數、類別與物件導向繼承、裝飾器以及模組匯入等核心知識，幫助你快速掌握開發 Django 所需的 Python 基礎能力。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-05-23T00:00:00\u002b00:00","dateModified":"2026-05-26T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/django\/003-Python-Basics-for-Django.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/django\/003-python-basics-for-django\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/django\/"},{"@type":"ListItem","position":3,"name":"\"Python 基礎語法速覽：給 Django 學習者的快速入門 | Django 教學\""}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"\"學 Django 之前需要把 Python 全部學完嗎？\"","acceptedAnswer":{"@type":"Answer","text":"\"不需要。Django 開發最常用到的 Python 知識包括：變數與資料型別、list 與 dict 操作、函數定義與參數傳遞（尤其是 *args 和 **kwargs）、類別與繼承、裝飾器，以及模組匯入。掌握這些核心語法就能順利開始 Django 開發，其他進階主題可以邊做邊學。\""}},{"@type":"Question","name":"\"Django 為什麼大量使用 class？可以只用函數嗎？\"","acceptedAnswer":{"@type":"Answer","text":"\"Django 提供了函數式視圖（Function-Based Views）和類別式視圖（Class-Based Views）兩種寫法，初學者可以先從函數式視圖入手。但 Django 的 Model、Form、Admin 等核心元件都是基於類別設計的，理解 class、__init__、self 和繼承是使用 Django 的必備知識。\""}},{"@type":"Question","name":"\"Python 的 *args 和 **kwargs 在 Django 中有什麼用途？\"","acceptedAnswer":{"@type":"Answer","text":"\"*args 和 **kwargs 讓函數能接收不定數量的參數。在 Django 中，它們常見於視圖函數接收 URL 參數、自訂裝飾器轉發參數、以及覆寫父類別方法時透過 super() 傳遞參數等場景，是理解 Django 原始碼的關鍵語法。\""}},{"@type":"Question","name":"\"Python 裝飾器在 Django 中常見的應用場景有哪些？\"","acceptedAnswer":{"@type":"Answer","text":"\"Django 大量使用裝飾器，例如 @login_required 檢查使用者是否登入、@require_http_methods 限制 HTTP 方法、@csrf_exempt 豁免 CSRF 驗證、@property 將方法轉為屬性存取，以及 @staticmethod 和 @classmethod 等。理解裝飾器的運作原理能幫助你讀懂 Django 原始碼並撰寫自訂裝飾器。\""}}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Python 基礎語法速覽：給 Django 學習者的快速入門 | Django 教學</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/05/23
+</span><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001.0 004.582 9m0 0H9m11 11v-5h-.581m0 0A8.003 8.003.0 014.062 13m15.357 2H15"/></svg>
+2026/05/26</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/python class="tag-pill no-underline">python</a>
+<a href=/tags/django class="tag-pill no-underline">django</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/django/003-Python-Basics-for-Django.png alt="Python 基礎語法速覽：給 Django 學習者的快速入門 | Django 教學"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p>在開始學習 <strong>Django</strong> 之前，你需要具備一定的 <strong>Python</strong> 基礎。本篇文章是為 Django 學習者量身打造的 Python 語法速覽，聚焦於開發 Django 時最常用到的語法知識，包括 <strong>變數與資料型別</strong>、<strong>資料結構</strong>、<strong>控制流程</strong>、<strong>函數</strong>、<strong>類別與物件導向</strong>、<strong>裝飾器（Decorators）</strong> 以及 <strong>模組匯入</strong>，幫助你用最短時間做好準備。</p></blockquote><h3 id=變數與資料型別data-types>變數與資料型別（Data Types）</h3><p>Python 是動態型別（Dynamically Typed）語言，宣告變數時不需要指定型別，直譯器會自動推斷。以下是 Django 開發中最常用的五種基本型別：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># 字串（str）— 網頁內容、URL、模板文字</span>
+</span></span><span style=display:flex><span>title <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;Django 教學&#34;</span>
+</span></span><span style=display:flex><span>url <span style=color:#f92672>=</span> <span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;/post/</span><span style=color:#e6db74>{</span>title<span style=color:#e6db74>}</span><span style=color:#e6db74>/&#34;</span>           <span style=color:#75715e># f-string 格式化</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 整數（int）— 主鍵 ID、分頁、計數</span>
+</span></span><span style=display:flex><span>page <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>per_page <span style=color:#f92672>=</span> <span style=color:#ae81ff>20</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 浮點數（float）— 價格、評分</span>
+</span></span><span style=display:flex><span>price <span style=color:#f92672>=</span> <span style=color:#ae81ff>299.99</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 布林值（bool）— 權限判斷、功能開關</span>
+</span></span><span style=display:flex><span>is_active <span style=color:#f92672>=</span> <span style=color:#66d9ef>True</span>
+</span></span><span style=display:flex><span>is_staff <span style=color:#f92672>=</span> <span style=color:#66d9ef>False</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 空值（None）— 預設值、可選欄位</span>
+</span></span><span style=display:flex><span>middle_name <span style=color:#f92672>=</span> <span style=color:#66d9ef>None</span>
+</span></span></code></pre></div><h4 id=型別轉換與檢查>型別轉換與檢查</h4><p>在處理表單資料或 URL 參數時，經常需要型別轉換：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># 型別轉換</span>
+</span></span><span style=display:flex><span>age <span style=color:#f92672>=</span> int(<span style=color:#e6db74>&#34;25&#34;</span>)           <span style=color:#75715e># 字串轉整數</span>
+</span></span><span style=display:flex><span>price <span style=color:#f92672>=</span> float(<span style=color:#e6db74>&#34;19.99&#34;</span>)    <span style=color:#75715e># 字串轉浮點數</span>
+</span></span><span style=display:flex><span>count <span style=color:#f92672>=</span> str(<span style=color:#ae81ff>100</span>)           <span style=color:#75715e># 整數轉字串</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 型別檢查</span>
+</span></span><span style=display:flex><span>print(type(age))           <span style=color:#75715e># 輸出：&lt;class &#39;int&#39;&gt;</span>
+</span></span><span style=display:flex><span>print(isinstance(age, int))  <span style=color:#75715e># 輸出：True</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Falsy 值 — 在條件判斷中視為 False</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># False, None, 0, 0.0, &#34;&#34;, [], (), {}, set()</span>
+</span></span><span style=display:flex><span>username <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>if</span> <span style=color:#f92672>not</span> username:
+</span></span><span style=display:flex><span>    print(<span style=color:#e6db74>&#34;使用者名稱不能為空&#34;</span>)  <span style=color:#75715e># 輸出：使用者名稱不能為空</span>
+</span></span></code></pre></div><h3 id=資料結構data-structures>資料結構（Data Structures）</h3><p>Django 大量使用 Python 的內建資料結構。掌握 <strong>串列（list）</strong>、<strong>字典（dict）</strong>、<strong>元組（tuple）</strong> 和 <strong>集合（set）</strong> 是必備技能。</p><h4 id=串列list-可變有序序列>串列（List）— 可變有序序列</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># 建立串列</span>
+</span></span><span style=display:flex><span>tags <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#34;python&#34;</span>, <span style=color:#e6db74>&#34;django&#34;</span>, <span style=color:#e6db74>&#34;web&#34;</span>]
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 存取元素</span>
+</span></span><span style=display:flex><span>print(tags[<span style=color:#ae81ff>0</span>])             <span style=color:#75715e># 輸出：python</span>
+</span></span><span style=display:flex><span>print(tags[<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>])            <span style=color:#75715e># 輸出：web</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 修改操作</span>
+</span></span><span style=display:flex><span>tags<span style=color:#f92672>.</span>append(<span style=color:#e6db74>&#34;tutorial&#34;</span>)    <span style=color:#75715e># 新增到尾端</span>
+</span></span><span style=display:flex><span>tags<span style=color:#f92672>.</span>insert(<span style=color:#ae81ff>0</span>, <span style=color:#e6db74>&#34;beginner&#34;</span>) <span style=color:#75715e># 插入到指定位置</span>
+</span></span><span style=display:flex><span>tags<span style=color:#f92672>.</span>remove(<span style=color:#e6db74>&#34;web&#34;</span>)         <span style=color:#75715e># 移除指定元素</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 串列推導式（List Comprehension）— Django 中常見</span>
+</span></span><span style=display:flex><span>active_users <span style=color:#f92672>=</span> [user <span style=color:#66d9ef>for</span> user <span style=color:#f92672>in</span> users <span style=color:#66d9ef>if</span> user<span style=color:#f92672>.</span>is_active]
+</span></span><span style=display:flex><span>usernames <span style=color:#f92672>=</span> [user<span style=color:#f92672>.</span>username<span style=color:#f92672>.</span>upper() <span style=color:#66d9ef>for</span> user <span style=color:#f92672>in</span> users]
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 切片（Slicing）</span>
+</span></span><span style=display:flex><span>recent_posts <span style=color:#f92672>=</span> posts[:<span style=color:#ae81ff>10</span>]  <span style=color:#75715e># 取前 10 筆</span>
+</span></span></code></pre></div><h4 id=字典dictionary-鍵值對映射>字典（Dictionary）— 鍵值對映射</h4><p>字典是 Django 中最重要的資料結構之一，模板上下文（Context）、設定檔、JSON 回應都是字典：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># 建立字典</span>
+</span></span><span style=display:flex><span>context <span style=color:#f92672>=</span> {
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;title&#34;</span>: <span style=color:#e6db74>&#34;首頁&#34;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;posts&#34;</span>: post_list,
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;is_authenticated&#34;</span>: <span style=color:#66d9ef>True</span>,
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 存取值</span>
+</span></span><span style=display:flex><span>print(context[<span style=color:#e6db74>&#34;title&#34;</span>])           <span style=color:#75715e># 輸出：首頁</span>
+</span></span><span style=display:flex><span>print(context<span style=color:#f92672>.</span>get(<span style=color:#e6db74>&#34;author&#34;</span>, <span style=color:#e6db74>&#34;匿名&#34;</span>))  <span style=color:#75715e># 安全存取，不存在時回傳預設值</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 遍歷字典</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>for</span> key, value <span style=color:#f92672>in</span> context<span style=color:#f92672>.</span>items():
+</span></span><span style=display:flex><span>    print(<span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>{</span>key<span style=color:#e6db74>}</span><span style=color:#e6db74>: </span><span style=color:#e6db74>{</span>value<span style=color:#e6db74>}</span><span style=color:#e6db74>&#34;</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 合併字典（Python 3.9+）</span>
+</span></span><span style=display:flex><span>defaults <span style=color:#f92672>=</span> {<span style=color:#e6db74>&#34;page&#34;</span>: <span style=color:#ae81ff>1</span>, <span style=color:#e6db74>&#34;per_page&#34;</span>: <span style=color:#ae81ff>20</span>}
+</span></span><span style=display:flex><span>params <span style=color:#f92672>=</span> {<span style=color:#e6db74>&#34;page&#34;</span>: <span style=color:#ae81ff>3</span>, <span style=color:#e6db74>&#34;sort&#34;</span>: <span style=color:#e6db74>&#34;date&#34;</span>}
+</span></span><span style=display:flex><span>merged <span style=color:#f92672>=</span> defaults <span style=color:#f92672>|</span> params        <span style=color:#75715e># {&#39;page&#39;: 3, &#39;per_page&#39;: 20, &#39;sort&#39;: &#39;date&#39;}</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 字典推導式</span>
+</span></span><span style=display:flex><span>field_errors <span style=color:#f92672>=</span> {field: err <span style=color:#66d9ef>for</span> field, err <span style=color:#f92672>in</span> form<span style=color:#f92672>.</span>errors<span style=color:#f92672>.</span>items()}
+</span></span></code></pre></div><h4 id=元組tuple與集合set>元組（Tuple）與集合（Set）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># 元組（Tuple）— 不可變序列，常用於 Django 設定</span>
+</span></span><span style=display:flex><span>INSTALLED_APPS <span style=color:#f92672>=</span> (
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;django.contrib.admin&#34;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;django.contrib.auth&#34;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;myapp&#34;</span>,
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>STATUS_CHOICES <span style=color:#f92672>=</span> (
+</span></span><span style=display:flex><span>    (<span style=color:#e6db74>&#34;draft&#34;</span>, <span style=color:#e6db74>&#34;草稿&#34;</span>),
+</span></span><span style=display:flex><span>    (<span style=color:#e6db74>&#34;published&#34;</span>, <span style=color:#e6db74>&#34;已發布&#34;</span>),
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 解包（Unpacking）</span>
+</span></span><span style=display:flex><span>status_code, status_text <span style=color:#f92672>=</span> (<span style=color:#e6db74>&#34;draft&#34;</span>, <span style=color:#e6db74>&#34;草稿&#34;</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 集合（Set）— 無序不重複，適合權限判斷</span>
+</span></span><span style=display:flex><span>user_permissions <span style=color:#f92672>=</span> {<span style=color:#e6db74>&#34;read&#34;</span>, <span style=color:#e6db74>&#34;write&#34;</span>, <span style=color:#e6db74>&#34;delete&#34;</span>}
+</span></span><span style=display:flex><span>required_permissions <span style=color:#f92672>=</span> {<span style=color:#e6db74>&#34;read&#34;</span>, <span style=color:#e6db74>&#34;write&#34;</span>}
+</span></span><span style=display:flex><span>print(required_permissions<span style=color:#f92672>.</span>issubset(user_permissions))  <span style=color:#75715e># 輸出：True</span>
+</span></span></code></pre></div><h3 id=控制流程control-flow>控制流程（Control Flow）</h3><h4 id=條件判斷--if--elif--else>條件判斷 — if / elif / else</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># 基本條件判斷</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>if</span> request<span style=color:#f92672>.</span>method <span style=color:#f92672>==</span> <span style=color:#e6db74>&#34;POST&#34;</span>:
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 處理表單提交</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>pass</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>elif</span> request<span style=color:#f92672>.</span>method <span style=color:#f92672>==</span> <span style=color:#e6db74>&#34;GET&#34;</span>:
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 顯示表單</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>pass</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>else</span>:
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 其他 HTTP 方法</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>pass</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 三元運算式（Ternary Expression）</span>
+</span></span><span style=display:flex><span>status <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;已發布&#34;</span> <span style=color:#66d9ef>if</span> post<span style=color:#f92672>.</span>is_published <span style=color:#66d9ef>else</span> <span style=color:#e6db74>&#34;草稿&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 利用 Truthy / Falsy 簡化判斷</span>
+</span></span><span style=display:flex><span>name <span style=color:#f92672>=</span> user_input <span style=color:#f92672>or</span> <span style=color:#e6db74>&#34;匿名&#34;</span>  <span style=color:#75715e># user_input 為空字串時使用預設值</span>
+</span></span></code></pre></div><h4 id=迴圈--for-與-while>迴圈 — for 與 while</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># for 迴圈 — 遍歷序列</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>for</span> post <span style=color:#f92672>in</span> posts:
+</span></span><span style=display:flex><span>    print(post<span style=color:#f92672>.</span>title)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 搭配 enumerate 取得索引</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>for</span> index, post <span style=color:#f92672>in</span> enumerate(posts, start<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>):
+</span></span><span style=display:flex><span>    print(<span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>{</span>index<span style=color:#e6db74>}</span><span style=color:#e6db74>. </span><span style=color:#e6db74>{</span>post<span style=color:#f92672>.</span>title<span style=color:#e6db74>}</span><span style=color:#e6db74>&#34;</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 搭配 zip 平行遍歷</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>for</span> name, email <span style=color:#f92672>in</span> zip(names, emails):
+</span></span><span style=display:flex><span>    print(<span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>{</span>name<span style=color:#e6db74>}</span><span style=color:#e6db74>: </span><span style=color:#e6db74>{</span>email<span style=color:#e6db74>}</span><span style=color:#e6db74>&#34;</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># range — 產生數字序列</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>for</span> i <span style=color:#f92672>in</span> range(<span style=color:#ae81ff>5</span>):             <span style=color:#75715e># 0, 1, 2, 3, 4</span>
+</span></span><span style=display:flex><span>    print(i)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># while 迴圈</span>
+</span></span><span style=display:flex><span>retry_count <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>while</span> retry_count <span style=color:#f92672>&lt;</span> <span style=color:#ae81ff>3</span>:
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> try_connection():
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>break</span>                  <span style=color:#75715e># 成功則跳出</span>
+</span></span><span style=display:flex><span>    retry_count <span style=color:#f92672>+=</span> <span style=color:#ae81ff>1</span>
+</span></span></code></pre></div><h3 id=函數定義與參數functions>函數定義與參數（Functions）</h3><p>函數（Function）是 Python 程式碼的基本組織單位。Django 的視圖（View）可以是函數，中介軟體（Middleware）也常用函數實作。</p><h4 id=基本定義與預設參數>基本定義與預設參數</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>greet</span>(name, greeting<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;Hello&#34;</span>):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;打招呼函數。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>{</span>greeting<span style=color:#e6db74>}</span><span style=color:#e6db74>, </span><span style=color:#e6db74>{</span>name<span style=color:#e6db74>}</span><span style=color:#e6db74>!&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>print(greet(<span style=color:#e6db74>&#34;Django&#34;</span>))            <span style=color:#75715e># 輸出：Hello, Django!</span>
+</span></span><span style=display:flex><span>print(greet(<span style=color:#e6db74>&#34;Django&#34;</span>, <span style=color:#e6db74>&#34;Hi&#34;</span>))      <span style=color:#75715e># 輸出：Hi, Django!</span>
+</span></span><span style=display:flex><span>print(greet(name<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;World&#34;</span>))        <span style=color:#75715e># 輸出：Hello, World!</span>
+</span></span></code></pre></div><h4 id=args-與-kwargs--不定長參數>*args 與 **kwargs — 不定長參數</h4><p>這是理解 Django 原始碼的關鍵語法。<code>*args</code> 將多餘的位置引數（Positional Arguments）打包為元組，<code>**kwargs</code> 將多餘的關鍵字引數（Keyword Arguments）打包為字典：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># *args — 接收任意數量的位置引數</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>add</span>(<span style=color:#f92672>*</span>args):
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> sum(args)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>print(add(<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>))              <span style=color:#75715e># 輸出：6</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># **kwargs — 接收任意數量的關鍵字引數</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>create_user</span>(<span style=color:#f92672>**</span>kwargs):
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> key, value <span style=color:#f92672>in</span> kwargs<span style=color:#f92672>.</span>items():
+</span></span><span style=display:flex><span>        print(<span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>{</span>key<span style=color:#e6db74>}</span><span style=color:#e6db74> = </span><span style=color:#e6db74>{</span>value<span style=color:#e6db74>}</span><span style=color:#e6db74>&#34;</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>create_user(name<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;Alice&#34;</span>, age<span style=color:#f92672>=</span><span style=color:#ae81ff>30</span>, email<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;alice@example.com&#34;</span>)
+</span></span><span style=display:flex><span><span style=color:#75715e># 輸出：</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># name = Alice</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># age = 30</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># email = alice@example.com</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 混合使用 — Django 原始碼中常見的模式</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>view</span>(request, <span style=color:#f92672>*</span>args, <span style=color:#f92672>**</span>kwargs):
+</span></span><span style=display:flex><span>    pk <span style=color:#f92672>=</span> kwargs<span style=color:#f92672>.</span>get(<span style=color:#e6db74>&#34;pk&#34;</span>)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> render(request, <span style=color:#e6db74>&#34;detail.html&#34;</span>, {<span style=color:#e6db74>&#34;pk&#34;</span>: pk})
+</span></span></code></pre></div><h4 id=解包傳入函數>解包傳入函數</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># 串列解包為位置引數</span>
+</span></span><span style=display:flex><span>args <span style=color:#f92672>=</span> [<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>]
+</span></span><span style=display:flex><span>print(add(<span style=color:#f92672>*</span>args))                 <span style=color:#75715e># 等同 add(1, 2, 3)，輸出：6</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 字典解包為關鍵字引數</span>
+</span></span><span style=display:flex><span>config <span style=color:#f92672>=</span> {<span style=color:#e6db74>&#34;name&#34;</span>: <span style=color:#e6db74>&#34;Alice&#34;</span>, <span style=color:#e6db74>&#34;age&#34;</span>: <span style=color:#ae81ff>30</span>}
+</span></span><span style=display:flex><span>create_user(<span style=color:#f92672>**</span>config)             <span style=color:#75715e># 等同 create_user(name=&#34;Alice&#34;, age=30)</span>
+</span></span></code></pre></div><h3 id=類別與物件導向基礎oop>類別與物件導向基礎（OOP）</h3><p>Django 的核心元件 — Model、View、Form、Admin — 都基於類別（Class）設計。理解物件導向程式設計（Object-Oriented Programming，簡稱 OOP）是使用 Django 的必要條件。</p><h4 id=類別定義__init__-與-self>類別定義、__init__ 與 self</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Article</span>:
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 類別變數 — 所有實例共用</span>
+</span></span><span style=display:flex><span>    platform <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;BenzHub&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>__init__</span>(self, title, content, author<span style=color:#f92672>=</span><span style=color:#66d9ef>None</span>):
+</span></span><span style=display:flex><span>        <span style=color:#75715e># 實例變數 — 每個物件獨立</span>
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>title <span style=color:#f92672>=</span> title
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>content <span style=color:#f92672>=</span> content
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>author <span style=color:#f92672>=</span> author
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>is_published <span style=color:#f92672>=</span> <span style=color:#66d9ef>False</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>publish</span>(self):
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>is_published <span style=color:#f92672>=</span> <span style=color:#66d9ef>True</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> <span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;《</span><span style=color:#e6db74>{</span>self<span style=color:#f92672>.</span>title<span style=color:#e6db74>}</span><span style=color:#e6db74>》已發布&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>__str__</span>(self):
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> <span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;Article: </span><span style=color:#e6db74>{</span>self<span style=color:#f92672>.</span>title<span style=color:#e6db74>}</span><span style=color:#e6db74>&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 建立物件（實例化）</span>
+</span></span><span style=display:flex><span>post <span style=color:#f92672>=</span> Article(<span style=color:#e6db74>&#34;Django 入門&#34;</span>, <span style=color:#e6db74>&#34;本篇教學...&#34;</span>)
+</span></span><span style=display:flex><span>print(post<span style=color:#f92672>.</span>publish())             <span style=color:#75715e># 輸出：《Django 入門》已發布</span>
+</span></span><span style=display:flex><span>print(post)                       <span style=color:#75715e># 輸出：Article: Django 入門</span>
+</span></span></code></pre></div><ul><li><code>__init__</code> 是建構方法（Constructor），在建立物件時自動呼叫</li><li><code>self</code> 代表物件自身的實例（Instance），透過它存取物件的屬性與方法</li><li><code>__str__</code> 是魔術方法（Magic Method），定義物件的字串表示</li></ul><h4 id=繼承inheritance>繼承（Inheritance）</h4><p>繼承（Inheritance）讓子類別（Child Class）重用父類別（Parent Class）的程式碼，Django 的 Model 和 View 都大量使用這個特性：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>BaseModel</span>:
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>__init__</span>(self, created_at<span style=color:#f92672>=</span><span style=color:#66d9ef>None</span>):
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>created_at <span style=color:#f92672>=</span> created_at <span style=color:#f92672>or</span> <span style=color:#e6db74>&#34;now&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>save</span>(self):
+</span></span><span style=display:flex><span>        print(<span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;儲存到資料庫，建立時間：</span><span style=color:#e6db74>{</span>self<span style=color:#f92672>.</span>created_at<span style=color:#e6db74>}</span><span style=color:#e6db74>&#34;</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Article</span>(BaseModel):
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>__init__</span>(self, title, content, <span style=color:#f92672>**</span>kwargs):
+</span></span><span style=display:flex><span>        super()<span style=color:#f92672>.</span><span style=color:#a6e22e>__init__</span>(<span style=color:#f92672>**</span>kwargs)  <span style=color:#75715e># 呼叫父類別的 __init__</span>
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>title <span style=color:#f92672>=</span> title
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>content <span style=color:#f92672>=</span> content
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>save</span>(self):
+</span></span><span style=display:flex><span>        print(<span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;儲存文章：</span><span style=color:#e6db74>{</span>self<span style=color:#f92672>.</span>title<span style=color:#e6db74>}</span><span style=color:#e6db74>&#34;</span>)
+</span></span><span style=display:flex><span>        super()<span style=color:#f92672>.</span>save()             <span style=color:#75715e># 呼叫父類別的 save</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>article <span style=color:#f92672>=</span> Article(<span style=color:#e6db74>&#34;Django ORM&#34;</span>, <span style=color:#e6db74>&#34;Django 的 ORM 教學...&#34;</span>)
+</span></span><span style=display:flex><span>article<span style=color:#f92672>.</span>save()
+</span></span><span style=display:flex><span><span style=color:#75715e># 輸出：</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 儲存文章：Django ORM</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 儲存到資料庫，建立時間：now</span>
+</span></span></code></pre></div><p>這個模式在 Django 中隨處可見，例如自訂 Model 繼承 <code>models.Model</code>、自訂 View 繼承 <code>View</code> 或 <code>ListView</code>，並透過 <code>super()</code> 呼叫父類別方法。</p><h3 id=裝飾器decorators基礎>裝飾器（Decorators）基礎</h3><p>裝飾器（Decorator）是 Python 中一個強大的語法特性，Django 大量使用裝飾器來實現權限控制、HTTP 方法限制等功能。</p><h4 id=裝飾器的基本原理>裝飾器的基本原理</h4><p>裝飾器本質上是一個函數，它接收一個函數作為參數，回傳一個新的函數：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> functools <span style=color:#f92672>import</span> wraps
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>log_calls</span>(func):
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>@wraps</span>(func)  <span style=color:#75715e># 保留原函數的名稱與文件字串</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>wrapper</span>(<span style=color:#f92672>*</span>args, <span style=color:#f92672>**</span>kwargs):
+</span></span><span style=display:flex><span>        print(<span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;呼叫 </span><span style=color:#e6db74>{</span>func<span style=color:#f92672>.</span>__name__<span style=color:#e6db74>}</span><span style=color:#e6db74>()&#34;</span>)
+</span></span><span style=display:flex><span>        result <span style=color:#f92672>=</span> func(<span style=color:#f92672>*</span>args, <span style=color:#f92672>**</span>kwargs)
+</span></span><span style=display:flex><span>        print(<span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;</span><span style=color:#e6db74>{</span>func<span style=color:#f92672>.</span>__name__<span style=color:#e6db74>}</span><span style=color:#e6db74>() 執行完畢&#34;</span>)
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> result
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> wrapper
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>@log_calls</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>process_data</span>(data):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;處理資料的函數。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> len(data)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>print(process_data([<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>]))
+</span></span><span style=display:flex><span><span style=color:#75715e># 輸出：</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 呼叫 process_data()</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># process_data() 執行完畢</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 3</span>
+</span></span></code></pre></div><p><code>@log_calls</code> 放在函數定義上方，等同於 <code>process_data = log_calls(process_data)</code>。</p><h4 id=django-中常見的裝飾器>Django 中常見的裝飾器</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> django.contrib.auth.decorators <span style=color:#f92672>import</span> login_required
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.views.decorators.http <span style=color:#f92672>import</span> require_POST
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># @login_required — 要求使用者登入</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>@login_required</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>dashboard</span>(request):
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> render(request, <span style=color:#e6db74>&#34;dashboard.html&#34;</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># @require_POST — 只允許 POST 請求</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>@require_POST</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>delete_post</span>(request, pk):
+</span></span><span style=display:flex><span>    post <span style=color:#f92672>=</span> Post<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>get(pk<span style=color:#f92672>=</span>pk)
+</span></span><span style=display:flex><span>    post<span style=color:#f92672>.</span>delete()
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> redirect(<span style=color:#e6db74>&#34;post_list&#34;</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 堆疊多個裝飾器（由下往上套用）</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>@login_required</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>@require_POST</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>create_post</span>(request):
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 先檢查是否為 POST，再檢查是否登入</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>pass</span>
+</span></span></code></pre></div><h4 id=帶參數的裝飾器>帶參數的裝飾器</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>permission_required</span>(permission):
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>decorator</span>(func):
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>@wraps</span>(func)
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>wrapper</span>(request, <span style=color:#f92672>*</span>args, <span style=color:#f92672>**</span>kwargs):
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>if</span> permission <span style=color:#f92672>not</span> <span style=color:#f92672>in</span> request<span style=color:#f92672>.</span>user<span style=color:#f92672>.</span>permissions:
+</span></span><span style=display:flex><span>                <span style=color:#66d9ef>return</span> HttpResponseForbidden(<span style=color:#e6db74>&#34;權限不足&#34;</span>)
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> func(request, <span style=color:#f92672>*</span>args, <span style=color:#f92672>**</span>kwargs)
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> wrapper
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> decorator
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>@permission_required</span>(<span style=color:#e6db74>&#34;can_edit&#34;</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>edit_post</span>(request, pk):
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>pass</span>
+</span></span></code></pre></div><h3 id=模組與套件匯入modules--packages>模組與套件匯入（Modules & Packages）</h3><p>Python 使用模組（Module）和套件（Package）來組織程式碼。Django 專案本身就是由多個套件（app）組成的，理解匯入語法是閱讀和編寫 Django 程式碼的基礎。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># 匯入整個模組</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> os
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> json
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>print(os<span style=color:#f92672>.</span>path<span style=color:#f92672>.</span>join(<span style=color:#e6db74>&#34;templates&#34;</span>, <span style=color:#e6db74>&#34;index.html&#34;</span>))
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 從模組匯入特定物件</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> datetime <span style=color:#f92672>import</span> datetime, timedelta
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> pathlib <span style=color:#f92672>import</span> Path
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>now <span style=color:#f92672>=</span> datetime<span style=color:#f92672>.</span>now()
+</span></span><span style=display:flex><span>tomorrow <span style=color:#f92672>=</span> now <span style=color:#f92672>+</span> timedelta(days<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Django 中常見的匯入模式</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.shortcuts <span style=color:#f92672>import</span> render, redirect, get_object_or_404
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.http <span style=color:#f92672>import</span> HttpResponse, JsonResponse
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.views <span style=color:#f92672>import</span> View
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.db <span style=color:#f92672>import</span> models
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 匯入自己的模組（相對匯入）</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> .models <span style=color:#f92672>import</span> Article        <span style=color:#75715e># 從同一套件匯入</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> .forms <span style=color:#f92672>import</span> ArticleForm
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> myapp.utils <span style=color:#f92672>import</span> helper     <span style=color:#75715e># 從指定套件匯入</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 使用別名（Alias）</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> numpy <span style=color:#66d9ef>as</span> np
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.contrib.auth.models <span style=color:#f92672>import</span> User <span style=color:#66d9ef>as</span> AuthUser
+</span></span></code></pre></div><h4 id=django-專案的匯入慣例>Django 專案的匯入慣例</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># views.py — 一個典型的 Django 視圖檔案的匯入結構</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 1. 標準函式庫</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> json
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> datetime <span style=color:#f92672>import</span> datetime
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 2. 第三方套件</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.shortcuts <span style=color:#f92672>import</span> render, redirect
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.contrib.auth.decorators <span style=color:#f92672>import</span> login_required
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 3. 本地應用</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> .models <span style=color:#f92672>import</span> Post
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> .forms <span style=color:#f92672>import</span> PostForm
+</span></span></code></pre></div><p>這種分組匯入的慣例讓程式碼更容易閱讀和維護。</p><h3 id=總結>總結</h3><p>本篇文章快速回顧了 Django 開發所需的 Python 核心語法。以下是各主題與 Django 的對應關係：</p><table><thead><tr><th>Python 語法</th><th>Django 應用場景</th></tr></thead><tbody><tr><td><code>str</code>、<code>int</code>、<code>bool</code></td><td>模型欄位、表單驗證、模板渲染</td></tr><tr><td><code>list</code>、<code>dict</code></td><td>模板上下文、QuerySet 操作、JSON 回應</td></tr><tr><td><code>if/elif/else</code>、<code>for</code></td><td>視圖邏輯、模板標籤</td></tr><tr><td>函數、<code>*args</code>、<code>**kwargs</code></td><td>視圖函數、裝飾器、訊號處理</td></tr><tr><td><code>class</code>、繼承、<code>super()</code></td><td>Model、View、Form、Admin</td></tr><tr><td>裝飾器</td><td>權限控制、HTTP 方法限制、快取</td></tr><tr><td><code>import</code>、<code>from...import</code></td><td>專案結構、app 間的相互引用</td></tr></tbody></table><p>你不需要精通 Python 的所有語法才能開始學 Django，但上述這些基礎知識會讓你在學習過程中更加順利。如果對某個主題想要深入了解，可以參考本站的 Python 系列教學。</p><p>在下一篇文章中，我們將正式進入 Django 的世界，建立你的第一個 Django 專案。</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
+</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/django/002-python-environment-setup/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Python 環境安裝與設定 | Django 教學</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/05/22</span>
+</a><a href=https://benzhub.github.io/post/django/001-what-is-web-development/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">什麼是 Web 開發？前端、後端、全端入門 | Django 教學</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/05/21</span>
+</a><a href=https://benzhub.github.io/post/python/036-regular-expressions/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Python 正規表達式（Regular Expressions）入門 | Python</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/04/30</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/django/002-python-environment-setup/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+<span class="text-sm font-medium">Python 環境安裝與設定 | Django 教學</span></a></div><div><a href=https://benzhub.github.io/post/django/004-django-introduction-and-installation/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+<span class="text-sm font-medium">Django 是什麼？框架介紹與安裝 | Django 教學</span></a></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
+</a><a href=/tags/acid><span class=tag-pill>acid</span>
+</a><a href=/tags/ai><span class=tag-pill>ai</span>
+</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
+</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
+</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
+</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
+</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
+</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
+</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
+</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
+</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
+</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
+</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
+</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
+</a><a href=/tags/api><span class=tag-pill>api</span>
+</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
+</a><a href=/tags/autovacuum><span class=tag-pill>autovacuum</span>
+</a><a href=/tags/background-processes><span class=tag-pill>background-processes</span>
+</a><a href=/tags/big-o><span class=tag-pill>big o</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (14)</span>
+</a><a href=/post/javascript/><span class=tag-pill>JavaScript (69)</span>
+</a><a href=/post/django/><span class=tag-pill>Django (31)</span>
+</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
+</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
+</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
+</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
+</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/django/031-django-signals/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Signals 信號機制：觀察者模式實戰 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/20</p></a><a href=/post/postgresql/014-dml-advanced/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">DML 進階操作：Upsert、MERGE、RETURNING 與 COPY 批量匯入 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/20</p></a><a href=/post/javascript/data-structures--algorithms/007-sorting/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">排序演算法 — Bubble、Merge、Quick Sort 等十大排序完整比較 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/20</p></a><a href=/post/postgresql/013-ddl-schema/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/19</p></a><a href=/post/django/030-django-custom-user-model/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django 自訂使用者模型：AbstractUser 與 AbstractBaseUser | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/19</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>

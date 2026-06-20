@@ -1,502 +1,37 @@
-<!DOCTYPE html>
-
-<html lang="zh-TW">
-<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><title>儲存引擎與頁面結構：PostgreSQL 資料在磁碟上的組織方式 | PostgreSQL | BenzHub</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="apple-touch-icon" sizes="180x180" href='/favicon/apple-touch-icon.png'>
-    <link rel="icon" type="image/png" sizes="32x32" href='/favicon/favicon-32x32.png'>
-    <link rel="icon" type="image/png" sizes="16x16" href='/favicon/favicon-16x16.png'>
-    <link rel="manifest" href='/favicon/site.webmanifest' />
-    <link rel="mask-icon" href=' /favicon/safari-pinned-tab.svg' color="#5bbad5" />
-    <link rel="shortcut icon" href='/favicon/favicon.ico' />
-    <meta name="theme-color" content="#fafafa">
-    <meta property="og:title" content="儲存引擎與頁面結構：PostgreSQL 資料在磁碟上的組織方式 | PostgreSQL | BenzHub" />
-    
-    
-    <link rel="stylesheet" href="/css/style.css" />
-    
-    <link href=' /css/blonde.min.css' rel="stylesheet" type="text/css" media="print"
-        onload="this.media=' all'">
-    
-
-
-
-
-
-
-
-  
-
-
-
-
-  
-
-<meta name="description" content="深入解析 PostgreSQL 的 Heap Table 儲存引擎，包括 8KB Page 內部結構、ItemId 行指標、Tuple Header 與 MVCC 關係、TOAST 超大值處理、Free Space Map、Fill Factor 與 HOT Update 優化，以及 Table Access Method API（PG12&#43;）可插拔儲存引擎。">
-<meta property="og:site_name" content="BenzHub">
-<meta property="og:description" content="深入解析 PostgreSQL 的 Heap Table 儲存引擎，包括 8KB Page 內部結構、ItemId 行指標、Tuple Header 與 MVCC 關係、TOAST 超大值處理、Free Space Map、Fill Factor 與 HOT Update 優化，以及 Table Access Method API（PG12&#43;）可插拔儲存引擎。">
-<meta property="og:url" content="http://localhost:1313/post/postgresql/008-storage-engine/">
-<meta property="og:type" content="article">
-<meta property="og:locale" content="zh_TW">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="">
-
-<link rel="canonical" href="http://localhost:1313/post/postgresql/008-storage-engine/">
-
-<meta name="twitter:description" content="深入解析 PostgreSQL 的 Heap Table 儲存引擎，包括 8KB Page 內部結構、ItemId 行指標、Tuple Header 與 MVCC 關係、TOAST 超大值處理、Free Space Map、Fill Factor 與 HOT Update 優化，以及 Table Access Method API（PG12&#43;）可插拔儲存引擎。">
-<meta property="article:published_time" content="2026-06-14T00:00:00&#43;00:00">
-<meta property="article:updated_time" content="2026-06-14T00:00:00&#43;00:00">
-
-
-
-
-
-    
-<meta property="og:image" content="http://localhost:1313/img/postgresql/008-Storage-Engine.png">
-<meta property="og:image:url" content="http://localhost:1313/img/postgresql/008-Storage-Engine.png">
-    
-
-    
-    <link rel="stylesheet" href='/css/custom.css'>
-    <i class="dark hidden"></i>
-    
-<link rel="alternate" hreflang="zh-TW" href="http://localhost:1313/post/postgresql/008-storage-engine/" />
-
-<link rel="alternate" hreflang="x-default" href="http://localhost:1313/post/postgresql/008-storage-engine/" />
-
-    
-
-
-
-
-
-
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BlogPosting",
-  "headline": "\"儲存引擎與頁面結構：PostgreSQL 資料在磁碟上的組織方式 | PostgreSQL\"",
-  "description": "\"深入解析 PostgreSQL 的 Heap Table 儲存引擎，包括 8KB Page 內部結構、ItemId 行指標、Tuple Header 與 MVCC 關係、TOAST 超大值處理、Free Space Map、Fill Factor 與 HOT Update 優化，以及 Table Access Method API（PG12+）可插拔儲存引擎。\"",
-  "author": {
-    "@type": "Person",
-    "name": "\"BenzHub\"",
-    "url": "http:\/\/localhost:1313\/about",
-    "jobTitle": "\"Software Developer\"",
-    "sameAs": [
-      "\"https://github.com/benzhub\""
-    ]
-  },
-  "datePublished": "2026-06-14T00:00:00\u002b00:00",
-  "dateModified": "2026-06-14T00:00:00\u002b00:00",
-  "image": "http:\/\/localhost:1313\/img\/postgresql\/008-Storage-Engine.png",
-  "publisher": {
-    "@type": "Organization",
-    "name": "\"BenzHub\"",
-    "url": "\"http://localhost:1313/\"",
-    "sameAs": [
-      "\"https://github.com/benzhub\""
-    ]
-  },
-  "mainEntityOfPage": {
-    "@type": "WebPage",
-    "@id": "http:\/\/localhost:1313\/post\/postgresql\/008-storage-engine\/"
-  },
-  "inLanguage": "zh-TW"
-}
-</script>
-
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    {
-      "@type": "ListItem",
-      "position": 1,
-      "name": "\"BenzHub\"",
-      "item": "http:\/\/localhost:1313\/"
-    }
-    
-    
-      
-      
-    ,{
-      "@type": "ListItem",
-      "position": 2,
-      "name": "\"Blog\"",
-      "item": "http:\/\/localhost:1313\/post\/postgresql\/"
-    }
-      
-      
-    
-    ,{
-      "@type": "ListItem",
-      "position":  3 ,
-      "name": "\"儲存引擎與頁面結構：PostgreSQL 資料在磁碟上的組織方式 | PostgreSQL\""
-    }
-  ]
-}
-</script>
-
-
-
-
-
-
-
-
-
-
-
-</head>
-<body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class="site-nav" id="siteNav">
-    <div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full">
-        
-        <a href="http://localhost:1313/" class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">
-            BenzHub
-        </a>
-
-        
-        <div class="hidden md:flex items-center gap-6">
-            
-            <a href="/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                首頁
-            </a>
-            
-            <a href="/about/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                關於
-            </a>
-            
-            <a href="/contact/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                聯絡
-            </a>
-            
-            <a href="/resourses/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                資源
-            </a>
-            
-
-            
-            <div class="flex items-center gap-2">
-                <form class="flex items-center" role="search" method="get" action="https://google.com/search" id="navSearchForm">
-                    <input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50"
-                        type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋" id="navSearchInput">
-                    <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
-                </form>
-                <button onclick="toggleNavSearch()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
-                    <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-                    </svg>
-                </button>
-            </div>
-
-            
-            <span class="text-zinc-200 dark:text-zinc-700">|</span>
-
-            
-            
-
-
-
-
-<div class="lang-switcher relative hidden md:block">
-    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-        <span>🌐</span>
-        <span>繁體中文</span>
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-    </button>
-    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
-        
-            
-            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-                
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-
-<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
-    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
-    <div class="flex gap-2">
-        
-            
-            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-                
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-
-            
-            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-                <i id="icon2" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
-            </button>
-        </div>
-
-        
-        <div class="flex md:hidden items-center gap-1">
-            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-                <i id="icon" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
-            </button>
-            <button id="hamburgerbtn" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Menu">
-                <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
-            </button>
-        </div>
-    </div>
-
-    
-    <div class="mobile-menu md:hidden" id="mobileMenu">
-        
-        <a href="/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            首頁
-        </a>
-        
-        <a href="/about/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            關於
-        </a>
-        
-        <a href="/contact/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            聯絡
-        </a>
-        
-        <a href="/resourses/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            資源
-        </a>
-        
-        <form class="mt-2" role="search" method="get" action="https://google.com/search">
-            <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
-            <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
-        </form>
-        
-        
-
-
-
-
-<div class="lang-switcher relative hidden md:block">
-    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-        <span>🌐</span>
-        <span>繁體中文</span>
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-    </button>
-    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
-        
-            
-            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-                
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-
-<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
-    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
-    <div class="flex gap-2">
-        
-            
-            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-                
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-    </div>
-</nav>
-
-<script>
-    
-    document.getElementById('hamburgerbtn').addEventListener('click', function () {
-        document.getElementById('mobileMenu').classList.toggle('active');
-    });
-
-    
-    window.addEventListener('scroll', function () {
-        var nav = document.getElementById('siteNav');
-        if (window.scrollY > 50) {
-            nav.classList.add('scrolled');
-        } else {
-            nav.classList.remove('scrolled');
-        }
-    });
-
-    
-    function toggleNavSearch() {
-        var input = document.getElementById('navSearchInput');
-        input.classList.toggle('expanded');
-        if (input.classList.contains('expanded')) {
-            input.focus();
-        }
-    }
-
-    
-    function toggleLangMenu() {
-        var dropdown = document.getElementById('langDropdown');
-        dropdown.classList.toggle('hidden');
-    }
-
-    
-    document.addEventListener('click', function (e) {
-        
-        var form = document.getElementById('navSearchForm');
-        var input = document.getElementById('navSearchInput');
-        if (form && input && !form.contains(e.target) && !e.target.closest('[aria-label="Toggle Search"]')) {
-            input.classList.remove('expanded');
-        }
-        
-        var langSwitcher = e.target.closest('.lang-switcher');
-        if (!langSwitcher) {
-            var dropdown = document.getElementById('langDropdown');
-            if (dropdown) dropdown.classList.add('hidden');
-        }
-    });
-</script>
-<div class="nav-spacer"></div>
-    <div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id="content">
-        <div class="lg:mx-5">
-<div class="grid grid-cols-3 gap-6">
-  
-  <div class="col-span-3 lg:col-span-2">
-  
-      
-      <div class="post-detail fade-in my-4">
-        <h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">儲存引擎與頁面結構：PostgreSQL 資料在磁碟上的組織方式 | PostgreSQL</h1>
-        <div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4">
-            <span class="flex items-center gap-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/14
-            </span>
-            
-        </div>
-        
-        <div class="flex flex-wrap gap-1.5 mb-5">
-            
-            <a href='/tags/postgresql' class="tag-pill no-underline">postgresql</a>
-            
-            <a href='/tags/storage-engine' class="tag-pill no-underline">storage-engine</a>
-            
-            <a href='/tags/heap' class="tag-pill no-underline">heap</a>
-            
-            <a href='/tags/toast' class="tag-pill no-underline">toast</a>
-            
-        </div>
-        
-        
-        <img class="py-4 m-auto rounded-lg thumb-img" src="http://localhost:1313/img/postgresql/008-Storage-Engine.png" alt="儲存引擎與頁面結構：PostgreSQL 資料在磁碟上的組織方式 | PostgreSQL">
-        
-        
-        <div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote>
-<p><strong>PostgreSQL</strong> 預設使用堆積表（Heap Table）作為儲存引擎，所有資料以 8KB 為單位的頁面（Page）組織在磁碟上。理解頁面內部結構，是診斷膨脹（Bloat）、調校 <strong>VACUUM</strong> 策略、以及優化 Update 密集工作負載的基礎。<strong>TOAST</strong> 機制則負責處理超過頁面大小的超大型值。</p>
-</blockquote>
-<h3 id="堆積表heap-table">堆積表（Heap Table）</h3>
-<p>Heap Table 是 <strong>PostgreSQL</strong> 的預設表儲存格式。「堆積」指的是資料以無序方式堆放——新的 Tuple 直接寫入有空間的 Page，沒有特定排序。</p>
-<p>與 MySQL InnoDB 的叢集索引（Clustered Index）不同：</p>
-<table>
-	<thead>
-			<tr>
-					<th>特性</th>
-					<th>PostgreSQL Heap</th>
-					<th>MySQL InnoDB Clustered</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td>資料排列</td>
-					<td>無序堆積</td>
-					<td>依主鍵排序</td>
-			</tr>
-			<tr>
-					<td>主鍵查詢</td>
-					<td>透過索引 → heap</td>
-					<td>直接在 clustered index 中</td>
-			</tr>
-			<tr>
-					<td>範圍掃描效率</td>
-					<td>需回表（index scan + heap fetch）</td>
-					<td>主鍵範圍掃描高效</td>
-			</tr>
-			<tr>
-					<td>表更新代價</td>
-					<td>Tuple 本身更新，索引另行更新</td>
-					<td>Clustered index 重排可能更昂貴</td>
-			</tr>
-	</tbody>
-</table>
-<p>PostgreSQL 12+ 透過 Table Access Method API 支援可插拔儲存引擎，但 Heap 仍是預設且最通用的選擇。</p>
-<h3 id="頁面佈局page-layout">頁面佈局（Page Layout）</h3>
-<p>所有 <strong>PostgreSQL</strong> 的資料——表、索引、序列——都以 <strong>8KB 頁面</strong>（Page，亦稱 Block）為單位存取。頁面是 I/O 的最小單位，即使只讀取一個 Tuple，也必須讀取整個 8KB 頁面。</p>
-<pre tabindex="0"><code>8KB Page 結構：
+<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>儲存引擎與頁面結構：PostgreSQL 資料在磁碟上的組織方式 | PostgreSQL | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="儲存引擎與頁面結構：PostgreSQL 資料在磁碟上的組織方式 | PostgreSQL | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="深入解析 PostgreSQL 的 Heap Table 儲存引擎，包括 8KB Page 內部結構、ItemId 行指標、Tuple Header 與 MVCC 關係、TOAST 超大值處理、Free Space Map、Fill Factor 與 HOT Update 優化，以及 Table Access Method API（PG12+）可插拔儲存引擎。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="深入解析 PostgreSQL 的 Heap Table 儲存引擎，包括 8KB Page 內部結構、ItemId 行指標、Tuple Header 與 MVCC 關係、TOAST 超大值處理、Free Space Map、Fill Factor 與 HOT Update 優化，以及 Table Access Method API（PG12+）可插拔儲存引擎。"><meta property="og:url" content="https://benzhub.github.io/post/postgresql/008-storage-engine/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/postgresql/008-storage-engine/><meta name=twitter:description content="深入解析 PostgreSQL 的 Heap Table 儲存引擎，包括 8KB Page 內部結構、ItemId 行指標、Tuple Header 與 MVCC 關係、TOAST 超大值處理、Free Space Map、Fill Factor 與 HOT Update 優化，以及 Table Access Method API（PG12+）可插拔儲存引擎。"><meta property="article:published_time" content="2026-06-14T00:00:00+00:00"><meta property="article:updated_time" content="2026-06-14T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/postgresql/008-Storage-Engine.png"><meta property="og:image:url" content="https://benzhub.github.io/img/postgresql/008-Storage-Engine.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/postgresql/008-storage-engine/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/postgresql/008-storage-engine/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"儲存引擎與頁面結構：PostgreSQL 資料在磁碟上的組織方式 | PostgreSQL\"","description":"\"深入解析 PostgreSQL 的 Heap Table 儲存引擎，包括 8KB Page 內部結構、ItemId 行指標、Tuple Header 與 MVCC 關係、TOAST 超大值處理、Free Space Map、Fill Factor 與 HOT Update 優化，以及 Table Access Method API（PG12+）可插拔儲存引擎。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-06-14T00:00:00\u002b00:00","dateModified":"2026-06-14T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/postgresql\/008-Storage-Engine.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/postgresql\/008-storage-engine\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/postgresql\/"},{"@type":"ListItem","position":3,"name":"\"儲存引擎與頁面結構：PostgreSQL 資料在磁碟上的組織方式 | PostgreSQL\""}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">儲存引擎與頁面結構：PostgreSQL 資料在磁碟上的組織方式 | PostgreSQL</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/14</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/postgresql class="tag-pill no-underline">postgresql</a>
+<a href=/tags/storage-engine class="tag-pill no-underline">storage-engine</a>
+<a href=/tags/heap class="tag-pill no-underline">heap</a>
+<a href=/tags/toast class="tag-pill no-underline">toast</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/postgresql/008-Storage-Engine.png alt="儲存引擎與頁面結構：PostgreSQL 資料在磁碟上的組織方式 | PostgreSQL"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p><strong>PostgreSQL</strong> 預設使用堆積表（Heap Table）作為儲存引擎，所有資料以 8KB 為單位的頁面（Page）組織在磁碟上。理解頁面內部結構，是診斷膨脹（Bloat）、調校 <strong>VACUUM</strong> 策略、以及優化 Update 密集工作負載的基礎。<strong>TOAST</strong> 機制則負責處理超過頁面大小的超大型值。</p></blockquote><h3 id=堆積表heap-table>堆積表（Heap Table）</h3><p>Heap Table 是 <strong>PostgreSQL</strong> 的預設表儲存格式。「堆積」指的是資料以無序方式堆放——新的 Tuple 直接寫入有空間的 Page，沒有特定排序。</p><p>與 MySQL InnoDB 的叢集索引（Clustered Index）不同：</p><table><thead><tr><th>特性</th><th>PostgreSQL Heap</th><th>MySQL InnoDB Clustered</th></tr></thead><tbody><tr><td>資料排列</td><td>無序堆積</td><td>依主鍵排序</td></tr><tr><td>主鍵查詢</td><td>透過索引 → heap</td><td>直接在 clustered index 中</td></tr><tr><td>範圍掃描效率</td><td>需回表（index scan + heap fetch）</td><td>主鍵範圍掃描高效</td></tr><tr><td>表更新代價</td><td>Tuple 本身更新，索引另行更新</td><td>Clustered index 重排可能更昂貴</td></tr></tbody></table><p>PostgreSQL 12+ 透過 Table Access Method API 支援可插拔儲存引擎，但 Heap 仍是預設且最通用的選擇。</p><h3 id=頁面佈局page-layout>頁面佈局（Page Layout）</h3><p>所有 <strong>PostgreSQL</strong> 的資料——表、索引、序列——都以 <strong>8KB 頁面</strong>（Page，亦稱 Block）為單位存取。頁面是 I/O 的最小單位，即使只讀取一個 Tuple，也必須讀取整個 8KB 頁面。</p><pre tabindex=0><code>8KB Page 結構：
 
 ┌─────────────────────────────────────┐  0
 │          PageHeaderData (24B)        │
@@ -517,18 +52,7 @@
 ├─────────────────────────────────────┤
 │         Special Space               │  8192（8KB）
 └─────────────────────────────────────┘
-</code></pre><p>Page 的兩端向中間成長：ItemId 陣列從上往下、Tuple Data 從下往上。當 <code>pd_lower</code> 與 <code>pd_upper</code> 相遇，Page 就滿了。</p>
-<h3 id="itemid行指標的重要性">ItemId（行指標）的重要性</h3>
-<p>每個 ItemId（4 bytes）包含三個欄位：</p>
-<ul>
-<li><code>lp_off</code>：Tuple 在 Page 內的偏移量</li>
-<li><code>lp_flags</code>：狀態（<code>LP_UNUSED</code> / <code>LP_NORMAL</code> / <code>LP_REDIRECT</code> / <code>LP_DEAD</code>）</li>
-<li><code>lp_len</code>：Tuple 的長度</li>
-</ul>
-<p>索引中儲存的是 <code>(page_number, ItemId_index)</code> 這個邏輯指標，稱為 <strong>ctid</strong>（如 <code>(0,1)</code> 表示第 0 個 Page 的第 1 個 ItemId）。即使 Tuple 因為 Update 被移動，索引無需更新——只要更新 ItemId 指向新位置（HOT Update 機制）。</p>
-<h3 id="tuple-header-結構">Tuple Header 結構</h3>
-<p>每個 Tuple 前有 <strong>23 bytes</strong> 的 Header，儲存 MVCC 所需的版本資訊：</p>
-<pre tabindex="0"><code>HeapTupleHeaderData（23 bytes）：
+</code></pre><p>Page 的兩端向中間成長：ItemId 陣列從上往下、Tuple Data 從下往上。當 <code>pd_lower</code> 與 <code>pd_upper</code> 相遇，Page 就滿了。</p><h3 id=itemid行指標的重要性>ItemId（行指標）的重要性</h3><p>每個 ItemId（4 bytes）包含三個欄位：</p><ul><li><code>lp_off</code>：Tuple 在 Page 內的偏移量</li><li><code>lp_flags</code>：狀態（<code>LP_UNUSED</code> / <code>LP_NORMAL</code> / <code>LP_REDIRECT</code> / <code>LP_DEAD</code>）</li><li><code>lp_len</code>：Tuple 的長度</li></ul><p>索引中儲存的是 <code>(page_number, ItemId_index)</code> 這個邏輯指標，稱為 <strong>ctid</strong>（如 <code>(0,1)</code> 表示第 0 個 Page 的第 1 個 ItemId）。即使 Tuple 因為 Update 被移動，索引無需更新——只要更新 ItemId 指向新位置（HOT Update 機制）。</p><h3 id=tuple-header-結構>Tuple Header 結構</h3><p>每個 Tuple 前有 <strong>23 bytes</strong> 的 Header，儲存 MVCC 所需的版本資訊：</p><pre tabindex=0><code>HeapTupleHeaderData（23 bytes）：
 
 位元組  欄位          說明
  0-3   t_xmin        插入此 Tuple 的 Transaction ID
@@ -538,85 +62,41 @@
 16-17  t_infomask    各種狀態 bits（Hint Bits 等）
 18     t_hoff        Header 總長（含 null bitmap）
 19+    null bitmap   每個欄位一個 bit，標記 NULL 值
-</code></pre><p>MVCC 的核心邏輯就建立在 <code>t_xmin</code> 和 <code>t_xmax</code> 上：</p>
-<ul>
-<li><strong>INSERT</strong>：設定 <code>t_xmin = 當前 XID</code>，<code>t_xmax = 0</code></li>
-<li><strong>DELETE</strong>：設定 <code>t_xmax = 當前 XID</code>，保留舊 Tuple</li>
-<li><strong>UPDATE</strong>：設定舊 Tuple 的 <code>t_xmax = 當前 XID</code>，插入新 Tuple 並設 <code>t_xmin = 當前 XID</code></li>
-</ul>
-<p>UPDATE 操作實際上是「刪除舊版本 + 插入新版本」，是 PostgreSQL 需要 VACUUM 清理 Dead Tuple 的根本原因。</p>
-<h3 id="toastthe-oversized-attribute-storage-technique">TOAST（The Oversized-Attribute Storage Technique）</h3>
-<p><strong>PostgreSQL</strong> 的頁面固定為 8KB，但允許儲存遠超過此大小的資料。<strong>TOAST</strong> 機制負責處理超大型值。</p>
-<p>當一個 Tuple 的大小超過約 <code>TOAST_TUPLE_THRESHOLD</code>（約 2KB）時，PostgreSQL 嘗試壓縮或將大型欄位移至 TOAST 表。</p>
-<h4 id="四種-toast-策略">四種 TOAST 策略</h4>
-<table>
-	<thead>
-			<tr>
-					<th>策略</th>
-					<th>行為</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td><code>PLAIN</code></td>
-					<td>不壓縮，不外移。適用於不可能超過頁面大小的型別（int, bool）</td>
-			</tr>
-			<tr>
-					<td><code>EXTENDED</code></td>
-					<td>先壓縮，若仍太大則外移至 TOAST 表。大多數可變長度型別的預設值</td>
-			</tr>
-			<tr>
-					<td><code>EXTERNAL</code></td>
-					<td>不壓縮，直接外移。適用於需要 substring 操作的資料</td>
-			</tr>
-			<tr>
-					<td><code>MAIN</code></td>
-					<td>先壓縮，若仍太大也允許外移（但優先留在主表）</td>
-			</tr>
-	</tbody>
-</table>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 查看表的 TOAST 表名稱
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#66d9ef">c</span>.relname <span style="color:#66d9ef">AS</span> main_table,
-</span></span><span style="display:flex;"><span>       t.relname <span style="color:#66d9ef">AS</span> toast_table
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> pg_class <span style="color:#66d9ef">c</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">LEFT</span> <span style="color:#66d9ef">JOIN</span> pg_class t <span style="color:#66d9ef">ON</span> <span style="color:#66d9ef">c</span>.reltoastrelid <span style="color:#f92672">=</span> t.oid
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> <span style="color:#66d9ef">c</span>.relname <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;my_table&#39;</span>;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 查看各欄位的 TOAST 策略
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> attname, attstorage,
-</span></span><span style="display:flex;"><span>       <span style="color:#66d9ef">CASE</span> attstorage
-</span></span><span style="display:flex;"><span>           <span style="color:#66d9ef">WHEN</span> <span style="color:#e6db74">&#39;p&#39;</span> <span style="color:#66d9ef">THEN</span> <span style="color:#e6db74">&#39;PLAIN&#39;</span>
-</span></span><span style="display:flex;"><span>           <span style="color:#66d9ef">WHEN</span> <span style="color:#e6db74">&#39;e&#39;</span> <span style="color:#66d9ef">THEN</span> <span style="color:#e6db74">&#39;EXTERNAL&#39;</span>
-</span></span><span style="display:flex;"><span>           <span style="color:#66d9ef">WHEN</span> <span style="color:#e6db74">&#39;x&#39;</span> <span style="color:#66d9ef">THEN</span> <span style="color:#e6db74">&#39;EXTENDED&#39;</span>
-</span></span><span style="display:flex;"><span>           <span style="color:#66d9ef">WHEN</span> <span style="color:#e6db74">&#39;m&#39;</span> <span style="color:#66d9ef">THEN</span> <span style="color:#e6db74">&#39;MAIN&#39;</span>
-</span></span><span style="display:flex;"><span>       <span style="color:#66d9ef">END</span> <span style="color:#66d9ef">AS</span> strategy
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> pg_attribute
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> attrelid <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;my_table&#39;</span>::regclass
-</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">AND</span> attnum <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>;
-</span></span></code></pre></div><p>每個有 TOAST 欄位的表都有一個對應的 TOAST 表（<code>pg_toast.pg_toast_&lt;relid&gt;</code>），大型值被切成每片段最大 2KB 的 chunks 存放。</p>
-<h3 id="free-space-map-與-fill-factor">Free Space Map 與 Fill Factor</h3>
-<h4 id="free-space-mapfsm">Free Space Map（FSM）</h4>
-<p>FSM 是每個表的 <code>_fsm</code> 後綴檔案，記錄每個 Page 的可用空間。<strong>PostgreSQL</strong> 在 INSERT 或 UPDATE 時，透過 FSM 快速找到有足夠空間的 Page。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 安裝 pg_freespacemap 查看 FSM 資訊
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> EXTENSION <span style="color:#66d9ef">IF</span> <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">EXISTS</span> pg_freespacemap;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 查看表的 Page 可用空間分佈
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> page, avail
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> pg_freespace(<span style="color:#e6db74">&#39;orders&#39;</span>)
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> avail <span style="color:#66d9ef">DESC</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">LIMIT</span> <span style="color:#ae81ff">20</span>;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 查看表的平均 Page 填充率
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">COUNT</span>(<span style="color:#f92672">*</span>) <span style="color:#66d9ef">AS</span> total_pages,
-</span></span><span style="display:flex;"><span>    ROUND(<span style="color:#66d9ef">AVG</span>(avail) <span style="color:#f92672">/</span> <span style="color:#ae81ff">8192</span>.<span style="color:#ae81ff">0</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">100</span>, <span style="color:#ae81ff">1</span>) <span style="color:#66d9ef">AS</span> avg_free_pct
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> pg_freespace(<span style="color:#e6db74">&#39;orders&#39;</span>);
-</span></span></code></pre></div><h4 id="fill-factor填充因子">Fill Factor（填充因子）</h4>
-<p>Fill Factor 決定 INSERT 時 Page 的目標填充比例（預設 100%）：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 設定 fill factor 為 80%，保留 20% 給 UPDATE
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> orders <span style="color:#66d9ef">SET</span> (fillfactor <span style="color:#f92672">=</span> <span style="color:#ae81ff">80</span>);
-</span></span></code></pre></div><p>Fill Factor &lt; 100% 搭配 <strong>HOT（Heap Only Tuple）Update</strong> 的優化效果：</p>
-<pre tabindex="0"><code>HOT Update 條件：
+</code></pre><p>MVCC 的核心邏輯就建立在 <code>t_xmin</code> 和 <code>t_xmax</code> 上：</p><ul><li><strong>INSERT</strong>：設定 <code>t_xmin = 當前 XID</code>，<code>t_xmax = 0</code></li><li><strong>DELETE</strong>：設定 <code>t_xmax = 當前 XID</code>，保留舊 Tuple</li><li><strong>UPDATE</strong>：設定舊 Tuple 的 <code>t_xmax = 當前 XID</code>，插入新 Tuple 並設 <code>t_xmin = 當前 XID</code></li></ul><p>UPDATE 操作實際上是「刪除舊版本 + 插入新版本」，是 PostgreSQL 需要 VACUUM 清理 Dead Tuple 的根本原因。</p><h3 id=toastthe-oversized-attribute-storage-technique>TOAST（The Oversized-Attribute Storage Technique）</h3><p><strong>PostgreSQL</strong> 的頁面固定為 8KB，但允許儲存遠超過此大小的資料。<strong>TOAST</strong> 機制負責處理超大型值。</p><p>當一個 Tuple 的大小超過約 <code>TOAST_TUPLE_THRESHOLD</code>（約 2KB）時，PostgreSQL 嘗試壓縮或將大型欄位移至 TOAST 表。</p><h4 id=四種-toast-策略>四種 TOAST 策略</h4><table><thead><tr><th>策略</th><th>行為</th></tr></thead><tbody><tr><td><code>PLAIN</code></td><td>不壓縮，不外移。適用於不可能超過頁面大小的型別（int, bool）</td></tr><tr><td><code>EXTENDED</code></td><td>先壓縮，若仍太大則外移至 TOAST 表。大多數可變長度型別的預設值</td></tr><tr><td><code>EXTERNAL</code></td><td>不壓縮，直接外移。適用於需要 substring 操作的資料</td></tr><tr><td><code>MAIN</code></td><td>先壓縮，若仍太大也允許外移（但優先留在主表）</td></tr></tbody></table><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 查看表的 TOAST 表名稱
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#66d9ef>c</span>.relname <span style=color:#66d9ef>AS</span> main_table,
+</span></span><span style=display:flex><span>       t.relname <span style=color:#66d9ef>AS</span> toast_table
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_class <span style=color:#66d9ef>c</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LEFT</span> <span style=color:#66d9ef>JOIN</span> pg_class t <span style=color:#66d9ef>ON</span> <span style=color:#66d9ef>c</span>.reltoastrelid <span style=color:#f92672>=</span> t.oid
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> <span style=color:#66d9ef>c</span>.relname <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;my_table&#39;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 查看各欄位的 TOAST 策略
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> attname, attstorage,
+</span></span><span style=display:flex><span>       <span style=color:#66d9ef>CASE</span> attstorage
+</span></span><span style=display:flex><span>           <span style=color:#66d9ef>WHEN</span> <span style=color:#e6db74>&#39;p&#39;</span> <span style=color:#66d9ef>THEN</span> <span style=color:#e6db74>&#39;PLAIN&#39;</span>
+</span></span><span style=display:flex><span>           <span style=color:#66d9ef>WHEN</span> <span style=color:#e6db74>&#39;e&#39;</span> <span style=color:#66d9ef>THEN</span> <span style=color:#e6db74>&#39;EXTERNAL&#39;</span>
+</span></span><span style=display:flex><span>           <span style=color:#66d9ef>WHEN</span> <span style=color:#e6db74>&#39;x&#39;</span> <span style=color:#66d9ef>THEN</span> <span style=color:#e6db74>&#39;EXTENDED&#39;</span>
+</span></span><span style=display:flex><span>           <span style=color:#66d9ef>WHEN</span> <span style=color:#e6db74>&#39;m&#39;</span> <span style=color:#66d9ef>THEN</span> <span style=color:#e6db74>&#39;MAIN&#39;</span>
+</span></span><span style=display:flex><span>       <span style=color:#66d9ef>END</span> <span style=color:#66d9ef>AS</span> strategy
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_attribute
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> attrelid <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;my_table&#39;</span>::regclass
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>AND</span> attnum <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>;
+</span></span></code></pre></div><p>每個有 TOAST 欄位的表都有一個對應的 TOAST 表（<code>pg_toast.pg_toast_&lt;relid></code>），大型值被切成每片段最大 2KB 的 chunks 存放。</p><h3 id=free-space-map-與-fill-factor>Free Space Map 與 Fill Factor</h3><h4 id=free-space-mapfsm>Free Space Map（FSM）</h4><p>FSM 是每個表的 <code>_fsm</code> 後綴檔案，記錄每個 Page 的可用空間。<strong>PostgreSQL</strong> 在 INSERT 或 UPDATE 時，透過 FSM 快速找到有足夠空間的 Page。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 安裝 pg_freespacemap 查看 FSM 資訊
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> EXTENSION <span style=color:#66d9ef>IF</span> <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>EXISTS</span> pg_freespacemap;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 查看表的 Page 可用空間分佈
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> page, avail
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_freespace(<span style=color:#e6db74>&#39;orders&#39;</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> avail <span style=color:#66d9ef>DESC</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LIMIT</span> <span style=color:#ae81ff>20</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 查看表的平均 Page 填充率
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>COUNT</span>(<span style=color:#f92672>*</span>) <span style=color:#66d9ef>AS</span> total_pages,
+</span></span><span style=display:flex><span>    ROUND(<span style=color:#66d9ef>AVG</span>(avail) <span style=color:#f92672>/</span> <span style=color:#ae81ff>8192</span>.<span style=color:#ae81ff>0</span> <span style=color:#f92672>*</span> <span style=color:#ae81ff>100</span>, <span style=color:#ae81ff>1</span>) <span style=color:#66d9ef>AS</span> avg_free_pct
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_freespace(<span style=color:#e6db74>&#39;orders&#39;</span>);
+</span></span></code></pre></div><h4 id=fill-factor填充因子>Fill Factor（填充因子）</h4><p>Fill Factor 決定 INSERT 時 Page 的目標填充比例（預設 100%）：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 設定 fill factor 為 80%，保留 20% 給 UPDATE
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>TABLE</span> orders <span style=color:#66d9ef>SET</span> (fillfactor <span style=color:#f92672>=</span> <span style=color:#ae81ff>80</span>);
+</span></span></code></pre></div><p>Fill Factor &lt; 100% 搭配 <strong>HOT（Heap Only Tuple）Update</strong> 的優化效果：</p><pre tabindex=0><code>HOT Update 條件：
 1. 被更新的欄位不在任何索引中
 2. 新版本 Tuple 能放在同一個 Page 內
 
@@ -635,543 +115,123 @@ INSERT 後（80% 滿）：         UPDATE 後（HOT update）：
 │ Tuple 1      │             │ Tuple 2      │
 └──────────────┘             │ Tuple 1(dead)│
                              └──────────────┘
-</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 查看 HOT Update 的效果
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span>
-</span></span><span style="display:flex;"><span>    n_tup_upd <span style="color:#66d9ef">AS</span> total_updates,
-</span></span><span style="display:flex;"><span>    n_tup_hot_upd <span style="color:#66d9ef">AS</span> hot_updates,
-</span></span><span style="display:flex;"><span>    ROUND(n_tup_hot_upd::numeric <span style="color:#f92672">/</span> <span style="color:#66d9ef">NULLIF</span>(n_tup_upd, <span style="color:#ae81ff">0</span>) <span style="color:#f92672">*</span> <span style="color:#ae81ff">100</span>, <span style="color:#ae81ff">1</span>) <span style="color:#66d9ef">AS</span> hot_ratio
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> pg_stat_user_tables
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> relname <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;user_sessions&#39;</span>;
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- hot_ratio 越高代表 Fill Factor 設定越有效
-</span></span></span></code></pre></div><h3 id="查看表的大小與頁面資訊">查看表的大小與頁面資訊</h3>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 查看表的詳細大小分解
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span>
-</span></span><span style="display:flex;"><span>    pg_size_pretty(pg_table_size(oid))          <span style="color:#66d9ef">AS</span> table_size,
-</span></span><span style="display:flex;"><span>    pg_size_pretty(pg_indexes_size(oid))        <span style="color:#66d9ef">AS</span> indexes_size,
-</span></span><span style="display:flex;"><span>    pg_size_pretty(pg_total_relation_size(oid)) <span style="color:#66d9ef">AS</span> total_size,
-</span></span><span style="display:flex;"><span>    relpages                                     <span style="color:#66d9ef">AS</span> page_count,
-</span></span><span style="display:flex;"><span>    reltuples::bigint                            <span style="color:#66d9ef">AS</span> estimated_rows
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> pg_class
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> relname <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;orders&#39;</span>;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 查看 TOAST 表的大小（有時比主表還大！）
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">c</span>.relname <span style="color:#66d9ef">AS</span> main_table,
-</span></span><span style="display:flex;"><span>    pg_size_pretty(pg_relation_size(<span style="color:#66d9ef">c</span>.oid)) <span style="color:#66d9ef">AS</span> main_size,
-</span></span><span style="display:flex;"><span>    pg_size_pretty(pg_relation_size(<span style="color:#66d9ef">c</span>.reltoastrelid)) <span style="color:#66d9ef">AS</span> toast_size
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> pg_class <span style="color:#66d9ef">c</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> <span style="color:#66d9ef">c</span>.relname <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;orders&#39;</span>;
-</span></span></code></pre></div><h3 id="使用-pageinspect-檢查頁面內容">使用 pageinspect 檢查頁面內容</h3>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 安裝 pageinspect（診斷用）
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> EXTENSION <span style="color:#66d9ef">IF</span> <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">EXISTS</span> pageinspect;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 查看第 0 個 Page 的 Header
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> page_header(get_raw_page(<span style="color:#e6db74">&#39;orders&#39;</span>, <span style="color:#ae81ff">0</span>));
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 查看 Page 中的所有 Tuple（含 Dead Tuple）
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> t_xmin, t_xmax, t_ctid, t_infomask::text
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> heap_page_items(get_raw_page(<span style="color:#e6db74">&#39;orders&#39;</span>, <span style="color:#ae81ff">0</span>));
-</span></span></code></pre></div><h3 id="tablespace-管理">Tablespace 管理</h3>
-<p>Tablespace 允許將不同的表或索引存放在不同的磁碟位置，實現儲存分層：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 建立 Tablespace
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> TABLESPACE fast_ssd <span style="color:#66d9ef">LOCATION</span> <span style="color:#e6db74">&#39;/ssd/pg_data&#39;</span>;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> TABLESPACE slow_hdd <span style="color:#66d9ef">LOCATION</span> <span style="color:#e6db74">&#39;/hdd/pg_archive&#39;</span>;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 在特定 Tablespace 建立表
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> hot_data (
-</span></span><span style="display:flex;"><span>    id SERIAL <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
-</span></span><span style="display:flex;"><span>    payload JSONB
-</span></span><span style="display:flex;"><span>) TABLESPACE fast_ssd;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 將既有表移至不同 Tablespace（會鎖表！）
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> archive_data <span style="color:#66d9ef">SET</span> TABLESPACE slow_hdd;
-</span></span></code></pre></div><h3 id="table-access-method-apipg12">Table Access Method API（PG12+）</h3>
-<p>PostgreSQL 12 引入了 Table Access Method API，允許第三方實作自訂的儲存引擎：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 查看已安裝的 Access Method
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> amname, amtype <span style="color:#66d9ef">FROM</span> pg_am;
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- amtype &#39;r&#39; = table access method
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e">-- amtype &#39;i&#39; = index access method
-</span></span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- Citus columnar（列式儲存，適合分析查詢）
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> analytics_events (
-</span></span><span style="display:flex;"><span>    event_date DATE,
-</span></span><span style="display:flex;"><span>    event_type TEXT,
-</span></span><span style="display:flex;"><span>    user_id INT,
-</span></span><span style="display:flex;"><span>    value NUMERIC
-</span></span><span style="display:flex;"><span>) <span style="color:#66d9ef">USING</span> columnar;
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 壓縮比通常可達 5-10x，但不支援 UPDATE/DELETE
-</span></span></span></code></pre></div><h3 id="page-層級-checksum">Page 層級 Checksum</h3>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 初始化新 cluster 時啟用 checksum</span>
-</span></span><span style="display:flex;"><span>initdb --data-checksums -D /var/lib/postgresql/data
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 事後對既有 cluster 啟用（PG12+，需要停機）</span>
-</span></span><span style="display:flex;"><span>pg_checksums --enable -D /var/lib/postgresql/data
-</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 查看 checksum 是否啟用
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SHOW</span> data_checksums;
-</span></span></code></pre></div><p>Checksum 在 Page 讀取時驗證，偵測靜默資料損壞（Silent Data Corruption）。建議所有生產環境啟用。</p>
-<h3 id="常見陷阱">常見陷阱</h3>
-<h4 id="delete-不會立即回收磁碟空間">DELETE 不會立即回收磁碟空間</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">DELETE</span> <span style="color:#66d9ef">FROM</span> orders <span style="color:#66d9ef">WHERE</span> created_at <span style="color:#f92672">&lt;</span> <span style="color:#e6db74">&#39;2023-01-01&#39;</span>;
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- ↑ 只是標記 Dead Tuple，磁碟檔案大小不變
-</span></span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 若要回收空間（但需排他鎖，避免在大表使用）：
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">VACUUM</span> <span style="color:#66d9ef">FULL</span> orders;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 生產環境推薦使用 pg_repack（不需長時間鎖表）
-</span></span></span></code></pre></div><h4 id="忽略-toast-表的大小">忽略 TOAST 表的大小</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 開發者常只看 table_size 而忽略 TOAST：
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> pg_size_pretty(pg_table_size(<span style="color:#e6db74">&#39;documents&#39;</span>)); <span style="color:#75715e">-- 可能只有 1MB
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e">-- 而 TOAST 實際大小：
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> pg_size_pretty(pg_relation_size(
-</span></span><span style="display:flex;"><span>    (<span style="color:#66d9ef">SELECT</span> reltoastrelid <span style="color:#66d9ef">FROM</span> pg_class <span style="color:#66d9ef">WHERE</span> relname<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;documents&#39;</span>)
-</span></span><span style="display:flex;"><span>)); <span style="color:#75715e">-- 可能有 10GB！
-</span></span></span></code></pre></div><h4 id="ctid-不是穩定的識別符">ctid 不是穩定的識別符</h4>
-<p><code>ctid</code> 是 Tuple 的物理位置，會在 VACUUM FULL、UPDATE、CLUSTER 時改變。不要在應用程式邏輯中依賴 <code>ctid</code>，應使用 PRIMARY KEY。</p>
-<h3 id="fill-factor-最佳實踐">Fill Factor 最佳實踐</h3>
-<table>
-	<thead>
-			<tr>
-					<th>工作負載類型</th>
-					<th>Fill Factor</th>
-					<th>原因</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td>高 UPDATE 頻率（session、狀態表）</td>
-					<td>70-80%</td>
-					<td>保留空間給 HOT Update</td>
-			</tr>
-			<tr>
-					<td>純追加寫入（log、audit）</td>
-					<td>100%（預設）</td>
-					<td>不需要 Update 空間</td>
-			</tr>
-			<tr>
-					<td>混合型</td>
-					<td>85-90%</td>
-					<td>適度平衡</td>
-			</tr>
-	</tbody>
-</table>
-<h3 id="總結">總結</h3>
-<p><strong>儲存引擎</strong> 是 PostgreSQL 資料組織的基礎：</p>
-<ul>
-<li><strong>Heap Table</strong> 以無序方式儲存資料，搭配索引提供高效查詢</li>
-<li><strong>8KB Page</strong> 是 I/O 的最小單位，理解 Page 結構有助於診斷效能問題</li>
-<li><strong>Tuple Header</strong> 儲存 MVCC 版本資訊，Update = 刪除舊版本 + 插入新版本</li>
-<li><strong>TOAST</strong> 透過壓縮與外移處理超大型值，JSONB 預設使用 EXTENDED 策略</li>
-<li><strong>Fill Factor</strong> 搭配 HOT Update 可大幅減少索引維護開銷</li>
-<li><strong>PG12+ Table Access Method API</strong> 開啟了可插拔儲存引擎的可能性</li>
-</ul>
-<p>下一篇，我們將深入探討 <strong>Transaction 管理</strong>——PostgreSQL 如何實現 ACID 中的原子性與持久性。</p></div>
-        
-        
-
-        
-        <div class="mt-8">
-          
-<div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose">
-  <div>
-    <div class="flex items-center gap-2 mb-1">
-      <a href="/about" class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">
-        BenZ
-      </a>
-      
-      <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span>
-      
-    </div>
-    <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">
-      熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。
-    </p>
-    <div class="flex items-center gap-3">
-      
-      <a href="https://github.com/benzhub" target="_blank" rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label="GitHub">
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-      </a>
-      
-      
-      
-    </div>
-  </div>
-</div>
-
-        </div>
-      </div>
-
-      
-      <div class="post-detail fade-in my-4">
-        
-
-
-<div>
-  <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3>
-  <div class="grid gap-2">
-    
-    <a href="http://localhost:1313/post/postgresql/007-system-catalog/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
-      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">系統目錄與統計視圖：PostgreSQL 的自我描述資料庫 | PostgreSQL</span>
-      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/13</span>
-    </a>
-    
-    <a href="http://localhost:1313/post/postgresql/006-vacuum/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
-      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">VACUUM 機制：PostgreSQL 空間回收與防膨脹的關鍵 | PostgreSQL</span>
-      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/12</span>
-    </a>
-    
-    <a href="http://localhost:1313/post/postgresql/005-buffer-management/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
-      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Buffer Management：PostgreSQL 如何用 Clock-Sweep 管理記憶體 | PostgreSQL</span>
-      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/11</span>
-    </a>
-    
-  </div>
-</div>
-
-
-      </div>
-
-      
-      <div class="post-detail fade-in my-4">
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            
-            <a href="http://localhost:1313/post/postgresql/007-system-catalog/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
-                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
-                <span class="text-sm font-medium">系統目錄與統計視圖：PostgreSQL 的自我描述資料庫 | PostgreSQL</span>
-            </a>
-            
-          </div>
-          <div>
-            
-            <a href="http://localhost:1313/post/postgresql/009-transaction-management/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
-                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
-                <span class="text-sm font-medium">Transaction 管理：PostgreSQL 的 ACID 實現與進階控制 | PostgreSQL</span>
-            </a>
-            
-          </div>
-        </div>
-      </div>
-
-      
-      <div class="post-detail fade-in my-4">
-        
-<script src="https://giscus.app/client.js"
-        data-repo="benzhub/benzhub.github.io"
-        data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM="
-        data-category="Announcements"
-        data-category-id="MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1"
-        data-mapping="pathname"
-        data-strict="0"
-        data-reactions-enabled="1"
-        data-emit-metadata="0"
-        data-input-position="top"
-        data-theme="preferred_color_scheme"
-        data-lang="zh-TW"
-        crossorigin="anonymous"
-        async>
-</script>
-
-
-      </div>
-    </div>
-    
-    <div class="hidden lg:block lg:col-span-1 mt-4">
-    
-    
-            
-            <div class="widget fade-in">
-    <p class="widget-title">搜尋</p>
-    <form role="search" method="get" action="https://google.com/search">
-        <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
-        <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
-    </form>
-</div>
-
-        
-            
-            
-
-        
-            
-            
-<div class="widget fade-in">
-    <p class="widget-title">標籤</p>
-    <div class="flex flex-wrap gap-1.5">
-        <a href='/tags/80/20-%E6%B3%95%E5%89%87'>
-            <span class="tag-pill">80/20 法則</span>
-        </a>
-        <a href='/tags/acid'>
-            <span class="tag-pill">acid</span>
-        </a>
-        <a href='/tags/ai'>
-            <span class="tag-pill">ai</span>
-        </a>
-        <a href='/tags/ai-agent'>
-            <span class="tag-pill">ai agent</span>
-        </a>
-        <a href='/tags/ai-workflow'>
-            <span class="tag-pill">ai workflow</span>
-        </a>
-        <a href='/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE'>
-            <span class="tag-pill">ai 工具焦慮</span>
-        </a>
-        <a href='/tags/ai-%E6%8E%A5%E5%96%AE'>
-            <span class="tag-pill">ai 接單</span>
-        </a>
-        <a href='/tags/ai-%E7%B9%AA%E5%9C%96'>
-            <span class="tag-pill">ai 繪圖</span>
-        </a>
-        <a href='/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA'>
-            <span class="tag-pill">ai 虛擬人</span>
-        </a>
-        <a href='/tags/ai-%E8%A1%8C%E9%8A%B7'>
-            <span class="tag-pill">ai 行銷</span>
-        </a>
-        <a href='/tags/ai-%E8%A8%AD%E8%A8%88'>
-            <span class="tag-pill">ai 設計</span>
-        </a>
-        <a href='/tags/ai-%E8%AE%8A%E7%8F%BE'>
-            <span class="tag-pill">ai 變現</span>
-        </a>
-        <a href='/tags/ai-%E8%B3%BA%E9%8C%A2'>
-            <span class="tag-pill">ai 賺錢</span>
-        </a>
-        <a href='/tags/ai-income'>
-            <span class="tag-pill">ai-income</span>
-        </a>
-        <a href='/tags/ai-insights'>
-            <span class="tag-pill">ai-insights</span>
-        </a>
-        <a href='/tags/api'>
-            <span class="tag-pill">api</span>
-        </a>
-        <a href='/tags/architecture'>
-            <span class="tag-pill">architecture</span>
-        </a>
-        <a href='/tags/autovacuum'>
-            <span class="tag-pill">autovacuum</span>
-        </a>
-        <a href='/tags/background-processes'>
-            <span class="tag-pill">background-processes</span>
-        </a>
-        <a href='/tags/big-o'>
-            <span class="tag-pill">big o</span>
-        </a>
-    </div>
-</div>
-
-
-        
-            
-            
-<div class="widget fade-in">
-    <p class="widget-title">文章系列</p>
-    <div class="flex flex-wrap gap-1.5">
-        
-        
-        
-        
-        <a href='/post/postgresql/'>
-            <span class="tag-pill">PostgreSQL (13)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/javascript/'>
-            <span class="tag-pill">JavaScript (68)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/django/'>
-            <span class="tag-pill">Django (30)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/python/'>
-            <span class="tag-pill">Python (37)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/htmlcss/'>
-            <span class="tag-pill">HTML &amp; CSS (23)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/linux/'>
-            <span class="tag-pill">Linux (22)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/git/'>
-            <span class="tag-pill">Git (18)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/ai-insights/'>
-            <span class="tag-pill">AI Insights (13)</span>
-        </a>
-        
-        
-    </div>
-</div>
-
-
-        
-            
-            
-
-<div class="widget fade-in">
-    <p class="widget-title">最新文章</p>
-    <div class="flex flex-col gap-1">
-        <a href="/post/postgresql/013-ddl-schema/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/19
-            </p>
-        </a>
-        <a href="/post/django/030-django-custom-user-model/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django 自訂使用者模型：AbstractUser 與 AbstractBaseUser | Django 教學</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/19
-            </p>
-        </a>
-        <a href="/post/javascript/data-structures--algorithms/006-heap-priority-queue/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">堆積與優先佇列 — Min/Max Heap 原理與 Heap Sort 完整實作 | 資料結構與演算法</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/19
-            </p>
-        </a>
-        <a href="/post/django/029-django-authentication/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Authentication 使用者認證系統完全指南 | Django 教學</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/18
-            </p>
-        </a>
-        <a href="/post/postgresql/012-data-types/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/18
-            </p>
-        </a>
-    </div>
-</div>
-
-        
-    
-</div>
-
-    
-</div>
-
-        </div>
-    </div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]">
-    
-    <p>&copy; 2026 <a href="http://localhost:1313/" class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p>
-</footer>
-
-
-<script>
-    (function (window, document) {
-        function main() {
-            var ad = document.createElement('script');
-            ad.async = true;
-            ad.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606';
-            ad.crossOrigin = "anonymous";
-            var sc = document.getElementsByTagName('script')[0];
-            sc.parentNode.insertBefore(ad, sc);
-        }
-        var lazyLoad = false;
-        function onLazyLoad() {
-            if (lazyLoad === false) {
-                lazyLoad = true;
-                window.removeEventListener('scroll', onLazyLoad);
-                window.removeEventListener('mousemove', onLazyLoad);
-                window.removeEventListener('mousedown', onLazyLoad);
-                window.removeEventListener('touchstart', onLazyLoad);
-                window.removeEventListener('keydown', onLazyLoad);
-                main();
-            }
-        }
-        window.addEventListener('scroll', onLazyLoad);
-        window.addEventListener('mousemove', onLazyLoad);
-        window.addEventListener('mousedown', onLazyLoad);
-        window.addEventListener('touchstart', onLazyLoad);
-        window.addEventListener('keydown', onLazyLoad);
-        window.addEventListener('load', function () {
-            if (window.pageYOffset) {
-                onLazyLoad();
-                window.setTimeout(onLazyLoad, 3000);
-            }
-        });
-    })(window, document);
-</script>
-
-
-<script>
-    
-    var icon = document.getElementById("icon");
-    var icon2 = document.getElementById("icon2");
-    if (document.documentElement.classList.contains("dark") || localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
-        if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
-        document.documentElement.classList.add('dark');
-    } else {
-        document.documentElement.classList.remove('dark');
-    }
-    function toggleDarkMode() {
-        if (document.documentElement.classList.contains('dark')) {
-            if (icon) { icon.classList.remove("icon-sun"); icon.classList.add("icon-moon"); }
-            if (icon2) { icon2.classList.remove("icon-sun"); icon2.classList.add("icon-moon"); }
-            document.documentElement.classList.remove('dark');
-            localStorage.theme = 'light';
-        } else {
-            if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
-            if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
-            document.documentElement.classList.add('dark');
-            localStorage.theme = 'dark';
-        }
-    }
-
-    
-    document.addEventListener('DOMContentLoaded', function () {
-        var observer = new IntersectionObserver(function (entries) {
-            entries.forEach(function (entry) {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0 });
-
-        document.querySelectorAll('.fade-in').forEach(function (el) {
-            observer.observe(el);
-        });
-    });
-</script>
-</body>
-
-</html>
+</code></pre><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 查看 HOT Update 的效果
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>    n_tup_upd <span style=color:#66d9ef>AS</span> total_updates,
+</span></span><span style=display:flex><span>    n_tup_hot_upd <span style=color:#66d9ef>AS</span> hot_updates,
+</span></span><span style=display:flex><span>    ROUND(n_tup_hot_upd::numeric <span style=color:#f92672>/</span> <span style=color:#66d9ef>NULLIF</span>(n_tup_upd, <span style=color:#ae81ff>0</span>) <span style=color:#f92672>*</span> <span style=color:#ae81ff>100</span>, <span style=color:#ae81ff>1</span>) <span style=color:#66d9ef>AS</span> hot_ratio
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stat_user_tables
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> relname <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;user_sessions&#39;</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- hot_ratio 越高代表 Fill Factor 設定越有效
+</span></span></span></code></pre></div><h3 id=查看表的大小與頁面資訊>查看表的大小與頁面資訊</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 查看表的詳細大小分解
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>    pg_size_pretty(pg_table_size(oid))          <span style=color:#66d9ef>AS</span> table_size,
+</span></span><span style=display:flex><span>    pg_size_pretty(pg_indexes_size(oid))        <span style=color:#66d9ef>AS</span> indexes_size,
+</span></span><span style=display:flex><span>    pg_size_pretty(pg_total_relation_size(oid)) <span style=color:#66d9ef>AS</span> total_size,
+</span></span><span style=display:flex><span>    relpages                                     <span style=color:#66d9ef>AS</span> page_count,
+</span></span><span style=display:flex><span>    reltuples::bigint                            <span style=color:#66d9ef>AS</span> estimated_rows
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_class
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> relname <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;orders&#39;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 查看 TOAST 表的大小（有時比主表還大！）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>c</span>.relname <span style=color:#66d9ef>AS</span> main_table,
+</span></span><span style=display:flex><span>    pg_size_pretty(pg_relation_size(<span style=color:#66d9ef>c</span>.oid)) <span style=color:#66d9ef>AS</span> main_size,
+</span></span><span style=display:flex><span>    pg_size_pretty(pg_relation_size(<span style=color:#66d9ef>c</span>.reltoastrelid)) <span style=color:#66d9ef>AS</span> toast_size
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_class <span style=color:#66d9ef>c</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> <span style=color:#66d9ef>c</span>.relname <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;orders&#39;</span>;
+</span></span></code></pre></div><h3 id=使用-pageinspect-檢查頁面內容>使用 pageinspect 檢查頁面內容</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 安裝 pageinspect（診斷用）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> EXTENSION <span style=color:#66d9ef>IF</span> <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>EXISTS</span> pageinspect;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 查看第 0 個 Page 的 Header
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> page_header(get_raw_page(<span style=color:#e6db74>&#39;orders&#39;</span>, <span style=color:#ae81ff>0</span>));
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 查看 Page 中的所有 Tuple（含 Dead Tuple）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> t_xmin, t_xmax, t_ctid, t_infomask::text
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> heap_page_items(get_raw_page(<span style=color:#e6db74>&#39;orders&#39;</span>, <span style=color:#ae81ff>0</span>));
+</span></span></code></pre></div><h3 id=tablespace-管理>Tablespace 管理</h3><p>Tablespace 允許將不同的表或索引存放在不同的磁碟位置，實現儲存分層：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 建立 Tablespace
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> TABLESPACE fast_ssd <span style=color:#66d9ef>LOCATION</span> <span style=color:#e6db74>&#39;/ssd/pg_data&#39;</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> TABLESPACE slow_hdd <span style=color:#66d9ef>LOCATION</span> <span style=color:#e6db74>&#39;/hdd/pg_archive&#39;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 在特定 Tablespace 建立表
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> hot_data (
+</span></span><span style=display:flex><span>    id SERIAL <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span>,
+</span></span><span style=display:flex><span>    payload JSONB
+</span></span><span style=display:flex><span>) TABLESPACE fast_ssd;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 將既有表移至不同 Tablespace（會鎖表！）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>TABLE</span> archive_data <span style=color:#66d9ef>SET</span> TABLESPACE slow_hdd;
+</span></span></code></pre></div><h3 id=table-access-method-apipg12>Table Access Method API（PG12+）</h3><p>PostgreSQL 12 引入了 Table Access Method API，允許第三方實作自訂的儲存引擎：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 查看已安裝的 Access Method
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> amname, amtype <span style=color:#66d9ef>FROM</span> pg_am;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- amtype &#39;r&#39; = table access method
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- amtype &#39;i&#39; = index access method
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- Citus columnar（列式儲存，適合分析查詢）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> analytics_events (
+</span></span><span style=display:flex><span>    event_date DATE,
+</span></span><span style=display:flex><span>    event_type TEXT,
+</span></span><span style=display:flex><span>    user_id INT,
+</span></span><span style=display:flex><span>    value NUMERIC
+</span></span><span style=display:flex><span>) <span style=color:#66d9ef>USING</span> columnar;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 壓縮比通常可達 5-10x，但不支援 UPDATE/DELETE
+</span></span></span></code></pre></div><h3 id=page-層級-checksum>Page 層級 Checksum</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 初始化新 cluster 時啟用 checksum</span>
+</span></span><span style=display:flex><span>initdb --data-checksums -D /var/lib/postgresql/data
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 事後對既有 cluster 啟用（PG12+，需要停機）</span>
+</span></span><span style=display:flex><span>pg_checksums --enable -D /var/lib/postgresql/data
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 查看 checksum 是否啟用
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SHOW</span> data_checksums;
+</span></span></code></pre></div><p>Checksum 在 Page 讀取時驗證，偵測靜默資料損壞（Silent Data Corruption）。建議所有生產環境啟用。</p><h3 id=常見陷阱>常見陷阱</h3><h4 id=delete-不會立即回收磁碟空間>DELETE 不會立即回收磁碟空間</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>DELETE</span> <span style=color:#66d9ef>FROM</span> orders <span style=color:#66d9ef>WHERE</span> created_at <span style=color:#f92672>&lt;</span> <span style=color:#e6db74>&#39;2023-01-01&#39;</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- ↑ 只是標記 Dead Tuple，磁碟檔案大小不變
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 若要回收空間（但需排他鎖，避免在大表使用）：
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>VACUUM</span> <span style=color:#66d9ef>FULL</span> orders;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 生產環境推薦使用 pg_repack（不需長時間鎖表）
+</span></span></span></code></pre></div><h4 id=忽略-toast-表的大小>忽略 TOAST 表的大小</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 開發者常只看 table_size 而忽略 TOAST：
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> pg_size_pretty(pg_table_size(<span style=color:#e6db74>&#39;documents&#39;</span>)); <span style=color:#75715e>-- 可能只有 1MB
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 而 TOAST 實際大小：
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> pg_size_pretty(pg_relation_size(
+</span></span><span style=display:flex><span>    (<span style=color:#66d9ef>SELECT</span> reltoastrelid <span style=color:#66d9ef>FROM</span> pg_class <span style=color:#66d9ef>WHERE</span> relname<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;documents&#39;</span>)
+</span></span><span style=display:flex><span>)); <span style=color:#75715e>-- 可能有 10GB！
+</span></span></span></code></pre></div><h4 id=ctid-不是穩定的識別符>ctid 不是穩定的識別符</h4><p><code>ctid</code> 是 Tuple 的物理位置，會在 VACUUM FULL、UPDATE、CLUSTER 時改變。不要在應用程式邏輯中依賴 <code>ctid</code>，應使用 PRIMARY KEY。</p><h3 id=fill-factor-最佳實踐>Fill Factor 最佳實踐</h3><table><thead><tr><th>工作負載類型</th><th>Fill Factor</th><th>原因</th></tr></thead><tbody><tr><td>高 UPDATE 頻率（session、狀態表）</td><td>70-80%</td><td>保留空間給 HOT Update</td></tr><tr><td>純追加寫入（log、audit）</td><td>100%（預設）</td><td>不需要 Update 空間</td></tr><tr><td>混合型</td><td>85-90%</td><td>適度平衡</td></tr></tbody></table><h3 id=總結>總結</h3><p><strong>儲存引擎</strong> 是 PostgreSQL 資料組織的基礎：</p><ul><li><strong>Heap Table</strong> 以無序方式儲存資料，搭配索引提供高效查詢</li><li><strong>8KB Page</strong> 是 I/O 的最小單位，理解 Page 結構有助於診斷效能問題</li><li><strong>Tuple Header</strong> 儲存 MVCC 版本資訊，Update = 刪除舊版本 + 插入新版本</li><li><strong>TOAST</strong> 透過壓縮與外移處理超大型值，JSONB 預設使用 EXTENDED 策略</li><li><strong>Fill Factor</strong> 搭配 HOT Update 可大幅減少索引維護開銷</li><li><strong>PG12+ Table Access Method API</strong> 開啟了可插拔儲存引擎的可能性</li></ul><p>下一篇，我們將深入探討 <strong>Transaction 管理</strong>——PostgreSQL 如何實現 ACID 中的原子性與持久性。</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
+</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/postgresql/007-system-catalog/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">系統目錄與統計視圖：PostgreSQL 的自我描述資料庫 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/13</span>
+</a><a href=https://benzhub.github.io/post/postgresql/006-vacuum/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">VACUUM 機制：PostgreSQL 空間回收與防膨脹的關鍵 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/12</span>
+</a><a href=https://benzhub.github.io/post/postgresql/005-buffer-management/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Buffer Management：PostgreSQL 如何用 Clock-Sweep 管理記憶體 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/11</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/postgresql/007-system-catalog/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+<span class="text-sm font-medium">系統目錄與統計視圖：PostgreSQL 的自我描述資料庫 | PostgreSQL</span></a></div><div><a href=https://benzhub.github.io/post/postgresql/009-transaction-management/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+<span class="text-sm font-medium">Transaction 管理：PostgreSQL 的 ACID 實現與進階控制 | PostgreSQL</span></a></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
+</a><a href=/tags/acid><span class=tag-pill>acid</span>
+</a><a href=/tags/ai><span class=tag-pill>ai</span>
+</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
+</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
+</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
+</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
+</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
+</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
+</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
+</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
+</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
+</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
+</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
+</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
+</a><a href=/tags/api><span class=tag-pill>api</span>
+</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
+</a><a href=/tags/autovacuum><span class=tag-pill>autovacuum</span>
+</a><a href=/tags/background-processes><span class=tag-pill>background-processes</span>
+</a><a href=/tags/big-o><span class=tag-pill>big o</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (14)</span>
+</a><a href=/post/javascript/><span class=tag-pill>JavaScript (69)</span>
+</a><a href=/post/django/><span class=tag-pill>Django (31)</span>
+</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
+</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
+</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
+</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
+</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/django/031-django-signals/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Signals 信號機制：觀察者模式實戰 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/20</p></a><a href=/post/postgresql/014-dml-advanced/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">DML 進階操作：Upsert、MERGE、RETURNING 與 COPY 批量匯入 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/20</p></a><a href=/post/javascript/data-structures--algorithms/007-sorting/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">排序演算法 — Bubble、Merge、Quick Sort 等十大排序完整比較 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/20</p></a><a href=/post/postgresql/013-ddl-schema/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/19</p></a><a href=/post/django/030-django-custom-user-model/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django 自訂使用者模型：AbstractUser 與 AbstractBaseUser | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/19</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>

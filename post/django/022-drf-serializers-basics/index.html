@@ -1,516 +1,39 @@
-<!DOCTYPE html>
-
-<html lang="zh-TW">
-<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><title>DRF Serializers 基礎：序列化與反序列化完全解析 | Django 教學 | BenzHub</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="apple-touch-icon" sizes="180x180" href='/favicon/apple-touch-icon.png'>
-    <link rel="icon" type="image/png" sizes="32x32" href='/favicon/favicon-32x32.png'>
-    <link rel="icon" type="image/png" sizes="16x16" href='/favicon/favicon-16x16.png'>
-    <link rel="manifest" href='/favicon/site.webmanifest' />
-    <link rel="mask-icon" href=' /favicon/safari-pinned-tab.svg' color="#5bbad5" />
-    <link rel="shortcut icon" href='/favicon/favicon.ico' />
-    <meta name="theme-color" content="#fafafa">
-    <meta property="og:title" content="DRF Serializers 基礎：序列化與反序列化完全解析 | Django 教學 | BenzHub" />
-    
-    
-    <link rel="stylesheet" href="/css/style.css" />
-    
-    <link href=' /css/blonde.min.css' rel="stylesheet" type="text/css" media="print"
-        onload="this.media=' all'">
-    
-
-
-
-
-
-
-
-  
-
-
-
-
-  
-
-<meta name="description" content="DRF Serializers 完整教學！從序列化與反序列化的核心概念、Serializer 與 ModelSerializer 的差異，到欄位類型、欄位選項、驗證機制與 serializer.is_valid() 錯誤處理，一篇掌握 Django REST Framework 序列化器的基礎知識與實戰技巧。">
-<meta property="og:site_name" content="BenzHub">
-<meta property="og:description" content="DRF Serializers 完整教學！從序列化與反序列化的核心概念、Serializer 與 ModelSerializer 的差異，到欄位類型、欄位選項、驗證機制與 serializer.is_valid() 錯誤處理，一篇掌握 Django REST Framework 序列化器的基礎知識與實戰技巧。">
-<meta property="og:url" content="http://localhost:1313/post/django/022-drf-serializers-basics/">
-<meta property="og:type" content="article">
-<meta property="og:locale" content="zh_TW">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="">
-
-<link rel="canonical" href="http://localhost:1313/post/django/022-drf-serializers-basics/">
-
-<meta name="twitter:description" content="DRF Serializers 完整教學！從序列化與反序列化的核心概念、Serializer 與 ModelSerializer 的差異，到欄位類型、欄位選項、驗證機制與 serializer.is_valid() 錯誤處理，一篇掌握 Django REST Framework 序列化器的基礎知識與實戰技巧。">
-<meta property="article:published_time" content="2026-06-11T00:00:00&#43;00:00">
-<meta property="article:updated_time" content="2026-05-21T00:00:00&#43;00:00">
-
-
-
-
-
-    
-<meta property="og:image" content="http://localhost:1313/img/django/022-DRF-Serializers-Basics.png">
-<meta property="og:image:url" content="http://localhost:1313/img/django/022-DRF-Serializers-Basics.png">
-    
-
-    
-    <link rel="stylesheet" href='/css/custom.css'>
-    <i class="dark hidden"></i>
-    
-<link rel="alternate" hreflang="zh-TW" href="http://localhost:1313/post/django/022-drf-serializers-basics/" />
-
-<link rel="alternate" hreflang="x-default" href="http://localhost:1313/post/django/022-drf-serializers-basics/" />
-
-    
-
-
-
-
-
-
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BlogPosting",
-  "headline": "\"DRF Serializers 基礎：序列化與反序列化完全解析 | Django 教學\"",
-  "description": "\"DRF Serializers 完整教學！從序列化與反序列化的核心概念、Serializer 與 ModelSerializer 的差異，到欄位類型、欄位選項、驗證機制與 serializer.is_valid() 錯誤處理，一篇掌握 Django REST Framework 序列化器的基礎知識與實戰技巧。\"",
-  "author": {
-    "@type": "Person",
-    "name": "\"BenzHub\"",
-    "url": "http:\/\/localhost:1313\/about",
-    "jobTitle": "\"Software Developer\"",
-    "sameAs": [
-      "\"https://github.com/benzhub\""
-    ]
-  },
-  "datePublished": "2026-06-11T00:00:00\u002b00:00",
-  "dateModified": "2026-05-21T00:00:00\u002b00:00",
-  "image": "http:\/\/localhost:1313\/img\/django\/022-DRF-Serializers-Basics.png",
-  "publisher": {
-    "@type": "Organization",
-    "name": "\"BenzHub\"",
-    "url": "\"http://localhost:1313/\"",
-    "sameAs": [
-      "\"https://github.com/benzhub\""
-    ]
-  },
-  "mainEntityOfPage": {
-    "@type": "WebPage",
-    "@id": "http:\/\/localhost:1313\/post\/django\/022-drf-serializers-basics\/"
-  },
-  "inLanguage": "zh-TW"
-}
-</script>
-
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    {
-      "@type": "ListItem",
-      "position": 1,
-      "name": "\"BenzHub\"",
-      "item": "http:\/\/localhost:1313\/"
-    }
-    
-    
-      
-      
-    ,{
-      "@type": "ListItem",
-      "position": 2,
-      "name": "\"Blog\"",
-      "item": "http:\/\/localhost:1313\/post\/django\/"
-    }
-      
-      
-    
-    ,{
-      "@type": "ListItem",
-      "position":  3 ,
-      "name": "\"DRF Serializers 基礎：序列化與反序列化完全解析 | Django 教學\""
-    }
-  ]
-}
-</script>
-
-
-
-
-
-
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    
-    
-    {
-      "@type": "Question",
-      "name": "\"DRF Serializer 是什麼？跟 Django Form 有什麼差別？\"",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "\"DRF Serializer 是 Django REST Framework 的核心元件，負責在 Python 物件與 JSON 之間進行雙向轉換，同時承擔資料驗證的職責。它的角色類似 Django Form，但 Form 處理的是 HTML 表單輸入，Serializer 處理的是 API 的 JSON 資料輸入與輸出。\""
-      }
-    }
-    
-    ,
-    {
-      "@type": "Question",
-      "name": "\"Serializer 和 ModelSerializer 該怎麼選擇？\"",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "\"優先使用 ModelSerializer，它能自動從 Model 產生欄位定義並提供預設的 create/update 方法，大幅減少程式碼量。當資料不對應任何 Model（如報表、聚合資料）、需要完全客製化的序列化邏輯，或是跨多個 Model 的複合資料結構時，才改用基本的 Serializer。\""
-      }
-    }
-    
-    ,
-    {
-      "@type": "Question",
-      "name": "\"serializer.is_valid() 和 serializer.is_valid(raise_exception=True) 有什麼差別？\"",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "\"兩者都會執行資料驗證，差別在於錯誤處理方式。不帶參數的 is_valid() 驗證失敗時回傳 False，你需要手動透過 serializer.errors 取得錯誤訊息並回傳回應。而 is_valid(raise_exception=True) 驗證失敗時會自動拋出 ValidationError，DRF 會自動回傳 HTTP 400 回應，程式碼更簡潔。\""
-      }
-    }
-    
-  ]
-}
-</script>
-
-
-
-
-
-</head>
-<body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class="site-nav" id="siteNav">
-    <div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full">
-        
-        <a href="http://localhost:1313/" class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">
-            BenzHub
-        </a>
-
-        
-        <div class="hidden md:flex items-center gap-6">
-            
-            <a href="/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                首頁
-            </a>
-            
-            <a href="/about/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                關於
-            </a>
-            
-            <a href="/contact/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                聯絡
-            </a>
-            
-            <a href="/resourses/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                資源
-            </a>
-            
-
-            
-            <div class="flex items-center gap-2">
-                <form class="flex items-center" role="search" method="get" action="https://google.com/search" id="navSearchForm">
-                    <input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50"
-                        type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋" id="navSearchInput">
-                    <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
-                </form>
-                <button onclick="toggleNavSearch()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
-                    <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-                    </svg>
-                </button>
-            </div>
-
-            
-            <span class="text-zinc-200 dark:text-zinc-700">|</span>
-
-            
-            
-
-
-
-
-<div class="lang-switcher relative hidden md:block">
-    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-        <span>🌐</span>
-        <span>繁體中文</span>
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-    </button>
-    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
-        
-            
-            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-                
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-
-<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
-    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
-    <div class="flex gap-2">
-        
-            
-            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-                
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-
-            
-            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-                <i id="icon2" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
-            </button>
-        </div>
-
-        
-        <div class="flex md:hidden items-center gap-1">
-            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-                <i id="icon" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
-            </button>
-            <button id="hamburgerbtn" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Menu">
-                <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
-            </button>
-        </div>
-    </div>
-
-    
-    <div class="mobile-menu md:hidden" id="mobileMenu">
-        
-        <a href="/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            首頁
-        </a>
-        
-        <a href="/about/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            關於
-        </a>
-        
-        <a href="/contact/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            聯絡
-        </a>
-        
-        <a href="/resourses/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            資源
-        </a>
-        
-        <form class="mt-2" role="search" method="get" action="https://google.com/search">
-            <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
-            <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
-        </form>
-        
-        
-
-
-
-
-<div class="lang-switcher relative hidden md:block">
-    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-        <span>🌐</span>
-        <span>繁體中文</span>
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-    </button>
-    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
-        
-            
-            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-                
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-
-<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
-    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
-    <div class="flex gap-2">
-        
-            
-            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-                
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-    </div>
-</nav>
-
-<script>
-    
-    document.getElementById('hamburgerbtn').addEventListener('click', function () {
-        document.getElementById('mobileMenu').classList.toggle('active');
-    });
-
-    
-    window.addEventListener('scroll', function () {
-        var nav = document.getElementById('siteNav');
-        if (window.scrollY > 50) {
-            nav.classList.add('scrolled');
-        } else {
-            nav.classList.remove('scrolled');
-        }
-    });
-
-    
-    function toggleNavSearch() {
-        var input = document.getElementById('navSearchInput');
-        input.classList.toggle('expanded');
-        if (input.classList.contains('expanded')) {
-            input.focus();
-        }
-    }
-
-    
-    function toggleLangMenu() {
-        var dropdown = document.getElementById('langDropdown');
-        dropdown.classList.toggle('hidden');
-    }
-
-    
-    document.addEventListener('click', function (e) {
-        
-        var form = document.getElementById('navSearchForm');
-        var input = document.getElementById('navSearchInput');
-        if (form && input && !form.contains(e.target) && !e.target.closest('[aria-label="Toggle Search"]')) {
-            input.classList.remove('expanded');
-        }
-        
-        var langSwitcher = e.target.closest('.lang-switcher');
-        if (!langSwitcher) {
-            var dropdown = document.getElementById('langDropdown');
-            if (dropdown) dropdown.classList.add('hidden');
-        }
-    });
-</script>
-<div class="nav-spacer"></div>
-    <div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id="content">
-        <div class="lg:mx-5">
-<div class="grid grid-cols-3 gap-6">
-  
-  <div class="col-span-3 lg:col-span-2">
-  
-      
-      <div class="post-detail fade-in my-4">
-        <h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">DRF Serializers 基礎：序列化與反序列化完全解析 | Django 教學</h1>
-        <div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4">
-            <span class="flex items-center gap-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/11
-            </span>
-            
-            <span class="flex items-center gap-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                2026/05/21
-            </span>
-            
-        </div>
-        
-        <div class="flex flex-wrap gap-1.5 mb-5">
-            
-            <a href='/tags/python' class="tag-pill no-underline">python</a>
-            
-            <a href='/tags/django' class="tag-pill no-underline">django</a>
-            
-        </div>
-        
-        
-        <img class="py-4 m-auto rounded-lg thumb-img" src="http://localhost:1313/img/django/022-DRF-Serializers-Basics.png" alt="DRF Serializers 基礎：序列化與反序列化完全解析 | Django 教學">
-        
-        
-        <div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote>
-<p><strong>DRF Serializers</strong>（序列化器）是 <strong>Django REST Framework</strong> 的核心元件，扮演著 Python 物件與 <strong>JSON</strong> 之間的轉換橋樑。無論是將資料庫的 Model 實例轉換成 API 回應的 JSON 格式，還是將客戶端傳來的 JSON 資料驗證後寫入資料庫，都需要透過 Serializer 來完成。你可以把它理解為 API 層的 Form——<strong>Django Form</strong> 處理 HTML 表單輸入，<strong>Serializer</strong> 處理 API 資料的輸入與輸出。本文將從序列化（Serialization）與反序列化（Deserialization）的基本概念出發，帶你掌握 <strong>ModelSerializer</strong>、欄位類型與選項、驗證機制等核心知識。</p>
-</blockquote>
-<h3 id="序列化-vs-反序列化serializer-的雙向轉換">序列化 vs 反序列化：Serializer 的雙向轉換</h3>
-<p>在理解 Serializer 之前，我們需要先釐清兩個核心概念：</p>
-<ul>
-<li><strong>序列化（Serialization）</strong>：將 Python 物件（通常是 Model 實例）轉換為 JSON 等可傳輸格式，用於 API 回應輸出</li>
-<li><strong>反序列化（Deserialization）</strong>：將客戶端傳來的 JSON 資料轉換為 Python 物件，經過驗證後寫入資料庫</li>
-</ul>
-<p>整個流程可以用以下示意圖來理解：</p>
-<pre tabindex="0"><code>序列化（輸出）：Model Instance → Serializer → JSON → HTTP Response
+<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>DRF Serializers 基礎：序列化與反序列化完全解析 | Django 教學 | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="DRF Serializers 基礎：序列化與反序列化完全解析 | Django 教學 | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="DRF Serializers 完整教學！從序列化與反序列化的核心概念、Serializer 與 ModelSerializer 的差異，到欄位類型、欄位選項、驗證機制與 serializer.is_valid() 錯誤處理，一篇掌握 Django REST Framework 序列化器的基礎知識與實戰技巧。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="DRF Serializers 完整教學！從序列化與反序列化的核心概念、Serializer 與 ModelSerializer 的差異，到欄位類型、欄位選項、驗證機制與 serializer.is_valid() 錯誤處理，一篇掌握 Django REST Framework 序列化器的基礎知識與實戰技巧。"><meta property="og:url" content="https://benzhub.github.io/post/django/022-drf-serializers-basics/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/django/022-drf-serializers-basics/><meta name=twitter:description content="DRF Serializers 完整教學！從序列化與反序列化的核心概念、Serializer 與 ModelSerializer 的差異，到欄位類型、欄位選項、驗證機制與 serializer.is_valid() 錯誤處理，一篇掌握 Django REST Framework 序列化器的基礎知識與實戰技巧。"><meta property="article:published_time" content="2026-06-11T00:00:00+00:00"><meta property="article:updated_time" content="2026-05-21T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/django/022-DRF-Serializers-Basics.png"><meta property="og:image:url" content="https://benzhub.github.io/img/django/022-DRF-Serializers-Basics.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/django/022-drf-serializers-basics/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/django/022-drf-serializers-basics/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"DRF Serializers 基礎：序列化與反序列化完全解析 | Django 教學\"","description":"\"DRF Serializers 完整教學！從序列化與反序列化的核心概念、Serializer 與 ModelSerializer 的差異，到欄位類型、欄位選項、驗證機制與 serializer.is_valid() 錯誤處理，一篇掌握 Django REST Framework 序列化器的基礎知識與實戰技巧。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-06-11T00:00:00\u002b00:00","dateModified":"2026-05-21T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/django\/022-DRF-Serializers-Basics.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/django\/022-drf-serializers-basics\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/django\/"},{"@type":"ListItem","position":3,"name":"\"DRF Serializers 基礎：序列化與反序列化完全解析 | Django 教學\""}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"\"DRF Serializer 是什麼？跟 Django Form 有什麼差別？\"","acceptedAnswer":{"@type":"Answer","text":"\"DRF Serializer 是 Django REST Framework 的核心元件，負責在 Python 物件與 JSON 之間進行雙向轉換，同時承擔資料驗證的職責。它的角色類似 Django Form，但 Form 處理的是 HTML 表單輸入，Serializer 處理的是 API 的 JSON 資料輸入與輸出。\""}},{"@type":"Question","name":"\"Serializer 和 ModelSerializer 該怎麼選擇？\"","acceptedAnswer":{"@type":"Answer","text":"\"優先使用 ModelSerializer，它能自動從 Model 產生欄位定義並提供預設的 create/update 方法，大幅減少程式碼量。當資料不對應任何 Model（如報表、聚合資料）、需要完全客製化的序列化邏輯，或是跨多個 Model 的複合資料結構時，才改用基本的 Serializer。\""}},{"@type":"Question","name":"\"serializer.is_valid() 和 serializer.is_valid(raise_exception=True) 有什麼差別？\"","acceptedAnswer":{"@type":"Answer","text":"\"兩者都會執行資料驗證，差別在於錯誤處理方式。不帶參數的 is_valid() 驗證失敗時回傳 False，你需要手動透過 serializer.errors 取得錯誤訊息並回傳回應。而 is_valid(raise_exception=True) 驗證失敗時會自動拋出 ValidationError，DRF 會自動回傳 HTTP 400 回應，程式碼更簡潔。\""}}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">DRF Serializers 基礎：序列化與反序列化完全解析 | Django 教學</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/11
+</span><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001.0 004.582 9m0 0H9m11 11v-5h-.581m0 0A8.003 8.003.0 014.062 13m15.357 2H15"/></svg>
+2026/05/21</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/python class="tag-pill no-underline">python</a>
+<a href=/tags/django class="tag-pill no-underline">django</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/django/022-DRF-Serializers-Basics.png alt="DRF Serializers 基礎：序列化與反序列化完全解析 | Django 教學"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p><strong>DRF Serializers</strong>（序列化器）是 <strong>Django REST Framework</strong> 的核心元件，扮演著 Python 物件與 <strong>JSON</strong> 之間的轉換橋樑。無論是將資料庫的 Model 實例轉換成 API 回應的 JSON 格式，還是將客戶端傳來的 JSON 資料驗證後寫入資料庫，都需要透過 Serializer 來完成。你可以把它理解為 API 層的 Form——<strong>Django Form</strong> 處理 HTML 表單輸入，<strong>Serializer</strong> 處理 API 資料的輸入與輸出。本文將從序列化（Serialization）與反序列化（Deserialization）的基本概念出發，帶你掌握 <strong>ModelSerializer</strong>、欄位類型與選項、驗證機制等核心知識。</p></blockquote><h3 id=序列化-vs-反序列化serializer-的雙向轉換>序列化 vs 反序列化：Serializer 的雙向轉換</h3><p>在理解 Serializer 之前，我們需要先釐清兩個核心概念：</p><ul><li><strong>序列化（Serialization）</strong>：將 Python 物件（通常是 Model 實例）轉換為 JSON 等可傳輸格式，用於 API 回應輸出</li><li><strong>反序列化（Deserialization）</strong>：將客戶端傳來的 JSON 資料轉換為 Python 物件，經過驗證後寫入資料庫</li></ul><p>整個流程可以用以下示意圖來理解：</p><pre tabindex=0><code>序列化（輸出）：Model Instance → Serializer → JSON → HTTP Response
 反序列化（輸入）：HTTP Request → JSON → Serializer → 驗證 → Model Instance
-</code></pre><p>具體來說，序列化的流程是：</p>
-<pre tabindex="0"><code>Django ORM Model Instance
+</code></pre><p>具體來說，序列化的流程是：</p><pre tabindex=0><code>Django ORM Model Instance
        ↓
   Serializer(instance=obj)
        ↓
@@ -519,8 +42,7 @@
   {&#34;id&#34;: 1, &#34;title&#34;: &#34;Hello World&#34;, &#34;author&#34;: &#34;Alice&#34;}
        ↓
   Response（HTTP 回應）
-</code></pre><p>反序列化的流程則是：</p>
-<pre tabindex="0"><code>Request Body（HTTP 請求）
+</code></pre><p>反序列化的流程則是：</p><pre tabindex=0><code>Request Body（HTTP 請求）
        ↓
   {&#34;title&#34;: &#34;New Post&#34;, &#34;content&#34;: &#34;...&#34;}
        ↓
@@ -531,906 +53,373 @@
   serializer.save()      ← 呼叫 create() 或 update()
        ↓
   Model Instance 儲存到資料庫
-</code></pre><hr>
-<h3 id="基本-serializer-類別手動宣告欄位">基本 Serializer 類別：手動宣告欄位</h3>
-<p>最基本的 Serializer 需要你手動宣告每個欄位，並實作 <code>create()</code> 和 <code>update()</code> 方法。先來看我們會用到的 Model：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># models.py</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.db <span style="color:#f92672">import</span> models
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Post</span>(models<span style="color:#f92672">.</span>Model):
-</span></span><span style="display:flex;"><span>    title <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>CharField(max_length<span style="color:#f92672">=</span><span style="color:#ae81ff">200</span>)
-</span></span><span style="display:flex;"><span>    content <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>TextField()
-</span></span><span style="display:flex;"><span>    author <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>ForeignKey(
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;auth.User&#39;</span>, on_delete<span style="color:#f92672">=</span>models<span style="color:#f92672">.</span>CASCADE, related_name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;posts&#39;</span>
-</span></span><span style="display:flex;"><span>    )
-</span></span><span style="display:flex;"><span>    is_published <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>BooleanField(default<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>)
-</span></span><span style="display:flex;"><span>    created_at <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>DateTimeField(auto_now_add<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
-</span></span><span style="display:flex;"><span>    updated_at <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>DateTimeField(auto_now<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__str__</span>(self):
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>title
-</span></span></code></pre></div><p>用基本 Serializer 手動定義序列化器：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># serializers.py</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> rest_framework <span style="color:#f92672">import</span> serializers
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> .models <span style="color:#f92672">import</span> Post
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PostSerializer</span>(serializers<span style="color:#f92672">.</span>Serializer):
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;基本 Serializer：需要手動宣告每個欄位&#34;&#34;&#34;</span>
-</span></span><span style="display:flex;"><span>    id <span style="color:#f92672">=</span> serializers<span style="color:#f92672">.</span>IntegerField(read_only<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
-</span></span><span style="display:flex;"><span>    title <span style="color:#f92672">=</span> serializers<span style="color:#f92672">.</span>CharField(max_length<span style="color:#f92672">=</span><span style="color:#ae81ff">200</span>)
-</span></span><span style="display:flex;"><span>    content <span style="color:#f92672">=</span> serializers<span style="color:#f92672">.</span>CharField()
-</span></span><span style="display:flex;"><span>    is_published <span style="color:#f92672">=</span> serializers<span style="color:#f92672">.</span>BooleanField(default<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>)
-</span></span><span style="display:flex;"><span>    created_at <span style="color:#f92672">=</span> serializers<span style="color:#f92672">.</span>DateTimeField(read_only<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">create</span>(self, validated_data):
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;&#34;&#34;反序列化時呼叫 serializer.save() 會觸發此方法&#34;&#34;&#34;</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> Post<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>create(<span style="color:#f92672">**</span>validated_data)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">update</span>(self, instance, validated_data):
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;&#34;&#34;當 serializer 有傳入 instance 時，save() 會觸發此方法&#34;&#34;&#34;</span>
-</span></span><span style="display:flex;"><span>        instance<span style="color:#f92672">.</span>title <span style="color:#f92672">=</span> validated_data<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#39;title&#39;</span>, instance<span style="color:#f92672">.</span>title)
-</span></span><span style="display:flex;"><span>        instance<span style="color:#f92672">.</span>content <span style="color:#f92672">=</span> validated_data<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#39;content&#39;</span>, instance<span style="color:#f92672">.</span>content)
-</span></span><span style="display:flex;"><span>        instance<span style="color:#f92672">.</span>is_published <span style="color:#f92672">=</span> validated_data<span style="color:#f92672">.</span>get(
-</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;is_published&#39;</span>, instance<span style="color:#f92672">.</span>is_published
-</span></span><span style="display:flex;"><span>        )
-</span></span><span style="display:flex;"><span>        instance<span style="color:#f92672">.</span>save()
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> instance
-</span></span></code></pre></div><p>基本 Serializer 的優點是完全可控，但缺點也很明顯——需要大量重複的程式碼。當你的 Serializer 欄位與 Model 高度對應時，<strong>ModelSerializer</strong> 是更好的選擇。</p>
-<hr>
-<h3 id="modelserializer自動對應-model">ModelSerializer：自動對應 Model</h3>
-<p><strong>ModelSerializer</strong> 繼承自 <code>Serializer</code>，它能根據 Model 自動產生欄位定義，並提供預設的 <code>create()</code> 和 <code>update()</code> 方法，大幅減少程式碼量。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># serializers.py</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> rest_framework <span style="color:#f92672">import</span> serializers
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> .models <span style="color:#f92672">import</span> Post
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PostSerializer</span>(serializers<span style="color:#f92672">.</span>ModelSerializer):
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Meta</span>:
-</span></span><span style="display:flex;"><span>        model <span style="color:#f92672">=</span> Post
-</span></span><span style="display:flex;"><span>        fields <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;id&#39;</span>, <span style="color:#e6db74">&#39;title&#39;</span>, <span style="color:#e6db74">&#39;content&#39;</span>, <span style="color:#e6db74">&#39;author&#39;</span>, <span style="color:#e6db74">&#39;is_published&#39;</span>, <span style="color:#e6db74">&#39;created_at&#39;</span>]
-</span></span><span style="display:flex;"><span>        read_only_fields <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;id&#39;</span>, <span style="color:#e6db74">&#39;created_at&#39;</span>]
-</span></span></code></pre></div><p>這短短幾行就等同於前面基本 Serializer 的所有程式碼。ModelSerializer 自動完成了以下工作：</p>
-<ul>
-<li>根據 Model 欄位自動產生對應的 Serializer 欄位</li>
-<li>自動產生 <code>validators</code>（例如 unique 約束的驗證）</li>
-<li>提供預設的 <code>create()</code> 和 <code>update()</code> 實作</li>
-</ul>
-<h4 id="meta-類別詳解">Meta 類別詳解</h4>
-<p>Meta 類別是 ModelSerializer 的核心設定，以下是最常用的選項：</p>
-<p><strong><code>model</code></strong>：指定要對應的 Model 類別。</p>
-<p><strong><code>fields</code></strong>：指定要包含哪些欄位。有兩種寫法：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PostSerializer</span>(serializers<span style="color:#f92672">.</span>ModelSerializer):
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Meta</span>:
-</span></span><span style="display:flex;"><span>        model <span style="color:#f92672">=</span> Post
-</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 寫法一：明確列出每個欄位（推薦）</span>
-</span></span><span style="display:flex;"><span>        fields <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;id&#39;</span>, <span style="color:#e6db74">&#39;title&#39;</span>, <span style="color:#e6db74">&#39;content&#39;</span>, <span style="color:#e6db74">&#39;author&#39;</span>, <span style="color:#e6db74">&#39;is_published&#39;</span>, <span style="color:#e6db74">&#39;created_at&#39;</span>]
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 寫法二：包含所有欄位</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># fields = &#39;__all__&#39;</span>
-</span></span></code></pre></div><blockquote>
-<p>建議使用 <strong>明確列出欄位</strong> 的方式。<code>'__all__'</code> 雖然方便，但當 Model 新增敏感欄位（如 <code>password_hash</code>）時，它會自動被暴露在 API 中，造成安全風險。明確列出欄位可以讓你完全掌控 API 回傳的內容。</p>
-</blockquote>
-<p>如果你想排除特定欄位，也可以用 <code>exclude</code>：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PostSerializer</span>(serializers<span style="color:#f92672">.</span>ModelSerializer):
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Meta</span>:
-</span></span><span style="display:flex;"><span>        model <span style="color:#f92672">=</span> Post
-</span></span><span style="display:flex;"><span>        exclude <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;updated_at&#39;</span>]  <span style="color:#75715e"># 排除 updated_at，其餘全部包含</span>
-</span></span></code></pre></div><p><strong><code>read_only_fields</code></strong>：指定哪些欄位為唯讀，這些欄位只會出現在序列化輸出中，不會接受反序列化的輸入：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PostSerializer</span>(serializers<span style="color:#f92672">.</span>ModelSerializer):
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Meta</span>:
-</span></span><span style="display:flex;"><span>        model <span style="color:#f92672">=</span> Post
-</span></span><span style="display:flex;"><span>        fields <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;id&#39;</span>, <span style="color:#e6db74">&#39;title&#39;</span>, <span style="color:#e6db74">&#39;content&#39;</span>, <span style="color:#e6db74">&#39;author&#39;</span>, <span style="color:#e6db74">&#39;created_at&#39;</span>]
-</span></span><span style="display:flex;"><span>        read_only_fields <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;id&#39;</span>, <span style="color:#e6db74">&#39;author&#39;</span>, <span style="color:#e6db74">&#39;created_at&#39;</span>]
-</span></span></code></pre></div><p><strong><code>extra_kwargs</code></strong>：為自動產生的欄位額外指定選項，不需要重新宣告整個欄位：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PostSerializer</span>(serializers<span style="color:#f92672">.</span>ModelSerializer):
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Meta</span>:
-</span></span><span style="display:flex;"><span>        model <span style="color:#f92672">=</span> Post
-</span></span><span style="display:flex;"><span>        fields <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;id&#39;</span>, <span style="color:#e6db74">&#39;title&#39;</span>, <span style="color:#e6db74">&#39;content&#39;</span>, <span style="color:#e6db74">&#39;author&#39;</span>, <span style="color:#e6db74">&#39;is_published&#39;</span>, <span style="color:#e6db74">&#39;created_at&#39;</span>]
-</span></span><span style="display:flex;"><span>        read_only_fields <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;id&#39;</span>, <span style="color:#e6db74">&#39;created_at&#39;</span>]
-</span></span><span style="display:flex;"><span>        extra_kwargs <span style="color:#f92672">=</span> {
-</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;content&#39;</span>: {<span style="color:#e6db74">&#39;required&#39;</span>: <span style="color:#66d9ef">True</span>, <span style="color:#e6db74">&#39;min_length&#39;</span>: <span style="color:#ae81ff">10</span>},
-</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;author&#39;</span>: {<span style="color:#e6db74">&#39;write_only&#39;</span>: <span style="color:#66d9ef">False</span>},
-</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;title&#39;</span>: {<span style="color:#e6db74">&#39;max_length&#39;</span>: <span style="color:#ae81ff">200</span>},
-</span></span><span style="display:flex;"><span>        }
-</span></span></code></pre></div><hr>
-<h3 id="常用欄位類型">常用欄位類型</h3>
-<p>DRF 提供了豐富的欄位類型，對應不同的資料需求：</p>
-<h4 id="基本欄位">基本欄位</h4>
-<table>
-	<thead>
-			<tr>
-					<th>欄位類型</th>
-					<th>說明</th>
-					<th>對應 Model 欄位</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td><code>CharField</code></td>
-					<td>字串</td>
-					<td><code>CharField</code>、<code>TextField</code></td>
-			</tr>
-			<tr>
-					<td><code>IntegerField</code></td>
-					<td>整數</td>
-					<td><code>IntegerField</code>、<code>SmallIntegerField</code></td>
-			</tr>
-			<tr>
-					<td><code>FloatField</code></td>
-					<td>浮點數</td>
-					<td><code>FloatField</code></td>
-			</tr>
-			<tr>
-					<td><code>BooleanField</code></td>
-					<td>布林值</td>
-					<td><code>BooleanField</code></td>
-			</tr>
-			<tr>
-					<td><code>DateTimeField</code></td>
-					<td>日期時間</td>
-					<td><code>DateTimeField</code></td>
-			</tr>
-			<tr>
-					<td><code>DateField</code></td>
-					<td>日期</td>
-					<td><code>DateField</code></td>
-			</tr>
-			<tr>
-					<td><code>EmailField</code></td>
-					<td>電子郵件（含格式驗證）</td>
-					<td><code>EmailField</code></td>
-			</tr>
-			<tr>
-					<td><code>URLField</code></td>
-					<td>URL（含格式驗證）</td>
-					<td><code>URLField</code></td>
-			</tr>
-	</tbody>
-</table>
-<h4 id="關聯欄位relational-fields">關聯欄位（Relational Fields）</h4>
-<p>關聯欄位用來處理 <strong>ForeignKey</strong> 和 <strong>ManyToManyField</strong> 等關聯關係：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> rest_framework <span style="color:#f92672">import</span> serializers
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> .models <span style="color:#f92672">import</span> Post, Category
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PostSerializer</span>(serializers<span style="color:#f92672">.</span>ModelSerializer):
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># PrimaryKeyRelatedField：顯示/接受關聯物件的 ID</span>
-</span></span><span style="display:flex;"><span>    author <span style="color:#f92672">=</span> serializers<span style="color:#f92672">.</span>PrimaryKeyRelatedField(read_only<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># StringRelatedField：顯示關聯物件的 __str__() 結果（唯讀）</span>
-</span></span><span style="display:flex;"><span>    category_name <span style="color:#f92672">=</span> serializers<span style="color:#f92672">.</span>StringRelatedField(source<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;category&#39;</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># SlugRelatedField：使用指定欄位（如 username）來表示關聯</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># author_username = serializers.SlugRelatedField(</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e">#     slug_field=&#39;username&#39;,</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e">#     source=&#39;author&#39;,</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e">#     read_only=True,</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># )</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Meta</span>:
-</span></span><span style="display:flex;"><span>        model <span style="color:#f92672">=</span> Post
-</span></span><span style="display:flex;"><span>        fields <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;id&#39;</span>, <span style="color:#e6db74">&#39;title&#39;</span>, <span style="color:#e6db74">&#39;author&#39;</span>, <span style="color:#e6db74">&#39;category_name&#39;</span>]
-</span></span></code></pre></div><p><strong><code>PrimaryKeyRelatedField</code></strong> 是最常用的關聯欄位，讀取時顯示 ID，寫入時也接受 ID 來建立關聯。</p>
-<hr>
-<h3 id="欄位選項">欄位選項</h3>
-<p>每個欄位都可以設定多種選項來控制其行為：</p>
-<table>
-	<thead>
-			<tr>
-					<th>選項</th>
-					<th>說明</th>
-					<th>範例</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td><code>read_only</code></td>
-					<td>僅出現在序列化輸出，不接受輸入</td>
-					<td><code>serializers.IntegerField(read_only=True)</code></td>
-			</tr>
-			<tr>
-					<td><code>write_only</code></td>
-					<td>僅接受輸入，不出現在序列化輸出</td>
-					<td><code>serializers.CharField(write_only=True)</code></td>
-			</tr>
-			<tr>
-					<td><code>required</code></td>
-					<td>反序列化時是否為必填</td>
-					<td><code>serializers.CharField(required=True)</code></td>
-			</tr>
-			<tr>
-					<td><code>default</code></td>
-					<td>未提供值時使用的預設值</td>
-					<td><code>serializers.BooleanField(default=False)</code></td>
-			</tr>
-			<tr>
-					<td><code>source</code></td>
-					<td>指定此欄位對應的 Model 屬性或方法</td>
-					<td><code>serializers.CharField(source='get_full_name')</code></td>
-			</tr>
-	</tbody>
-</table>
-<p><code>source</code> 是一個特別實用的選項，它能讓 Serializer 欄位名稱與 Model 欄位名稱不同：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PostSerializer</span>(serializers<span style="color:#f92672">.</span>ModelSerializer):
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 將 Serializer 的 writer 欄位對應到 Model 的 author 欄位</span>
-</span></span><span style="display:flex;"><span>    writer <span style="color:#f92672">=</span> serializers<span style="color:#f92672">.</span>PrimaryKeyRelatedField(
-</span></span><span style="display:flex;"><span>        source<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;author&#39;</span>, read_only<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>
-</span></span><span style="display:flex;"><span>    )
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 透過 source 存取關聯物件的屬性</span>
-</span></span><span style="display:flex;"><span>    author_email <span style="color:#f92672">=</span> serializers<span style="color:#f92672">.</span>EmailField(
-</span></span><span style="display:flex;"><span>        source<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;author.email&#39;</span>, read_only<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>
-</span></span><span style="display:flex;"><span>    )
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Meta</span>:
-</span></span><span style="display:flex;"><span>        model <span style="color:#f92672">=</span> Post
-</span></span><span style="display:flex;"><span>        fields <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;id&#39;</span>, <span style="color:#e6db74">&#39;title&#39;</span>, <span style="color:#e6db74">&#39;writer&#39;</span>, <span style="color:#e6db74">&#39;author_email&#39;</span>]
-</span></span></code></pre></div><p><code>read_only</code> 和 <code>write_only</code> 的典型應用場景：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">UserSerializer</span>(serializers<span style="color:#f92672">.</span>ModelSerializer):
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 密碼只在建立時接受輸入，永遠不會出現在回應中</span>
-</span></span><span style="display:flex;"><span>    password <span style="color:#f92672">=</span> serializers<span style="color:#f92672">.</span>CharField(write_only<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>, min_length<span style="color:#f92672">=</span><span style="color:#ae81ff">8</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 建立日期只在回應中顯示，不接受輸入</span>
-</span></span><span style="display:flex;"><span>    date_joined <span style="color:#f92672">=</span> serializers<span style="color:#f92672">.</span>DateTimeField(read_only<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Meta</span>:
-</span></span><span style="display:flex;"><span>        model <span style="color:#f92672">=</span> User
-</span></span><span style="display:flex;"><span>        fields <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;id&#39;</span>, <span style="color:#e6db74">&#39;username&#39;</span>, <span style="color:#e6db74">&#39;email&#39;</span>, <span style="color:#e6db74">&#39;password&#39;</span>, <span style="color:#e6db74">&#39;date_joined&#39;</span>]
-</span></span></code></pre></div><hr>
-<h3 id="驗證機制validation">驗證機制（Validation）</h3>
-<p>Serializer 提供三個層級的驗證機制，從單一欄位到跨欄位的聯合驗證都能處理。</p>
-<h4 id="欄位級驗證field-level-validation">欄位級驗證（Field-level Validation）</h4>
-<p>定義 <code>validate_&lt;field_name&gt;</code> 方法來驗證單一欄位：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PostSerializer</span>(serializers<span style="color:#f92672">.</span>ModelSerializer):
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Meta</span>:
-</span></span><span style="display:flex;"><span>        model <span style="color:#f92672">=</span> Post
-</span></span><span style="display:flex;"><span>        fields <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;id&#39;</span>, <span style="color:#e6db74">&#39;title&#39;</span>, <span style="color:#e6db74">&#39;content&#39;</span>, <span style="color:#e6db74">&#39;is_published&#39;</span>]
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">validate_title</span>(self, value):
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;&#34;&#34;驗證 title 欄位：方法名稱必須為 validate_ 加上欄位名稱&#34;&#34;&#34;</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> len(value) <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">5</span>:
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">raise</span> serializers<span style="color:#f92672">.</span>ValidationError(<span style="color:#e6db74">&#34;標題至少需要 5 個字元。&#34;</span>)
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> <span style="color:#e6db74">&#39;spam&#39;</span> <span style="color:#f92672">in</span> value<span style="color:#f92672">.</span>lower():
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">raise</span> serializers<span style="color:#f92672">.</span>ValidationError(<span style="color:#e6db74">&#34;標題包含禁止詞彙。&#34;</span>)
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> value<span style="color:#f92672">.</span>strip()  <span style="color:#75715e"># 可回傳處理後的值</span>
-</span></span></code></pre></div><h4 id="物件級驗證object-level-validation">物件級驗證（Object-level Validation）</h4>
-<p>覆寫 <code>validate()</code> 方法進行跨欄位的聯合驗證：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PostSerializer</span>(serializers<span style="color:#f92672">.</span>ModelSerializer):
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Meta</span>:
-</span></span><span style="display:flex;"><span>        model <span style="color:#f92672">=</span> Post
-</span></span><span style="display:flex;"><span>        fields <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;id&#39;</span>, <span style="color:#e6db74">&#39;title&#39;</span>, <span style="color:#e6db74">&#39;content&#39;</span>, <span style="color:#e6db74">&#39;is_published&#39;</span>]
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">validate</span>(self, attrs):
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;&#34;&#34;跨欄位驗證：可存取所有已驗證的欄位值&#34;&#34;&#34;</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> attrs<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#39;is_published&#39;</span>) <span style="color:#f92672">and</span> len(attrs<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#39;content&#39;</span>, <span style="color:#e6db74">&#39;&#39;</span>)) <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">100</span>:
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">raise</span> serializers<span style="color:#f92672">.</span>ValidationError(
-</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;已發布的文章內容至少需要 100 個字元。&#34;</span>
-</span></span><span style="display:flex;"><span>            )
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> attrs
-</span></span></code></pre></div><h4 id="validators-參數">validators 參數</h4>
-<p>DRF 也提供了可重用的 <strong>驗證器</strong>（Validators），透過 <code>validators</code> 參數附加到欄位或 Meta 類別中：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> rest_framework.validators <span style="color:#f92672">import</span> UniqueValidator, UniqueTogetherValidator
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PostSerializer</span>(serializers<span style="color:#f92672">.</span>ModelSerializer):
-</span></span><span style="display:flex;"><span>    title <span style="color:#f92672">=</span> serializers<span style="color:#f92672">.</span>CharField(
-</span></span><span style="display:flex;"><span>        max_length<span style="color:#f92672">=</span><span style="color:#ae81ff">200</span>,
-</span></span><span style="display:flex;"><span>        validators<span style="color:#f92672">=</span>[
-</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># UniqueValidator：確保欄位值在資料表中唯一</span>
-</span></span><span style="display:flex;"><span>            UniqueValidator(
-</span></span><span style="display:flex;"><span>                queryset<span style="color:#f92672">=</span>Post<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>all(),
-</span></span><span style="display:flex;"><span>                message<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;已有相同標題的文章存在。&#34;</span>
-</span></span><span style="display:flex;"><span>            )
-</span></span><span style="display:flex;"><span>        ]
-</span></span><span style="display:flex;"><span>    )
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Meta</span>:
-</span></span><span style="display:flex;"><span>        model <span style="color:#f92672">=</span> Post
-</span></span><span style="display:flex;"><span>        fields <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;id&#39;</span>, <span style="color:#e6db74">&#39;title&#39;</span>, <span style="color:#e6db74">&#39;content&#39;</span>, <span style="color:#e6db74">&#39;author&#39;</span>]
-</span></span><span style="display:flex;"><span>        validators <span style="color:#f92672">=</span> [
-</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># UniqueTogetherValidator：確保多個欄位的組合唯一</span>
-</span></span><span style="display:flex;"><span>            UniqueTogetherValidator(
-</span></span><span style="display:flex;"><span>                queryset<span style="color:#f92672">=</span>Post<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>all(),
-</span></span><span style="display:flex;"><span>                fields<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#39;title&#39;</span>, <span style="color:#e6db74">&#39;author&#39;</span>],
-</span></span><span style="display:flex;"><span>                message<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;同一作者不能有重複標題的文章。&#34;</span>
-</span></span><span style="display:flex;"><span>            )
-</span></span><span style="display:flex;"><span>        ]
-</span></span></code></pre></div><p>這三個層級的驗證會按照以下順序依序執行：</p>
-<ol>
-<li><strong>欄位本身的驗證</strong>（型別檢查、required、max_length 等）</li>
-<li><strong>欄位級驗證</strong>（<code>validate_&lt;field_name&gt;</code> 方法）</li>
-<li><strong>物件級驗證</strong>（<code>validate</code> 方法）</li>
-</ol>
-<hr>
-<h3 id="序列化資料與錯誤處理">序列化資料與錯誤處理</h3>
-<p>掌握 <code>serializer.data</code>、<code>serializer.errors</code> 和 <code>serializer.is_valid()</code> 是使用 Serializer 的關鍵。</p>
-<h4 id="serializerdata取得序列化結果">serializer.data：取得序列化結果</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> .models <span style="color:#f92672">import</span> Post
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> .serializers <span style="color:#f92672">import</span> PostSerializer
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 序列化單一物件</span>
-</span></span><span style="display:flex;"><span>post <span style="color:#f92672">=</span> Post<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>get(pk<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>)
-</span></span><span style="display:flex;"><span>serializer <span style="color:#f92672">=</span> PostSerializer(post)
-</span></span><span style="display:flex;"><span>print(serializer<span style="color:#f92672">.</span>data)
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出：{&#39;id&#39;: 1, &#39;title&#39;: &#39;Hello World&#39;, &#39;content&#39;: &#39;...&#39;, ...}</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 序列化多個物件（加上 many=True）</span>
-</span></span><span style="display:flex;"><span>posts <span style="color:#f92672">=</span> Post<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>all()
-</span></span><span style="display:flex;"><span>serializer <span style="color:#f92672">=</span> PostSerializer(posts, many<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
-</span></span><span style="display:flex;"><span>print(serializer<span style="color:#f92672">.</span>data)
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出：[{&#39;id&#39;: 1, ...}, {&#39;id&#39;: 2, ...}, ...]</span>
-</span></span></code></pre></div><h4 id="serializeris_valid執行驗證">serializer.is_valid()：執行驗證</h4>
-<p>反序列化時，必須先呼叫 <code>is_valid()</code> 通過驗證後才能存取 <code>validated_data</code> 或呼叫 <code>save()</code>：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 反序列化：驗證輸入資料</span>
-</span></span><span style="display:flex;"><span>data <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#39;title&#39;</span>: <span style="color:#e6db74">&#39;New Post&#39;</span>, <span style="color:#e6db74">&#39;content&#39;</span>: <span style="color:#e6db74">&#39;Hello DRF!&#39;</span>}
-</span></span><span style="display:flex;"><span>serializer <span style="color:#f92672">=</span> PostSerializer(data<span style="color:#f92672">=</span>data)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 方式一：手動處理驗證失敗</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> serializer<span style="color:#f92672">.</span>is_valid():
-</span></span><span style="display:flex;"><span>    serializer<span style="color:#f92672">.</span>save()
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">else</span>:
-</span></span><span style="display:flex;"><span>    print(serializer<span style="color:#f92672">.</span>errors)  <span style="color:#75715e"># 取得錯誤訊息</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 方式二：驗證失敗時自動拋出例外（推薦）</span>
-</span></span><span style="display:flex;"><span>serializer<span style="color:#f92672">.</span>is_valid(raise_exception<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
-</span></span><span style="display:flex;"><span>serializer<span style="color:#f92672">.</span>save()
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 若驗證失敗，DRF 會自動回傳 HTTP 400 回應</span>
-</span></span></code></pre></div><p>在實際的 API View 中，<code>raise_exception=True</code> 是更常用的方式，因為 DRF 的例外處理器會自動將 <code>ValidationError</code> 轉換為格式一致的 HTTP 400 回應。</p>
-<h4 id="serializererrors取得錯誤訊息">serializer.errors：取得錯誤訊息</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>data <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#39;title&#39;</span>: <span style="color:#e6db74">&#39;&#39;</span>, <span style="color:#e6db74">&#39;content&#39;</span>: <span style="color:#e6db74">&#39;&#39;</span>}
-</span></span><span style="display:flex;"><span>serializer <span style="color:#f92672">=</span> PostSerializer(data<span style="color:#f92672">=</span>data)
-</span></span><span style="display:flex;"><span>serializer<span style="color:#f92672">.</span>is_valid()
-</span></span><span style="display:flex;"><span>print(serializer<span style="color:#f92672">.</span>errors)
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 輸出：</span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># {</span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">#     &#39;title&#39;: [ErrorDetail(string=&#39;此欄位不可為空白。&#39;, code=&#39;blank&#39;)],</span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">#     &#39;content&#39;: [ErrorDetail(string=&#39;此欄位不可為空白。&#39;, code=&#39;blank&#39;)]</span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># }</span>
-</span></span></code></pre></div><p>錯誤訊息以字典形式呈現，key 是欄位名稱，value 是該欄位的錯誤清單。物件級驗證的錯誤則會出現在 <code>non_field_errors</code> 這個 key 下。</p>
-<hr>
-<h3 id="完整範例post-api-的-serializer">完整範例：Post API 的 Serializer</h3>
-<p>最後，讓我們把所有概念串起來，建立一個完整的 Post API Serializer：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># serializers.py</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> rest_framework <span style="color:#f92672">import</span> serializers
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> rest_framework.validators <span style="color:#f92672">import</span> UniqueValidator
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> .models <span style="color:#f92672">import</span> Post
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PostSerializer</span>(serializers<span style="color:#f92672">.</span>ModelSerializer):
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;文章序列化器：涵蓋欄位選項、自訂欄位與驗證機制&#34;&#34;&#34;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># SerializerMethodField：動態計算的唯讀欄位</span>
-</span></span><span style="display:flex;"><span>    author_name <span style="color:#f92672">=</span> serializers<span style="color:#f92672">.</span>SerializerMethodField()
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 自訂驗證器</span>
-</span></span><span style="display:flex;"><span>    title <span style="color:#f92672">=</span> serializers<span style="color:#f92672">.</span>CharField(
-</span></span><span style="display:flex;"><span>        max_length<span style="color:#f92672">=</span><span style="color:#ae81ff">200</span>,
-</span></span><span style="display:flex;"><span>        validators<span style="color:#f92672">=</span>[
-</span></span><span style="display:flex;"><span>            UniqueValidator(
-</span></span><span style="display:flex;"><span>                queryset<span style="color:#f92672">=</span>Post<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>all(),
-</span></span><span style="display:flex;"><span>                message<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;已有相同標題的文章。&#34;</span>
-</span></span><span style="display:flex;"><span>            )
-</span></span><span style="display:flex;"><span>        ]
-</span></span><span style="display:flex;"><span>    )
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Meta</span>:
-</span></span><span style="display:flex;"><span>        model <span style="color:#f92672">=</span> Post
-</span></span><span style="display:flex;"><span>        fields <span style="color:#f92672">=</span> [
-</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;id&#39;</span>, <span style="color:#e6db74">&#39;title&#39;</span>, <span style="color:#e6db74">&#39;content&#39;</span>, <span style="color:#e6db74">&#39;author&#39;</span>, <span style="color:#e6db74">&#39;author_name&#39;</span>,
-</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;is_published&#39;</span>, <span style="color:#e6db74">&#39;created_at&#39;</span>, <span style="color:#e6db74">&#39;updated_at&#39;</span>,
-</span></span><span style="display:flex;"><span>        ]
-</span></span><span style="display:flex;"><span>        read_only_fields <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;id&#39;</span>, <span style="color:#e6db74">&#39;author&#39;</span>, <span style="color:#e6db74">&#39;created_at&#39;</span>, <span style="color:#e6db74">&#39;updated_at&#39;</span>]
-</span></span><span style="display:flex;"><span>        extra_kwargs <span style="color:#f92672">=</span> {
-</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;content&#39;</span>: {<span style="color:#e6db74">&#39;required&#39;</span>: <span style="color:#66d9ef">True</span>, <span style="color:#e6db74">&#39;min_length&#39;</span>: <span style="color:#ae81ff">10</span>},
-</span></span><span style="display:flex;"><span>        }
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_author_name</span>(self, obj):
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;&#34;&#34;SerializerMethodField 的取值方法，命名規則為 get_&lt;field_name&gt;&#34;&#34;&#34;</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> obj<span style="color:#f92672">.</span>author<span style="color:#f92672">.</span>get_full_name() <span style="color:#f92672">or</span> obj<span style="color:#f92672">.</span>author<span style="color:#f92672">.</span>username
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">validate_title</span>(self, value):
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;&#34;&#34;欄位級驗證：標題不得包含禁止詞彙&#34;&#34;&#34;</span>
-</span></span><span style="display:flex;"><span>        forbidden_words <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;spam&#39;</span>, <span style="color:#e6db74">&#39;test123&#39;</span>]
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> word <span style="color:#f92672">in</span> forbidden_words:
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> word <span style="color:#f92672">in</span> value<span style="color:#f92672">.</span>lower():
-</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">raise</span> serializers<span style="color:#f92672">.</span>ValidationError(
-</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;標題包含禁止詞彙：</span><span style="color:#e6db74">{</span>word<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
-</span></span><span style="display:flex;"><span>                )
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> value<span style="color:#f92672">.</span>strip()
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">validate</span>(self, attrs):
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;&#34;&#34;物件級驗證：發布文章時內容不得過短&#34;&#34;&#34;</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> attrs<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#39;is_published&#39;</span>) <span style="color:#f92672">and</span> len(attrs<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#39;content&#39;</span>, <span style="color:#e6db74">&#39;&#39;</span>)) <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">100</span>:
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">raise</span> serializers<span style="color:#f92672">.</span>ValidationError(
-</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;已發布的文章內容至少需要 100 個字元。&#34;</span>
-</span></span><span style="display:flex;"><span>            )
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> attrs
-</span></span></code></pre></div><p>在 View 中使用這個 Serializer：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># views.py</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> rest_framework <span style="color:#f92672">import</span> status
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> rest_framework.decorators <span style="color:#f92672">import</span> api_view
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> rest_framework.response <span style="color:#f92672">import</span> Response
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> .models <span style="color:#f92672">import</span> Post
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> .serializers <span style="color:#f92672">import</span> PostSerializer
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@api_view</span>([<span style="color:#e6db74">&#39;GET&#39;</span>, <span style="color:#e6db74">&#39;POST&#39;</span>])
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">post_list</span>(request):
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> request<span style="color:#f92672">.</span>method <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;GET&#39;</span>:
-</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 序列化：Model → JSON</span>
-</span></span><span style="display:flex;"><span>        posts <span style="color:#f92672">=</span> Post<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>select_related(<span style="color:#e6db74">&#39;author&#39;</span>)<span style="color:#f92672">.</span>all()
-</span></span><span style="display:flex;"><span>        serializer <span style="color:#f92672">=</span> PostSerializer(posts, many<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> Response(serializer<span style="color:#f92672">.</span>data)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">elif</span> request<span style="color:#f92672">.</span>method <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;POST&#39;</span>:
-</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 反序列化：JSON → Model</span>
-</span></span><span style="display:flex;"><span>        serializer <span style="color:#f92672">=</span> PostSerializer(data<span style="color:#f92672">=</span>request<span style="color:#f92672">.</span>data)
-</span></span><span style="display:flex;"><span>        serializer<span style="color:#f92672">.</span>is_valid(raise_exception<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
-</span></span><span style="display:flex;"><span>        serializer<span style="color:#f92672">.</span>save(author<span style="color:#f92672">=</span>request<span style="color:#f92672">.</span>user)  <span style="color:#75715e"># 透過 save() 傳入額外欄位</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> Response(serializer<span style="color:#f92672">.</span>data, status<span style="color:#f92672">=</span>status<span style="color:#f92672">.</span>HTTP_201_CREATED)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@api_view</span>([<span style="color:#e6db74">&#39;GET&#39;</span>, <span style="color:#e6db74">&#39;PUT&#39;</span>, <span style="color:#e6db74">&#39;DELETE&#39;</span>])
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">post_detail</span>(request, pk):
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">try</span>:
-</span></span><span style="display:flex;"><span>        post <span style="color:#f92672">=</span> Post<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>select_related(<span style="color:#e6db74">&#39;author&#39;</span>)<span style="color:#f92672">.</span>get(pk<span style="color:#f92672">=</span>pk)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">except</span> Post<span style="color:#f92672">.</span>DoesNotExist:
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> Response(status<span style="color:#f92672">=</span>status<span style="color:#f92672">.</span>HTTP_404_NOT_FOUND)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> request<span style="color:#f92672">.</span>method <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;GET&#39;</span>:
-</span></span><span style="display:flex;"><span>        serializer <span style="color:#f92672">=</span> PostSerializer(post)
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> Response(serializer<span style="color:#f92672">.</span>data)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">elif</span> request<span style="color:#f92672">.</span>method <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;PUT&#39;</span>:
-</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 更新時傳入 instance 與 data</span>
-</span></span><span style="display:flex;"><span>        serializer <span style="color:#f92672">=</span> PostSerializer(post, data<span style="color:#f92672">=</span>request<span style="color:#f92672">.</span>data)
-</span></span><span style="display:flex;"><span>        serializer<span style="color:#f92672">.</span>is_valid(raise_exception<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
-</span></span><span style="display:flex;"><span>        serializer<span style="color:#f92672">.</span>save()
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> Response(serializer<span style="color:#f92672">.</span>data)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">elif</span> request<span style="color:#f92672">.</span>method <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;DELETE&#39;</span>:
-</span></span><span style="display:flex;"><span>        post<span style="color:#f92672">.</span>delete()
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> Response(status<span style="color:#f92672">=</span>status<span style="color:#f92672">.</span>HTTP_204_NO_CONTENT)
-</span></span></code></pre></div><p>API 的輸入與輸出範例：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-json" data-lang="json"><span style="display:flex;"><span><span style="color:#75715e">// POST /api/posts/ — 建立文章（輸入）
-</span></span></span><span style="display:flex;"><span>{
-</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;title&#34;</span>: <span style="color:#e6db74">&#34;DRF Serializers 入門教學&#34;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;content&#34;</span>: <span style="color:#e6db74">&#34;Django REST Framework 的 Serializer 是 API 開發的核心元件...&#34;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;is_published&#34;</span>: <span style="color:#66d9ef">true</span>
-</span></span><span style="display:flex;"><span>}
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">// 回應（輸出）
-</span></span></span><span style="display:flex;"><span>{
-</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;id&#34;</span>: <span style="color:#ae81ff">1</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;title&#34;</span>: <span style="color:#e6db74">&#34;DRF Serializers 入門教學&#34;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;content&#34;</span>: <span style="color:#e6db74">&#34;Django REST Framework 的 Serializer 是 API 開發的核心元件...&#34;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;author&#34;</span>: <span style="color:#ae81ff">42</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;author_name&#34;</span>: <span style="color:#e6db74">&#34;Alice Chen&#34;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;is_published&#34;</span>: <span style="color:#66d9ef">true</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;created_at&#34;</span>: <span style="color:#e6db74">&#34;2026-06-11T10:30:00Z&#34;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;updated_at&#34;</span>: <span style="color:#e6db74">&#34;2026-06-11T10:30:00Z&#34;</span>
-</span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><hr>
-<h3 id="總結">總結</h3>
-<p>DRF Serializer 是 Django REST Framework 中最核心的元件之一，扮演著 Python 物件與 JSON 之間雙向轉換的橋樑。讓我們回顧本文的重點：</p>
-<ul>
-<li><strong>序列化 vs 反序列化</strong>：序列化是將 Model 實例轉為 JSON 輸出，反序列化是將 JSON 輸入驗證後轉為 Model 實例。</li>
-<li><strong>Serializer vs ModelSerializer</strong>：優先使用 ModelSerializer，它能自動從 Model 產生欄位並提供預設的 <code>create()</code> / <code>update()</code> 方法。只有在資料不對應 Model 或需要完全客製化時，才使用基本 Serializer。</li>
-<li><strong>Meta 類別</strong>：透過 <code>model</code>、<code>fields</code>、<code>read_only_fields</code>、<code>extra_kwargs</code> 控制 ModelSerializer 的行為。建議明確列出 <code>fields</code> 而非使用 <code>'__all__'</code>。</li>
-<li><strong>欄位類型與選項</strong>：DRF 提供豐富的欄位類型對應不同資料需求，<code>read_only</code>、<code>write_only</code>、<code>required</code>、<code>default</code>、<code>source</code> 等選項可精細控制欄位行為。</li>
-<li><strong>三層驗證機制</strong>：欄位級驗證（<code>validate_&lt;field_name&gt;</code>）處理單一欄位，物件級驗證（<code>validate</code>）處理跨欄位邏輯，<code>validators</code> 參數提供可重用的驗證器。</li>
-<li><strong>核心 API</strong>：<code>serializer.data</code> 取得序列化結果、<code>serializer.is_valid(raise_exception=True)</code> 執行驗證、<code>serializer.errors</code> 取得錯誤訊息。</li>
-</ul>
-<p>掌握了 Serializer 的基礎知識，你就具備了使用 DRF 建構 RESTful API 的核心能力。在後續的文章中，我們將進一步探索巢狀序列化（Nested Serializers）、自訂欄位與進階驗證等主題。</p></div>
-        
-        
-
-        
-        <div class="mt-8">
-          
-<div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose">
-  <div>
-    <div class="flex items-center gap-2 mb-1">
-      <a href="/about" class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">
-        BenZ
-      </a>
-      
-      <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span>
-      
-    </div>
-    <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">
-      熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。
-    </p>
-    <div class="flex items-center gap-3">
-      
-      <a href="https://github.com/benzhub" target="_blank" rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label="GitHub">
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-      </a>
-      
-      
-      
-    </div>
-  </div>
-</div>
-
-        </div>
-      </div>
-
-      
-      <div class="post-detail fade-in my-4">
-        
-
-
-<div>
-  <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3>
-  <div class="grid gap-2">
-    
-    <a href="http://localhost:1313/post/django/021-drf-introduction/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
-      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django REST Framework 入門：建立你的第一個 API | Django 教學</span>
-      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/10</span>
-    </a>
-    
-    <a href="http://localhost:1313/post/django/020-django-admin-advanced/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
-      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django Admin 進階：Inline 編輯、自訂 Actions 與權限控制 | Django 教學</span>
-      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/09</span>
-    </a>
-    
-    <a href="http://localhost:1313/post/django/019-django-admin-basics/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
-      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django Admin 後台管理介面入門 | Django 教學</span>
-      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/08</span>
-    </a>
-    
-  </div>
-</div>
-
-
-      </div>
-
-      
-      <div class="post-detail fade-in my-4">
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            
-            <a href="http://localhost:1313/post/django/021-drf-introduction/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
-                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
-                <span class="text-sm font-medium">Django REST Framework 入門：建立你的第一個 API | Django 教學</span>
-            </a>
-            
-          </div>
-          <div>
-            
-            <a href="http://localhost:1313/post/django/023-drf-serializers-advanced/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
-                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
-                <span class="text-sm font-medium">DRF Serializers 進階：巢狀序列化與自訂方法 | Django 教學</span>
-            </a>
-            
-          </div>
-        </div>
-      </div>
-
-      
-      <div class="post-detail fade-in my-4">
-        
-<script src="https://giscus.app/client.js"
-        data-repo="benzhub/benzhub.github.io"
-        data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM="
-        data-category="Announcements"
-        data-category-id="MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1"
-        data-mapping="pathname"
-        data-strict="0"
-        data-reactions-enabled="1"
-        data-emit-metadata="0"
-        data-input-position="top"
-        data-theme="preferred_color_scheme"
-        data-lang="zh-TW"
-        crossorigin="anonymous"
-        async>
-</script>
-
-
-      </div>
-    </div>
-    
-    <div class="hidden lg:block lg:col-span-1 mt-4">
-    
-    
-            
-            <div class="widget fade-in">
-    <p class="widget-title">搜尋</p>
-    <form role="search" method="get" action="https://google.com/search">
-        <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
-        <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
-    </form>
-</div>
-
-        
-            
-            
-
-        
-            
-            
-<div class="widget fade-in">
-    <p class="widget-title">標籤</p>
-    <div class="flex flex-wrap gap-1.5">
-        <a href='/tags/80/20-%E6%B3%95%E5%89%87'>
-            <span class="tag-pill">80/20 法則</span>
-        </a>
-        <a href='/tags/acid'>
-            <span class="tag-pill">acid</span>
-        </a>
-        <a href='/tags/ai'>
-            <span class="tag-pill">ai</span>
-        </a>
-        <a href='/tags/ai-agent'>
-            <span class="tag-pill">ai agent</span>
-        </a>
-        <a href='/tags/ai-workflow'>
-            <span class="tag-pill">ai workflow</span>
-        </a>
-        <a href='/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE'>
-            <span class="tag-pill">ai 工具焦慮</span>
-        </a>
-        <a href='/tags/ai-%E6%8E%A5%E5%96%AE'>
-            <span class="tag-pill">ai 接單</span>
-        </a>
-        <a href='/tags/ai-%E7%B9%AA%E5%9C%96'>
-            <span class="tag-pill">ai 繪圖</span>
-        </a>
-        <a href='/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA'>
-            <span class="tag-pill">ai 虛擬人</span>
-        </a>
-        <a href='/tags/ai-%E8%A1%8C%E9%8A%B7'>
-            <span class="tag-pill">ai 行銷</span>
-        </a>
-        <a href='/tags/ai-%E8%A8%AD%E8%A8%88'>
-            <span class="tag-pill">ai 設計</span>
-        </a>
-        <a href='/tags/ai-%E8%AE%8A%E7%8F%BE'>
-            <span class="tag-pill">ai 變現</span>
-        </a>
-        <a href='/tags/ai-%E8%B3%BA%E9%8C%A2'>
-            <span class="tag-pill">ai 賺錢</span>
-        </a>
-        <a href='/tags/ai-income'>
-            <span class="tag-pill">ai-income</span>
-        </a>
-        <a href='/tags/ai-insights'>
-            <span class="tag-pill">ai-insights</span>
-        </a>
-        <a href='/tags/api'>
-            <span class="tag-pill">api</span>
-        </a>
-        <a href='/tags/architecture'>
-            <span class="tag-pill">architecture</span>
-        </a>
-        <a href='/tags/autovacuum'>
-            <span class="tag-pill">autovacuum</span>
-        </a>
-        <a href='/tags/background-processes'>
-            <span class="tag-pill">background-processes</span>
-        </a>
-        <a href='/tags/big-o'>
-            <span class="tag-pill">big o</span>
-        </a>
-    </div>
-</div>
-
-
-        
-            
-            
-<div class="widget fade-in">
-    <p class="widget-title">文章系列</p>
-    <div class="flex flex-wrap gap-1.5">
-        
-        
-        
-        
-        <a href='/post/postgresql/'>
-            <span class="tag-pill">PostgreSQL (13)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/javascript/'>
-            <span class="tag-pill">JavaScript (68)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/django/'>
-            <span class="tag-pill">Django (30)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/python/'>
-            <span class="tag-pill">Python (37)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/htmlcss/'>
-            <span class="tag-pill">HTML &amp; CSS (23)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/linux/'>
-            <span class="tag-pill">Linux (22)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/git/'>
-            <span class="tag-pill">Git (18)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/ai-insights/'>
-            <span class="tag-pill">AI Insights (13)</span>
-        </a>
-        
-        
-    </div>
-</div>
-
-
-        
-            
-            
-
-<div class="widget fade-in">
-    <p class="widget-title">最新文章</p>
-    <div class="flex flex-col gap-1">
-        <a href="/post/postgresql/013-ddl-schema/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/19
-            </p>
-        </a>
-        <a href="/post/django/030-django-custom-user-model/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django 自訂使用者模型：AbstractUser 與 AbstractBaseUser | Django 教學</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/19
-            </p>
-        </a>
-        <a href="/post/javascript/data-structures--algorithms/006-heap-priority-queue/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">堆積與優先佇列 — Min/Max Heap 原理與 Heap Sort 完整實作 | 資料結構與演算法</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/19
-            </p>
-        </a>
-        <a href="/post/django/029-django-authentication/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Authentication 使用者認證系統完全指南 | Django 教學</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/18
-            </p>
-        </a>
-        <a href="/post/postgresql/012-data-types/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/18
-            </p>
-        </a>
-    </div>
-</div>
-
-        
-    
-</div>
-
-    
-</div>
-
-        </div>
-    </div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]">
-    
-    <p>&copy; 2026 <a href="http://localhost:1313/" class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p>
-</footer>
-
-
-<script>
-    (function (window, document) {
-        function main() {
-            var ad = document.createElement('script');
-            ad.async = true;
-            ad.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606';
-            ad.crossOrigin = "anonymous";
-            var sc = document.getElementsByTagName('script')[0];
-            sc.parentNode.insertBefore(ad, sc);
-        }
-        var lazyLoad = false;
-        function onLazyLoad() {
-            if (lazyLoad === false) {
-                lazyLoad = true;
-                window.removeEventListener('scroll', onLazyLoad);
-                window.removeEventListener('mousemove', onLazyLoad);
-                window.removeEventListener('mousedown', onLazyLoad);
-                window.removeEventListener('touchstart', onLazyLoad);
-                window.removeEventListener('keydown', onLazyLoad);
-                main();
-            }
-        }
-        window.addEventListener('scroll', onLazyLoad);
-        window.addEventListener('mousemove', onLazyLoad);
-        window.addEventListener('mousedown', onLazyLoad);
-        window.addEventListener('touchstart', onLazyLoad);
-        window.addEventListener('keydown', onLazyLoad);
-        window.addEventListener('load', function () {
-            if (window.pageYOffset) {
-                onLazyLoad();
-                window.setTimeout(onLazyLoad, 3000);
-            }
-        });
-    })(window, document);
-</script>
-
-
-<script>
-    
-    var icon = document.getElementById("icon");
-    var icon2 = document.getElementById("icon2");
-    if (document.documentElement.classList.contains("dark") || localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
-        if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
-        document.documentElement.classList.add('dark');
-    } else {
-        document.documentElement.classList.remove('dark');
-    }
-    function toggleDarkMode() {
-        if (document.documentElement.classList.contains('dark')) {
-            if (icon) { icon.classList.remove("icon-sun"); icon.classList.add("icon-moon"); }
-            if (icon2) { icon2.classList.remove("icon-sun"); icon2.classList.add("icon-moon"); }
-            document.documentElement.classList.remove('dark');
-            localStorage.theme = 'light';
-        } else {
-            if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
-            if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
-            document.documentElement.classList.add('dark');
-            localStorage.theme = 'dark';
-        }
-    }
-
-    
-    document.addEventListener('DOMContentLoaded', function () {
-        var observer = new IntersectionObserver(function (entries) {
-            entries.forEach(function (entry) {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0 });
-
-        document.querySelectorAll('.fade-in').forEach(function (el) {
-            observer.observe(el);
-        });
-    });
-</script>
-</body>
-
-</html>
+</code></pre><hr><h3 id=基本-serializer-類別手動宣告欄位>基本 Serializer 類別：手動宣告欄位</h3><p>最基本的 Serializer 需要你手動宣告每個欄位，並實作 <code>create()</code> 和 <code>update()</code> 方法。先來看我們會用到的 Model：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># models.py</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.db <span style=color:#f92672>import</span> models
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Post</span>(models<span style=color:#f92672>.</span>Model):
+</span></span><span style=display:flex><span>    title <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>CharField(max_length<span style=color:#f92672>=</span><span style=color:#ae81ff>200</span>)
+</span></span><span style=display:flex><span>    content <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>TextField()
+</span></span><span style=display:flex><span>    author <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>ForeignKey(
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;auth.User&#39;</span>, on_delete<span style=color:#f92672>=</span>models<span style=color:#f92672>.</span>CASCADE, related_name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;posts&#39;</span>
+</span></span><span style=display:flex><span>    )
+</span></span><span style=display:flex><span>    is_published <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>BooleanField(default<span style=color:#f92672>=</span><span style=color:#66d9ef>False</span>)
+</span></span><span style=display:flex><span>    created_at <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>DateTimeField(auto_now_add<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
+</span></span><span style=display:flex><span>    updated_at <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>DateTimeField(auto_now<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>__str__</span>(self):
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> self<span style=color:#f92672>.</span>title
+</span></span></code></pre></div><p>用基本 Serializer 手動定義序列化器：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># serializers.py</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework <span style=color:#f92672>import</span> serializers
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> .models <span style=color:#f92672>import</span> Post
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>PostSerializer</span>(serializers<span style=color:#f92672>.</span>Serializer):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;基本 Serializer：需要手動宣告每個欄位&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>    id <span style=color:#f92672>=</span> serializers<span style=color:#f92672>.</span>IntegerField(read_only<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
+</span></span><span style=display:flex><span>    title <span style=color:#f92672>=</span> serializers<span style=color:#f92672>.</span>CharField(max_length<span style=color:#f92672>=</span><span style=color:#ae81ff>200</span>)
+</span></span><span style=display:flex><span>    content <span style=color:#f92672>=</span> serializers<span style=color:#f92672>.</span>CharField()
+</span></span><span style=display:flex><span>    is_published <span style=color:#f92672>=</span> serializers<span style=color:#f92672>.</span>BooleanField(default<span style=color:#f92672>=</span><span style=color:#66d9ef>False</span>)
+</span></span><span style=display:flex><span>    created_at <span style=color:#f92672>=</span> serializers<span style=color:#f92672>.</span>DateTimeField(read_only<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>create</span>(self, validated_data):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;反序列化時呼叫 serializer.save() 會觸發此方法&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> Post<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>create(<span style=color:#f92672>**</span>validated_data)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>update</span>(self, instance, validated_data):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;當 serializer 有傳入 instance 時，save() 會觸發此方法&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        instance<span style=color:#f92672>.</span>title <span style=color:#f92672>=</span> validated_data<span style=color:#f92672>.</span>get(<span style=color:#e6db74>&#39;title&#39;</span>, instance<span style=color:#f92672>.</span>title)
+</span></span><span style=display:flex><span>        instance<span style=color:#f92672>.</span>content <span style=color:#f92672>=</span> validated_data<span style=color:#f92672>.</span>get(<span style=color:#e6db74>&#39;content&#39;</span>, instance<span style=color:#f92672>.</span>content)
+</span></span><span style=display:flex><span>        instance<span style=color:#f92672>.</span>is_published <span style=color:#f92672>=</span> validated_data<span style=color:#f92672>.</span>get(
+</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;is_published&#39;</span>, instance<span style=color:#f92672>.</span>is_published
+</span></span><span style=display:flex><span>        )
+</span></span><span style=display:flex><span>        instance<span style=color:#f92672>.</span>save()
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> instance
+</span></span></code></pre></div><p>基本 Serializer 的優點是完全可控，但缺點也很明顯——需要大量重複的程式碼。當你的 Serializer 欄位與 Model 高度對應時，<strong>ModelSerializer</strong> 是更好的選擇。</p><hr><h3 id=modelserializer自動對應-model>ModelSerializer：自動對應 Model</h3><p><strong>ModelSerializer</strong> 繼承自 <code>Serializer</code>，它能根據 Model 自動產生欄位定義，並提供預設的 <code>create()</code> 和 <code>update()</code> 方法，大幅減少程式碼量。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># serializers.py</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework <span style=color:#f92672>import</span> serializers
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> .models <span style=color:#f92672>import</span> Post
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>PostSerializer</span>(serializers<span style=color:#f92672>.</span>ModelSerializer):
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Meta</span>:
+</span></span><span style=display:flex><span>        model <span style=color:#f92672>=</span> Post
+</span></span><span style=display:flex><span>        fields <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#39;id&#39;</span>, <span style=color:#e6db74>&#39;title&#39;</span>, <span style=color:#e6db74>&#39;content&#39;</span>, <span style=color:#e6db74>&#39;author&#39;</span>, <span style=color:#e6db74>&#39;is_published&#39;</span>, <span style=color:#e6db74>&#39;created_at&#39;</span>]
+</span></span><span style=display:flex><span>        read_only_fields <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#39;id&#39;</span>, <span style=color:#e6db74>&#39;created_at&#39;</span>]
+</span></span></code></pre></div><p>這短短幾行就等同於前面基本 Serializer 的所有程式碼。ModelSerializer 自動完成了以下工作：</p><ul><li>根據 Model 欄位自動產生對應的 Serializer 欄位</li><li>自動產生 <code>validators</code>（例如 unique 約束的驗證）</li><li>提供預設的 <code>create()</code> 和 <code>update()</code> 實作</li></ul><h4 id=meta-類別詳解>Meta 類別詳解</h4><p>Meta 類別是 ModelSerializer 的核心設定，以下是最常用的選項：</p><p><strong><code>model</code></strong>：指定要對應的 Model 類別。</p><p><strong><code>fields</code></strong>：指定要包含哪些欄位。有兩種寫法：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>PostSerializer</span>(serializers<span style=color:#f92672>.</span>ModelSerializer):
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Meta</span>:
+</span></span><span style=display:flex><span>        model <span style=color:#f92672>=</span> Post
+</span></span><span style=display:flex><span>        <span style=color:#75715e># 寫法一：明確列出每個欄位（推薦）</span>
+</span></span><span style=display:flex><span>        fields <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#39;id&#39;</span>, <span style=color:#e6db74>&#39;title&#39;</span>, <span style=color:#e6db74>&#39;content&#39;</span>, <span style=color:#e6db74>&#39;author&#39;</span>, <span style=color:#e6db74>&#39;is_published&#39;</span>, <span style=color:#e6db74>&#39;created_at&#39;</span>]
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#75715e># 寫法二：包含所有欄位</span>
+</span></span><span style=display:flex><span>        <span style=color:#75715e># fields = &#39;__all__&#39;</span>
+</span></span></code></pre></div><blockquote><p>建議使用 <strong>明確列出欄位</strong> 的方式。<code>'__all__'</code> 雖然方便，但當 Model 新增敏感欄位（如 <code>password_hash</code>）時，它會自動被暴露在 API 中，造成安全風險。明確列出欄位可以讓你完全掌控 API 回傳的內容。</p></blockquote><p>如果你想排除特定欄位，也可以用 <code>exclude</code>：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>PostSerializer</span>(serializers<span style=color:#f92672>.</span>ModelSerializer):
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Meta</span>:
+</span></span><span style=display:flex><span>        model <span style=color:#f92672>=</span> Post
+</span></span><span style=display:flex><span>        exclude <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#39;updated_at&#39;</span>]  <span style=color:#75715e># 排除 updated_at，其餘全部包含</span>
+</span></span></code></pre></div><p><strong><code>read_only_fields</code></strong>：指定哪些欄位為唯讀，這些欄位只會出現在序列化輸出中，不會接受反序列化的輸入：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>PostSerializer</span>(serializers<span style=color:#f92672>.</span>ModelSerializer):
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Meta</span>:
+</span></span><span style=display:flex><span>        model <span style=color:#f92672>=</span> Post
+</span></span><span style=display:flex><span>        fields <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#39;id&#39;</span>, <span style=color:#e6db74>&#39;title&#39;</span>, <span style=color:#e6db74>&#39;content&#39;</span>, <span style=color:#e6db74>&#39;author&#39;</span>, <span style=color:#e6db74>&#39;created_at&#39;</span>]
+</span></span><span style=display:flex><span>        read_only_fields <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#39;id&#39;</span>, <span style=color:#e6db74>&#39;author&#39;</span>, <span style=color:#e6db74>&#39;created_at&#39;</span>]
+</span></span></code></pre></div><p><strong><code>extra_kwargs</code></strong>：為自動產生的欄位額外指定選項，不需要重新宣告整個欄位：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>PostSerializer</span>(serializers<span style=color:#f92672>.</span>ModelSerializer):
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Meta</span>:
+</span></span><span style=display:flex><span>        model <span style=color:#f92672>=</span> Post
+</span></span><span style=display:flex><span>        fields <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#39;id&#39;</span>, <span style=color:#e6db74>&#39;title&#39;</span>, <span style=color:#e6db74>&#39;content&#39;</span>, <span style=color:#e6db74>&#39;author&#39;</span>, <span style=color:#e6db74>&#39;is_published&#39;</span>, <span style=color:#e6db74>&#39;created_at&#39;</span>]
+</span></span><span style=display:flex><span>        read_only_fields <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#39;id&#39;</span>, <span style=color:#e6db74>&#39;created_at&#39;</span>]
+</span></span><span style=display:flex><span>        extra_kwargs <span style=color:#f92672>=</span> {
+</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;content&#39;</span>: {<span style=color:#e6db74>&#39;required&#39;</span>: <span style=color:#66d9ef>True</span>, <span style=color:#e6db74>&#39;min_length&#39;</span>: <span style=color:#ae81ff>10</span>},
+</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;author&#39;</span>: {<span style=color:#e6db74>&#39;write_only&#39;</span>: <span style=color:#66d9ef>False</span>},
+</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;title&#39;</span>: {<span style=color:#e6db74>&#39;max_length&#39;</span>: <span style=color:#ae81ff>200</span>},
+</span></span><span style=display:flex><span>        }
+</span></span></code></pre></div><hr><h3 id=常用欄位類型>常用欄位類型</h3><p>DRF 提供了豐富的欄位類型，對應不同的資料需求：</p><h4 id=基本欄位>基本欄位</h4><table><thead><tr><th>欄位類型</th><th>說明</th><th>對應 Model 欄位</th></tr></thead><tbody><tr><td><code>CharField</code></td><td>字串</td><td><code>CharField</code>、<code>TextField</code></td></tr><tr><td><code>IntegerField</code></td><td>整數</td><td><code>IntegerField</code>、<code>SmallIntegerField</code></td></tr><tr><td><code>FloatField</code></td><td>浮點數</td><td><code>FloatField</code></td></tr><tr><td><code>BooleanField</code></td><td>布林值</td><td><code>BooleanField</code></td></tr><tr><td><code>DateTimeField</code></td><td>日期時間</td><td><code>DateTimeField</code></td></tr><tr><td><code>DateField</code></td><td>日期</td><td><code>DateField</code></td></tr><tr><td><code>EmailField</code></td><td>電子郵件（含格式驗證）</td><td><code>EmailField</code></td></tr><tr><td><code>URLField</code></td><td>URL（含格式驗證）</td><td><code>URLField</code></td></tr></tbody></table><h4 id=關聯欄位relational-fields>關聯欄位（Relational Fields）</h4><p>關聯欄位用來處理 <strong>ForeignKey</strong> 和 <strong>ManyToManyField</strong> 等關聯關係：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework <span style=color:#f92672>import</span> serializers
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> .models <span style=color:#f92672>import</span> Post, Category
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>PostSerializer</span>(serializers<span style=color:#f92672>.</span>ModelSerializer):
+</span></span><span style=display:flex><span>    <span style=color:#75715e># PrimaryKeyRelatedField：顯示/接受關聯物件的 ID</span>
+</span></span><span style=display:flex><span>    author <span style=color:#f92672>=</span> serializers<span style=color:#f92672>.</span>PrimaryKeyRelatedField(read_only<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># StringRelatedField：顯示關聯物件的 __str__() 結果（唯讀）</span>
+</span></span><span style=display:flex><span>    category_name <span style=color:#f92672>=</span> serializers<span style=color:#f92672>.</span>StringRelatedField(source<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;category&#39;</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># SlugRelatedField：使用指定欄位（如 username）來表示關聯</span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># author_username = serializers.SlugRelatedField(</span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>#     slug_field=&#39;username&#39;,</span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>#     source=&#39;author&#39;,</span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>#     read_only=True,</span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># )</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Meta</span>:
+</span></span><span style=display:flex><span>        model <span style=color:#f92672>=</span> Post
+</span></span><span style=display:flex><span>        fields <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#39;id&#39;</span>, <span style=color:#e6db74>&#39;title&#39;</span>, <span style=color:#e6db74>&#39;author&#39;</span>, <span style=color:#e6db74>&#39;category_name&#39;</span>]
+</span></span></code></pre></div><p><strong><code>PrimaryKeyRelatedField</code></strong> 是最常用的關聯欄位，讀取時顯示 ID，寫入時也接受 ID 來建立關聯。</p><hr><h3 id=欄位選項>欄位選項</h3><p>每個欄位都可以設定多種選項來控制其行為：</p><table><thead><tr><th>選項</th><th>說明</th><th>範例</th></tr></thead><tbody><tr><td><code>read_only</code></td><td>僅出現在序列化輸出，不接受輸入</td><td><code>serializers.IntegerField(read_only=True)</code></td></tr><tr><td><code>write_only</code></td><td>僅接受輸入，不出現在序列化輸出</td><td><code>serializers.CharField(write_only=True)</code></td></tr><tr><td><code>required</code></td><td>反序列化時是否為必填</td><td><code>serializers.CharField(required=True)</code></td></tr><tr><td><code>default</code></td><td>未提供值時使用的預設值</td><td><code>serializers.BooleanField(default=False)</code></td></tr><tr><td><code>source</code></td><td>指定此欄位對應的 Model 屬性或方法</td><td><code>serializers.CharField(source='get_full_name')</code></td></tr></tbody></table><p><code>source</code> 是一個特別實用的選項，它能讓 Serializer 欄位名稱與 Model 欄位名稱不同：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>PostSerializer</span>(serializers<span style=color:#f92672>.</span>ModelSerializer):
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 將 Serializer 的 writer 欄位對應到 Model 的 author 欄位</span>
+</span></span><span style=display:flex><span>    writer <span style=color:#f92672>=</span> serializers<span style=color:#f92672>.</span>PrimaryKeyRelatedField(
+</span></span><span style=display:flex><span>        source<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;author&#39;</span>, read_only<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>
+</span></span><span style=display:flex><span>    )
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 透過 source 存取關聯物件的屬性</span>
+</span></span><span style=display:flex><span>    author_email <span style=color:#f92672>=</span> serializers<span style=color:#f92672>.</span>EmailField(
+</span></span><span style=display:flex><span>        source<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;author.email&#39;</span>, read_only<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>
+</span></span><span style=display:flex><span>    )
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Meta</span>:
+</span></span><span style=display:flex><span>        model <span style=color:#f92672>=</span> Post
+</span></span><span style=display:flex><span>        fields <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#39;id&#39;</span>, <span style=color:#e6db74>&#39;title&#39;</span>, <span style=color:#e6db74>&#39;writer&#39;</span>, <span style=color:#e6db74>&#39;author_email&#39;</span>]
+</span></span></code></pre></div><p><code>read_only</code> 和 <code>write_only</code> 的典型應用場景：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>UserSerializer</span>(serializers<span style=color:#f92672>.</span>ModelSerializer):
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 密碼只在建立時接受輸入，永遠不會出現在回應中</span>
+</span></span><span style=display:flex><span>    password <span style=color:#f92672>=</span> serializers<span style=color:#f92672>.</span>CharField(write_only<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>, min_length<span style=color:#f92672>=</span><span style=color:#ae81ff>8</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 建立日期只在回應中顯示，不接受輸入</span>
+</span></span><span style=display:flex><span>    date_joined <span style=color:#f92672>=</span> serializers<span style=color:#f92672>.</span>DateTimeField(read_only<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Meta</span>:
+</span></span><span style=display:flex><span>        model <span style=color:#f92672>=</span> User
+</span></span><span style=display:flex><span>        fields <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#39;id&#39;</span>, <span style=color:#e6db74>&#39;username&#39;</span>, <span style=color:#e6db74>&#39;email&#39;</span>, <span style=color:#e6db74>&#39;password&#39;</span>, <span style=color:#e6db74>&#39;date_joined&#39;</span>]
+</span></span></code></pre></div><hr><h3 id=驗證機制validation>驗證機制（Validation）</h3><p>Serializer 提供三個層級的驗證機制，從單一欄位到跨欄位的聯合驗證都能處理。</p><h4 id=欄位級驗證field-level-validation>欄位級驗證（Field-level Validation）</h4><p>定義 <code>validate_&lt;field_name></code> 方法來驗證單一欄位：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>PostSerializer</span>(serializers<span style=color:#f92672>.</span>ModelSerializer):
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Meta</span>:
+</span></span><span style=display:flex><span>        model <span style=color:#f92672>=</span> Post
+</span></span><span style=display:flex><span>        fields <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#39;id&#39;</span>, <span style=color:#e6db74>&#39;title&#39;</span>, <span style=color:#e6db74>&#39;content&#39;</span>, <span style=color:#e6db74>&#39;is_published&#39;</span>]
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>validate_title</span>(self, value):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;驗證 title 欄位：方法名稱必須為 validate_ 加上欄位名稱&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> len(value) <span style=color:#f92672>&lt;</span> <span style=color:#ae81ff>5</span>:
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>raise</span> serializers<span style=color:#f92672>.</span>ValidationError(<span style=color:#e6db74>&#34;標題至少需要 5 個字元。&#34;</span>)
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> <span style=color:#e6db74>&#39;spam&#39;</span> <span style=color:#f92672>in</span> value<span style=color:#f92672>.</span>lower():
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>raise</span> serializers<span style=color:#f92672>.</span>ValidationError(<span style=color:#e6db74>&#34;標題包含禁止詞彙。&#34;</span>)
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> value<span style=color:#f92672>.</span>strip()  <span style=color:#75715e># 可回傳處理後的值</span>
+</span></span></code></pre></div><h4 id=物件級驗證object-level-validation>物件級驗證（Object-level Validation）</h4><p>覆寫 <code>validate()</code> 方法進行跨欄位的聯合驗證：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>PostSerializer</span>(serializers<span style=color:#f92672>.</span>ModelSerializer):
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Meta</span>:
+</span></span><span style=display:flex><span>        model <span style=color:#f92672>=</span> Post
+</span></span><span style=display:flex><span>        fields <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#39;id&#39;</span>, <span style=color:#e6db74>&#39;title&#39;</span>, <span style=color:#e6db74>&#39;content&#39;</span>, <span style=color:#e6db74>&#39;is_published&#39;</span>]
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>validate</span>(self, attrs):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;跨欄位驗證：可存取所有已驗證的欄位值&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> attrs<span style=color:#f92672>.</span>get(<span style=color:#e6db74>&#39;is_published&#39;</span>) <span style=color:#f92672>and</span> len(attrs<span style=color:#f92672>.</span>get(<span style=color:#e6db74>&#39;content&#39;</span>, <span style=color:#e6db74>&#39;&#39;</span>)) <span style=color:#f92672>&lt;</span> <span style=color:#ae81ff>100</span>:
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>raise</span> serializers<span style=color:#f92672>.</span>ValidationError(
+</span></span><span style=display:flex><span>                <span style=color:#e6db74>&#34;已發布的文章內容至少需要 100 個字元。&#34;</span>
+</span></span><span style=display:flex><span>            )
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> attrs
+</span></span></code></pre></div><h4 id=validators-參數>validators 參數</h4><p>DRF 也提供了可重用的 <strong>驗證器</strong>（Validators），透過 <code>validators</code> 參數附加到欄位或 Meta 類別中：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework.validators <span style=color:#f92672>import</span> UniqueValidator, UniqueTogetherValidator
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>PostSerializer</span>(serializers<span style=color:#f92672>.</span>ModelSerializer):
+</span></span><span style=display:flex><span>    title <span style=color:#f92672>=</span> serializers<span style=color:#f92672>.</span>CharField(
+</span></span><span style=display:flex><span>        max_length<span style=color:#f92672>=</span><span style=color:#ae81ff>200</span>,
+</span></span><span style=display:flex><span>        validators<span style=color:#f92672>=</span>[
+</span></span><span style=display:flex><span>            <span style=color:#75715e># UniqueValidator：確保欄位值在資料表中唯一</span>
+</span></span><span style=display:flex><span>            UniqueValidator(
+</span></span><span style=display:flex><span>                queryset<span style=color:#f92672>=</span>Post<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>all(),
+</span></span><span style=display:flex><span>                message<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;已有相同標題的文章存在。&#34;</span>
+</span></span><span style=display:flex><span>            )
+</span></span><span style=display:flex><span>        ]
+</span></span><span style=display:flex><span>    )
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Meta</span>:
+</span></span><span style=display:flex><span>        model <span style=color:#f92672>=</span> Post
+</span></span><span style=display:flex><span>        fields <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#39;id&#39;</span>, <span style=color:#e6db74>&#39;title&#39;</span>, <span style=color:#e6db74>&#39;content&#39;</span>, <span style=color:#e6db74>&#39;author&#39;</span>]
+</span></span><span style=display:flex><span>        validators <span style=color:#f92672>=</span> [
+</span></span><span style=display:flex><span>            <span style=color:#75715e># UniqueTogetherValidator：確保多個欄位的組合唯一</span>
+</span></span><span style=display:flex><span>            UniqueTogetherValidator(
+</span></span><span style=display:flex><span>                queryset<span style=color:#f92672>=</span>Post<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>all(),
+</span></span><span style=display:flex><span>                fields<span style=color:#f92672>=</span>[<span style=color:#e6db74>&#39;title&#39;</span>, <span style=color:#e6db74>&#39;author&#39;</span>],
+</span></span><span style=display:flex><span>                message<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;同一作者不能有重複標題的文章。&#34;</span>
+</span></span><span style=display:flex><span>            )
+</span></span><span style=display:flex><span>        ]
+</span></span></code></pre></div><p>這三個層級的驗證會按照以下順序依序執行：</p><ol><li><strong>欄位本身的驗證</strong>（型別檢查、required、max_length 等）</li><li><strong>欄位級驗證</strong>（<code>validate_&lt;field_name></code> 方法）</li><li><strong>物件級驗證</strong>（<code>validate</code> 方法）</li></ol><hr><h3 id=序列化資料與錯誤處理>序列化資料與錯誤處理</h3><p>掌握 <code>serializer.data</code>、<code>serializer.errors</code> 和 <code>serializer.is_valid()</code> 是使用 Serializer 的關鍵。</p><h4 id=serializerdata取得序列化結果>serializer.data：取得序列化結果</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> .models <span style=color:#f92672>import</span> Post
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> .serializers <span style=color:#f92672>import</span> PostSerializer
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 序列化單一物件</span>
+</span></span><span style=display:flex><span>post <span style=color:#f92672>=</span> Post<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>get(pk<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>)
+</span></span><span style=display:flex><span>serializer <span style=color:#f92672>=</span> PostSerializer(post)
+</span></span><span style=display:flex><span>print(serializer<span style=color:#f92672>.</span>data)
+</span></span><span style=display:flex><span><span style=color:#75715e># 輸出：{&#39;id&#39;: 1, &#39;title&#39;: &#39;Hello World&#39;, &#39;content&#39;: &#39;...&#39;, ...}</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 序列化多個物件（加上 many=True）</span>
+</span></span><span style=display:flex><span>posts <span style=color:#f92672>=</span> Post<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>all()
+</span></span><span style=display:flex><span>serializer <span style=color:#f92672>=</span> PostSerializer(posts, many<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
+</span></span><span style=display:flex><span>print(serializer<span style=color:#f92672>.</span>data)
+</span></span><span style=display:flex><span><span style=color:#75715e># 輸出：[{&#39;id&#39;: 1, ...}, {&#39;id&#39;: 2, ...}, ...]</span>
+</span></span></code></pre></div><h4 id=serializeris_valid執行驗證>serializer.is_valid()：執行驗證</h4><p>反序列化時，必須先呼叫 <code>is_valid()</code> 通過驗證後才能存取 <code>validated_data</code> 或呼叫 <code>save()</code>：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># 反序列化：驗證輸入資料</span>
+</span></span><span style=display:flex><span>data <span style=color:#f92672>=</span> {<span style=color:#e6db74>&#39;title&#39;</span>: <span style=color:#e6db74>&#39;New Post&#39;</span>, <span style=color:#e6db74>&#39;content&#39;</span>: <span style=color:#e6db74>&#39;Hello DRF!&#39;</span>}
+</span></span><span style=display:flex><span>serializer <span style=color:#f92672>=</span> PostSerializer(data<span style=color:#f92672>=</span>data)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 方式一：手動處理驗證失敗</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>if</span> serializer<span style=color:#f92672>.</span>is_valid():
+</span></span><span style=display:flex><span>    serializer<span style=color:#f92672>.</span>save()
+</span></span><span style=display:flex><span><span style=color:#66d9ef>else</span>:
+</span></span><span style=display:flex><span>    print(serializer<span style=color:#f92672>.</span>errors)  <span style=color:#75715e># 取得錯誤訊息</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 方式二：驗證失敗時自動拋出例外（推薦）</span>
+</span></span><span style=display:flex><span>serializer<span style=color:#f92672>.</span>is_valid(raise_exception<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
+</span></span><span style=display:flex><span>serializer<span style=color:#f92672>.</span>save()
+</span></span><span style=display:flex><span><span style=color:#75715e># 若驗證失敗，DRF 會自動回傳 HTTP 400 回應</span>
+</span></span></code></pre></div><p>在實際的 API View 中，<code>raise_exception=True</code> 是更常用的方式，因為 DRF 的例外處理器會自動將 <code>ValidationError</code> 轉換為格式一致的 HTTP 400 回應。</p><h4 id=serializererrors取得錯誤訊息>serializer.errors：取得錯誤訊息</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span>data <span style=color:#f92672>=</span> {<span style=color:#e6db74>&#39;title&#39;</span>: <span style=color:#e6db74>&#39;&#39;</span>, <span style=color:#e6db74>&#39;content&#39;</span>: <span style=color:#e6db74>&#39;&#39;</span>}
+</span></span><span style=display:flex><span>serializer <span style=color:#f92672>=</span> PostSerializer(data<span style=color:#f92672>=</span>data)
+</span></span><span style=display:flex><span>serializer<span style=color:#f92672>.</span>is_valid()
+</span></span><span style=display:flex><span>print(serializer<span style=color:#f92672>.</span>errors)
+</span></span><span style=display:flex><span><span style=color:#75715e># 輸出：</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># {</span>
+</span></span><span style=display:flex><span><span style=color:#75715e>#     &#39;title&#39;: [ErrorDetail(string=&#39;此欄位不可為空白。&#39;, code=&#39;blank&#39;)],</span>
+</span></span><span style=display:flex><span><span style=color:#75715e>#     &#39;content&#39;: [ErrorDetail(string=&#39;此欄位不可為空白。&#39;, code=&#39;blank&#39;)]</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># }</span>
+</span></span></code></pre></div><p>錯誤訊息以字典形式呈現，key 是欄位名稱，value 是該欄位的錯誤清單。物件級驗證的錯誤則會出現在 <code>non_field_errors</code> 這個 key 下。</p><hr><h3 id=完整範例post-api-的-serializer>完整範例：Post API 的 Serializer</h3><p>最後，讓我們把所有概念串起來，建立一個完整的 Post API Serializer：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># serializers.py</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework <span style=color:#f92672>import</span> serializers
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework.validators <span style=color:#f92672>import</span> UniqueValidator
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> .models <span style=color:#f92672>import</span> Post
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>PostSerializer</span>(serializers<span style=color:#f92672>.</span>ModelSerializer):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;文章序列化器：涵蓋欄位選項、自訂欄位與驗證機制&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># SerializerMethodField：動態計算的唯讀欄位</span>
+</span></span><span style=display:flex><span>    author_name <span style=color:#f92672>=</span> serializers<span style=color:#f92672>.</span>SerializerMethodField()
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 自訂驗證器</span>
+</span></span><span style=display:flex><span>    title <span style=color:#f92672>=</span> serializers<span style=color:#f92672>.</span>CharField(
+</span></span><span style=display:flex><span>        max_length<span style=color:#f92672>=</span><span style=color:#ae81ff>200</span>,
+</span></span><span style=display:flex><span>        validators<span style=color:#f92672>=</span>[
+</span></span><span style=display:flex><span>            UniqueValidator(
+</span></span><span style=display:flex><span>                queryset<span style=color:#f92672>=</span>Post<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>all(),
+</span></span><span style=display:flex><span>                message<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;已有相同標題的文章。&#34;</span>
+</span></span><span style=display:flex><span>            )
+</span></span><span style=display:flex><span>        ]
+</span></span><span style=display:flex><span>    )
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Meta</span>:
+</span></span><span style=display:flex><span>        model <span style=color:#f92672>=</span> Post
+</span></span><span style=display:flex><span>        fields <span style=color:#f92672>=</span> [
+</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;id&#39;</span>, <span style=color:#e6db74>&#39;title&#39;</span>, <span style=color:#e6db74>&#39;content&#39;</span>, <span style=color:#e6db74>&#39;author&#39;</span>, <span style=color:#e6db74>&#39;author_name&#39;</span>,
+</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;is_published&#39;</span>, <span style=color:#e6db74>&#39;created_at&#39;</span>, <span style=color:#e6db74>&#39;updated_at&#39;</span>,
+</span></span><span style=display:flex><span>        ]
+</span></span><span style=display:flex><span>        read_only_fields <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#39;id&#39;</span>, <span style=color:#e6db74>&#39;author&#39;</span>, <span style=color:#e6db74>&#39;created_at&#39;</span>, <span style=color:#e6db74>&#39;updated_at&#39;</span>]
+</span></span><span style=display:flex><span>        extra_kwargs <span style=color:#f92672>=</span> {
+</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;content&#39;</span>: {<span style=color:#e6db74>&#39;required&#39;</span>: <span style=color:#66d9ef>True</span>, <span style=color:#e6db74>&#39;min_length&#39;</span>: <span style=color:#ae81ff>10</span>},
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>get_author_name</span>(self, obj):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;SerializerMethodField 的取值方法，命名規則為 get_&lt;field_name&gt;&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> obj<span style=color:#f92672>.</span>author<span style=color:#f92672>.</span>get_full_name() <span style=color:#f92672>or</span> obj<span style=color:#f92672>.</span>author<span style=color:#f92672>.</span>username
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>validate_title</span>(self, value):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;欄位級驗證：標題不得包含禁止詞彙&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        forbidden_words <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#39;spam&#39;</span>, <span style=color:#e6db74>&#39;test123&#39;</span>]
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>for</span> word <span style=color:#f92672>in</span> forbidden_words:
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>if</span> word <span style=color:#f92672>in</span> value<span style=color:#f92672>.</span>lower():
+</span></span><span style=display:flex><span>                <span style=color:#66d9ef>raise</span> serializers<span style=color:#f92672>.</span>ValidationError(
+</span></span><span style=display:flex><span>                    <span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;標題包含禁止詞彙：</span><span style=color:#e6db74>{</span>word<span style=color:#e6db74>}</span><span style=color:#e6db74>&#34;</span>
+</span></span><span style=display:flex><span>                )
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> value<span style=color:#f92672>.</span>strip()
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>validate</span>(self, attrs):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;物件級驗證：發布文章時內容不得過短&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> attrs<span style=color:#f92672>.</span>get(<span style=color:#e6db74>&#39;is_published&#39;</span>) <span style=color:#f92672>and</span> len(attrs<span style=color:#f92672>.</span>get(<span style=color:#e6db74>&#39;content&#39;</span>, <span style=color:#e6db74>&#39;&#39;</span>)) <span style=color:#f92672>&lt;</span> <span style=color:#ae81ff>100</span>:
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>raise</span> serializers<span style=color:#f92672>.</span>ValidationError(
+</span></span><span style=display:flex><span>                <span style=color:#e6db74>&#34;已發布的文章內容至少需要 100 個字元。&#34;</span>
+</span></span><span style=display:flex><span>            )
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> attrs
+</span></span></code></pre></div><p>在 View 中使用這個 Serializer：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># views.py</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework <span style=color:#f92672>import</span> status
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework.decorators <span style=color:#f92672>import</span> api_view
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework.response <span style=color:#f92672>import</span> Response
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> .models <span style=color:#f92672>import</span> Post
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> .serializers <span style=color:#f92672>import</span> PostSerializer
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>@api_view</span>([<span style=color:#e6db74>&#39;GET&#39;</span>, <span style=color:#e6db74>&#39;POST&#39;</span>])
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>post_list</span>(request):
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> request<span style=color:#f92672>.</span>method <span style=color:#f92672>==</span> <span style=color:#e6db74>&#39;GET&#39;</span>:
+</span></span><span style=display:flex><span>        <span style=color:#75715e># 序列化：Model → JSON</span>
+</span></span><span style=display:flex><span>        posts <span style=color:#f92672>=</span> Post<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>select_related(<span style=color:#e6db74>&#39;author&#39;</span>)<span style=color:#f92672>.</span>all()
+</span></span><span style=display:flex><span>        serializer <span style=color:#f92672>=</span> PostSerializer(posts, many<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> Response(serializer<span style=color:#f92672>.</span>data)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>elif</span> request<span style=color:#f92672>.</span>method <span style=color:#f92672>==</span> <span style=color:#e6db74>&#39;POST&#39;</span>:
+</span></span><span style=display:flex><span>        <span style=color:#75715e># 反序列化：JSON → Model</span>
+</span></span><span style=display:flex><span>        serializer <span style=color:#f92672>=</span> PostSerializer(data<span style=color:#f92672>=</span>request<span style=color:#f92672>.</span>data)
+</span></span><span style=display:flex><span>        serializer<span style=color:#f92672>.</span>is_valid(raise_exception<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
+</span></span><span style=display:flex><span>        serializer<span style=color:#f92672>.</span>save(author<span style=color:#f92672>=</span>request<span style=color:#f92672>.</span>user)  <span style=color:#75715e># 透過 save() 傳入額外欄位</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> Response(serializer<span style=color:#f92672>.</span>data, status<span style=color:#f92672>=</span>status<span style=color:#f92672>.</span>HTTP_201_CREATED)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>@api_view</span>([<span style=color:#e6db74>&#39;GET&#39;</span>, <span style=color:#e6db74>&#39;PUT&#39;</span>, <span style=color:#e6db74>&#39;DELETE&#39;</span>])
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>post_detail</span>(request, pk):
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>try</span>:
+</span></span><span style=display:flex><span>        post <span style=color:#f92672>=</span> Post<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>select_related(<span style=color:#e6db74>&#39;author&#39;</span>)<span style=color:#f92672>.</span>get(pk<span style=color:#f92672>=</span>pk)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>except</span> Post<span style=color:#f92672>.</span>DoesNotExist:
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> Response(status<span style=color:#f92672>=</span>status<span style=color:#f92672>.</span>HTTP_404_NOT_FOUND)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> request<span style=color:#f92672>.</span>method <span style=color:#f92672>==</span> <span style=color:#e6db74>&#39;GET&#39;</span>:
+</span></span><span style=display:flex><span>        serializer <span style=color:#f92672>=</span> PostSerializer(post)
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> Response(serializer<span style=color:#f92672>.</span>data)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>elif</span> request<span style=color:#f92672>.</span>method <span style=color:#f92672>==</span> <span style=color:#e6db74>&#39;PUT&#39;</span>:
+</span></span><span style=display:flex><span>        <span style=color:#75715e># 更新時傳入 instance 與 data</span>
+</span></span><span style=display:flex><span>        serializer <span style=color:#f92672>=</span> PostSerializer(post, data<span style=color:#f92672>=</span>request<span style=color:#f92672>.</span>data)
+</span></span><span style=display:flex><span>        serializer<span style=color:#f92672>.</span>is_valid(raise_exception<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
+</span></span><span style=display:flex><span>        serializer<span style=color:#f92672>.</span>save()
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> Response(serializer<span style=color:#f92672>.</span>data)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>elif</span> request<span style=color:#f92672>.</span>method <span style=color:#f92672>==</span> <span style=color:#e6db74>&#39;DELETE&#39;</span>:
+</span></span><span style=display:flex><span>        post<span style=color:#f92672>.</span>delete()
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> Response(status<span style=color:#f92672>=</span>status<span style=color:#f92672>.</span>HTTP_204_NO_CONTENT)
+</span></span></code></pre></div><p>API 的輸入與輸出範例：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-json data-lang=json><span style=display:flex><span><span style=color:#75715e>// POST /api/posts/ — 建立文章（輸入）
+</span></span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;title&#34;</span>: <span style=color:#e6db74>&#34;DRF Serializers 入門教學&#34;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;content&#34;</span>: <span style=color:#e6db74>&#34;Django REST Framework 的 Serializer 是 API 開發的核心元件...&#34;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;is_published&#34;</span>: <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 回應（輸出）
+</span></span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;id&#34;</span>: <span style=color:#ae81ff>1</span>,
+</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;title&#34;</span>: <span style=color:#e6db74>&#34;DRF Serializers 入門教學&#34;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;content&#34;</span>: <span style=color:#e6db74>&#34;Django REST Framework 的 Serializer 是 API 開發的核心元件...&#34;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;author&#34;</span>: <span style=color:#ae81ff>42</span>,
+</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;author_name&#34;</span>: <span style=color:#e6db74>&#34;Alice Chen&#34;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;is_published&#34;</span>: <span style=color:#66d9ef>true</span>,
+</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;created_at&#34;</span>: <span style=color:#e6db74>&#34;2026-06-11T10:30:00Z&#34;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;updated_at&#34;</span>: <span style=color:#e6db74>&#34;2026-06-11T10:30:00Z&#34;</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><hr><h3 id=總結>總結</h3><p>DRF Serializer 是 Django REST Framework 中最核心的元件之一，扮演著 Python 物件與 JSON 之間雙向轉換的橋樑。讓我們回顧本文的重點：</p><ul><li><strong>序列化 vs 反序列化</strong>：序列化是將 Model 實例轉為 JSON 輸出，反序列化是將 JSON 輸入驗證後轉為 Model 實例。</li><li><strong>Serializer vs ModelSerializer</strong>：優先使用 ModelSerializer，它能自動從 Model 產生欄位並提供預設的 <code>create()</code> / <code>update()</code> 方法。只有在資料不對應 Model 或需要完全客製化時，才使用基本 Serializer。</li><li><strong>Meta 類別</strong>：透過 <code>model</code>、<code>fields</code>、<code>read_only_fields</code>、<code>extra_kwargs</code> 控制 ModelSerializer 的行為。建議明確列出 <code>fields</code> 而非使用 <code>'__all__'</code>。</li><li><strong>欄位類型與選項</strong>：DRF 提供豐富的欄位類型對應不同資料需求，<code>read_only</code>、<code>write_only</code>、<code>required</code>、<code>default</code>、<code>source</code> 等選項可精細控制欄位行為。</li><li><strong>三層驗證機制</strong>：欄位級驗證（<code>validate_&lt;field_name></code>）處理單一欄位，物件級驗證（<code>validate</code>）處理跨欄位邏輯，<code>validators</code> 參數提供可重用的驗證器。</li><li><strong>核心 API</strong>：<code>serializer.data</code> 取得序列化結果、<code>serializer.is_valid(raise_exception=True)</code> 執行驗證、<code>serializer.errors</code> 取得錯誤訊息。</li></ul><p>掌握了 Serializer 的基礎知識，你就具備了使用 DRF 建構 RESTful API 的核心能力。在後續的文章中，我們將進一步探索巢狀序列化（Nested Serializers）、自訂欄位與進階驗證等主題。</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
+</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/django/021-drf-introduction/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django REST Framework 入門：建立你的第一個 API | Django 教學</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/10</span>
+</a><a href=https://benzhub.github.io/post/django/020-django-admin-advanced/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django Admin 進階：Inline 編輯、自訂 Actions 與權限控制 | Django 教學</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/09</span>
+</a><a href=https://benzhub.github.io/post/django/019-django-admin-basics/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django Admin 後台管理介面入門 | Django 教學</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/08</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/django/021-drf-introduction/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+<span class="text-sm font-medium">Django REST Framework 入門：建立你的第一個 API | Django 教學</span></a></div><div><a href=https://benzhub.github.io/post/django/023-drf-serializers-advanced/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+<span class="text-sm font-medium">DRF Serializers 進階：巢狀序列化與自訂方法 | Django 教學</span></a></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
+</a><a href=/tags/acid><span class=tag-pill>acid</span>
+</a><a href=/tags/ai><span class=tag-pill>ai</span>
+</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
+</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
+</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
+</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
+</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
+</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
+</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
+</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
+</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
+</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
+</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
+</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
+</a><a href=/tags/api><span class=tag-pill>api</span>
+</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
+</a><a href=/tags/autovacuum><span class=tag-pill>autovacuum</span>
+</a><a href=/tags/background-processes><span class=tag-pill>background-processes</span>
+</a><a href=/tags/big-o><span class=tag-pill>big o</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (14)</span>
+</a><a href=/post/javascript/><span class=tag-pill>JavaScript (69)</span>
+</a><a href=/post/django/><span class=tag-pill>Django (31)</span>
+</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
+</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
+</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
+</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
+</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/django/031-django-signals/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Signals 信號機制：觀察者模式實戰 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/20</p></a><a href=/post/postgresql/014-dml-advanced/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">DML 進階操作：Upsert、MERGE、RETURNING 與 COPY 批量匯入 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/20</p></a><a href=/post/javascript/data-structures--algorithms/007-sorting/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">排序演算法 — Bubble、Merge、Quick Sort 等十大排序完整比較 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/20</p></a><a href=/post/postgresql/013-ddl-schema/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/19</p></a><a href=/post/django/030-django-custom-user-model/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django 自訂使用者模型：AbstractUser 與 AbstractBaseUser | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/19</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>

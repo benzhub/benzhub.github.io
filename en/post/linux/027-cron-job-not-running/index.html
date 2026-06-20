@@ -1,1194 +1,196 @@
-<!DOCTYPE html>
-
-<html lang="en">
-<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><title>Cron Job Not Running? 10 Fixes for Common Cron Issues | BenzHub</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="apple-touch-icon" sizes="180x180" href='/favicon/apple-touch-icon.png'>
-    <link rel="icon" type="image/png" sizes="32x32" href='/favicon/favicon-32x32.png'>
-    <link rel="icon" type="image/png" sizes="16x16" href='/favicon/favicon-16x16.png'>
-    <link rel="manifest" href='/favicon/site.webmanifest' />
-    <link rel="mask-icon" href=' /favicon/safari-pinned-tab.svg' color="#5bbad5" />
-    <link rel="shortcut icon" href='/favicon/favicon.ico' />
-    <meta name="theme-color" content="#fafafa">
-    <meta property="og:title" content="Cron Job Not Running? 10 Fixes for Common Cron Issues | BenzHub" />
-    
-    
-    <link rel="stylesheet" href="/css/style.css" />
-    
-    <link href=' /css/blonde.min.css' rel="stylesheet" type="text/css" media="print"
-        onload="this.media=' all'">
-    
-
-
-
-
-
-
-
-  
-
-
-
-
-  
-
-<meta name="description" content="Cron job not running? Debug with these 10 fixes: PATH issues, permission errors, missing shebang, environment variables, log checking, and more. Systematic troubleshooting guide for broken cron jobs.">
-<meta property="og:site_name" content="BenzHub">
-<meta property="og:description" content="Cron job not running? Debug with these 10 fixes: PATH issues, permission errors, missing shebang, environment variables, log checking, and more. Systematic troubleshooting guide for broken cron jobs.">
-<meta property="og:url" content="http://localhost:1313/en/post/linux/027-cron-job-not-running/">
-<meta property="og:type" content="article">
-<meta property="og:locale" content="en_US">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="">
-
-<link rel="canonical" href="http://localhost:1313/en/post/linux/027-cron-job-not-running/">
-
-<meta name="twitter:description" content="Cron job not running? Debug with these 10 fixes: PATH issues, permission errors, missing shebang, environment variables, log checking, and more. Systematic troubleshooting guide for broken cron jobs.">
-<meta property="article:published_time" content="2026-05-16T00:00:00&#43;00:00">
-<meta property="article:updated_time" content="2026-05-16T00:00:00&#43;00:00">
-
-
-
-
-
-    
-<meta property="og:image" content="http://localhost:1313/img/linux/027-Cron-Job-Not-Running.png">
-<meta property="og:image:url" content="http://localhost:1313/img/linux/027-Cron-Job-Not-Running.png">
-    
-
-    
-    <link rel="stylesheet" href='/css/custom.css'>
-    <i class="dark hidden"></i>
-    
-<link rel="alternate" hreflang="en" href="http://localhost:1313/en/post/linux/027-cron-job-not-running/" />
-
-<link rel="alternate" hreflang="x-default" href="http://localhost:1313/en/post/linux/027-cron-job-not-running/" />
-
-    
-
-
-
-
-
-
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BlogPosting",
-  "headline": "\"Cron Job Not Running? 10 Fixes for Common Cron Issues\"",
-  "description": "\"Cron job not running? Debug with these 10 fixes: PATH issues, permission errors, missing shebang, environment variables, log checking, and more. Systematic troubleshooting guide for broken cron jobs.\"",
-  "author": {
-    "@type": "Person",
-    "name": "\"BenzHub\"",
-    "url": "http:\/\/localhost:1313\/en\/about",
-    "jobTitle": "\"Software Developer\"",
-    "sameAs": [
-      "\"https://github.com/benzhub\""
-    ]
-  },
-  "datePublished": "2026-05-16T00:00:00\u002b00:00",
-  "dateModified": "2026-05-16T00:00:00\u002b00:00",
-  "image": "http:\/\/localhost:1313\/img\/linux\/027-Cron-Job-Not-Running.png",
-  "publisher": {
-    "@type": "Organization",
-    "name": "\"BenzHub\"",
-    "url": "\"http://localhost:1313/\"",
-    "sameAs": [
-      "\"https://github.com/benzhub\""
-    ]
-  },
-  "mainEntityOfPage": {
-    "@type": "WebPage",
-    "@id": "http:\/\/localhost:1313\/en\/post\/linux\/027-cron-job-not-running\/"
-  },
-  "inLanguage": "en"
-}
-</script>
-
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    {
-      "@type": "ListItem",
-      "position": 1,
-      "name": "\"BenzHub\"",
-      "item": "http:\/\/localhost:1313\/"
-    }
-    
-    
-      
-      
-    ,{
-      "@type": "ListItem",
-      "position": 2,
-      "name": "\"Posts\"",
-      "item": "http:\/\/localhost:1313\/en\/post\/"
-    }
-      
-      
-    
-    ,{
-      "@type": "ListItem",
-      "position":  3 ,
-      "name": "\"Cron Job Not Running? 10 Fixes for Common Cron Issues\""
-    }
-  ]
-}
-</script>
-
-
-
-
-
-
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    
-    
-    {
-      "@type": "Question",
-      "name": "\"Why is my cron job not running?\"",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "\"The most common causes are: wrong PATH (cron uses minimal /usr/bin:/bin), missing execute permission on the script, relative paths in commands, or the cron daemon not running. Check with grep CRON /var/log/syslog.\""
-      }
-    }
-    
-    ,
-    {
-      "@type": "Question",
-      "name": "\"How do I check if cron is running?\"",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "\"Run 'systemctl status cron' (Debian/Ubuntu) or 'systemctl status crond' (CentOS/RHEL). If inactive, start with 'sudo systemctl start cron'. Also check if your user has cron access with 'cat /etc/cron.deny'.\""
-      }
-    }
-    
-    ,
-    {
-      "@type": "Question",
-      "name": "\"Why does my cron script work manually but fail in cron?\"",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "\"Cron runs in a minimal environment without your shell profile (.bashrc/.zshrc). It has a short PATH and no custom environment variables. Fix by setting PATH at the top of crontab or using absolute paths in your script.\""
-      }
-    }
-    
-  ]
-}
-</script>
-
-
-
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "HowTo",
-  "name": "\"How to Debug a Cron Job That's Not Running\"",
-  "description": "\"Cron job not running? Debug with these 10 fixes: PATH issues, permission errors, missing shebang, environment variables, log checking, and more. Systematic troubleshooting guide for broken cron jobs.\"",
-  "totalTime": "PT5M",
-  "step": [
-    
-    
-    {
-      "@type": "HowToStep",
-      "position":  1 ,
-      "name": "\"Check cron daemon status\"",
-      "text": "\"Run 'systemctl status cron' to verify the cron service is active and running.\""
-    }
-    
-    ,
-    {
-      "@type": "HowToStep",
-      "position":  2 ,
-      "name": "\"Check system logs for cron activity\"",
-      "text": "\"Run 'grep CRON /var/log/syslog | tail -20' to see if cron attempted to run your job.\""
-    }
-    
-    ,
-    {
-      "@type": "HowToStep",
-      "position":  3 ,
-      "name": "\"Verify your crontab is saved\"",
-      "text": "\"Run 'crontab -l' and confirm your job appears in the list with correct syntax.\""
-    }
-    
-    ,
-    {
-      "@type": "HowToStep",
-      "position":  4 ,
-      "name": "\"Test in cron's environment\"",
-      "text": "\"Run 'env -i PATH=/usr/bin:/bin HOME=$HOME /path/to/script.sh' to simulate cron's minimal environment.\""
-    }
-    
-    ,
-    {
-      "@type": "HowToStep",
-      "position":  5 ,
-      "name": "\"Add logging to your cron job\"",
-      "text": "\"Append '\\u003e\\u003e /tmp/cronjob.log 2\\u003e\\u00261' to your cron command to capture all output for debugging.\""
-    }
-    
-  ]
-}
-</script>
-
-
-</head>
-<body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class="site-nav" id="siteNav">
-    <div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full">
-        
-        <a href="http://localhost:1313/" class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">
-            BenzHub
-        </a>
-
-        
-        <div class="hidden md:flex items-center gap-6">
-            
-            <a href="/en/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                Home
-            </a>
-            
-            <a href="/en/about/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                About
-            </a>
-            
-            <a href="/en/contact/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                Contact
-            </a>
-            
-            <a href="/en/resourses/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                Resources
-            </a>
-            
-
-            
-            <div class="flex items-center gap-2">
-                <form class="flex items-center" role="search" method="get" action="https://google.com/search" id="navSearchForm">
-                    <input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50"
-                        type="search" placeholder="Search articles..." name="q" aria-label="Search" id="navSearchInput">
-                    <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
-                </form>
-                <button onclick="toggleNavSearch()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
-                    <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-                    </svg>
-                </button>
-            </div>
-
-            
-            <span class="text-zinc-200 dark:text-zinc-700">|</span>
-
-            
-            
-
-
-
-
-<div class="lang-switcher relative hidden md:block">
-    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-        <span>🌐</span>
-        <span>English</span>
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-    </button>
-    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
-        
-            
-                
-                
-                <a href="http://localhost:1313/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">繁體中文</a>
-                
-            
-        
-            
-            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ English</span>
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-
-<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
-    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
-    <div class="flex gap-2">
-        
-            
-                
-                
-                <a href="http://localhost:1313/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">繁體中文</a>
-                
-            
-        
-            
-            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">English</span>
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-
-            
-            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-                <i id="icon2" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
-            </button>
-        </div>
-
-        
-        <div class="flex md:hidden items-center gap-1">
-            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-                <i id="icon" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
-            </button>
-            <button id="hamburgerbtn" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Menu">
-                <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
-            </button>
-        </div>
-    </div>
-
-    
-    <div class="mobile-menu md:hidden" id="mobileMenu">
-        
-        <a href="/en/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            Home
-        </a>
-        
-        <a href="/en/about/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            About
-        </a>
-        
-        <a href="/en/contact/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            Contact
-        </a>
-        
-        <a href="/en/resourses/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            Resources
-        </a>
-        
-        <form class="mt-2" role="search" method="get" action="https://google.com/search">
-            <input class="search-input" type="search" placeholder="Search articles..." name="q" aria-label="Search">
-            <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
-        </form>
-        
-        
-
-
-
-
-<div class="lang-switcher relative hidden md:block">
-    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-        <span>🌐</span>
-        <span>English</span>
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-    </button>
-    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
-        
-            
-                
-                
-                <a href="http://localhost:1313/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">繁體中文</a>
-                
-            
-        
-            
-            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ English</span>
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-
-<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
-    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
-    <div class="flex gap-2">
-        
-            
-                
-                
-                <a href="http://localhost:1313/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">繁體中文</a>
-                
-            
-        
-            
-            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">English</span>
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-    </div>
-</nav>
-
-<script>
-    
-    document.getElementById('hamburgerbtn').addEventListener('click', function () {
-        document.getElementById('mobileMenu').classList.toggle('active');
-    });
-
-    
-    window.addEventListener('scroll', function () {
-        var nav = document.getElementById('siteNav');
-        if (window.scrollY > 50) {
-            nav.classList.add('scrolled');
-        } else {
-            nav.classList.remove('scrolled');
-        }
-    });
-
-    
-    function toggleNavSearch() {
-        var input = document.getElementById('navSearchInput');
-        input.classList.toggle('expanded');
-        if (input.classList.contains('expanded')) {
-            input.focus();
-        }
-    }
-
-    
-    function toggleLangMenu() {
-        var dropdown = document.getElementById('langDropdown');
-        dropdown.classList.toggle('hidden');
-    }
-
-    
-    document.addEventListener('click', function (e) {
-        
-        var form = document.getElementById('navSearchForm');
-        var input = document.getElementById('navSearchInput');
-        if (form && input && !form.contains(e.target) && !e.target.closest('[aria-label="Toggle Search"]')) {
-            input.classList.remove('expanded');
-        }
-        
-        var langSwitcher = e.target.closest('.lang-switcher');
-        if (!langSwitcher) {
-            var dropdown = document.getElementById('langDropdown');
-            if (dropdown) dropdown.classList.add('hidden');
-        }
-    });
-</script>
-<div class="nav-spacer"></div>
-    <div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id="content">
-        <div class="lg:mx-5">
-<div class="grid grid-cols-3 gap-6">
-  
-  <div class="col-span-3 lg:col-span-2">
-  
-      
-      <div class="post-detail fade-in my-4">
-        <h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Cron Job Not Running? 10 Fixes for Common Cron Issues</h1>
-        <div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4">
-            <span class="flex items-center gap-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/05/16
-            </span>
-            
-        </div>
-        
-        <div class="flex flex-wrap gap-1.5 mb-5">
-            
-            <a href='/en/tags/linux' class="tag-pill no-underline">linux</a>
-            
-            <a href='/en/tags/cron' class="tag-pill no-underline">cron</a>
-            
-            <a href='/en/tags/debugging' class="tag-pill no-underline">debugging</a>
-            
-            <a href='/en/tags/devops' class="tag-pill no-underline">devops</a>
-            
-        </div>
-        
-        
-        <img class="py-4 m-auto rounded-lg thumb-img" src="http://localhost:1313/img/linux/027-Cron-Job-Not-Running.png" alt="Cron Job Not Running? 10 Fixes for Common Cron Issues">
-        
-        
-        <div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><p><strong>Your cron job is not running because of one (or more) of these issues: the PATH environment is too minimal, your script lacks execute permission, you used relative paths, the shebang line is missing, or the cron daemon itself is not active.</strong> The fastest way to confirm whether cron even attempted your job is to check the system log with <code>grep CRON /var/log/syslog | tail -20</code>. If your job does not appear there, cron never tried to run it — the problem is in crontab configuration. If it does appear but your expected output is missing, the script itself is failing silently.</p>
-<p>This guide walks through the <strong>10 most common reasons cron jobs fail</strong> with concrete fixes for each. If you are new to cron, start with <a href="/en/post/linux/022-cron-job/">What Is a Cron Job?</a> for fundamentals, or review <a href="/en/post/linux/024-crontab-syntax/">Crontab Syntax Explained</a> to verify your schedule expression.</p>
-<hr>
-<h2 id="fix-1-path-not-set-crons-minimal-environment">Fix 1: PATH Not Set (Cron&rsquo;s Minimal Environment)</h2>
-<p><strong>Symptom:</strong> Your script runs perfectly from the terminal but produces &ldquo;command not found&rdquo; errors under cron, or simply does nothing.</p>
-<p><strong>Root Cause:</strong> When you open a terminal, your shell loads <code>~/.bashrc</code>, <code>~/.bash_profile</code>, or <code>~/.zshrc</code>, which typically sets PATH to include <code>/usr/local/bin</code>, <code>/opt/homebrew/bin</code>, custom directories, and more. Cron does none of this. Its default PATH is extremely limited:</p>
-<pre tabindex="0"><code>PATH=/usr/bin:/bin
-</code></pre><p>Any command that lives outside those two directories — <code>node</code>, <code>python3</code>, <code>docker</code>, <code>aws</code>, <code>kubectl</code> — will fail with &ldquo;command not found.&rdquo;</p>
-<p><strong>Fix:</strong> Explicitly set PATH at the top of your crontab:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Edit your crontab</span>
-</span></span><span style="display:flex;"><span>crontab -e
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Add PATH as the first line</span>
-</span></span><span style="display:flex;"><span>PATH<span style="color:#f92672">=</span>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Your jobs below</span>
-</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0</span> <span style="color:#ae81ff">3</span> * * * /home/user/scripts/backup.sh
-</span></span></code></pre></div><p>Alternatively, use absolute paths for every command inside your script:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>/usr/local/bin/node /home/user/app/cleanup.js
-</span></span><span style="display:flex;"><span>/usr/bin/python3 /home/user/scripts/report.py
-</span></span></code></pre></div><p>To discover the full path of any command, use <code>which</code>:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>which python3
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># /usr/local/bin/python3</span>
-</span></span></code></pre></div><hr>
-<h2 id="fix-2-missing-execute-permission">Fix 2: Missing Execute Permission</h2>
-<p><strong>Symptom:</strong> The cron log shows the job was triggered, but nothing happens. Running the script manually with <code>bash script.sh</code> works, but cron silently fails.</p>
-<p><strong>Root Cause:</strong> Cron attempts to execute the script directly (like <code>./script.sh</code>), not by passing it to an interpreter. Without the execute bit set, the operating system refuses to run the file.</p>
-<p><strong>Fix:</strong> Add execute permission to your script:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>chmod +x /home/user/scripts/backup.sh
-</span></span></code></pre></div><p>Verify the permission:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>ls -la /home/user/scripts/backup.sh
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># -rwxr-xr-x 1 user user 1024 May 16 backup.sh</span>
-</span></span></code></pre></div><p>The <code>x</code> in the permission string confirms execute access. Make sure the user running the cron job (check with <code>whoami</code> or <code>crontab -l</code>) has execute permission on the file.</p>
-<hr>
-<h2 id="fix-3-wrong-or-relative-paths-in-script">Fix 3: Wrong or Relative Paths in Script</h2>
-<p><strong>Symptom:</strong> The script works when you <code>cd</code> into its directory and run it, but fails under cron. Files that should be created or read are missing.</p>
-<p><strong>Root Cause:</strong> Cron does not run your job from the script&rsquo;s directory. It typically runs from the user&rsquo;s home directory (or <code>/</code>). Any relative path like <code>./data/output.csv</code> or <code>../config/settings.json</code> resolves to the wrong location.</p>
-<p><strong>Fix:</strong> Use absolute paths for every file reference in your script:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#!/bin/bash
-</span></span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Bad - relative paths</span>
-</span></span><span style="display:flex;"><span>cd data
-</span></span><span style="display:flex;"><span>cat input.txt &gt; output.csv
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Good - absolute paths</span>
-</span></span><span style="display:flex;"><span>DATA_DIR<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;/home/user/project/data&#34;</span>
-</span></span><span style="display:flex;"><span>cat <span style="color:#e6db74">&#34;</span>$DATA_DIR<span style="color:#e6db74">/input.txt&#34;</span> &gt; <span style="color:#e6db74">&#34;</span>$DATA_DIR<span style="color:#e6db74">/output.csv&#34;</span>
-</span></span></code></pre></div><p>If your script must run from a specific directory, add an explicit <code>cd</code> with error handling at the top:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#!/bin/bash
-</span></span></span><span style="display:flex;"><span>cd /home/user/project <span style="color:#f92672">||</span> exit <span style="color:#ae81ff">1</span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Now relative paths work correctly</span>
-</span></span><span style="display:flex;"><span>./process.sh
-</span></span></code></pre></div><hr>
-<h2 id="fix-4-missing-shebang-line">Fix 4: Missing Shebang Line</h2>
-<p><strong>Symptom:</strong> The script executes without errors in your terminal using <code>bash script.sh</code> or <code>python3 script.py</code>, but cron produces garbled output or &ldquo;exec format error&rdquo; in logs.</p>
-<p><strong>Root Cause:</strong> Without a shebang (<code>#!</code>) on the first line, the system does not know which interpreter to use. Some systems default to <code>/bin/sh</code> (which is often <code>dash</code>, not <code>bash</code>), causing bash-specific syntax like arrays, <code>[[</code>, or <code>$(())</code> to fail. Python scripts without a shebang may be interpreted as shell commands entirely.</p>
-<p><strong>Fix:</strong> Always include the correct shebang as the very first line:</p>
-<p>For Bash scripts:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#!/bin/bash
-</span></span></span><span style="display:flex;"><span>set -euo pipefail
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;Backup starting at </span><span style="color:#66d9ef">$(</span>date<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span>
-</span></span></code></pre></div><p>For Python scripts:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e">#!/usr/bin/env python3</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> sys
-</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;Running report generation&#34;</span>)
-</span></span></code></pre></div><p>For Perl scripts:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#75715e">#!/usr/bin/perl</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">use</span> strict;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">use</span> warnings;
-</span></span></code></pre></div><p>After adding the shebang, ensure the file also has execute permission (Fix 2).</p>
-<hr>
-<h2 id="fix-5-environment-variables-not-available">Fix 5: Environment Variables Not Available</h2>
-<p><strong>Symptom:</strong> Your script relies on environment variables like <code>DATABASE_URL</code>, <code>API_KEY</code>, or <code>AWS_PROFILE</code> that are set in your shell profile, but under cron these variables are empty.</p>
-<p><strong>Root Cause:</strong> Cron does not source <code>~/.bashrc</code>, <code>~/.profile</code>, or any shell initialization file. The only environment variables available are: <code>HOME</code>, <code>LOGNAME</code>, <code>PATH</code> (minimal), and <code>SHELL</code>. Everything else is undefined.</p>
-<p><strong>Fix:</strong> Option A — Define variables directly in the crontab:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>crontab -e
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Set variables at the top</span>
-</span></span><span style="display:flex;"><span>DATABASE_URL<span style="color:#f92672">=</span>postgres://localhost:5432/mydb
-</span></span><span style="display:flex;"><span>API_KEY<span style="color:#f92672">=</span>sk-abc123
-</span></span><span style="display:flex;"><span>PATH<span style="color:#f92672">=</span>/usr/local/bin:/usr/bin:/bin
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0</span> * * * * /home/user/scripts/sync.sh
-</span></span></code></pre></div><p>Option B — Source your profile at the start of the cron command:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#ae81ff">0</span> * * * * . /home/user/.env <span style="color:#f92672">&amp;&amp;</span> /home/user/scripts/sync.sh
-</span></span></code></pre></div><p>Option C — Load variables inside the script itself:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#!/bin/bash
-</span></span></span><span style="display:flex;"><span>source /home/user/project/.env
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Variables are now available</span>
-</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;Connecting to </span>$DATABASE_URL<span style="color:#e6db74">&#34;</span>
-</span></span></code></pre></div><hr>
-<h2 id="fix-6-cron-daemon-not-running">Fix 6: Cron Daemon Not Running</h2>
-<p><strong>Symptom:</strong> No cron jobs run at all — not just yours, but system-wide cron jobs are also failing. Nothing appears in <code>/var/log/syslog</code> for CRON.</p>
-<p><strong>Root Cause:</strong> The cron daemon (<code>crond</code> or <code>cron</code>) is not running. This can happen after a system update, in Docker containers (where cron is not started by default), or if someone manually stopped the service.</p>
-<p><strong>Fix:</strong> Check and start the cron service:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Debian/Ubuntu</span>
-</span></span><span style="display:flex;"><span>sudo systemctl status cron
-</span></span><span style="display:flex;"><span>sudo systemctl start cron
-</span></span><span style="display:flex;"><span>sudo systemctl enable cron  <span style="color:#75715e"># Start on boot</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># CentOS/RHEL/Fedora</span>
-</span></span><span style="display:flex;"><span>sudo systemctl status crond
-</span></span><span style="display:flex;"><span>sudo systemctl start crond
-</span></span><span style="display:flex;"><span>sudo systemctl enable crond
-</span></span></code></pre></div><p>For Docker containers, cron is typically not running by default. Add it to your entrypoint:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-dockerfile" data-lang="dockerfile"><span style="display:flex;"><span><span style="color:#75715e"># In Dockerfile or entrypoint script</span><span style="color:#960050;background-color:#1e0010">
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">RUN</span> apt-get update <span style="color:#f92672">&amp;&amp;</span> apt-get install -y cron<span style="color:#960050;background-color:#1e0010">
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CMD</span> cron <span style="color:#f92672">&amp;&amp;</span> tail -f /var/log/cron.log<span style="color:#960050;background-color:#1e0010">
-</span></span></span></code></pre></div><p>Verify cron is running:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>ps aux | grep cron
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># root  1234  0.0  0.0  /usr/sbin/cron -f</span>
-</span></span></code></pre></div><hr>
-<h2 id="fix-7-syntax-error-in-crontab-expression">Fix 7: Syntax Error in Crontab Expression</h2>
-<p><strong>Symptom:</strong> Your specific job never fires, but other cron jobs work fine. No errors appear in the log for your entry.</p>
-<p><strong>Root Cause:</strong> The crontab time expression contains a syntax mistake. Common errors include: using 6 fields instead of 5, confusing day-of-week numbering (0 or 7 = Sunday), using unsupported named shortcuts, or placing a comment on the same line as a job.</p>
-<p><strong>Fix:</strong> Validate your crontab syntax. The five fields are:</p>
-<pre tabindex="0"><code>┌───────────── minute (0-59)
+<!doctype html><html lang=en><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>Cron Job Not Running? 10 Fixes for Common Cron Issues | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="Cron Job Not Running? 10 Fixes for Common Cron Issues | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="Cron job not running? Debug with these 10 fixes: PATH issues, permission errors, missing shebang, environment variables, log checking, and more. Systematic troubleshooting guide for broken cron jobs."><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="Cron job not running? Debug with these 10 fixes: PATH issues, permission errors, missing shebang, environment variables, log checking, and more. Systematic troubleshooting guide for broken cron jobs."><meta property="og:url" content="https://benzhub.github.io/en/post/linux/027-cron-job-not-running/"><meta property="og:type" content="article"><meta property="og:locale" content="en_US"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/en/post/linux/027-cron-job-not-running/><meta name=twitter:description content="Cron job not running? Debug with these 10 fixes: PATH issues, permission errors, missing shebang, environment variables, log checking, and more. Systematic troubleshooting guide for broken cron jobs."><meta property="article:published_time" content="2026-05-16T00:00:00+00:00"><meta property="article:updated_time" content="2026-05-16T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/linux/027-Cron-Job-Not-Running.png"><meta property="og:image:url" content="https://benzhub.github.io/img/linux/027-Cron-Job-Not-Running.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=en href=https://benzhub.github.io/en/post/linux/027-cron-job-not-running/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/en/post/linux/027-cron-job-not-running/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"Cron Job Not Running? 10 Fixes for Common Cron Issues\"","description":"\"Cron job not running? Debug with these 10 fixes: PATH issues, permission errors, missing shebang, environment variables, log checking, and more. Systematic troubleshooting guide for broken cron jobs.\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/en\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-05-16T00:00:00\u002b00:00","dateModified":"2026-05-16T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/linux\/027-Cron-Job-Not-Running.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/en\/post\/linux\/027-cron-job-not-running\/"},"inLanguage":"en"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Posts\"","item":"https:\/\/benzhub.github.io\/en\/post\/"},{"@type":"ListItem","position":3,"name":"\"Cron Job Not Running? 10 Fixes for Common Cron Issues\""}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"\"Why is my cron job not running?\"","acceptedAnswer":{"@type":"Answer","text":"\"The most common causes are: wrong PATH (cron uses minimal /usr/bin:/bin), missing execute permission on the script, relative paths in commands, or the cron daemon not running. Check with grep CRON /var/log/syslog.\""}},{"@type":"Question","name":"\"How do I check if cron is running?\"","acceptedAnswer":{"@type":"Answer","text":"\"Run 'systemctl status cron' (Debian/Ubuntu) or 'systemctl status crond' (CentOS/RHEL). If inactive, start with 'sudo systemctl start cron'. Also check if your user has cron access with 'cat /etc/cron.deny'.\""}},{"@type":"Question","name":"\"Why does my cron script work manually but fail in cron?\"","acceptedAnswer":{"@type":"Answer","text":"\"Cron runs in a minimal environment without your shell profile (.bashrc/.zshrc). It has a short PATH and no custom environment variables. Fix by setting PATH at the top of crontab or using absolute paths in your script.\""}}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"HowTo","name":"\"How to Debug a Cron Job That's Not Running\"","description":"\"Cron job not running? Debug with these 10 fixes: PATH issues, permission errors, missing shebang, environment variables, log checking, and more. Systematic troubleshooting guide for broken cron jobs.\"","totalTime":"PT5M","step":[{"@type":"HowToStep","position":1,"name":"\"Check cron daemon status\"","text":"\"Run 'systemctl status cron' to verify the cron service is active and running.\""},{"@type":"HowToStep","position":2,"name":"\"Check system logs for cron activity\"","text":"\"Run 'grep CRON /var/log/syslog | tail -20' to see if cron attempted to run your job.\""},{"@type":"HowToStep","position":3,"name":"\"Verify your crontab is saved\"","text":"\"Run 'crontab -l' and confirm your job appears in the list with correct syntax.\""},{"@type":"HowToStep","position":4,"name":"\"Test in cron's environment\"","text":"\"Run 'env -i PATH=/usr/bin:/bin HOME=$HOME /path/to/script.sh' to simulate cron's minimal environment.\""},{"@type":"HowToStep","position":5,"name":"\"Add logging to your cron job\"","text":"\"Append '\\u003e\\u003e /tmp/cronjob.log 2\\u003e\\u00261' to your cron command to capture all output for debugging.\""}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/en/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">Home
+</a><a href=/en/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">About
+</a><a href=/en/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">Contact
+</a><a href=/en/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">Resources</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder="Search articles..." name=q aria-label=Search id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>English</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><a href=/zh-tw/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">繁體中文</a>
+<span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ English</span>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><a href=/zh-tw/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">繁體中文</a>
+<span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">English</span>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/en/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">Home
+</a><a href=/en/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">About
+</a><a href=/en/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">Contact
+</a><a href=/en/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">Resources</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder="Search articles..." name=q aria-label=Search>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>English</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><a href=/zh-tw/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">繁體中文</a>
+<span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ English</span>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><a href=/zh-tw/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">繁體中文</a>
+<span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">English</span>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Cron Job Not Running? 10 Fixes for Common Cron Issues</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/05/16</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/en/tags/linux class="tag-pill no-underline">linux</a>
+<a href=/en/tags/cron class="tag-pill no-underline">cron</a>
+<a href=/en/tags/debugging class="tag-pill no-underline">debugging</a>
+<a href=/en/tags/devops class="tag-pill no-underline">devops</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/linux/027-Cron-Job-Not-Running.png alt="Cron Job Not Running? 10 Fixes for Common Cron Issues"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><p><strong>Your cron job is not running because of one (or more) of these issues: the PATH environment is too minimal, your script lacks execute permission, you used relative paths, the shebang line is missing, or the cron daemon itself is not active.</strong> The fastest way to confirm whether cron even attempted your job is to check the system log with <code>grep CRON /var/log/syslog | tail -20</code>. If your job does not appear there, cron never tried to run it — the problem is in crontab configuration. If it does appear but your expected output is missing, the script itself is failing silently.</p><p>This guide walks through the <strong>10 most common reasons cron jobs fail</strong> with concrete fixes for each. If you are new to cron, start with <a href=/en/post/linux/022-cron-job/>What Is a Cron Job?</a> for fundamentals, or review <a href=/en/post/linux/024-crontab-syntax/>Crontab Syntax Explained</a> to verify your schedule expression.</p><hr><h2 id=fix-1-path-not-set-crons-minimal-environment>Fix 1: PATH Not Set (Cron&rsquo;s Minimal Environment)</h2><p><strong>Symptom:</strong> Your script runs perfectly from the terminal but produces &ldquo;command not found&rdquo; errors under cron, or simply does nothing.</p><p><strong>Root Cause:</strong> When you open a terminal, your shell loads <code>~/.bashrc</code>, <code>~/.bash_profile</code>, or <code>~/.zshrc</code>, which typically sets PATH to include <code>/usr/local/bin</code>, <code>/opt/homebrew/bin</code>, custom directories, and more. Cron does none of this. Its default PATH is extremely limited:</p><pre tabindex=0><code>PATH=/usr/bin:/bin
+</code></pre><p>Any command that lives outside those two directories — <code>node</code>, <code>python3</code>, <code>docker</code>, <code>aws</code>, <code>kubectl</code> — will fail with &ldquo;command not found.&rdquo;</p><p><strong>Fix:</strong> Explicitly set PATH at the top of your crontab:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># Edit your crontab</span>
+</span></span><span style=display:flex><span>crontab -e
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Add PATH as the first line</span>
+</span></span><span style=display:flex><span>PATH<span style=color:#f92672>=</span>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Your jobs below</span>
+</span></span><span style=display:flex><span><span style=color:#ae81ff>0</span> <span style=color:#ae81ff>3</span> * * * /home/user/scripts/backup.sh
+</span></span></code></pre></div><p>Alternatively, use absolute paths for every command inside your script:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>/usr/local/bin/node /home/user/app/cleanup.js
+</span></span><span style=display:flex><span>/usr/bin/python3 /home/user/scripts/report.py
+</span></span></code></pre></div><p>To discover the full path of any command, use <code>which</code>:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>which python3
+</span></span><span style=display:flex><span><span style=color:#75715e># /usr/local/bin/python3</span>
+</span></span></code></pre></div><hr><h2 id=fix-2-missing-execute-permission>Fix 2: Missing Execute Permission</h2><p><strong>Symptom:</strong> The cron log shows the job was triggered, but nothing happens. Running the script manually with <code>bash script.sh</code> works, but cron silently fails.</p><p><strong>Root Cause:</strong> Cron attempts to execute the script directly (like <code>./script.sh</code>), not by passing it to an interpreter. Without the execute bit set, the operating system refuses to run the file.</p><p><strong>Fix:</strong> Add execute permission to your script:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>chmod +x /home/user/scripts/backup.sh
+</span></span></code></pre></div><p>Verify the permission:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>ls -la /home/user/scripts/backup.sh
+</span></span><span style=display:flex><span><span style=color:#75715e># -rwxr-xr-x 1 user user 1024 May 16 backup.sh</span>
+</span></span></code></pre></div><p>The <code>x</code> in the permission string confirms execute access. Make sure the user running the cron job (check with <code>whoami</code> or <code>crontab -l</code>) has execute permission on the file.</p><hr><h2 id=fix-3-wrong-or-relative-paths-in-script>Fix 3: Wrong or Relative Paths in Script</h2><p><strong>Symptom:</strong> The script works when you <code>cd</code> into its directory and run it, but fails under cron. Files that should be created or read are missing.</p><p><strong>Root Cause:</strong> Cron does not run your job from the script&rsquo;s directory. It typically runs from the user&rsquo;s home directory (or <code>/</code>). Any relative path like <code>./data/output.csv</code> or <code>../config/settings.json</code> resolves to the wrong location.</p><p><strong>Fix:</strong> Use absolute paths for every file reference in your script:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e>#!/bin/bash
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Bad - relative paths</span>
+</span></span><span style=display:flex><span>cd data
+</span></span><span style=display:flex><span>cat input.txt &gt; output.csv
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Good - absolute paths</span>
+</span></span><span style=display:flex><span>DATA_DIR<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;/home/user/project/data&#34;</span>
+</span></span><span style=display:flex><span>cat <span style=color:#e6db74>&#34;</span>$DATA_DIR<span style=color:#e6db74>/input.txt&#34;</span> &gt; <span style=color:#e6db74>&#34;</span>$DATA_DIR<span style=color:#e6db74>/output.csv&#34;</span>
+</span></span></code></pre></div><p>If your script must run from a specific directory, add an explicit <code>cd</code> with error handling at the top:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e>#!/bin/bash
+</span></span></span><span style=display:flex><span>cd /home/user/project <span style=color:#f92672>||</span> exit <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Now relative paths work correctly</span>
+</span></span><span style=display:flex><span>./process.sh
+</span></span></code></pre></div><hr><h2 id=fix-4-missing-shebang-line>Fix 4: Missing Shebang Line</h2><p><strong>Symptom:</strong> The script executes without errors in your terminal using <code>bash script.sh</code> or <code>python3 script.py</code>, but cron produces garbled output or &ldquo;exec format error&rdquo; in logs.</p><p><strong>Root Cause:</strong> Without a shebang (<code>#!</code>) on the first line, the system does not know which interpreter to use. Some systems default to <code>/bin/sh</code> (which is often <code>dash</code>, not <code>bash</code>), causing bash-specific syntax like arrays, <code>[[</code>, or <code>$(())</code> to fail. Python scripts without a shebang may be interpreted as shell commands entirely.</p><p><strong>Fix:</strong> Always include the correct shebang as the very first line:</p><p>For Bash scripts:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e>#!/bin/bash
+</span></span></span><span style=display:flex><span>set -euo pipefail
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>echo <span style=color:#e6db74>&#34;Backup starting at </span><span style=color:#66d9ef>$(</span>date<span style=color:#66d9ef>)</span><span style=color:#e6db74>&#34;</span>
+</span></span></code></pre></div><p>For Python scripts:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e>#!/usr/bin/env python3</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> sys
+</span></span><span style=display:flex><span>print(<span style=color:#e6db74>&#34;Running report generation&#34;</span>)
+</span></span></code></pre></div><p>For Perl scripts:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-perl data-lang=perl><span style=display:flex><span><span style=color:#75715e>#!/usr/bin/perl</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>use</span> strict;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>use</span> warnings;
+</span></span></code></pre></div><p>After adding the shebang, ensure the file also has execute permission (Fix 2).</p><hr><h2 id=fix-5-environment-variables-not-available>Fix 5: Environment Variables Not Available</h2><p><strong>Symptom:</strong> Your script relies on environment variables like <code>DATABASE_URL</code>, <code>API_KEY</code>, or <code>AWS_PROFILE</code> that are set in your shell profile, but under cron these variables are empty.</p><p><strong>Root Cause:</strong> Cron does not source <code>~/.bashrc</code>, <code>~/.profile</code>, or any shell initialization file. The only environment variables available are: <code>HOME</code>, <code>LOGNAME</code>, <code>PATH</code> (minimal), and <code>SHELL</code>. Everything else is undefined.</p><p><strong>Fix:</strong> Option A — Define variables directly in the crontab:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>crontab -e
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Set variables at the top</span>
+</span></span><span style=display:flex><span>DATABASE_URL<span style=color:#f92672>=</span>postgres://localhost:5432/mydb
+</span></span><span style=display:flex><span>API_KEY<span style=color:#f92672>=</span>sk-abc123
+</span></span><span style=display:flex><span>PATH<span style=color:#f92672>=</span>/usr/local/bin:/usr/bin:/bin
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#ae81ff>0</span> * * * * /home/user/scripts/sync.sh
+</span></span></code></pre></div><p>Option B — Source your profile at the start of the cron command:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#ae81ff>0</span> * * * * . /home/user/.env <span style=color:#f92672>&amp;&amp;</span> /home/user/scripts/sync.sh
+</span></span></code></pre></div><p>Option C — Load variables inside the script itself:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e>#!/bin/bash
+</span></span></span><span style=display:flex><span>source /home/user/project/.env
+</span></span><span style=display:flex><span><span style=color:#75715e># Variables are now available</span>
+</span></span><span style=display:flex><span>echo <span style=color:#e6db74>&#34;Connecting to </span>$DATABASE_URL<span style=color:#e6db74>&#34;</span>
+</span></span></code></pre></div><hr><h2 id=fix-6-cron-daemon-not-running>Fix 6: Cron Daemon Not Running</h2><p><strong>Symptom:</strong> No cron jobs run at all — not just yours, but system-wide cron jobs are also failing. Nothing appears in <code>/var/log/syslog</code> for CRON.</p><p><strong>Root Cause:</strong> The cron daemon (<code>crond</code> or <code>cron</code>) is not running. This can happen after a system update, in Docker containers (where cron is not started by default), or if someone manually stopped the service.</p><p><strong>Fix:</strong> Check and start the cron service:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># Debian/Ubuntu</span>
+</span></span><span style=display:flex><span>sudo systemctl status cron
+</span></span><span style=display:flex><span>sudo systemctl start cron
+</span></span><span style=display:flex><span>sudo systemctl enable cron  <span style=color:#75715e># Start on boot</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># CentOS/RHEL/Fedora</span>
+</span></span><span style=display:flex><span>sudo systemctl status crond
+</span></span><span style=display:flex><span>sudo systemctl start crond
+</span></span><span style=display:flex><span>sudo systemctl enable crond
+</span></span></code></pre></div><p>For Docker containers, cron is typically not running by default. Add it to your entrypoint:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-dockerfile data-lang=dockerfile><span style=display:flex><span><span style=color:#75715e># In Dockerfile or entrypoint script</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>RUN</span> apt-get update <span style=color:#f92672>&amp;&amp;</span> apt-get install -y cron<span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CMD</span> cron <span style=color:#f92672>&amp;&amp;</span> tail -f /var/log/cron.log<span style=color:#960050;background-color:#1e0010>
+</span></span></span></code></pre></div><p>Verify cron is running:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>ps aux | grep cron
+</span></span><span style=display:flex><span><span style=color:#75715e># root  1234  0.0  0.0  /usr/sbin/cron -f</span>
+</span></span></code></pre></div><hr><h2 id=fix-7-syntax-error-in-crontab-expression>Fix 7: Syntax Error in Crontab Expression</h2><p><strong>Symptom:</strong> Your specific job never fires, but other cron jobs work fine. No errors appear in the log for your entry.</p><p><strong>Root Cause:</strong> The crontab time expression contains a syntax mistake. Common errors include: using 6 fields instead of 5, confusing day-of-week numbering (0 or 7 = Sunday), using unsupported named shortcuts, or placing a comment on the same line as a job.</p><p><strong>Fix:</strong> Validate your crontab syntax. The five fields are:</p><pre tabindex=0><code>┌───────────── minute (0-59)
 │ ┌───────────── hour (0-23)
 │ │ ┌───────────── day of month (1-31)
 │ │ │ ┌───────────── month (1-12)
 │ │ │ │ ┌───────────── day of week (0-7, Sun=0 or 7)
 │ │ │ │ │
 * * * * * /path/to/command
-</code></pre><p>Common mistakes and corrections:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># WRONG: 6 fields (seconds are not supported in standard cron)</span>
-</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0</span> <span style="color:#ae81ff">0</span> <span style="color:#ae81ff">3</span> * * * /path/to/script.sh
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># CORRECT: 5 fields</span>
-</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0</span> <span style="color:#ae81ff">3</span> * * * /path/to/script.sh
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># WRONG: inline comment breaks the command</span>
-</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0</span> <span style="color:#ae81ff">3</span> * * * /path/to/script.sh <span style="color:#75715e"># daily backup</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># CORRECT: comment on its own line</span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Daily backup</span>
-</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0</span> <span style="color:#ae81ff">3</span> * * * /path/to/script.sh
-</span></span></code></pre></div><p>Use <code>crontab -e</code> to edit — it validates syntax before saving. For detailed syntax reference, see <a href="/en/post/linux/024-crontab-syntax/">Crontab Syntax Explained</a>.</p>
-<hr>
-<h2 id="fix-8-output-not-redirected-mailbox-full--mail-not-configured">Fix 8: Output Not Redirected (Mailbox Full / Mail Not Configured)</h2>
-<p><strong>Symptom:</strong> The job ran successfully in the past but suddenly stopped. Or the job runs but you see &ldquo;mail delivery failed&rdquo; messages in system logs.</p>
-<p><strong>Root Cause:</strong> By default, cron emails all output (stdout and stderr) from your command to the user. If the mail system is not configured (common on modern servers), or the mailbox is full, cron may throttle or skip subsequent runs. Additionally, without output redirection, you lose all debugging information.</p>
-<p><strong>Fix:</strong> Always redirect output explicitly:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Redirect both stdout and stderr to a log file</span>
-</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0</span> <span style="color:#ae81ff">3</span> * * * /home/user/scripts/backup.sh &gt;&gt; /var/log/backup.log 2&gt;&amp;<span style="color:#ae81ff">1</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Discard output entirely (if you don&#39;t need it)</span>
-</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0</span> <span style="color:#ae81ff">3</span> * * * /home/user/scripts/backup.sh &gt; /dev/null 2&gt;&amp;<span style="color:#ae81ff">1</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Send only errors to a log file</span>
-</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0</span> <span style="color:#ae81ff">3</span> * * * /home/user/scripts/backup.sh &gt; /dev/null 2&gt;&gt; /var/log/backup-errors.log
-</span></span></code></pre></div><p>To disable cron mail entirely, add <code>MAILTO=&quot;&quot;</code> at the top of your crontab:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>crontab -e
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>MAILTO<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;&#34;</span>
-</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0</span> <span style="color:#ae81ff">3</span> * * * /home/user/scripts/backup.sh &gt;&gt; /tmp/backup.log 2&gt;&amp;<span style="color:#ae81ff">1</span>
-</span></span></code></pre></div><hr>
-<h2 id="fix-9-user-not-allowed-to-use-cron-cronallow--crondeny">Fix 9: User Not Allowed to Use Cron (cron.allow / cron.deny)</h2>
-<p><strong>Symptom:</strong> Running <code>crontab -e</code> returns &ldquo;You (username) are not allowed to use this program&rdquo; or your jobs simply never execute despite correct configuration.</p>
-<p><strong>Root Cause:</strong> Linux uses two files to control cron access: <code>/etc/cron.allow</code> and <code>/etc/cron.deny</code>. If <code>cron.allow</code> exists, only users listed in that file can use cron (whitelist mode). If <code>cron.allow</code> does not exist, users in <code>cron.deny</code> are blocked. If neither file exists, access rules depend on the distribution (some allow all users, some deny all non-root users).</p>
-<p><strong>Fix:</strong> Check and modify access files:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Check if your user is denied</span>
-</span></span><span style="display:flex;"><span>cat /etc/cron.deny
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># If your username is listed, remove it</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Check if an allow list exists (whitelist mode)</span>
-</span></span><span style="display:flex;"><span>cat /etc/cron.allow
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># If this file exists, your user MUST be in it</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Add your user to the allow list</span>
-</span></span><span style="display:flex;"><span>sudo sh -c <span style="color:#e6db74">&#39;echo &#34;yourusername&#34; &gt;&gt; /etc/cron.allow&#39;</span>
-</span></span></code></pre></div><p>After modifying these files, verify access:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>crontab -l
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Should show your crontab without permission errors</span>
-</span></span></code></pre></div><p>Note: On some systems, the cron service must be restarted after changing these files:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo systemctl restart cron
-</span></span></code></pre></div><hr>
-<h2 id="fix-10-script-has-windows-line-endings-rn">Fix 10: Script Has Windows Line Endings (\r\n)</h2>
-<p><strong>Symptom:</strong> The script works perfectly on your local machine (or when run manually) but under cron you get errors like &ldquo;/bin/bash^M: bad interpreter&rdquo;, &ldquo;command not found&rdquo; with extra whitespace, or mysterious failures at seemingly valid lines.</p>
-<p><strong>Root Cause:</strong> If you edited the script on Windows or transferred it via certain methods, it may contain Windows-style line endings (<code>\r\n</code> — carriage return + line feed) instead of Unix line endings (<code>\n</code> — line feed only). The <code>\r</code> character is invisible in most editors but causes the shell to misinterpret commands, paths, and even the shebang line.</p>
-<p><strong>Fix:</strong> Convert the file to Unix line endings:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Using dos2unix (install if needed: apt install dos2unix)</span>
-</span></span><span style="display:flex;"><span>dos2unix /home/user/scripts/backup.sh
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Using sed</span>
-</span></span><span style="display:flex;"><span>sed -i <span style="color:#e6db74">&#39;s/\r$//&#39;</span> /home/user/scripts/backup.sh
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Using tr</span>
-</span></span><span style="display:flex;"><span>tr -d <span style="color:#e6db74">&#39;\r&#39;</span> &lt; /home/user/scripts/backup.sh &gt; /tmp/fixed.sh
-</span></span><span style="display:flex;"><span>mv /tmp/fixed.sh /home/user/scripts/backup.sh
-</span></span><span style="display:flex;"><span>chmod +x /home/user/scripts/backup.sh
-</span></span></code></pre></div><p>To detect if a file has Windows line endings:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Shows ^M at end of lines if Windows format</span>
-</span></span><span style="display:flex;"><span>cat -A /home/user/scripts/backup.sh | head -5
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Or use file command</span>
-</span></span><span style="display:flex;"><span>file /home/user/scripts/backup.sh
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># &#34;ASCII text, with CRLF line terminators&#34; means Windows format</span>
-</span></span></code></pre></div><p>Prevent future issues by configuring your editor and Git:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Git: auto-convert to LF on commit</span>
-</span></span><span style="display:flex;"><span>git config --global core.autocrlf input
-</span></span></code></pre></div><hr>
-<h2 id="quick-diagnosis-checklist">Quick Diagnosis Checklist</h2>
-<p>When your cron job fails, run through this checklist systematically:</p>
-<table>
-	<thead>
-			<tr>
-					<th>Check</th>
-					<th>Command</th>
-					<th>What to look for</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td>Cron daemon running?</td>
-					<td><code>systemctl status cron</code></td>
-					<td>Active (running)</td>
-			</tr>
-			<tr>
-					<td>Job in crontab?</td>
-					<td><code>crontab -l</code></td>
-					<td>Your entry listed</td>
-			</tr>
-			<tr>
-					<td>Cron attempted it?</td>
-					<td><code>grep CRON /var/log/syslog | tail -20</code></td>
-					<td>Your command in log</td>
-			</tr>
-			<tr>
-					<td>Syntax valid?</td>
-					<td><code>crontab -e</code> (validates on save)</td>
-					<td>No errors on save</td>
-			</tr>
-			<tr>
-					<td>Script executable?</td>
-					<td><code>ls -la /path/to/script.sh</code></td>
-					<td><code>x</code> in permissions</td>
-			</tr>
-			<tr>
-					<td>Shebang present?</td>
-					<td><code>head -1 /path/to/script.sh</code></td>
-					<td>Starts with <code>#!</code></td>
-			</tr>
-			<tr>
-					<td>Unix line endings?</td>
-					<td><code>file /path/to/script.sh</code></td>
-					<td>No &ldquo;CRLF&rdquo; mention</td>
-			</tr>
-			<tr>
-					<td>PATH sufficient?</td>
-					<td><code>env -i PATH=/usr/bin:/bin which yourcommand</code></td>
-					<td>Path resolved</td>
-			</tr>
-			<tr>
-					<td>User allowed?</td>
-					<td><code>crontab -l</code> (no permission error)</td>
-					<td>Shows entries</td>
-			</tr>
-			<tr>
-					<td>Env vars set?</td>
-					<td>Check script or crontab header</td>
-					<td>Variables defined</td>
-			</tr>
-	</tbody>
-</table>
-<p><strong>The single best debugging technique</strong> is to simulate cron&rsquo;s environment locally:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>env -i PATH<span style="color:#f92672">=</span>/usr/bin:/bin HOME<span style="color:#f92672">=</span>$HOME SHELL<span style="color:#f92672">=</span>/bin/bash /bin/bash /path/to/your/script.sh
-</span></span></code></pre></div><p>This strips all environment variables and runs your script in the same minimal context cron uses. If it fails here, it will fail in cron — and you will see the exact error message.</p>
-<p>For a comprehensive overview of scheduling concepts, revisit <a href="/en/post/linux/022-cron-job/">What Is a Cron Job?</a>. To validate your time expressions, see <a href="/en/post/linux/024-crontab-syntax/">Crontab Syntax Explained</a>.</p></div>
-        
-        
-
-        
-        <div class="mt-8">
-          
-<div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose">
-  <div>
-    <div class="flex items-center gap-2 mb-1">
-      <a href="/en/about" class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">
-        BenZ
-      </a>
-      
-      <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span>
-      
-    </div>
-    <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">
-      Software developer passionate about technology. Sharing programming experiences and learning notes.
-    </p>
-    <div class="flex items-center gap-3">
-      
-      <a href="https://github.com/benzhub" target="_blank" rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label="GitHub">
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-      </a>
-      
-      
-      
-    </div>
-  </div>
-</div>
-
-        </div>
-      </div>
-
-      
-      <div class="post-detail fade-in my-4">
-        
-
-
-<div>
-  <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">Related Posts</h3>
-  <div class="grid gap-2">
-    
-    <a href="http://localhost:1313/en/post/linux/025-cron-every-5-minutes/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
-      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">How to Run a Cron Job Every 5 Minutes (and Other Intervals)</span>
-      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/05/15</span>
-    </a>
-    
-    <a href="http://localhost:1313/en/post/linux/026-systemd-timer-vs-cron/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
-      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Systemd Timer vs Cron: Which Linux Scheduler Should You Use?</span>
-      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/05/15</span>
-    </a>
-    
-    <a href="http://localhost:1313/en/post/linux/024-crontab-syntax/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
-      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Crontab Syntax Explained: The Complete Time Format Guide</span>
-      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/05/14</span>
-    </a>
-    
-  </div>
-</div>
-
-
-      </div>
-
-      
-      <div class="post-detail fade-in my-4">
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            
-            <a href="http://localhost:1313/en/post/linux/025-cron-every-5-minutes/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
-                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; Previous</span>
-                <span class="text-sm font-medium">How to Run a Cron Job Every 5 Minutes (and Other Intervals)</span>
-            </a>
-            
-          </div>
-          <div>
-            
-          </div>
-        </div>
-      </div>
-
-      
-      <div class="post-detail fade-in my-4">
-        
-<script src="https://giscus.app/client.js"
-        data-repo="benzhub/benzhub.github.io"
-        data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM="
-        data-category="Announcements"
-        data-category-id="MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1"
-        data-mapping="pathname"
-        data-strict="0"
-        data-reactions-enabled="1"
-        data-emit-metadata="0"
-        data-input-position="top"
-        data-theme="preferred_color_scheme"
-        data-lang="en"
-        crossorigin="anonymous"
-        async>
-</script>
-
-
-      </div>
-    </div>
-    
-    <div class="hidden lg:block lg:col-span-1 mt-4">
-    
-    
-            
-            <div class="widget fade-in">
-    <p class="widget-title">Search</p>
-    <form role="search" method="get" action="https://google.com/search">
-        <input class="search-input" type="search" placeholder="Search articles..." name="q" aria-label="Search">
-        <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
-    </form>
-</div>
-
-        
-            
-            
-
-        
-            
-            
-<div class="widget fade-in">
-    <p class="widget-title">Tags</p>
-    <div class="flex flex-wrap gap-1.5">
-        <a href='/en/tags/ai'>
-            <span class="tag-pill">ai</span>
-        </a>
-        <a href='/en/tags/ai-insights'>
-            <span class="tag-pill">ai-insights</span>
-        </a>
-        <a href='/en/tags/api'>
-            <span class="tag-pill">api</span>
-        </a>
-        <a href='/en/tags/automation'>
-            <span class="tag-pill">automation</span>
-        </a>
-        <a href='/en/tags/claude-code'>
-            <span class="tag-pill">claude code</span>
-        </a>
-        <a href='/en/tags/cron'>
-            <span class="tag-pill">cron</span>
-        </a>
-        <a href='/en/tags/cursor'>
-            <span class="tag-pill">cursor</span>
-        </a>
-        <a href='/en/tags/database'>
-            <span class="tag-pill">database</span>
-        </a>
-        <a href='/en/tags/debugging'>
-            <span class="tag-pill">debugging</span>
-        </a>
-        <a href='/en/tags/design-pattern'>
-            <span class="tag-pill">design-pattern</span>
-        </a>
-        <a href='/en/tags/devops'>
-            <span class="tag-pill">devops</span>
-        </a>
-        <a href='/en/tags/django'>
-            <span class="tag-pill">django</span>
-        </a>
-        <a href='/en/tags/flutter'>
-            <span class="tag-pill">flutter</span>
-        </a>
-        <a href='/en/tags/fnm'>
-            <span class="tag-pill">fnm</span>
-        </a>
-        <a href='/en/tags/git'>
-            <span class="tag-pill">git</span>
-        </a>
-        <a href='/en/tags/github-copilot'>
-            <span class="tag-pill">github copilot</span>
-        </a>
-        <a href='/en/tags/harness-engineering'>
-            <span class="tag-pill">harness engineering</span>
-        </a>
-        <a href='/en/tags/html'>
-            <span class="tag-pill">html</span>
-        </a>
-        <a href='/en/tags/javascript'>
-            <span class="tag-pill">javascript</span>
-        </a>
-        <a href='/en/tags/linux'>
-            <span class="tag-pill">linux</span>
-        </a>
-    </div>
-</div>
-
-
-        
-            
-            
-<div class="widget fade-in">
-    <p class="widget-title">Article Series</p>
-    <div class="flex flex-wrap gap-1.5">
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-    </div>
-</div>
-
-
-        
-            
-            
-
-<div class="widget fade-in">
-    <p class="widget-title">Recent Posts</p>
-    <div class="flex flex-col gap-1">
-        <a href="/en/post/linux/027-cron-job-not-running/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Cron Job Not Running? 10 Fixes for Common Cron Issues</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/05/16
-            </p>
-        </a>
-        <a href="/en/post/linux/025-cron-every-5-minutes/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">How to Run a Cron Job Every 5 Minutes (and Other Intervals)</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/05/15
-            </p>
-        </a>
-        <a href="/en/post/linux/026-systemd-timer-vs-cron/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Systemd Timer vs Cron: Which Linux Scheduler Should You Use?</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/05/15
-            </p>
-        </a>
-        <a href="/en/post/linux/024-crontab-syntax/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Crontab Syntax Explained: The Complete Time Format Guide</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/05/14
-            </p>
-        </a>
-        <a href="/en/post/linux/023-crontab-examples/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">30&#43; Crontab Examples for Every Use Case | Linux Cron Scheduling</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/05/13
-            </p>
-        </a>
-    </div>
-</div>
-
-        
-    
-</div>
-
-    
-</div>
-
-        </div>
-    </div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]">
-    
-    <p>&copy; 2026 <a href="http://localhost:1313/" class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p>
-</footer>
-
-
-<script>
-    (function (window, document) {
-        function main() {
-            var ad = document.createElement('script');
-            ad.async = true;
-            ad.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606';
-            ad.crossOrigin = "anonymous";
-            var sc = document.getElementsByTagName('script')[0];
-            sc.parentNode.insertBefore(ad, sc);
-        }
-        var lazyLoad = false;
-        function onLazyLoad() {
-            if (lazyLoad === false) {
-                lazyLoad = true;
-                window.removeEventListener('scroll', onLazyLoad);
-                window.removeEventListener('mousemove', onLazyLoad);
-                window.removeEventListener('mousedown', onLazyLoad);
-                window.removeEventListener('touchstart', onLazyLoad);
-                window.removeEventListener('keydown', onLazyLoad);
-                main();
-            }
-        }
-        window.addEventListener('scroll', onLazyLoad);
-        window.addEventListener('mousemove', onLazyLoad);
-        window.addEventListener('mousedown', onLazyLoad);
-        window.addEventListener('touchstart', onLazyLoad);
-        window.addEventListener('keydown', onLazyLoad);
-        window.addEventListener('load', function () {
-            if (window.pageYOffset) {
-                onLazyLoad();
-                window.setTimeout(onLazyLoad, 3000);
-            }
-        });
-    })(window, document);
-</script>
-
-
-<script>
-    
-    var icon = document.getElementById("icon");
-    var icon2 = document.getElementById("icon2");
-    if (document.documentElement.classList.contains("dark") || localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
-        if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
-        document.documentElement.classList.add('dark');
-    } else {
-        document.documentElement.classList.remove('dark');
-    }
-    function toggleDarkMode() {
-        if (document.documentElement.classList.contains('dark')) {
-            if (icon) { icon.classList.remove("icon-sun"); icon.classList.add("icon-moon"); }
-            if (icon2) { icon2.classList.remove("icon-sun"); icon2.classList.add("icon-moon"); }
-            document.documentElement.classList.remove('dark');
-            localStorage.theme = 'light';
-        } else {
-            if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
-            if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
-            document.documentElement.classList.add('dark');
-            localStorage.theme = 'dark';
-        }
-    }
-
-    
-    document.addEventListener('DOMContentLoaded', function () {
-        var observer = new IntersectionObserver(function (entries) {
-            entries.forEach(function (entry) {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0 });
-
-        document.querySelectorAll('.fade-in').forEach(function (el) {
-            observer.observe(el);
-        });
-    });
-</script>
-</body>
-
-</html>
+</code></pre><p>Common mistakes and corrections:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># WRONG: 6 fields (seconds are not supported in standard cron)</span>
+</span></span><span style=display:flex><span><span style=color:#ae81ff>0</span> <span style=color:#ae81ff>0</span> <span style=color:#ae81ff>3</span> * * * /path/to/script.sh
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># CORRECT: 5 fields</span>
+</span></span><span style=display:flex><span><span style=color:#ae81ff>0</span> <span style=color:#ae81ff>3</span> * * * /path/to/script.sh
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># WRONG: inline comment breaks the command</span>
+</span></span><span style=display:flex><span><span style=color:#ae81ff>0</span> <span style=color:#ae81ff>3</span> * * * /path/to/script.sh <span style=color:#75715e># daily backup</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># CORRECT: comment on its own line</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Daily backup</span>
+</span></span><span style=display:flex><span><span style=color:#ae81ff>0</span> <span style=color:#ae81ff>3</span> * * * /path/to/script.sh
+</span></span></code></pre></div><p>Use <code>crontab -e</code> to edit — it validates syntax before saving. For detailed syntax reference, see <a href=/en/post/linux/024-crontab-syntax/>Crontab Syntax Explained</a>.</p><hr><h2 id=fix-8-output-not-redirected-mailbox-full--mail-not-configured>Fix 8: Output Not Redirected (Mailbox Full / Mail Not Configured)</h2><p><strong>Symptom:</strong> The job ran successfully in the past but suddenly stopped. Or the job runs but you see &ldquo;mail delivery failed&rdquo; messages in system logs.</p><p><strong>Root Cause:</strong> By default, cron emails all output (stdout and stderr) from your command to the user. If the mail system is not configured (common on modern servers), or the mailbox is full, cron may throttle or skip subsequent runs. Additionally, without output redirection, you lose all debugging information.</p><p><strong>Fix:</strong> Always redirect output explicitly:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># Redirect both stdout and stderr to a log file</span>
+</span></span><span style=display:flex><span><span style=color:#ae81ff>0</span> <span style=color:#ae81ff>3</span> * * * /home/user/scripts/backup.sh &gt;&gt; /var/log/backup.log 2&gt;&amp;<span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Discard output entirely (if you don&#39;t need it)</span>
+</span></span><span style=display:flex><span><span style=color:#ae81ff>0</span> <span style=color:#ae81ff>3</span> * * * /home/user/scripts/backup.sh &gt; /dev/null 2&gt;&amp;<span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Send only errors to a log file</span>
+</span></span><span style=display:flex><span><span style=color:#ae81ff>0</span> <span style=color:#ae81ff>3</span> * * * /home/user/scripts/backup.sh &gt; /dev/null 2&gt;&gt; /var/log/backup-errors.log
+</span></span></code></pre></div><p>To disable cron mail entirely, add <code>MAILTO=""</code> at the top of your crontab:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>crontab -e
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>MAILTO<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#ae81ff>0</span> <span style=color:#ae81ff>3</span> * * * /home/user/scripts/backup.sh &gt;&gt; /tmp/backup.log 2&gt;&amp;<span style=color:#ae81ff>1</span>
+</span></span></code></pre></div><hr><h2 id=fix-9-user-not-allowed-to-use-cron-cronallow--crondeny>Fix 9: User Not Allowed to Use Cron (cron.allow / cron.deny)</h2><p><strong>Symptom:</strong> Running <code>crontab -e</code> returns &ldquo;You (username) are not allowed to use this program&rdquo; or your jobs simply never execute despite correct configuration.</p><p><strong>Root Cause:</strong> Linux uses two files to control cron access: <code>/etc/cron.allow</code> and <code>/etc/cron.deny</code>. If <code>cron.allow</code> exists, only users listed in that file can use cron (whitelist mode). If <code>cron.allow</code> does not exist, users in <code>cron.deny</code> are blocked. If neither file exists, access rules depend on the distribution (some allow all users, some deny all non-root users).</p><p><strong>Fix:</strong> Check and modify access files:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># Check if your user is denied</span>
+</span></span><span style=display:flex><span>cat /etc/cron.deny
+</span></span><span style=display:flex><span><span style=color:#75715e># If your username is listed, remove it</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Check if an allow list exists (whitelist mode)</span>
+</span></span><span style=display:flex><span>cat /etc/cron.allow
+</span></span><span style=display:flex><span><span style=color:#75715e># If this file exists, your user MUST be in it</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Add your user to the allow list</span>
+</span></span><span style=display:flex><span>sudo sh -c <span style=color:#e6db74>&#39;echo &#34;yourusername&#34; &gt;&gt; /etc/cron.allow&#39;</span>
+</span></span></code></pre></div><p>After modifying these files, verify access:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>crontab -l
+</span></span><span style=display:flex><span><span style=color:#75715e># Should show your crontab without permission errors</span>
+</span></span></code></pre></div><p>Note: On some systems, the cron service must be restarted after changing these files:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>sudo systemctl restart cron
+</span></span></code></pre></div><hr><h2 id=fix-10-script-has-windows-line-endings-rn>Fix 10: Script Has Windows Line Endings (\r\n)</h2><p><strong>Symptom:</strong> The script works perfectly on your local machine (or when run manually) but under cron you get errors like &ldquo;/bin/bash^M: bad interpreter&rdquo;, &ldquo;command not found&rdquo; with extra whitespace, or mysterious failures at seemingly valid lines.</p><p><strong>Root Cause:</strong> If you edited the script on Windows or transferred it via certain methods, it may contain Windows-style line endings (<code>\r\n</code> — carriage return + line feed) instead of Unix line endings (<code>\n</code> — line feed only). The <code>\r</code> character is invisible in most editors but causes the shell to misinterpret commands, paths, and even the shebang line.</p><p><strong>Fix:</strong> Convert the file to Unix line endings:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># Using dos2unix (install if needed: apt install dos2unix)</span>
+</span></span><span style=display:flex><span>dos2unix /home/user/scripts/backup.sh
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Using sed</span>
+</span></span><span style=display:flex><span>sed -i <span style=color:#e6db74>&#39;s/\r$//&#39;</span> /home/user/scripts/backup.sh
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Using tr</span>
+</span></span><span style=display:flex><span>tr -d <span style=color:#e6db74>&#39;\r&#39;</span> &lt; /home/user/scripts/backup.sh &gt; /tmp/fixed.sh
+</span></span><span style=display:flex><span>mv /tmp/fixed.sh /home/user/scripts/backup.sh
+</span></span><span style=display:flex><span>chmod +x /home/user/scripts/backup.sh
+</span></span></code></pre></div><p>To detect if a file has Windows line endings:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># Shows ^M at end of lines if Windows format</span>
+</span></span><span style=display:flex><span>cat -A /home/user/scripts/backup.sh | head -5
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Or use file command</span>
+</span></span><span style=display:flex><span>file /home/user/scripts/backup.sh
+</span></span><span style=display:flex><span><span style=color:#75715e># &#34;ASCII text, with CRLF line terminators&#34; means Windows format</span>
+</span></span></code></pre></div><p>Prevent future issues by configuring your editor and Git:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># Git: auto-convert to LF on commit</span>
+</span></span><span style=display:flex><span>git config --global core.autocrlf input
+</span></span></code></pre></div><hr><h2 id=quick-diagnosis-checklist>Quick Diagnosis Checklist</h2><p>When your cron job fails, run through this checklist systematically:</p><table><thead><tr><th>Check</th><th>Command</th><th>What to look for</th></tr></thead><tbody><tr><td>Cron daemon running?</td><td><code>systemctl status cron</code></td><td>Active (running)</td></tr><tr><td>Job in crontab?</td><td><code>crontab -l</code></td><td>Your entry listed</td></tr><tr><td>Cron attempted it?</td><td><code>grep CRON /var/log/syslog | tail -20</code></td><td>Your command in log</td></tr><tr><td>Syntax valid?</td><td><code>crontab -e</code> (validates on save)</td><td>No errors on save</td></tr><tr><td>Script executable?</td><td><code>ls -la /path/to/script.sh</code></td><td><code>x</code> in permissions</td></tr><tr><td>Shebang present?</td><td><code>head -1 /path/to/script.sh</code></td><td>Starts with <code>#!</code></td></tr><tr><td>Unix line endings?</td><td><code>file /path/to/script.sh</code></td><td>No &ldquo;CRLF&rdquo; mention</td></tr><tr><td>PATH sufficient?</td><td><code>env -i PATH=/usr/bin:/bin which yourcommand</code></td><td>Path resolved</td></tr><tr><td>User allowed?</td><td><code>crontab -l</code> (no permission error)</td><td>Shows entries</td></tr><tr><td>Env vars set?</td><td>Check script or crontab header</td><td>Variables defined</td></tr></tbody></table><p><strong>The single best debugging technique</strong> is to simulate cron&rsquo;s environment locally:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>env -i PATH<span style=color:#f92672>=</span>/usr/bin:/bin HOME<span style=color:#f92672>=</span>$HOME SHELL<span style=color:#f92672>=</span>/bin/bash /bin/bash /path/to/your/script.sh
+</span></span></code></pre></div><p>This strips all environment variables and runs your script in the same minimal context cron uses. If it fails here, it will fail in cron — and you will see the exact error message.</p><p>For a comprehensive overview of scheduling concepts, revisit <a href=/en/post/linux/022-cron-job/>What Is a Cron Job?</a>. To validate your time expressions, see <a href=/en/post/linux/024-crontab-syntax/>Crontab Syntax Explained</a>.</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/en/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
+</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">Software developer passionate about technology. Sharing programming experiences and learning notes.</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">Related Posts</h3><div class="grid gap-2"><a href=https://benzhub.github.io/en/post/linux/025-cron-every-5-minutes/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">How to Run a Cron Job Every 5 Minutes (and Other Intervals)</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/05/15</span>
+</a><a href=https://benzhub.github.io/en/post/linux/026-systemd-timer-vs-cron/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Systemd Timer vs Cron: Which Linux Scheduler Should You Use?</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/05/15</span>
+</a><a href=https://benzhub.github.io/en/post/linux/024-crontab-syntax/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Crontab Syntax Explained: The Complete Time Format Guide</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/05/14</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/en/post/linux/025-cron-every-5-minutes/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; Previous</span>
+<span class="text-sm font-medium">How to Run a Cron Job Every 5 Minutes (and Other Intervals)</span></a></div><div></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=en crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>Search</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder="Search articles..." name=q aria-label=Search>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>Tags</p><div class="flex flex-wrap gap-1.5"><a href=/en/tags/ai><span class=tag-pill>ai</span>
+</a><a href=/en/tags/ai-insights><span class=tag-pill>ai-insights</span>
+</a><a href=/en/tags/api><span class=tag-pill>api</span>
+</a><a href=/en/tags/automation><span class=tag-pill>automation</span>
+</a><a href=/en/tags/claude-code><span class=tag-pill>claude code</span>
+</a><a href=/en/tags/cron><span class=tag-pill>cron</span>
+</a><a href=/en/tags/cursor><span class=tag-pill>cursor</span>
+</a><a href=/en/tags/database><span class=tag-pill>database</span>
+</a><a href=/en/tags/debugging><span class=tag-pill>debugging</span>
+</a><a href=/en/tags/design-pattern><span class=tag-pill>design-pattern</span>
+</a><a href=/en/tags/devops><span class=tag-pill>devops</span>
+</a><a href=/en/tags/django><span class=tag-pill>django</span>
+</a><a href=/en/tags/flutter><span class=tag-pill>flutter</span>
+</a><a href=/en/tags/fnm><span class=tag-pill>fnm</span>
+</a><a href=/en/tags/git><span class=tag-pill>git</span>
+</a><a href=/en/tags/github-copilot><span class=tag-pill>github copilot</span>
+</a><a href=/en/tags/harness-engineering><span class=tag-pill>harness engineering</span>
+</a><a href=/en/tags/html><span class=tag-pill>html</span>
+</a><a href=/en/tags/javascript><span class=tag-pill>javascript</span>
+</a><a href=/en/tags/linux><span class=tag-pill>linux</span></a></div></div><div class="widget fade-in"><p class=widget-title>Article Series</p><div class="flex flex-wrap gap-1.5"></div></div><div class="widget fade-in"><p class=widget-title>Recent Posts</p><div class="flex flex-col gap-1"><a href=/en/post/linux/027-cron-job-not-running/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Cron Job Not Running? 10 Fixes for Common Cron Issues</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/05/16</p></a><a href=/en/post/linux/025-cron-every-5-minutes/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">How to Run a Cron Job Every 5 Minutes (and Other Intervals)</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/05/15</p></a><a href=/en/post/linux/026-systemd-timer-vs-cron/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Systemd Timer vs Cron: Which Linux Scheduler Should You Use?</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/05/15</p></a><a href=/en/post/linux/024-crontab-syntax/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Crontab Syntax Explained: The Complete Time Format Guide</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/05/14</p></a><a href=/en/post/linux/023-crontab-examples/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">30+ Crontab Examples for Every Use Case | Linux Cron Scheduling</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/05/13</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>

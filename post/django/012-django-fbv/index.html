@@ -1,513 +1,37 @@
-<!DOCTYPE html>
-
-<html lang="zh-TW">
-<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><title>Django Views：Function-Based Views 函數視圖入門 | Django 教學 | BenzHub</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="apple-touch-icon" sizes="180x180" href='/favicon/apple-touch-icon.png'>
-    <link rel="icon" type="image/png" sizes="32x32" href='/favicon/favicon-32x32.png'>
-    <link rel="icon" type="image/png" sizes="16x16" href='/favicon/favicon-16x16.png'>
-    <link rel="manifest" href='/favicon/site.webmanifest' />
-    <link rel="mask-icon" href=' /favicon/safari-pinned-tab.svg' color="#5bbad5" />
-    <link rel="shortcut icon" href='/favicon/favicon.ico' />
-    <meta name="theme-color" content="#fafafa">
-    <meta property="og:title" content="Django Views：Function-Based Views 函數視圖入門 | Django 教學 | BenzHub" />
-    
-    
-    <link rel="stylesheet" href="/css/style.css" />
-    
-    <link href=' /css/blonde.min.css' rel="stylesheet" type="text/css" media="print"
-        onload="this.media=' all'">
-    
-
-
-
-
-
-
-
-  
-
-
-
-
-  
-
-<meta name="description" content="Django Views 教學：深入解析 Function-Based Views（FBV）函數視圖，從 HttpRequest 與 HttpResponse 物件、render 與 redirect 快捷函數、JsonResponse 到完整 CRUD 範例，帶你掌握 Django FBV 開發核心技巧。">
-<meta property="og:site_name" content="BenzHub">
-<meta property="og:description" content="Django Views 教學：深入解析 Function-Based Views（FBV）函數視圖，從 HttpRequest 與 HttpResponse 物件、render 與 redirect 快捷函數、JsonResponse 到完整 CRUD 範例，帶你掌握 Django FBV 開發核心技巧。">
-<meta property="og:url" content="http://localhost:1313/post/django/012-django-fbv/">
-<meta property="og:type" content="article">
-<meta property="og:locale" content="zh_TW">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="">
-
-<link rel="canonical" href="http://localhost:1313/post/django/012-django-fbv/">
-
-<meta name="twitter:description" content="Django Views 教學：深入解析 Function-Based Views（FBV）函數視圖，從 HttpRequest 與 HttpResponse 物件、render 與 redirect 快捷函數、JsonResponse 到完整 CRUD 範例，帶你掌握 Django FBV 開發核心技巧。">
-<meta property="article:published_time" content="2026-06-01T00:00:00&#43;00:00">
-<meta property="article:updated_time" content="2026-05-27T00:00:00&#43;00:00">
-
-
-
-
-
-    
-<meta property="og:image" content="http://localhost:1313/img/django/012-Django-FBV.png">
-<meta property="og:image:url" content="http://localhost:1313/img/django/012-Django-FBV.png">
-    
-
-    
-    <link rel="stylesheet" href='/css/custom.css'>
-    <i class="dark hidden"></i>
-    
-<link rel="alternate" hreflang="zh-TW" href="http://localhost:1313/post/django/012-django-fbv/" />
-
-<link rel="alternate" hreflang="x-default" href="http://localhost:1313/post/django/012-django-fbv/" />
-
-    
-
-
-
-
-
-
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BlogPosting",
-  "headline": "\"Django Views：Function-Based Views 函數視圖入門 | Django 教學\"",
-  "description": "\"Django Views 教學：深入解析 Function-Based Views（FBV）函數視圖，從 HttpRequest 與 HttpResponse 物件、render 與 redirect 快捷函數、JsonResponse 到完整 CRUD 範例，帶你掌握 Django FBV 開發核心技巧。\"",
-  "author": {
-    "@type": "Person",
-    "name": "\"BenzHub\"",
-    "url": "http:\/\/localhost:1313\/about",
-    "jobTitle": "\"Software Developer\"",
-    "sameAs": [
-      "\"https://github.com/benzhub\""
-    ]
-  },
-  "datePublished": "2026-06-01T00:00:00\u002b00:00",
-  "dateModified": "2026-05-27T00:00:00\u002b00:00",
-  "image": "http:\/\/localhost:1313\/img\/django\/012-Django-FBV.png",
-  "publisher": {
-    "@type": "Organization",
-    "name": "\"BenzHub\"",
-    "url": "\"http://localhost:1313/\"",
-    "sameAs": [
-      "\"https://github.com/benzhub\""
-    ]
-  },
-  "mainEntityOfPage": {
-    "@type": "WebPage",
-    "@id": "http:\/\/localhost:1313\/post\/django\/012-django-fbv\/"
-  },
-  "inLanguage": "zh-TW"
-}
-</script>
-
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    {
-      "@type": "ListItem",
-      "position": 1,
-      "name": "\"BenzHub\"",
-      "item": "http:\/\/localhost:1313\/"
-    }
-    
-    
-      
-      
-    ,{
-      "@type": "ListItem",
-      "position": 2,
-      "name": "\"Blog\"",
-      "item": "http:\/\/localhost:1313\/post\/django\/"
-    }
-      
-      
-    
-    ,{
-      "@type": "ListItem",
-      "position":  3 ,
-      "name": "\"Django Views：Function-Based Views 函數視圖入門 | Django 教學\""
-    }
-  ]
-}
-</script>
-
-
-
-
-
-
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    
-    
-    {
-      "@type": "Question",
-      "name": "\"Django 的 FBV 和 CBV 有什麼差別？該怎麼選擇？\"",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "\"FBV（Function-Based Views）使用函式處理請求，程式碼直觀、線性流程好理解，適合邏輯簡單或高度客製化的場景。CBV（Class-Based Views）使用類別處理請求，透過繼承和 Mixin 實現程式碼複用，適合標準 CRUD 操作。初學者建議從 FBV 入門，熟悉 Django 運作原理後再學習 CBV。\""
-      }
-    }
-    
-    ,
-    {
-      "@type": "Question",
-      "name": "\"Django 的 render() 和 HttpResponse() 有什麼差別？\"",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "\"HttpResponse() 直接回傳字串內容作為 HTTP 回應，適合回傳簡單文字或需要完全控制回應內容的場景。render() 是快捷函數，會載入指定的模板檔案、將 context 變數注入模板進行渲染後回傳 HttpResponse，適合需要回傳 HTML 頁面的場景。實務上大多數 View 都使用 render() 搭配模板。\""
-      }
-    }
-    
-    ,
-    {
-      "@type": "Question",
-      "name": "\"為什麼 Django POST 請求需要 CSRF Token？\"",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "\"CSRF（Cross-Site Request Forgery，跨站請求偽造）是一種常見的 Web 攻擊手法，攻擊者誘導使用者在已登入的狀態下發送惡意請求。Django 內建 CSRF 防護機制，要求每個 POST 請求必須攜帶有效的 CSRF Token，伺服器會驗證該 Token 確保請求來自合法的表單頁面，而非第三方惡意網站。\""
-      }
-    }
-    
-  ]
-}
-</script>
-
-
-
-
-
-</head>
-<body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class="site-nav" id="siteNav">
-    <div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full">
-        
-        <a href="http://localhost:1313/" class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">
-            BenzHub
-        </a>
-
-        
-        <div class="hidden md:flex items-center gap-6">
-            
-            <a href="/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                首頁
-            </a>
-            
-            <a href="/about/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                關於
-            </a>
-            
-            <a href="/contact/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                聯絡
-            </a>
-            
-            <a href="/resourses/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                資源
-            </a>
-            
-
-            
-            <div class="flex items-center gap-2">
-                <form class="flex items-center" role="search" method="get" action="https://google.com/search" id="navSearchForm">
-                    <input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50"
-                        type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋" id="navSearchInput">
-                    <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
-                </form>
-                <button onclick="toggleNavSearch()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
-                    <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-                    </svg>
-                </button>
-            </div>
-
-            
-            <span class="text-zinc-200 dark:text-zinc-700">|</span>
-
-            
-            
-
-
-
-
-<div class="lang-switcher relative hidden md:block">
-    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-        <span>🌐</span>
-        <span>繁體中文</span>
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-    </button>
-    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
-        
-            
-            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-                
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-
-<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
-    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
-    <div class="flex gap-2">
-        
-            
-            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-                
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-
-            
-            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-                <i id="icon2" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
-            </button>
-        </div>
-
-        
-        <div class="flex md:hidden items-center gap-1">
-            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-                <i id="icon" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
-            </button>
-            <button id="hamburgerbtn" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Menu">
-                <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
-            </button>
-        </div>
-    </div>
-
-    
-    <div class="mobile-menu md:hidden" id="mobileMenu">
-        
-        <a href="/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            首頁
-        </a>
-        
-        <a href="/about/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            關於
-        </a>
-        
-        <a href="/contact/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            聯絡
-        </a>
-        
-        <a href="/resourses/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            資源
-        </a>
-        
-        <form class="mt-2" role="search" method="get" action="https://google.com/search">
-            <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
-            <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
-        </form>
-        
-        
-
-
-
-
-<div class="lang-switcher relative hidden md:block">
-    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-        <span>🌐</span>
-        <span>繁體中文</span>
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-    </button>
-    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
-        
-            
-            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-                
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-
-<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
-    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
-    <div class="flex gap-2">
-        
-            
-            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-                
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-    </div>
-</nav>
-
-<script>
-    
-    document.getElementById('hamburgerbtn').addEventListener('click', function () {
-        document.getElementById('mobileMenu').classList.toggle('active');
-    });
-
-    
-    window.addEventListener('scroll', function () {
-        var nav = document.getElementById('siteNav');
-        if (window.scrollY > 50) {
-            nav.classList.add('scrolled');
-        } else {
-            nav.classList.remove('scrolled');
-        }
-    });
-
-    
-    function toggleNavSearch() {
-        var input = document.getElementById('navSearchInput');
-        input.classList.toggle('expanded');
-        if (input.classList.contains('expanded')) {
-            input.focus();
-        }
-    }
-
-    
-    function toggleLangMenu() {
-        var dropdown = document.getElementById('langDropdown');
-        dropdown.classList.toggle('hidden');
-    }
-
-    
-    document.addEventListener('click', function (e) {
-        
-        var form = document.getElementById('navSearchForm');
-        var input = document.getElementById('navSearchInput');
-        if (form && input && !form.contains(e.target) && !e.target.closest('[aria-label="Toggle Search"]')) {
-            input.classList.remove('expanded');
-        }
-        
-        var langSwitcher = e.target.closest('.lang-switcher');
-        if (!langSwitcher) {
-            var dropdown = document.getElementById('langDropdown');
-            if (dropdown) dropdown.classList.add('hidden');
-        }
-    });
-</script>
-<div class="nav-spacer"></div>
-    <div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id="content">
-        <div class="lg:mx-5">
-<div class="grid grid-cols-3 gap-6">
-  
-  <div class="col-span-3 lg:col-span-2">
-  
-      
-      <div class="post-detail fade-in my-4">
-        <h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Django Views：Function-Based Views 函數視圖入門 | Django 教學</h1>
-        <div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4">
-            <span class="flex items-center gap-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/01
-            </span>
-            
-            <span class="flex items-center gap-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                2026/05/27
-            </span>
-            
-        </div>
-        
-        <div class="flex flex-wrap gap-1.5 mb-5">
-            
-            <a href='/tags/python' class="tag-pill no-underline">python</a>
-            
-            <a href='/tags/django' class="tag-pill no-underline">django</a>
-            
-        </div>
-        
-        
-        <img class="py-4 m-auto rounded-lg thumb-img" src="http://localhost:1313/img/django/012-Django-FBV.png" alt="Django Views：Function-Based Views 函數視圖入門 | Django 教學">
-        
-        
-        <div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote>
-<p>在 Django 的 <strong>MTV</strong>（Model-Template-View）架構中， <strong>View</strong> 扮演著承上啟下的核心角色——它接收使用者的 <strong>HTTP 請求</strong>（Request），執行商業邏輯，最後回傳 <strong>HTTP 回應</strong>（Response）。本篇教學將聚焦於 <strong>Function-Based Views</strong>（FBV，函數視圖），這是 Django 中最直觀、最容易上手的 View 撰寫方式。我們將從 <strong>HttpRequest</strong> 與 <strong>HttpResponse</strong> 物件開始，逐步學會 <code>render()</code>、<code>redirect()</code>、 <strong>JsonResponse</strong> 等常用工具，最後完成一個完整的 <strong>CRUD</strong> 範例。</p>
-</blockquote>
-<h3 id="view-在-mtv-架構中的角色">View 在 MTV 架構中的角色</h3>
-<p>在前幾篇教學中，我們認識了 Django 的 MTV 架構：<strong>Model</strong> 負責資料層、<strong>Template</strong> 負責呈現層、<strong>View</strong> 負責邏輯層。View 就像是整個應用的「交通指揮中心」，它的工作流程如下：</p>
-<ol>
-<li>接收來自使用者的 <strong>HttpRequest</strong> 物件（包含請求方法、參數、表單資料等）</li>
-<li>執行對應的商業邏輯（查詢資料庫、處理表單、計算結果等）</li>
-<li>回傳一個 <strong>HttpResponse</strong> 物件（HTML 頁面、JSON 資料、重導向等）</li>
-</ol>
-<pre tabindex="0"><code>┌──────────┐     HttpRequest      ┌──────────┐     查詢/寫入     ┌──────────┐
+<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>Django Views：Function-Based Views 函數視圖入門 | Django 教學 | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="Django Views：Function-Based Views 函數視圖入門 | Django 教學 | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="Django Views 教學：深入解析 Function-Based Views（FBV）函數視圖，從 HttpRequest 與 HttpResponse 物件、render 與 redirect 快捷函數、JsonResponse 到完整 CRUD 範例，帶你掌握 Django FBV 開發核心技巧。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="Django Views 教學：深入解析 Function-Based Views（FBV）函數視圖，從 HttpRequest 與 HttpResponse 物件、render 與 redirect 快捷函數、JsonResponse 到完整 CRUD 範例，帶你掌握 Django FBV 開發核心技巧。"><meta property="og:url" content="https://benzhub.github.io/post/django/012-django-fbv/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/django/012-django-fbv/><meta name=twitter:description content="Django Views 教學：深入解析 Function-Based Views（FBV）函數視圖，從 HttpRequest 與 HttpResponse 物件、render 與 redirect 快捷函數、JsonResponse 到完整 CRUD 範例，帶你掌握 Django FBV 開發核心技巧。"><meta property="article:published_time" content="2026-06-01T00:00:00+00:00"><meta property="article:updated_time" content="2026-05-27T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/django/012-Django-FBV.png"><meta property="og:image:url" content="https://benzhub.github.io/img/django/012-Django-FBV.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/django/012-django-fbv/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/django/012-django-fbv/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"Django Views：Function-Based Views 函數視圖入門 | Django 教學\"","description":"\"Django Views 教學：深入解析 Function-Based Views（FBV）函數視圖，從 HttpRequest 與 HttpResponse 物件、render 與 redirect 快捷函數、JsonResponse 到完整 CRUD 範例，帶你掌握 Django FBV 開發核心技巧。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-06-01T00:00:00\u002b00:00","dateModified":"2026-05-27T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/django\/012-Django-FBV.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/django\/012-django-fbv\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/django\/"},{"@type":"ListItem","position":3,"name":"\"Django Views：Function-Based Views 函數視圖入門 | Django 教學\""}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"\"Django 的 FBV 和 CBV 有什麼差別？該怎麼選擇？\"","acceptedAnswer":{"@type":"Answer","text":"\"FBV（Function-Based Views）使用函式處理請求，程式碼直觀、線性流程好理解，適合邏輯簡單或高度客製化的場景。CBV（Class-Based Views）使用類別處理請求，透過繼承和 Mixin 實現程式碼複用，適合標準 CRUD 操作。初學者建議從 FBV 入門，熟悉 Django 運作原理後再學習 CBV。\""}},{"@type":"Question","name":"\"Django 的 render() 和 HttpResponse() 有什麼差別？\"","acceptedAnswer":{"@type":"Answer","text":"\"HttpResponse() 直接回傳字串內容作為 HTTP 回應，適合回傳簡單文字或需要完全控制回應內容的場景。render() 是快捷函數，會載入指定的模板檔案、將 context 變數注入模板進行渲染後回傳 HttpResponse，適合需要回傳 HTML 頁面的場景。實務上大多數 View 都使用 render() 搭配模板。\""}},{"@type":"Question","name":"\"為什麼 Django POST 請求需要 CSRF Token？\"","acceptedAnswer":{"@type":"Answer","text":"\"CSRF（Cross-Site Request Forgery，跨站請求偽造）是一種常見的 Web 攻擊手法，攻擊者誘導使用者在已登入的狀態下發送惡意請求。Django 內建 CSRF 防護機制，要求每個 POST 請求必須攜帶有效的 CSRF Token，伺服器會驗證該 Token 確保請求來自合法的表單頁面，而非第三方惡意網站。\""}}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Django Views：Function-Based Views 函數視圖入門 | Django 教學</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/01
+</span><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001.0 004.582 9m0 0H9m11 11v-5h-.581m0 0A8.003 8.003.0 014.062 13m15.357 2H15"/></svg>
+2026/05/27</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/python class="tag-pill no-underline">python</a>
+<a href=/tags/django class="tag-pill no-underline">django</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/django/012-Django-FBV.png alt="Django Views：Function-Based Views 函數視圖入門 | Django 教學"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p>在 Django 的 <strong>MTV</strong>（Model-Template-View）架構中， <strong>View</strong> 扮演著承上啟下的核心角色——它接收使用者的 <strong>HTTP 請求</strong>（Request），執行商業邏輯，最後回傳 <strong>HTTP 回應</strong>（Response）。本篇教學將聚焦於 <strong>Function-Based Views</strong>（FBV，函數視圖），這是 Django 中最直觀、最容易上手的 View 撰寫方式。我們將從 <strong>HttpRequest</strong> 與 <strong>HttpResponse</strong> 物件開始，逐步學會 <code>render()</code>、<code>redirect()</code>、 <strong>JsonResponse</strong> 等常用工具，最後完成一個完整的 <strong>CRUD</strong> 範例。</p></blockquote><h3 id=view-在-mtv-架構中的角色>View 在 MTV 架構中的角色</h3><p>在前幾篇教學中，我們認識了 Django 的 MTV 架構：<strong>Model</strong> 負責資料層、<strong>Template</strong> 負責呈現層、<strong>View</strong> 負責邏輯層。View 就像是整個應用的「交通指揮中心」，它的工作流程如下：</p><ol><li>接收來自使用者的 <strong>HttpRequest</strong> 物件（包含請求方法、參數、表單資料等）</li><li>執行對應的商業邏輯（查詢資料庫、處理表單、計算結果等）</li><li>回傳一個 <strong>HttpResponse</strong> 物件（HTML 頁面、JSON 資料、重導向等）</li></ol><pre tabindex=0><code>┌──────────┐     HttpRequest      ┌──────────┐     查詢/寫入     ┌──────────┐
 │          │ ──────────────────→  │          │ ──────────────→  │          │
 │  使用者   │                      │   View   │                  │  Model   │
 │          │ ←──────────────────  │          │ ←──────────────  │          │
@@ -518,907 +42,385 @@
                                  ┌──────────┐
                                  │ Template │
                                  └──────────┘
-</code></pre><p>Django 的 View 最小定義非常簡潔——只要是一個接收 <code>request</code> 參數並回傳 <code>HttpResponse</code>（或其子類別）的 Python 函式，就是一個合法的 FBV。</p>
-<hr>
-<h3 id="httprequest-物件">HttpRequest 物件</h3>
-<p>當使用者發送請求到 Django 應用時，Django 會自動將原始的 HTTP 請求封裝成一個 <strong>HttpRequest</strong> 物件，並作為第一個參數傳入 View 函式。這個物件包含了請求的所有資訊。</p>
-<h4 id="常用屬性一覽">常用屬性一覽</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">example_view</span>(request):
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># HTTP 請求方法：&#39;GET&#39;、&#39;POST&#39;、&#39;PUT&#39;、&#39;DELETE&#39; 等</span>
-</span></span><span style="display:flex;"><span>    print(request<span style="color:#f92672">.</span>method)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># GET 參數（QueryDict 物件），例如 ?page=2&amp;sort=name</span>
-</span></span><span style="display:flex;"><span>    print(request<span style="color:#f92672">.</span>GET)
-</span></span><span style="display:flex;"><span>    print(request<span style="color:#f92672">.</span>GET<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#39;page&#39;</span>, <span style="color:#e6db74">&#39;1&#39;</span>))  <span style="color:#75715e"># 取得 page 參數，預設值為 &#39;1&#39;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># POST 表單資料（QueryDict 物件）</span>
-</span></span><span style="display:flex;"><span>    print(request<span style="color:#f92672">.</span>POST)
-</span></span><span style="display:flex;"><span>    print(request<span style="color:#f92672">.</span>POST<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#39;username&#39;</span>, <span style="color:#e6db74">&#39;&#39;</span>))
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 請求的原始內容（bytes），常用於處理 JSON 請求</span>
-</span></span><span style="display:flex;"><span>    print(request<span style="color:#f92672">.</span>body)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 當前登入的使用者（需啟用 AuthenticationMiddleware）</span>
-</span></span><span style="display:flex;"><span>    print(request<span style="color:#f92672">.</span>user)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Session 物件（dict-like），用於儲存跨請求的資料</span>
-</span></span><span style="display:flex;"><span>    print(request<span style="color:#f92672">.</span>session)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 請求路徑</span>
-</span></span><span style="display:flex;"><span>    print(request<span style="color:#f92672">.</span>path)           <span style="color:#75715e"># 例如 &#39;/articles/1/&#39;</span>
-</span></span><span style="display:flex;"><span>    print(request<span style="color:#f92672">.</span>get_full_path())  <span style="color:#75715e"># 例如 &#39;/articles/1/?page=2&#39;</span>
-</span></span></code></pre></div><p><code>request.GET</code> 和 <code>request.POST</code> 都是 <strong>QueryDict</strong> 物件，它是 Python 字典（dict）的子類別，支援同一個 key 對應多個值（例如多選的 checkbox）。使用 <code>.get()</code> 方法取值時可以指定預設值，避免 key 不存在時拋出例外（Exception）。</p>
-<hr>
-<h3 id="httpresponse-物件">HttpResponse 物件</h3>
-<p>View 函式必須回傳一個 <strong>HttpResponse</strong> 物件（或其子類別）。HttpResponse 代表伺服器要回傳給瀏覽器的回應內容。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> django.http <span style="color:#f92672">import</span> HttpResponse
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">hello_view</span>(request):
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 最基本的回應：回傳純文字</span>
-</span></span><span style="display:flex;"><span>    response <span style="color:#f92672">=</span> HttpResponse(<span style="color:#e6db74">&#34;Hello, Django!&#34;</span>)
-</span></span><span style="display:flex;"><span>    print(response<span style="color:#f92672">.</span>status_code)  <span style="color:#75715e"># 200（預設狀態碼）</span>
-</span></span><span style="display:flex;"><span>    print(response<span style="color:#f92672">.</span>content)      <span style="color:#75715e"># b&#39;Hello, Django!&#39;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> response
-</span></span></code></pre></div><p>你也可以自訂狀態碼（Status Code）和回應標頭（Headers）：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> django.http <span style="color:#f92672">import</span> HttpResponse
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">custom_response</span>(request):
-</span></span><span style="display:flex;"><span>    response <span style="color:#f92672">=</span> HttpResponse(<span style="color:#e6db74">&#34;找不到頁面&#34;</span>, status<span style="color:#f92672">=</span><span style="color:#ae81ff">404</span>)
-</span></span><span style="display:flex;"><span>    response[<span style="color:#e6db74">&#39;X-Custom-Header&#39;</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;my-value&#39;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> response
-</span></span></code></pre></div><p>Django 也提供了多個 HttpResponse 的子類別，對應不同的 HTTP 狀態碼：</p>
-<table>
-	<thead>
-			<tr>
-					<th>類別</th>
-					<th>狀態碼</th>
-					<th>用途</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td><code>HttpResponse</code></td>
-					<td>200</td>
-					<td>一般成功回應</td>
-			</tr>
-			<tr>
-					<td><code>HttpResponseRedirect</code></td>
-					<td>302</td>
-					<td>暫時重導向</td>
-			</tr>
-			<tr>
-					<td><code>HttpResponsePermanentRedirect</code></td>
-					<td>301</td>
-					<td>永久重導向</td>
-			</tr>
-			<tr>
-					<td><code>HttpResponseNotFound</code></td>
-					<td>404</td>
-					<td>找不到資源</td>
-			</tr>
-			<tr>
-					<td><code>HttpResponseForbidden</code></td>
-					<td>403</td>
-					<td>禁止存取</td>
-			</tr>
-			<tr>
-					<td><code>HttpResponseBadRequest</code></td>
-					<td>400</td>
-					<td>錯誤的請求</td>
-			</tr>
-			<tr>
-					<td><code>JsonResponse</code></td>
-					<td>200</td>
-					<td>JSON 格式回應</td>
-			</tr>
-	</tbody>
-</table>
-<hr>
-<h3 id="第一個-fbvhello-world">第一個 FBV：Hello World</h3>
-<p>讓我們從最簡單的 FBV 開始。首先在 <code>views.py</code> 中定義一個 View 函式：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># views.py</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.http <span style="color:#f92672">import</span> HttpResponse
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">hello_world</span>(request):
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;最簡單的 FBV，回傳純文字&#34;&#34;&#34;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> HttpResponse(<span style="color:#e6db74">&#34;Hello, World! 歡迎來到 Django FBV 教學。&#34;</span>)
-</span></span></code></pre></div><p>接著在 <code>urls.py</code> 中設定 URL 路由，將網址對應到這個 View：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># urls.py</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.urls <span style="color:#f92672">import</span> path
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> . <span style="color:#f92672">import</span> views
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>urlpatterns <span style="color:#f92672">=</span> [
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;hello/&#39;</span>, views<span style="color:#f92672">.</span>hello_world, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;hello_world&#39;</span>),
-</span></span><span style="display:flex;"><span>]
-</span></span></code></pre></div><p>啟動開發伺服器後，在瀏覽器訪問 <code>http://127.0.0.1:8000/hello/</code>，就能看到 &ldquo;Hello, World! 歡迎來到 Django FBV 教學。&rdquo; 的文字。</p>
-<hr>
-<h3 id="接收-url-參數">接收 URL 參數</h3>
-<p>Django 的 URL 路由（URL Routing）支援從網址中擷取參數，並將它們傳入 View 函式：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># urls.py</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.urls <span style="color:#f92672">import</span> path
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> . <span style="color:#f92672">import</span> views
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>urlpatterns <span style="color:#f92672">=</span> [
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># &lt;str:name&gt; 擷取字串參數，傳入 View 的 name 參數</span>
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;hello/&lt;str:name&gt;/&#39;</span>, views<span style="color:#f92672">.</span>hello_name, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;hello_name&#39;</span>),
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># &lt;int:pk&gt; 擷取整數參數，傳入 View 的 pk 參數</span>
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;articles/&lt;int:pk&gt;/&#39;</span>, views<span style="color:#f92672">.</span>article_detail, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;article_detail&#39;</span>),
-</span></span><span style="display:flex;"><span>]
-</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># views.py</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.http <span style="color:#f92672">import</span> HttpResponse
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">hello_name</span>(request, name):
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;接收 URL 中的 name 參數&#34;&#34;&#34;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> HttpResponse(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Hello, </span><span style="color:#e6db74">{</span>name<span style="color:#e6db74">}</span><span style="color:#e6db74">!&#34;</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 訪問 /hello/Django/ → 輸出 &#34;Hello, Django!&#34;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">article_detail</span>(request, pk):
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;接收 URL 中的文章 ID&#34;&#34;&#34;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> HttpResponse(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;你正在查看第 </span><span style="color:#e6db74">{</span>pk<span style="color:#e6db74">}</span><span style="color:#e6db74"> 篇文章。&#34;</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 訪問 /articles/42/ → 輸出 &#34;你正在查看第 42 篇文章。&#34;</span>
-</span></span></code></pre></div><p>常用的 URL 路徑轉換器（Path Converter）包括：</p>
-<table>
-	<thead>
-			<tr>
-					<th>轉換器</th>
-					<th>說明</th>
-					<th>範例</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td><code>str</code></td>
-					<td>匹配任何非空字串（不含 <code>/</code>）</td>
-					<td><code>&lt;str:slug&gt;</code></td>
-			</tr>
-			<tr>
-					<td><code>int</code></td>
-					<td>匹配零或正整數</td>
-					<td><code>&lt;int:pk&gt;</code></td>
-			</tr>
-			<tr>
-					<td><code>slug</code></td>
-					<td>匹配由字母、數字、<code>-</code>、<code>_</code> 組成的字串</td>
-					<td><code>&lt;slug:post_slug&gt;</code></td>
-			</tr>
-			<tr>
-					<td><code>uuid</code></td>
-					<td>匹配 UUID 格式字串</td>
-					<td><code>&lt;uuid:id&gt;</code></td>
-			</tr>
-	</tbody>
-</table>
-<hr>
-<h3 id="處理-get-請求列出資料">處理 GET 請求：列出資料</h3>
-<p>在實際應用中，GET 請求通常用來「取得」或「列出」資料。以下範例示範如何從資料庫查詢文章列表：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># views.py</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.shortcuts <span style="color:#f92672">import</span> render
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> .models <span style="color:#f92672">import</span> Post
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">post_list</span>(request):
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;列出所有已發布的文章&#34;&#34;&#34;</span>
-</span></span><span style="display:flex;"><span>    posts <span style="color:#f92672">=</span> Post<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>filter(is_published<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)<span style="color:#f92672">.</span>order_by(<span style="color:#e6db74">&#39;-created_at&#39;</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 從 GET 參數取得搜尋關鍵字（選填）</span>
-</span></span><span style="display:flex;"><span>    keyword <span style="color:#f92672">=</span> request<span style="color:#f92672">.</span>GET<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#39;q&#39;</span>, <span style="color:#e6db74">&#39;&#39;</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> keyword:
-</span></span><span style="display:flex;"><span>        posts <span style="color:#f92672">=</span> posts<span style="color:#f92672">.</span>filter(title__icontains<span style="color:#f92672">=</span>keyword)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    context <span style="color:#f92672">=</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;posts&#39;</span>: posts,
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;keyword&#39;</span>: keyword,
-</span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> render(request, <span style="color:#e6db74">&#39;blog/post_list.html&#39;</span>, context)
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># render() 會載入模板、注入 context 變數、回傳 HttpResponse</span>
-</span></span></code></pre></div><p>當使用者訪問 <code>/posts/?q=django</code> 時，View 會從 GET 參數中取得搜尋關鍵字 <code>django</code>，過濾出標題包含該關鍵字的文章，並透過 <code>render()</code> 渲染模板後回傳。</p>
-<hr>
-<h3 id="處理-post-請求建立資料">處理 POST 請求：建立資料</h3>
-<p>POST 請求通常用來「提交」或「建立」資料。在同一個 View 中，我們經常需要同時處理 GET（顯示表單）和 POST（接收表單資料）兩種請求：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># views.py</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.shortcuts <span style="color:#f92672">import</span> render, redirect
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> .forms <span style="color:#f92672">import</span> PostForm
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">post_create</span>(request):
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;建立新文章：GET 顯示空白表單，POST 處理表單提交&#34;&#34;&#34;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> request<span style="color:#f92672">.</span>method <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;POST&#39;</span>:
-</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># POST 請求：接收使用者提交的表單資料</span>
-</span></span><span style="display:flex;"><span>        form <span style="color:#f92672">=</span> PostForm(request<span style="color:#f92672">.</span>POST)
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> form<span style="color:#f92672">.</span>is_valid():
-</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># 表單驗證通過，儲存到資料庫</span>
-</span></span><span style="display:flex;"><span>            post <span style="color:#f92672">=</span> form<span style="color:#f92672">.</span>save(commit<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>)
-</span></span><span style="display:flex;"><span>            post<span style="color:#f92672">.</span>author <span style="color:#f92672">=</span> request<span style="color:#f92672">.</span>user
-</span></span><span style="display:flex;"><span>            post<span style="color:#f92672">.</span>save()
-</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># 建立成功，重導向到文章詳情頁</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> redirect(<span style="color:#e6db74">&#39;post_detail&#39;</span>, pk<span style="color:#f92672">=</span>post<span style="color:#f92672">.</span>pk)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span>:
-</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># GET 請求：建立空白表單</span>
-</span></span><span style="display:flex;"><span>        form <span style="color:#f92672">=</span> PostForm()
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># GET 或表單驗證失敗時，渲染表單頁面</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> render(request, <span style="color:#e6db74">&#39;blog/post_form.html&#39;</span>, {<span style="color:#e6db74">&#39;form&#39;</span>: form})
-</span></span></code></pre></div><p>這個模式是 Django FBV 中最經典的「GET 顯示 / POST 處理」雙重職責（Dual Responsibility）模式，幾乎所有表單處理的 View 都遵循這個結構。</p>
-<hr>
-<h3 id="render-快捷函數">render() 快捷函數</h3>
-<p><code>render()</code> 是 Django 最常用的快捷函數（Shortcut Function），它結合了「載入模板」和「回傳回應」兩個步驟：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> django.shortcuts <span style="color:#f92672">import</span> render
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">about_page</span>(request):
-</span></span><span style="display:flex;"><span>    context <span style="color:#f92672">=</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;title&#39;</span>: <span style="color:#e6db74">&#39;關於我們&#39;</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;team_members&#39;</span>: [<span style="color:#e6db74">&#39;Alice&#39;</span>, <span style="color:#e6db74">&#39;Bob&#39;</span>, <span style="color:#e6db74">&#39;Charlie&#39;</span>],
-</span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># render(request, 模板路徑, context 字典)</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> render(request, <span style="color:#e6db74">&#39;pages/about.html&#39;</span>, context)
-</span></span></code></pre></div><p><code>render()</code> 等同於以下寫法的簡化版：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> django.template.loader <span style="color:#f92672">import</span> get_template
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.http <span style="color:#f92672">import</span> HttpResponse
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">about_page</span>(request):
-</span></span><span style="display:flex;"><span>    template <span style="color:#f92672">=</span> get_template(<span style="color:#e6db74">&#39;pages/about.html&#39;</span>)
-</span></span><span style="display:flex;"><span>    context <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#39;title&#39;</span>: <span style="color:#e6db74">&#39;關於我們&#39;</span>}
-</span></span><span style="display:flex;"><span>    html <span style="color:#f92672">=</span> template<span style="color:#f92672">.</span>render(context, request)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> HttpResponse(html)
-</span></span></code></pre></div><p>實務上幾乎不會使用手動載入模板的寫法，直接用 <code>render()</code> 即可。</p>
-<hr>
-<h3 id="redirect-重導向">redirect() 重導向</h3>
-<p><code>redirect()</code> 快捷函數用於回傳 HTTP 重導向回應（預設為 302 暫時重導向），常用於表單提交成功後將使用者引導到另一個頁面：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> django.shortcuts <span style="color:#f92672">import</span> redirect
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">some_view</span>(request):
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 方式一：使用 URL name（推薦）</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> redirect(<span style="color:#e6db74">&#39;post_list&#39;</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 方式二：使用 URL name 並帶入參數</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> redirect(<span style="color:#e6db74">&#39;post_detail&#39;</span>, pk<span style="color:#f92672">=</span><span style="color:#ae81ff">42</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 方式三：直接指定 URL 路徑</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> redirect(<span style="color:#e6db74">&#39;/articles/&#39;</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 方式四：永久重導向（301）</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> redirect(<span style="color:#e6db74">&#39;post_list&#39;</span>, permanent<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
-</span></span></code></pre></div><blockquote>
-<p><strong>最佳實踐：</strong> 建議使用 URL name 搭配 <code>redirect()</code>，而非寫死 URL 路徑。這樣即使未來修改了 URL 結構，也不需要逐一更新 View 中的路徑。</p>
-</blockquote>
-<hr>
-<h3 id="jsonresponse回傳-json-資料">JsonResponse：回傳 JSON 資料</h3>
-<p>當你的 View 需要回傳 <strong>JSON</strong>（JavaScript Object Notation）格式的資料時（例如提供 API 給前端 JavaScript 呼叫），可以使用 <strong>JsonResponse</strong>：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> django.http <span style="color:#f92672">import</span> JsonResponse
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">api_post_list</span>(request):
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;回傳文章列表的 JSON 資料&#34;&#34;&#34;</span>
-</span></span><span style="display:flex;"><span>    posts <span style="color:#f92672">=</span> Post<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>filter(is_published<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)<span style="color:#f92672">.</span>values(<span style="color:#e6db74">&#39;id&#39;</span>, <span style="color:#e6db74">&#39;title&#39;</span>, <span style="color:#e6db74">&#39;created_at&#39;</span>)
-</span></span><span style="display:flex;"><span>    data <span style="color:#f92672">=</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;status&#39;</span>: <span style="color:#e6db74">&#39;ok&#39;</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;count&#39;</span>: posts<span style="color:#f92672">.</span>count(),
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;results&#39;</span>: list(posts),
-</span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># safe=False 允許回傳非 dict 的頂層資料（如 list）</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> JsonResponse(data)
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 輸出：{&#34;status&#34;: &#34;ok&#34;, &#34;count&#34;: 3, &#34;results&#34;: [...]}</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">api_post_detail</span>(request, pk):
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;回傳單篇文章的 JSON 資料&#34;&#34;&#34;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">try</span>:
-</span></span><span style="display:flex;"><span>        post <span style="color:#f92672">=</span> Post<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>get(pk<span style="color:#f92672">=</span>pk)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">except</span> Post<span style="color:#f92672">.</span>DoesNotExist:
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> JsonResponse({<span style="color:#e6db74">&#39;error&#39;</span>: <span style="color:#e6db74">&#39;文章不存在&#39;</span>}, status<span style="color:#f92672">=</span><span style="color:#ae81ff">404</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    data <span style="color:#f92672">=</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;id&#39;</span>: post<span style="color:#f92672">.</span>pk,
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;title&#39;</span>: post<span style="color:#f92672">.</span>title,
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;content&#39;</span>: post<span style="color:#f92672">.</span>content,
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;created_at&#39;</span>: post<span style="color:#f92672">.</span>created_at<span style="color:#f92672">.</span>isoformat(),
-</span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> JsonResponse(data)
-</span></span></code></pre></div><p>JsonResponse 會自動將 Python 字典序列化（Serialize）為 JSON 格式，並設定回應的 <code>Content-Type</code> 為 <code>application/json</code>。</p>
-<hr>
-<h3 id="get_object_or_404-快捷函數">get_object_or_404() 快捷函數</h3>
-<p>在查詢單一物件時，如果物件不存在，我們通常希望回傳 404 錯誤頁面，而非讓程式拋出未處理的例外。<code>get_object_or_404()</code> 正是為此設計的快捷函數：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> django.shortcuts <span style="color:#f92672">import</span> get_object_or_404, render
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">post_detail</span>(request, pk):
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 如果 pk 對應的 Post 不存在，自動回傳 404 頁面</span>
-</span></span><span style="display:flex;"><span>    post <span style="color:#f92672">=</span> get_object_or_404(Post, pk<span style="color:#f92672">=</span>pk)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> render(request, <span style="color:#e6db74">&#39;blog/post_detail.html&#39;</span>, {<span style="color:#e6db74">&#39;post&#39;</span>: post})
-</span></span></code></pre></div><p>這等同於以下手動處理的寫法：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> django.http <span style="color:#f92672">import</span> Http404
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">post_detail</span>(request, pk):
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">try</span>:
-</span></span><span style="display:flex;"><span>        post <span style="color:#f92672">=</span> Post<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>get(pk<span style="color:#f92672">=</span>pk)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">except</span> Post<span style="color:#f92672">.</span>DoesNotExist:
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">raise</span> Http404(<span style="color:#e6db74">&#34;文章不存在&#34;</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> render(request, <span style="color:#e6db74">&#39;blog/post_detail.html&#39;</span>, {<span style="color:#e6db74">&#39;post&#39;</span>: post})
-</span></span></code></pre></div><p><code>get_object_or_404()</code> 也支援額外的篩選條件：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 查詢指定作者的文章，不存在則 404</span>
-</span></span><span style="display:flex;"><span>post <span style="color:#f92672">=</span> get_object_or_404(Post, pk<span style="color:#f92672">=</span>pk, author<span style="color:#f92672">=</span>request<span style="color:#f92672">.</span>user)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 也可以傳入 QuerySet</span>
-</span></span><span style="display:flex;"><span>published_posts <span style="color:#f92672">=</span> Post<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>filter(is_published<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
-</span></span><span style="display:flex;"><span>post <span style="color:#f92672">=</span> get_object_or_404(published_posts, pk<span style="color:#f92672">=</span>pk)
-</span></span></code></pre></div><hr>
-<h3 id="裝飾器限制-http-方法">裝飾器：限制 HTTP 方法</h3>
-<p>Django 提供了多個裝飾器（Decorator）來限制 View 只接受特定的 HTTP 方法（HTTP Method），如果請求使用了不允許的方法，Django 會自動回傳 <code>405 Method Not Allowed</code> 錯誤。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> django.views.decorators.http <span style="color:#f92672">import</span> require_http_methods, require_GET, require_POST
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 只允許 GET 和 POST 方法</span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@require_http_methods</span>([<span style="color:#e6db74">&#34;GET&#34;</span>, <span style="color:#e6db74">&#34;POST&#34;</span>])
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">post_create</span>(request):
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> request<span style="color:#f92672">.</span>method <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;POST&#39;</span>:
-</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 處理表單提交</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">pass</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span>:
-</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 顯示表單</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">pass</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 只允許 GET 方法（語法糖）</span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@require_GET</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">post_list</span>(request):
-</span></span><span style="display:flex;"><span>    posts <span style="color:#f92672">=</span> Post<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>all()
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> render(request, <span style="color:#e6db74">&#39;blog/post_list.html&#39;</span>, {<span style="color:#e6db74">&#39;posts&#39;</span>: posts})
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 只允許 POST 方法（語法糖）</span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@require_POST</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">post_delete</span>(request, pk):
-</span></span><span style="display:flex;"><span>    post <span style="color:#f92672">=</span> get_object_or_404(Post, pk<span style="color:#f92672">=</span>pk, author<span style="color:#f92672">=</span>request<span style="color:#f92672">.</span>user)
-</span></span><span style="display:flex;"><span>    post<span style="color:#f92672">.</span>delete()
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> redirect(<span style="color:#e6db74">&#39;post_list&#39;</span>)
-</span></span></code></pre></div><p><code>@require_GET</code> 和 <code>@require_POST</code> 分別是 <code>@require_http_methods([&quot;GET&quot;])</code> 和 <code>@require_http_methods([&quot;POST&quot;])</code> 的簡寫形式，讓程式碼更簡潔。</p>
-<hr>
-<h3 id="login_required-簡介">@login_required 簡介</h3>
-<p><code>@login_required</code> 裝飾器用於保護 View，確保只有已登入的使用者才能存取。如果使用者尚未登入，Django 會自動將他們重導向到登入頁面：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> django.contrib.auth.decorators <span style="color:#f92672">import</span> login_required
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@login_required</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">post_create</span>(request):
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;只有登入的使用者才能建立文章&#34;&#34;&#34;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 這裡的 request.user 保證是已登入的使用者</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pass</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@login_required</span>(login_url<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;/accounts/login/&#39;</span>)
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">dashboard</span>(request):
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;自訂登入頁面的 URL&#34;&#34;&#34;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> render(request, <span style="color:#e6db74">&#39;dashboard.html&#39;</span>)
-</span></span></code></pre></div><p>當未登入的使用者嘗試訪問被 <code>@login_required</code> 保護的 View 時，Django 會將他們重導向到 <code>settings.LOGIN_URL</code>（預設為 <code>/accounts/login/</code>），並在 URL 中附帶 <code>next</code> 參數，讓使用者登入後能自動回到原本要訪問的頁面。</p>
-<hr>
-<h3 id="完整-crud-範例">完整 CRUD 範例</h3>
-<p>讓我們把前面學到的所有知識整合起來，以一個部落格的 <strong>Post</strong> Model 為例，實作完整的 <strong>CRUD</strong>（Create、Read、Update、Delete）功能。</p>
-<h4 id="model-與-form-定義">Model 與 Form 定義</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># models.py</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.db <span style="color:#f92672">import</span> models
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.contrib.auth.models <span style="color:#f92672">import</span> User
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Post</span>(models<span style="color:#f92672">.</span>Model):
-</span></span><span style="display:flex;"><span>    title <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>CharField(<span style="color:#e6db74">&#39;標題&#39;</span>, max_length<span style="color:#f92672">=</span><span style="color:#ae81ff">200</span>)
-</span></span><span style="display:flex;"><span>    content <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>TextField(<span style="color:#e6db74">&#39;內容&#39;</span>)
-</span></span><span style="display:flex;"><span>    author <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>ForeignKey(User, on_delete<span style="color:#f92672">=</span>models<span style="color:#f92672">.</span>CASCADE, verbose_name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;作者&#39;</span>)
-</span></span><span style="display:flex;"><span>    is_published <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>BooleanField(<span style="color:#e6db74">&#39;已發布&#39;</span>, default<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>)
-</span></span><span style="display:flex;"><span>    created_at <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>DateTimeField(<span style="color:#e6db74">&#39;建立時間&#39;</span>, auto_now_add<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
-</span></span><span style="display:flex;"><span>    updated_at <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>DateTimeField(<span style="color:#e6db74">&#39;更新時間&#39;</span>, auto_now<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Meta</span>:
-</span></span><span style="display:flex;"><span>        ordering <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;-created_at&#39;</span>]
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__str__</span>(self):
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>title
-</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># forms.py</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django <span style="color:#f92672">import</span> forms
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> .models <span style="color:#f92672">import</span> Post
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PostForm</span>(forms<span style="color:#f92672">.</span>ModelForm):
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Meta</span>:
-</span></span><span style="display:flex;"><span>        model <span style="color:#f92672">=</span> Post
-</span></span><span style="display:flex;"><span>        fields <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;title&#39;</span>, <span style="color:#e6db74">&#39;content&#39;</span>, <span style="color:#e6db74">&#39;is_published&#39;</span>]
-</span></span><span style="display:flex;"><span>        widgets <span style="color:#f92672">=</span> {
-</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;title&#39;</span>: forms<span style="color:#f92672">.</span>TextInput(attrs<span style="color:#f92672">=</span>{<span style="color:#e6db74">&#39;class&#39;</span>: <span style="color:#e6db74">&#39;form-control&#39;</span>}),
-</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;content&#39;</span>: forms<span style="color:#f92672">.</span>Textarea(attrs<span style="color:#f92672">=</span>{<span style="color:#e6db74">&#39;class&#39;</span>: <span style="color:#e6db74">&#39;form-control&#39;</span>, <span style="color:#e6db74">&#39;rows&#39;</span>: <span style="color:#ae81ff">8</span>}),
-</span></span><span style="display:flex;"><span>        }
-</span></span></code></pre></div><h4 id="views完整-crud">Views（完整 CRUD）</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># views.py</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.shortcuts <span style="color:#f92672">import</span> render, get_object_or_404, redirect
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.contrib.auth.decorators <span style="color:#f92672">import</span> login_required
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.views.decorators.http <span style="color:#f92672">import</span> require_http_methods, require_GET, require_POST
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> .models <span style="color:#f92672">import</span> Post
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> .forms <span style="color:#f92672">import</span> PostForm
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># ─── Read（列表） ───</span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@require_GET</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">post_list</span>(request):
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;列出所有已發布的文章&#34;&#34;&#34;</span>
-</span></span><span style="display:flex;"><span>    posts <span style="color:#f92672">=</span> Post<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>filter(is_published<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> render(request, <span style="color:#e6db74">&#39;blog/post_list.html&#39;</span>, {<span style="color:#e6db74">&#39;posts&#39;</span>: posts})
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># ─── Read（詳情） ───</span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@require_GET</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">post_detail</span>(request, pk):
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;查看單篇文章&#34;&#34;&#34;</span>
-</span></span><span style="display:flex;"><span>    post <span style="color:#f92672">=</span> get_object_or_404(Post, pk<span style="color:#f92672">=</span>pk, is_published<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> render(request, <span style="color:#e6db74">&#39;blog/post_detail.html&#39;</span>, {<span style="color:#e6db74">&#39;post&#39;</span>: post})
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># ─── Create（建立） ───</span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@login_required</span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@require_http_methods</span>([<span style="color:#e6db74">&#34;GET&#34;</span>, <span style="color:#e6db74">&#34;POST&#34;</span>])
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">post_create</span>(request):
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;建立新文章&#34;&#34;&#34;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> request<span style="color:#f92672">.</span>method <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;POST&#39;</span>:
-</span></span><span style="display:flex;"><span>        form <span style="color:#f92672">=</span> PostForm(request<span style="color:#f92672">.</span>POST)
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> form<span style="color:#f92672">.</span>is_valid():
-</span></span><span style="display:flex;"><span>            post <span style="color:#f92672">=</span> form<span style="color:#f92672">.</span>save(commit<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>)
-</span></span><span style="display:flex;"><span>            post<span style="color:#f92672">.</span>author <span style="color:#f92672">=</span> request<span style="color:#f92672">.</span>user  <span style="color:#75715e"># 自動設定作者為當前使用者</span>
-</span></span><span style="display:flex;"><span>            post<span style="color:#f92672">.</span>save()
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> redirect(<span style="color:#e6db74">&#39;post_detail&#39;</span>, pk<span style="color:#f92672">=</span>post<span style="color:#f92672">.</span>pk)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span>:
-</span></span><span style="display:flex;"><span>        form <span style="color:#f92672">=</span> PostForm()
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> render(request, <span style="color:#e6db74">&#39;blog/post_form.html&#39;</span>, {<span style="color:#e6db74">&#39;form&#39;</span>: form, <span style="color:#e6db74">&#39;action&#39;</span>: <span style="color:#e6db74">&#39;建立&#39;</span>})
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># ─── Update（更新） ───</span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@login_required</span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@require_http_methods</span>([<span style="color:#e6db74">&#34;GET&#34;</span>, <span style="color:#e6db74">&#34;POST&#34;</span>])
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">post_update</span>(request, pk):
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;更新文章（僅限作者本人）&#34;&#34;&#34;</span>
-</span></span><span style="display:flex;"><span>    post <span style="color:#f92672">=</span> get_object_or_404(Post, pk<span style="color:#f92672">=</span>pk, author<span style="color:#f92672">=</span>request<span style="color:#f92672">.</span>user)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> request<span style="color:#f92672">.</span>method <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;POST&#39;</span>:
-</span></span><span style="display:flex;"><span>        form <span style="color:#f92672">=</span> PostForm(request<span style="color:#f92672">.</span>POST, instance<span style="color:#f92672">=</span>post)
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> form<span style="color:#f92672">.</span>is_valid():
-</span></span><span style="display:flex;"><span>            form<span style="color:#f92672">.</span>save()
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> redirect(<span style="color:#e6db74">&#39;post_detail&#39;</span>, pk<span style="color:#f92672">=</span>post<span style="color:#f92672">.</span>pk)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span>:
-</span></span><span style="display:flex;"><span>        form <span style="color:#f92672">=</span> PostForm(instance<span style="color:#f92672">=</span>post)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> render(request, <span style="color:#e6db74">&#39;blog/post_form.html&#39;</span>, {
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;form&#39;</span>: form,
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;post&#39;</span>: post,
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;action&#39;</span>: <span style="color:#e6db74">&#39;更新&#39;</span>,
-</span></span><span style="display:flex;"><span>    })
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># ─── Delete（刪除） ───</span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@login_required</span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@require_http_methods</span>([<span style="color:#e6db74">&#34;GET&#34;</span>, <span style="color:#e6db74">&#34;POST&#34;</span>])
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">post_delete</span>(request, pk):
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;刪除文章（僅限作者本人）&#34;&#34;&#34;</span>
-</span></span><span style="display:flex;"><span>    post <span style="color:#f92672">=</span> get_object_or_404(Post, pk<span style="color:#f92672">=</span>pk, author<span style="color:#f92672">=</span>request<span style="color:#f92672">.</span>user)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> request<span style="color:#f92672">.</span>method <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;POST&#39;</span>:
-</span></span><span style="display:flex;"><span>        post<span style="color:#f92672">.</span>delete()
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> redirect(<span style="color:#e6db74">&#39;post_list&#39;</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># GET 請求：顯示確認刪除頁面</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> render(request, <span style="color:#e6db74">&#39;blog/post_confirm_delete.html&#39;</span>, {<span style="color:#e6db74">&#39;post&#39;</span>: post})
-</span></span></code></pre></div><h4 id="url-路由設定">URL 路由設定</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># urls.py</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.urls <span style="color:#f92672">import</span> path
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> . <span style="color:#f92672">import</span> views
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>urlpatterns <span style="color:#f92672">=</span> [
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;posts/&#39;</span>, views<span style="color:#f92672">.</span>post_list, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;post_list&#39;</span>),
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;posts/&lt;int:pk&gt;/&#39;</span>, views<span style="color:#f92672">.</span>post_detail, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;post_detail&#39;</span>),
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;posts/create/&#39;</span>, views<span style="color:#f92672">.</span>post_create, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;post_create&#39;</span>),
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;posts/&lt;int:pk&gt;/update/&#39;</span>, views<span style="color:#f92672">.</span>post_update, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;post_update&#39;</span>),
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;posts/&lt;int:pk&gt;/delete/&#39;</span>, views<span style="color:#f92672">.</span>post_delete, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;post_delete&#39;</span>),
-</span></span><span style="display:flex;"><span>]
-</span></span></code></pre></div><p>以上五個 URL 對應五個 View 函式，涵蓋了完整的 CRUD 操作。注意 <code>create/</code> 路由必須放在 <code>&lt;int:pk&gt;/</code> 之前，否則 Django 會嘗試將 <code>create</code> 當作 <code>pk</code> 來匹配，導致錯誤。</p>
-<hr>
-<h3 id="總結">總結</h3>
-<p>在這篇教學中，我們深入學習了 Django <strong>Function-Based Views</strong>（FBV）的核心知識：</p>
-<ul>
-<li><strong>View 的角色</strong>：在 MTV 架構中，View 負責接收 HttpRequest、執行邏輯、回傳 HttpResponse，是連接 Model 與 Template 的橋樑。</li>
-<li><strong>HttpRequest 物件</strong>：封裝了請求的所有資訊，包括 <code>method</code>、<code>GET</code>、<code>POST</code>、<code>body</code>、<code>user</code>、<code>session</code> 等屬性。</li>
-<li><strong>HttpResponse 物件</strong>：代表伺服器的回應，可以設定 <code>status_code</code>、<code>content</code> 以及自訂標頭。</li>
-<li><strong>快捷函數</strong>：<code>render()</code> 結合模板渲染、<code>redirect()</code> 處理重導向、<code>get_object_or_404()</code> 安全地查詢單一物件。</li>
-<li><strong>JsonResponse</strong>：專門用於回傳 JSON 格式的回應，自動處理序列化與 Content-Type 設定。</li>
-<li><strong>裝飾器</strong>：<code>@require_http_methods</code>、<code>@require_GET</code>、<code>@require_POST</code> 限制允許的 HTTP 方法；<code>@login_required</code> 保護需要登入才能存取的 View。</li>
-<li><strong>完整 CRUD 範例</strong>：以 Post Model 為例，展示了列表、詳情、建立、更新、刪除五個 View 的實作方式與 URL 路由設定。</li>
-</ul>
-<p>FBV 的最大優勢是直觀易懂，程式碼的執行流程一目了然。對於邏輯簡單或高度客製化的需求，FBV 是非常好的選擇。在後續的教學中，我們將學習 <strong>Class-Based Views</strong>（CBV），透過類別繼承和 Mixin 機制實現更高效的程式碼複用。</p></div>
-        
-        
-
-        
-        <div class="mt-8">
-          
-<div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose">
-  <div>
-    <div class="flex items-center gap-2 mb-1">
-      <a href="/about" class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">
-        BenZ
-      </a>
-      
-      <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span>
-      
-    </div>
-    <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">
-      熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。
-    </p>
-    <div class="flex items-center gap-3">
-      
-      <a href="https://github.com/benzhub" target="_blank" rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label="GitHub">
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-      </a>
-      
-      
-      
-    </div>
-  </div>
-</div>
-
-        </div>
-      </div>
-
-      
-      <div class="post-detail fade-in my-4">
-        
-
-
-<div>
-  <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3>
-  <div class="grid gap-2">
-    
-    <a href="http://localhost:1313/post/django/011-django-orm-queryset/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
-      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django ORM 與 QuerySet 查詢語法完全指南 | Django 教學</span>
-      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/05/31</span>
-    </a>
-    
-    <a href="http://localhost:1313/post/django/010-django-migrations/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
-      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django Migrations 資料庫遷移實戰指南 | Django 教學</span>
-      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/05/30</span>
-    </a>
-    
-    <a href="http://localhost:1313/post/django/009-django-models-relationships/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
-      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django Models 關聯關係：一對一、一對多、多對多完全解析 | Django 教學</span>
-      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/05/29</span>
-    </a>
-    
-  </div>
-</div>
-
-
-      </div>
-
-      
-      <div class="post-detail fade-in my-4">
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            
-            <a href="http://localhost:1313/post/django/011-django-orm-queryset/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
-                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
-                <span class="text-sm font-medium">Django ORM 與 QuerySet 查詢語法完全指南 | Django 教學</span>
-            </a>
-            
-          </div>
-          <div>
-            
-            <a href="http://localhost:1313/post/django/013-django-cbv/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
-                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
-                <span class="text-sm font-medium">Django Views：Class-Based Views 類別視圖深入解析 | Django 教學</span>
-            </a>
-            
-          </div>
-        </div>
-      </div>
-
-      
-      <div class="post-detail fade-in my-4">
-        
-<script src="https://giscus.app/client.js"
-        data-repo="benzhub/benzhub.github.io"
-        data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM="
-        data-category="Announcements"
-        data-category-id="MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1"
-        data-mapping="pathname"
-        data-strict="0"
-        data-reactions-enabled="1"
-        data-emit-metadata="0"
-        data-input-position="top"
-        data-theme="preferred_color_scheme"
-        data-lang="zh-TW"
-        crossorigin="anonymous"
-        async>
-</script>
-
-
-      </div>
-    </div>
-    
-    <div class="hidden lg:block lg:col-span-1 mt-4">
-    
-    
-            
-            <div class="widget fade-in">
-    <p class="widget-title">搜尋</p>
-    <form role="search" method="get" action="https://google.com/search">
-        <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
-        <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
-    </form>
-</div>
-
-        
-            
-            
-
-        
-            
-            
-<div class="widget fade-in">
-    <p class="widget-title">標籤</p>
-    <div class="flex flex-wrap gap-1.5">
-        <a href='/tags/80/20-%E6%B3%95%E5%89%87'>
-            <span class="tag-pill">80/20 法則</span>
-        </a>
-        <a href='/tags/acid'>
-            <span class="tag-pill">acid</span>
-        </a>
-        <a href='/tags/ai'>
-            <span class="tag-pill">ai</span>
-        </a>
-        <a href='/tags/ai-agent'>
-            <span class="tag-pill">ai agent</span>
-        </a>
-        <a href='/tags/ai-workflow'>
-            <span class="tag-pill">ai workflow</span>
-        </a>
-        <a href='/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE'>
-            <span class="tag-pill">ai 工具焦慮</span>
-        </a>
-        <a href='/tags/ai-%E6%8E%A5%E5%96%AE'>
-            <span class="tag-pill">ai 接單</span>
-        </a>
-        <a href='/tags/ai-%E7%B9%AA%E5%9C%96'>
-            <span class="tag-pill">ai 繪圖</span>
-        </a>
-        <a href='/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA'>
-            <span class="tag-pill">ai 虛擬人</span>
-        </a>
-        <a href='/tags/ai-%E8%A1%8C%E9%8A%B7'>
-            <span class="tag-pill">ai 行銷</span>
-        </a>
-        <a href='/tags/ai-%E8%A8%AD%E8%A8%88'>
-            <span class="tag-pill">ai 設計</span>
-        </a>
-        <a href='/tags/ai-%E8%AE%8A%E7%8F%BE'>
-            <span class="tag-pill">ai 變現</span>
-        </a>
-        <a href='/tags/ai-%E8%B3%BA%E9%8C%A2'>
-            <span class="tag-pill">ai 賺錢</span>
-        </a>
-        <a href='/tags/ai-income'>
-            <span class="tag-pill">ai-income</span>
-        </a>
-        <a href='/tags/ai-insights'>
-            <span class="tag-pill">ai-insights</span>
-        </a>
-        <a href='/tags/api'>
-            <span class="tag-pill">api</span>
-        </a>
-        <a href='/tags/architecture'>
-            <span class="tag-pill">architecture</span>
-        </a>
-        <a href='/tags/autovacuum'>
-            <span class="tag-pill">autovacuum</span>
-        </a>
-        <a href='/tags/background-processes'>
-            <span class="tag-pill">background-processes</span>
-        </a>
-        <a href='/tags/big-o'>
-            <span class="tag-pill">big o</span>
-        </a>
-    </div>
-</div>
-
-
-        
-            
-            
-<div class="widget fade-in">
-    <p class="widget-title">文章系列</p>
-    <div class="flex flex-wrap gap-1.5">
-        
-        
-        
-        
-        <a href='/post/postgresql/'>
-            <span class="tag-pill">PostgreSQL (13)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/javascript/'>
-            <span class="tag-pill">JavaScript (68)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/django/'>
-            <span class="tag-pill">Django (30)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/python/'>
-            <span class="tag-pill">Python (37)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/htmlcss/'>
-            <span class="tag-pill">HTML &amp; CSS (23)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/linux/'>
-            <span class="tag-pill">Linux (22)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/git/'>
-            <span class="tag-pill">Git (18)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/ai-insights/'>
-            <span class="tag-pill">AI Insights (13)</span>
-        </a>
-        
-        
-    </div>
-</div>
-
-
-        
-            
-            
-
-<div class="widget fade-in">
-    <p class="widget-title">最新文章</p>
-    <div class="flex flex-col gap-1">
-        <a href="/post/postgresql/013-ddl-schema/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/19
-            </p>
-        </a>
-        <a href="/post/django/030-django-custom-user-model/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django 自訂使用者模型：AbstractUser 與 AbstractBaseUser | Django 教學</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/19
-            </p>
-        </a>
-        <a href="/post/javascript/data-structures--algorithms/006-heap-priority-queue/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">堆積與優先佇列 — Min/Max Heap 原理與 Heap Sort 完整實作 | 資料結構與演算法</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/19
-            </p>
-        </a>
-        <a href="/post/django/029-django-authentication/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Authentication 使用者認證系統完全指南 | Django 教學</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/18
-            </p>
-        </a>
-        <a href="/post/postgresql/012-data-types/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/18
-            </p>
-        </a>
-    </div>
-</div>
-
-        
-    
-</div>
-
-    
-</div>
-
-        </div>
-    </div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]">
-    
-    <p>&copy; 2026 <a href="http://localhost:1313/" class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p>
-</footer>
-
-
-<script>
-    (function (window, document) {
-        function main() {
-            var ad = document.createElement('script');
-            ad.async = true;
-            ad.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606';
-            ad.crossOrigin = "anonymous";
-            var sc = document.getElementsByTagName('script')[0];
-            sc.parentNode.insertBefore(ad, sc);
-        }
-        var lazyLoad = false;
-        function onLazyLoad() {
-            if (lazyLoad === false) {
-                lazyLoad = true;
-                window.removeEventListener('scroll', onLazyLoad);
-                window.removeEventListener('mousemove', onLazyLoad);
-                window.removeEventListener('mousedown', onLazyLoad);
-                window.removeEventListener('touchstart', onLazyLoad);
-                window.removeEventListener('keydown', onLazyLoad);
-                main();
-            }
-        }
-        window.addEventListener('scroll', onLazyLoad);
-        window.addEventListener('mousemove', onLazyLoad);
-        window.addEventListener('mousedown', onLazyLoad);
-        window.addEventListener('touchstart', onLazyLoad);
-        window.addEventListener('keydown', onLazyLoad);
-        window.addEventListener('load', function () {
-            if (window.pageYOffset) {
-                onLazyLoad();
-                window.setTimeout(onLazyLoad, 3000);
-            }
-        });
-    })(window, document);
-</script>
-
-
-<script>
-    
-    var icon = document.getElementById("icon");
-    var icon2 = document.getElementById("icon2");
-    if (document.documentElement.classList.contains("dark") || localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
-        if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
-        document.documentElement.classList.add('dark');
-    } else {
-        document.documentElement.classList.remove('dark');
-    }
-    function toggleDarkMode() {
-        if (document.documentElement.classList.contains('dark')) {
-            if (icon) { icon.classList.remove("icon-sun"); icon.classList.add("icon-moon"); }
-            if (icon2) { icon2.classList.remove("icon-sun"); icon2.classList.add("icon-moon"); }
-            document.documentElement.classList.remove('dark');
-            localStorage.theme = 'light';
-        } else {
-            if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
-            if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
-            document.documentElement.classList.add('dark');
-            localStorage.theme = 'dark';
-        }
-    }
-
-    
-    document.addEventListener('DOMContentLoaded', function () {
-        var observer = new IntersectionObserver(function (entries) {
-            entries.forEach(function (entry) {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0 });
-
-        document.querySelectorAll('.fade-in').forEach(function (el) {
-            observer.observe(el);
-        });
-    });
-</script>
-</body>
-
-</html>
+</code></pre><p>Django 的 View 最小定義非常簡潔——只要是一個接收 <code>request</code> 參數並回傳 <code>HttpResponse</code>（或其子類別）的 Python 函式，就是一個合法的 FBV。</p><hr><h3 id=httprequest-物件>HttpRequest 物件</h3><p>當使用者發送請求到 Django 應用時，Django 會自動將原始的 HTTP 請求封裝成一個 <strong>HttpRequest</strong> 物件，並作為第一個參數傳入 View 函式。這個物件包含了請求的所有資訊。</p><h4 id=常用屬性一覽>常用屬性一覽</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>example_view</span>(request):
+</span></span><span style=display:flex><span>    <span style=color:#75715e># HTTP 請求方法：&#39;GET&#39;、&#39;POST&#39;、&#39;PUT&#39;、&#39;DELETE&#39; 等</span>
+</span></span><span style=display:flex><span>    print(request<span style=color:#f92672>.</span>method)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># GET 參數（QueryDict 物件），例如 ?page=2&amp;sort=name</span>
+</span></span><span style=display:flex><span>    print(request<span style=color:#f92672>.</span>GET)
+</span></span><span style=display:flex><span>    print(request<span style=color:#f92672>.</span>GET<span style=color:#f92672>.</span>get(<span style=color:#e6db74>&#39;page&#39;</span>, <span style=color:#e6db74>&#39;1&#39;</span>))  <span style=color:#75715e># 取得 page 參數，預設值為 &#39;1&#39;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># POST 表單資料（QueryDict 物件）</span>
+</span></span><span style=display:flex><span>    print(request<span style=color:#f92672>.</span>POST)
+</span></span><span style=display:flex><span>    print(request<span style=color:#f92672>.</span>POST<span style=color:#f92672>.</span>get(<span style=color:#e6db74>&#39;username&#39;</span>, <span style=color:#e6db74>&#39;&#39;</span>))
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 請求的原始內容（bytes），常用於處理 JSON 請求</span>
+</span></span><span style=display:flex><span>    print(request<span style=color:#f92672>.</span>body)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 當前登入的使用者（需啟用 AuthenticationMiddleware）</span>
+</span></span><span style=display:flex><span>    print(request<span style=color:#f92672>.</span>user)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># Session 物件（dict-like），用於儲存跨請求的資料</span>
+</span></span><span style=display:flex><span>    print(request<span style=color:#f92672>.</span>session)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 請求路徑</span>
+</span></span><span style=display:flex><span>    print(request<span style=color:#f92672>.</span>path)           <span style=color:#75715e># 例如 &#39;/articles/1/&#39;</span>
+</span></span><span style=display:flex><span>    print(request<span style=color:#f92672>.</span>get_full_path())  <span style=color:#75715e># 例如 &#39;/articles/1/?page=2&#39;</span>
+</span></span></code></pre></div><p><code>request.GET</code> 和 <code>request.POST</code> 都是 <strong>QueryDict</strong> 物件，它是 Python 字典（dict）的子類別，支援同一個 key 對應多個值（例如多選的 checkbox）。使用 <code>.get()</code> 方法取值時可以指定預設值，避免 key 不存在時拋出例外（Exception）。</p><hr><h3 id=httpresponse-物件>HttpResponse 物件</h3><p>View 函式必須回傳一個 <strong>HttpResponse</strong> 物件（或其子類別）。HttpResponse 代表伺服器要回傳給瀏覽器的回應內容。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> django.http <span style=color:#f92672>import</span> HttpResponse
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>hello_view</span>(request):
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 最基本的回應：回傳純文字</span>
+</span></span><span style=display:flex><span>    response <span style=color:#f92672>=</span> HttpResponse(<span style=color:#e6db74>&#34;Hello, Django!&#34;</span>)
+</span></span><span style=display:flex><span>    print(response<span style=color:#f92672>.</span>status_code)  <span style=color:#75715e># 200（預設狀態碼）</span>
+</span></span><span style=display:flex><span>    print(response<span style=color:#f92672>.</span>content)      <span style=color:#75715e># b&#39;Hello, Django!&#39;</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> response
+</span></span></code></pre></div><p>你也可以自訂狀態碼（Status Code）和回應標頭（Headers）：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> django.http <span style=color:#f92672>import</span> HttpResponse
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>custom_response</span>(request):
+</span></span><span style=display:flex><span>    response <span style=color:#f92672>=</span> HttpResponse(<span style=color:#e6db74>&#34;找不到頁面&#34;</span>, status<span style=color:#f92672>=</span><span style=color:#ae81ff>404</span>)
+</span></span><span style=display:flex><span>    response[<span style=color:#e6db74>&#39;X-Custom-Header&#39;</span>] <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;my-value&#39;</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> response
+</span></span></code></pre></div><p>Django 也提供了多個 HttpResponse 的子類別，對應不同的 HTTP 狀態碼：</p><table><thead><tr><th>類別</th><th>狀態碼</th><th>用途</th></tr></thead><tbody><tr><td><code>HttpResponse</code></td><td>200</td><td>一般成功回應</td></tr><tr><td><code>HttpResponseRedirect</code></td><td>302</td><td>暫時重導向</td></tr><tr><td><code>HttpResponsePermanentRedirect</code></td><td>301</td><td>永久重導向</td></tr><tr><td><code>HttpResponseNotFound</code></td><td>404</td><td>找不到資源</td></tr><tr><td><code>HttpResponseForbidden</code></td><td>403</td><td>禁止存取</td></tr><tr><td><code>HttpResponseBadRequest</code></td><td>400</td><td>錯誤的請求</td></tr><tr><td><code>JsonResponse</code></td><td>200</td><td>JSON 格式回應</td></tr></tbody></table><hr><h3 id=第一個-fbvhello-world>第一個 FBV：Hello World</h3><p>讓我們從最簡單的 FBV 開始。首先在 <code>views.py</code> 中定義一個 View 函式：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># views.py</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.http <span style=color:#f92672>import</span> HttpResponse
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>hello_world</span>(request):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;最簡單的 FBV，回傳純文字&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> HttpResponse(<span style=color:#e6db74>&#34;Hello, World! 歡迎來到 Django FBV 教學。&#34;</span>)
+</span></span></code></pre></div><p>接著在 <code>urls.py</code> 中設定 URL 路由，將網址對應到這個 View：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># urls.py</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.urls <span style=color:#f92672>import</span> path
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> . <span style=color:#f92672>import</span> views
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>urlpatterns <span style=color:#f92672>=</span> [
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;hello/&#39;</span>, views<span style=color:#f92672>.</span>hello_world, name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;hello_world&#39;</span>),
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><p>啟動開發伺服器後，在瀏覽器訪問 <code>http://127.0.0.1:8000/hello/</code>，就能看到 &ldquo;Hello, World! 歡迎來到 Django FBV 教學。&rdquo; 的文字。</p><hr><h3 id=接收-url-參數>接收 URL 參數</h3><p>Django 的 URL 路由（URL Routing）支援從網址中擷取參數，並將它們傳入 View 函式：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># urls.py</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.urls <span style=color:#f92672>import</span> path
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> . <span style=color:#f92672>import</span> views
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>urlpatterns <span style=color:#f92672>=</span> [
+</span></span><span style=display:flex><span>    <span style=color:#75715e># &lt;str:name&gt; 擷取字串參數，傳入 View 的 name 參數</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;hello/&lt;str:name&gt;/&#39;</span>, views<span style=color:#f92672>.</span>hello_name, name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;hello_name&#39;</span>),
+</span></span><span style=display:flex><span>    <span style=color:#75715e># &lt;int:pk&gt; 擷取整數參數，傳入 View 的 pk 參數</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;articles/&lt;int:pk&gt;/&#39;</span>, views<span style=color:#f92672>.</span>article_detail, name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;article_detail&#39;</span>),
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># views.py</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.http <span style=color:#f92672>import</span> HttpResponse
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>hello_name</span>(request, name):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;接收 URL 中的 name 參數&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> HttpResponse(<span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;Hello, </span><span style=color:#e6db74>{</span>name<span style=color:#e6db74>}</span><span style=color:#e6db74>!&#34;</span>)
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 訪問 /hello/Django/ → 輸出 &#34;Hello, Django!&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>article_detail</span>(request, pk):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;接收 URL 中的文章 ID&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> HttpResponse(<span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;你正在查看第 </span><span style=color:#e6db74>{</span>pk<span style=color:#e6db74>}</span><span style=color:#e6db74> 篇文章。&#34;</span>)
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 訪問 /articles/42/ → 輸出 &#34;你正在查看第 42 篇文章。&#34;</span>
+</span></span></code></pre></div><p>常用的 URL 路徑轉換器（Path Converter）包括：</p><table><thead><tr><th>轉換器</th><th>說明</th><th>範例</th></tr></thead><tbody><tr><td><code>str</code></td><td>匹配任何非空字串（不含 <code>/</code>）</td><td><code>&lt;str:slug></code></td></tr><tr><td><code>int</code></td><td>匹配零或正整數</td><td><code>&lt;int:pk></code></td></tr><tr><td><code>slug</code></td><td>匹配由字母、數字、<code>-</code>、<code>_</code> 組成的字串</td><td><code>&lt;slug:post_slug></code></td></tr><tr><td><code>uuid</code></td><td>匹配 UUID 格式字串</td><td><code>&lt;uuid:id></code></td></tr></tbody></table><hr><h3 id=處理-get-請求列出資料>處理 GET 請求：列出資料</h3><p>在實際應用中，GET 請求通常用來「取得」或「列出」資料。以下範例示範如何從資料庫查詢文章列表：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># views.py</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.shortcuts <span style=color:#f92672>import</span> render
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> .models <span style=color:#f92672>import</span> Post
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>post_list</span>(request):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;列出所有已發布的文章&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>    posts <span style=color:#f92672>=</span> Post<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>filter(is_published<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)<span style=color:#f92672>.</span>order_by(<span style=color:#e6db74>&#39;-created_at&#39;</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 從 GET 參數取得搜尋關鍵字（選填）</span>
+</span></span><span style=display:flex><span>    keyword <span style=color:#f92672>=</span> request<span style=color:#f92672>.</span>GET<span style=color:#f92672>.</span>get(<span style=color:#e6db74>&#39;q&#39;</span>, <span style=color:#e6db74>&#39;&#39;</span>)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> keyword:
+</span></span><span style=display:flex><span>        posts <span style=color:#f92672>=</span> posts<span style=color:#f92672>.</span>filter(title__icontains<span style=color:#f92672>=</span>keyword)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    context <span style=color:#f92672>=</span> {
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;posts&#39;</span>: posts,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;keyword&#39;</span>: keyword,
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> render(request, <span style=color:#e6db74>&#39;blog/post_list.html&#39;</span>, context)
+</span></span><span style=display:flex><span>    <span style=color:#75715e># render() 會載入模板、注入 context 變數、回傳 HttpResponse</span>
+</span></span></code></pre></div><p>當使用者訪問 <code>/posts/?q=django</code> 時，View 會從 GET 參數中取得搜尋關鍵字 <code>django</code>，過濾出標題包含該關鍵字的文章，並透過 <code>render()</code> 渲染模板後回傳。</p><hr><h3 id=處理-post-請求建立資料>處理 POST 請求：建立資料</h3><p>POST 請求通常用來「提交」或「建立」資料。在同一個 View 中，我們經常需要同時處理 GET（顯示表單）和 POST（接收表單資料）兩種請求：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># views.py</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.shortcuts <span style=color:#f92672>import</span> render, redirect
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> .forms <span style=color:#f92672>import</span> PostForm
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>post_create</span>(request):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;建立新文章：GET 顯示空白表單，POST 處理表單提交&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> request<span style=color:#f92672>.</span>method <span style=color:#f92672>==</span> <span style=color:#e6db74>&#39;POST&#39;</span>:
+</span></span><span style=display:flex><span>        <span style=color:#75715e># POST 請求：接收使用者提交的表單資料</span>
+</span></span><span style=display:flex><span>        form <span style=color:#f92672>=</span> PostForm(request<span style=color:#f92672>.</span>POST)
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> form<span style=color:#f92672>.</span>is_valid():
+</span></span><span style=display:flex><span>            <span style=color:#75715e># 表單驗證通過，儲存到資料庫</span>
+</span></span><span style=display:flex><span>            post <span style=color:#f92672>=</span> form<span style=color:#f92672>.</span>save(commit<span style=color:#f92672>=</span><span style=color:#66d9ef>False</span>)
+</span></span><span style=display:flex><span>            post<span style=color:#f92672>.</span>author <span style=color:#f92672>=</span> request<span style=color:#f92672>.</span>user
+</span></span><span style=display:flex><span>            post<span style=color:#f92672>.</span>save()
+</span></span><span style=display:flex><span>            <span style=color:#75715e># 建立成功，重導向到文章詳情頁</span>
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> redirect(<span style=color:#e6db74>&#39;post_detail&#39;</span>, pk<span style=color:#f92672>=</span>post<span style=color:#f92672>.</span>pk)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>else</span>:
+</span></span><span style=display:flex><span>        <span style=color:#75715e># GET 請求：建立空白表單</span>
+</span></span><span style=display:flex><span>        form <span style=color:#f92672>=</span> PostForm()
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># GET 或表單驗證失敗時，渲染表單頁面</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> render(request, <span style=color:#e6db74>&#39;blog/post_form.html&#39;</span>, {<span style=color:#e6db74>&#39;form&#39;</span>: form})
+</span></span></code></pre></div><p>這個模式是 Django FBV 中最經典的「GET 顯示 / POST 處理」雙重職責（Dual Responsibility）模式，幾乎所有表單處理的 View 都遵循這個結構。</p><hr><h3 id=render-快捷函數>render() 快捷函數</h3><p><code>render()</code> 是 Django 最常用的快捷函數（Shortcut Function），它結合了「載入模板」和「回傳回應」兩個步驟：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> django.shortcuts <span style=color:#f92672>import</span> render
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>about_page</span>(request):
+</span></span><span style=display:flex><span>    context <span style=color:#f92672>=</span> {
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;title&#39;</span>: <span style=color:#e6db74>&#39;關於我們&#39;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;team_members&#39;</span>: [<span style=color:#e6db74>&#39;Alice&#39;</span>, <span style=color:#e6db74>&#39;Bob&#39;</span>, <span style=color:#e6db74>&#39;Charlie&#39;</span>],
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#75715e># render(request, 模板路徑, context 字典)</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> render(request, <span style=color:#e6db74>&#39;pages/about.html&#39;</span>, context)
+</span></span></code></pre></div><p><code>render()</code> 等同於以下寫法的簡化版：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> django.template.loader <span style=color:#f92672>import</span> get_template
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.http <span style=color:#f92672>import</span> HttpResponse
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>about_page</span>(request):
+</span></span><span style=display:flex><span>    template <span style=color:#f92672>=</span> get_template(<span style=color:#e6db74>&#39;pages/about.html&#39;</span>)
+</span></span><span style=display:flex><span>    context <span style=color:#f92672>=</span> {<span style=color:#e6db74>&#39;title&#39;</span>: <span style=color:#e6db74>&#39;關於我們&#39;</span>}
+</span></span><span style=display:flex><span>    html <span style=color:#f92672>=</span> template<span style=color:#f92672>.</span>render(context, request)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> HttpResponse(html)
+</span></span></code></pre></div><p>實務上幾乎不會使用手動載入模板的寫法，直接用 <code>render()</code> 即可。</p><hr><h3 id=redirect-重導向>redirect() 重導向</h3><p><code>redirect()</code> 快捷函數用於回傳 HTTP 重導向回應（預設為 302 暫時重導向），常用於表單提交成功後將使用者引導到另一個頁面：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> django.shortcuts <span style=color:#f92672>import</span> redirect
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>some_view</span>(request):
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 方式一：使用 URL name（推薦）</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> redirect(<span style=color:#e6db74>&#39;post_list&#39;</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 方式二：使用 URL name 並帶入參數</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> redirect(<span style=color:#e6db74>&#39;post_detail&#39;</span>, pk<span style=color:#f92672>=</span><span style=color:#ae81ff>42</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 方式三：直接指定 URL 路徑</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> redirect(<span style=color:#e6db74>&#39;/articles/&#39;</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 方式四：永久重導向（301）</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> redirect(<span style=color:#e6db74>&#39;post_list&#39;</span>, permanent<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
+</span></span></code></pre></div><blockquote><p><strong>最佳實踐：</strong> 建議使用 URL name 搭配 <code>redirect()</code>，而非寫死 URL 路徑。這樣即使未來修改了 URL 結構，也不需要逐一更新 View 中的路徑。</p></blockquote><hr><h3 id=jsonresponse回傳-json-資料>JsonResponse：回傳 JSON 資料</h3><p>當你的 View 需要回傳 <strong>JSON</strong>（JavaScript Object Notation）格式的資料時（例如提供 API 給前端 JavaScript 呼叫），可以使用 <strong>JsonResponse</strong>：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> django.http <span style=color:#f92672>import</span> JsonResponse
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>api_post_list</span>(request):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;回傳文章列表的 JSON 資料&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>    posts <span style=color:#f92672>=</span> Post<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>filter(is_published<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)<span style=color:#f92672>.</span>values(<span style=color:#e6db74>&#39;id&#39;</span>, <span style=color:#e6db74>&#39;title&#39;</span>, <span style=color:#e6db74>&#39;created_at&#39;</span>)
+</span></span><span style=display:flex><span>    data <span style=color:#f92672>=</span> {
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;status&#39;</span>: <span style=color:#e6db74>&#39;ok&#39;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;count&#39;</span>: posts<span style=color:#f92672>.</span>count(),
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;results&#39;</span>: list(posts),
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#75715e># safe=False 允許回傳非 dict 的頂層資料（如 list）</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> JsonResponse(data)
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 輸出：{&#34;status&#34;: &#34;ok&#34;, &#34;count&#34;: 3, &#34;results&#34;: [...]}</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>api_post_detail</span>(request, pk):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;回傳單篇文章的 JSON 資料&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>try</span>:
+</span></span><span style=display:flex><span>        post <span style=color:#f92672>=</span> Post<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>get(pk<span style=color:#f92672>=</span>pk)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>except</span> Post<span style=color:#f92672>.</span>DoesNotExist:
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> JsonResponse({<span style=color:#e6db74>&#39;error&#39;</span>: <span style=color:#e6db74>&#39;文章不存在&#39;</span>}, status<span style=color:#f92672>=</span><span style=color:#ae81ff>404</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    data <span style=color:#f92672>=</span> {
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;id&#39;</span>: post<span style=color:#f92672>.</span>pk,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;title&#39;</span>: post<span style=color:#f92672>.</span>title,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;content&#39;</span>: post<span style=color:#f92672>.</span>content,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;created_at&#39;</span>: post<span style=color:#f92672>.</span>created_at<span style=color:#f92672>.</span>isoformat(),
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> JsonResponse(data)
+</span></span></code></pre></div><p>JsonResponse 會自動將 Python 字典序列化（Serialize）為 JSON 格式，並設定回應的 <code>Content-Type</code> 為 <code>application/json</code>。</p><hr><h3 id=get_object_or_404-快捷函數>get_object_or_404() 快捷函數</h3><p>在查詢單一物件時，如果物件不存在，我們通常希望回傳 404 錯誤頁面，而非讓程式拋出未處理的例外。<code>get_object_or_404()</code> 正是為此設計的快捷函數：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> django.shortcuts <span style=color:#f92672>import</span> get_object_or_404, render
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>post_detail</span>(request, pk):
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 如果 pk 對應的 Post 不存在，自動回傳 404 頁面</span>
+</span></span><span style=display:flex><span>    post <span style=color:#f92672>=</span> get_object_or_404(Post, pk<span style=color:#f92672>=</span>pk)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> render(request, <span style=color:#e6db74>&#39;blog/post_detail.html&#39;</span>, {<span style=color:#e6db74>&#39;post&#39;</span>: post})
+</span></span></code></pre></div><p>這等同於以下手動處理的寫法：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> django.http <span style=color:#f92672>import</span> Http404
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>post_detail</span>(request, pk):
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>try</span>:
+</span></span><span style=display:flex><span>        post <span style=color:#f92672>=</span> Post<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>get(pk<span style=color:#f92672>=</span>pk)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>except</span> Post<span style=color:#f92672>.</span>DoesNotExist:
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>raise</span> Http404(<span style=color:#e6db74>&#34;文章不存在&#34;</span>)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> render(request, <span style=color:#e6db74>&#39;blog/post_detail.html&#39;</span>, {<span style=color:#e6db74>&#39;post&#39;</span>: post})
+</span></span></code></pre></div><p><code>get_object_or_404()</code> 也支援額外的篩選條件：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># 查詢指定作者的文章，不存在則 404</span>
+</span></span><span style=display:flex><span>post <span style=color:#f92672>=</span> get_object_or_404(Post, pk<span style=color:#f92672>=</span>pk, author<span style=color:#f92672>=</span>request<span style=color:#f92672>.</span>user)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 也可以傳入 QuerySet</span>
+</span></span><span style=display:flex><span>published_posts <span style=color:#f92672>=</span> Post<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>filter(is_published<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
+</span></span><span style=display:flex><span>post <span style=color:#f92672>=</span> get_object_or_404(published_posts, pk<span style=color:#f92672>=</span>pk)
+</span></span></code></pre></div><hr><h3 id=裝飾器限制-http-方法>裝飾器：限制 HTTP 方法</h3><p>Django 提供了多個裝飾器（Decorator）來限制 View 只接受特定的 HTTP 方法（HTTP Method），如果請求使用了不允許的方法，Django 會自動回傳 <code>405 Method Not Allowed</code> 錯誤。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> django.views.decorators.http <span style=color:#f92672>import</span> require_http_methods, require_GET, require_POST
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 只允許 GET 和 POST 方法</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>@require_http_methods</span>([<span style=color:#e6db74>&#34;GET&#34;</span>, <span style=color:#e6db74>&#34;POST&#34;</span>])
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>post_create</span>(request):
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> request<span style=color:#f92672>.</span>method <span style=color:#f92672>==</span> <span style=color:#e6db74>&#39;POST&#39;</span>:
+</span></span><span style=display:flex><span>        <span style=color:#75715e># 處理表單提交</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>pass</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>else</span>:
+</span></span><span style=display:flex><span>        <span style=color:#75715e># 顯示表單</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>pass</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 只允許 GET 方法（語法糖）</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>@require_GET</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>post_list</span>(request):
+</span></span><span style=display:flex><span>    posts <span style=color:#f92672>=</span> Post<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>all()
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> render(request, <span style=color:#e6db74>&#39;blog/post_list.html&#39;</span>, {<span style=color:#e6db74>&#39;posts&#39;</span>: posts})
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 只允許 POST 方法（語法糖）</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>@require_POST</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>post_delete</span>(request, pk):
+</span></span><span style=display:flex><span>    post <span style=color:#f92672>=</span> get_object_or_404(Post, pk<span style=color:#f92672>=</span>pk, author<span style=color:#f92672>=</span>request<span style=color:#f92672>.</span>user)
+</span></span><span style=display:flex><span>    post<span style=color:#f92672>.</span>delete()
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> redirect(<span style=color:#e6db74>&#39;post_list&#39;</span>)
+</span></span></code></pre></div><p><code>@require_GET</code> 和 <code>@require_POST</code> 分別是 <code>@require_http_methods(["GET"])</code> 和 <code>@require_http_methods(["POST"])</code> 的簡寫形式，讓程式碼更簡潔。</p><hr><h3 id=login_required-簡介>@login_required 簡介</h3><p><code>@login_required</code> 裝飾器用於保護 View，確保只有已登入的使用者才能存取。如果使用者尚未登入，Django 會自動將他們重導向到登入頁面：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> django.contrib.auth.decorators <span style=color:#f92672>import</span> login_required
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>@login_required</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>post_create</span>(request):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;只有登入的使用者才能建立文章&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 這裡的 request.user 保證是已登入的使用者</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>pass</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>@login_required</span>(login_url<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;/accounts/login/&#39;</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>dashboard</span>(request):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;自訂登入頁面的 URL&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> render(request, <span style=color:#e6db74>&#39;dashboard.html&#39;</span>)
+</span></span></code></pre></div><p>當未登入的使用者嘗試訪問被 <code>@login_required</code> 保護的 View 時，Django 會將他們重導向到 <code>settings.LOGIN_URL</code>（預設為 <code>/accounts/login/</code>），並在 URL 中附帶 <code>next</code> 參數，讓使用者登入後能自動回到原本要訪問的頁面。</p><hr><h3 id=完整-crud-範例>完整 CRUD 範例</h3><p>讓我們把前面學到的所有知識整合起來，以一個部落格的 <strong>Post</strong> Model 為例，實作完整的 <strong>CRUD</strong>（Create、Read、Update、Delete）功能。</p><h4 id=model-與-form-定義>Model 與 Form 定義</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># models.py</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.db <span style=color:#f92672>import</span> models
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.contrib.auth.models <span style=color:#f92672>import</span> User
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Post</span>(models<span style=color:#f92672>.</span>Model):
+</span></span><span style=display:flex><span>    title <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>CharField(<span style=color:#e6db74>&#39;標題&#39;</span>, max_length<span style=color:#f92672>=</span><span style=color:#ae81ff>200</span>)
+</span></span><span style=display:flex><span>    content <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>TextField(<span style=color:#e6db74>&#39;內容&#39;</span>)
+</span></span><span style=display:flex><span>    author <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>ForeignKey(User, on_delete<span style=color:#f92672>=</span>models<span style=color:#f92672>.</span>CASCADE, verbose_name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;作者&#39;</span>)
+</span></span><span style=display:flex><span>    is_published <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>BooleanField(<span style=color:#e6db74>&#39;已發布&#39;</span>, default<span style=color:#f92672>=</span><span style=color:#66d9ef>False</span>)
+</span></span><span style=display:flex><span>    created_at <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>DateTimeField(<span style=color:#e6db74>&#39;建立時間&#39;</span>, auto_now_add<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
+</span></span><span style=display:flex><span>    updated_at <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>DateTimeField(<span style=color:#e6db74>&#39;更新時間&#39;</span>, auto_now<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Meta</span>:
+</span></span><span style=display:flex><span>        ordering <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#39;-created_at&#39;</span>]
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>__str__</span>(self):
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> self<span style=color:#f92672>.</span>title
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># forms.py</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django <span style=color:#f92672>import</span> forms
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> .models <span style=color:#f92672>import</span> Post
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>PostForm</span>(forms<span style=color:#f92672>.</span>ModelForm):
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Meta</span>:
+</span></span><span style=display:flex><span>        model <span style=color:#f92672>=</span> Post
+</span></span><span style=display:flex><span>        fields <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#39;title&#39;</span>, <span style=color:#e6db74>&#39;content&#39;</span>, <span style=color:#e6db74>&#39;is_published&#39;</span>]
+</span></span><span style=display:flex><span>        widgets <span style=color:#f92672>=</span> {
+</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;title&#39;</span>: forms<span style=color:#f92672>.</span>TextInput(attrs<span style=color:#f92672>=</span>{<span style=color:#e6db74>&#39;class&#39;</span>: <span style=color:#e6db74>&#39;form-control&#39;</span>}),
+</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;content&#39;</span>: forms<span style=color:#f92672>.</span>Textarea(attrs<span style=color:#f92672>=</span>{<span style=color:#e6db74>&#39;class&#39;</span>: <span style=color:#e6db74>&#39;form-control&#39;</span>, <span style=color:#e6db74>&#39;rows&#39;</span>: <span style=color:#ae81ff>8</span>}),
+</span></span><span style=display:flex><span>        }
+</span></span></code></pre></div><h4 id=views完整-crud>Views（完整 CRUD）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># views.py</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.shortcuts <span style=color:#f92672>import</span> render, get_object_or_404, redirect
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.contrib.auth.decorators <span style=color:#f92672>import</span> login_required
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.views.decorators.http <span style=color:#f92672>import</span> require_http_methods, require_GET, require_POST
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> .models <span style=color:#f92672>import</span> Post
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> .forms <span style=color:#f92672>import</span> PostForm
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># ─── Read（列表） ───</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>@require_GET</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>post_list</span>(request):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;列出所有已發布的文章&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>    posts <span style=color:#f92672>=</span> Post<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>filter(is_published<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> render(request, <span style=color:#e6db74>&#39;blog/post_list.html&#39;</span>, {<span style=color:#e6db74>&#39;posts&#39;</span>: posts})
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># ─── Read（詳情） ───</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>@require_GET</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>post_detail</span>(request, pk):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;查看單篇文章&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>    post <span style=color:#f92672>=</span> get_object_or_404(Post, pk<span style=color:#f92672>=</span>pk, is_published<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> render(request, <span style=color:#e6db74>&#39;blog/post_detail.html&#39;</span>, {<span style=color:#e6db74>&#39;post&#39;</span>: post})
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># ─── Create（建立） ───</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>@login_required</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>@require_http_methods</span>([<span style=color:#e6db74>&#34;GET&#34;</span>, <span style=color:#e6db74>&#34;POST&#34;</span>])
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>post_create</span>(request):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;建立新文章&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> request<span style=color:#f92672>.</span>method <span style=color:#f92672>==</span> <span style=color:#e6db74>&#39;POST&#39;</span>:
+</span></span><span style=display:flex><span>        form <span style=color:#f92672>=</span> PostForm(request<span style=color:#f92672>.</span>POST)
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> form<span style=color:#f92672>.</span>is_valid():
+</span></span><span style=display:flex><span>            post <span style=color:#f92672>=</span> form<span style=color:#f92672>.</span>save(commit<span style=color:#f92672>=</span><span style=color:#66d9ef>False</span>)
+</span></span><span style=display:flex><span>            post<span style=color:#f92672>.</span>author <span style=color:#f92672>=</span> request<span style=color:#f92672>.</span>user  <span style=color:#75715e># 自動設定作者為當前使用者</span>
+</span></span><span style=display:flex><span>            post<span style=color:#f92672>.</span>save()
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> redirect(<span style=color:#e6db74>&#39;post_detail&#39;</span>, pk<span style=color:#f92672>=</span>post<span style=color:#f92672>.</span>pk)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>else</span>:
+</span></span><span style=display:flex><span>        form <span style=color:#f92672>=</span> PostForm()
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> render(request, <span style=color:#e6db74>&#39;blog/post_form.html&#39;</span>, {<span style=color:#e6db74>&#39;form&#39;</span>: form, <span style=color:#e6db74>&#39;action&#39;</span>: <span style=color:#e6db74>&#39;建立&#39;</span>})
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># ─── Update（更新） ───</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>@login_required</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>@require_http_methods</span>([<span style=color:#e6db74>&#34;GET&#34;</span>, <span style=color:#e6db74>&#34;POST&#34;</span>])
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>post_update</span>(request, pk):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;更新文章（僅限作者本人）&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>    post <span style=color:#f92672>=</span> get_object_or_404(Post, pk<span style=color:#f92672>=</span>pk, author<span style=color:#f92672>=</span>request<span style=color:#f92672>.</span>user)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> request<span style=color:#f92672>.</span>method <span style=color:#f92672>==</span> <span style=color:#e6db74>&#39;POST&#39;</span>:
+</span></span><span style=display:flex><span>        form <span style=color:#f92672>=</span> PostForm(request<span style=color:#f92672>.</span>POST, instance<span style=color:#f92672>=</span>post)
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> form<span style=color:#f92672>.</span>is_valid():
+</span></span><span style=display:flex><span>            form<span style=color:#f92672>.</span>save()
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> redirect(<span style=color:#e6db74>&#39;post_detail&#39;</span>, pk<span style=color:#f92672>=</span>post<span style=color:#f92672>.</span>pk)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>else</span>:
+</span></span><span style=display:flex><span>        form <span style=color:#f92672>=</span> PostForm(instance<span style=color:#f92672>=</span>post)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> render(request, <span style=color:#e6db74>&#39;blog/post_form.html&#39;</span>, {
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;form&#39;</span>: form,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;post&#39;</span>: post,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;action&#39;</span>: <span style=color:#e6db74>&#39;更新&#39;</span>,
+</span></span><span style=display:flex><span>    })
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># ─── Delete（刪除） ───</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>@login_required</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>@require_http_methods</span>([<span style=color:#e6db74>&#34;GET&#34;</span>, <span style=color:#e6db74>&#34;POST&#34;</span>])
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>post_delete</span>(request, pk):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;刪除文章（僅限作者本人）&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>    post <span style=color:#f92672>=</span> get_object_or_404(Post, pk<span style=color:#f92672>=</span>pk, author<span style=color:#f92672>=</span>request<span style=color:#f92672>.</span>user)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> request<span style=color:#f92672>.</span>method <span style=color:#f92672>==</span> <span style=color:#e6db74>&#39;POST&#39;</span>:
+</span></span><span style=display:flex><span>        post<span style=color:#f92672>.</span>delete()
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> redirect(<span style=color:#e6db74>&#39;post_list&#39;</span>)
+</span></span><span style=display:flex><span>    <span style=color:#75715e># GET 請求：顯示確認刪除頁面</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> render(request, <span style=color:#e6db74>&#39;blog/post_confirm_delete.html&#39;</span>, {<span style=color:#e6db74>&#39;post&#39;</span>: post})
+</span></span></code></pre></div><h4 id=url-路由設定>URL 路由設定</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># urls.py</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.urls <span style=color:#f92672>import</span> path
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> . <span style=color:#f92672>import</span> views
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>urlpatterns <span style=color:#f92672>=</span> [
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;posts/&#39;</span>, views<span style=color:#f92672>.</span>post_list, name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;post_list&#39;</span>),
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;posts/&lt;int:pk&gt;/&#39;</span>, views<span style=color:#f92672>.</span>post_detail, name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;post_detail&#39;</span>),
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;posts/create/&#39;</span>, views<span style=color:#f92672>.</span>post_create, name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;post_create&#39;</span>),
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;posts/&lt;int:pk&gt;/update/&#39;</span>, views<span style=color:#f92672>.</span>post_update, name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;post_update&#39;</span>),
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;posts/&lt;int:pk&gt;/delete/&#39;</span>, views<span style=color:#f92672>.</span>post_delete, name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;post_delete&#39;</span>),
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><p>以上五個 URL 對應五個 View 函式，涵蓋了完整的 CRUD 操作。注意 <code>create/</code> 路由必須放在 <code>&lt;int:pk>/</code> 之前，否則 Django 會嘗試將 <code>create</code> 當作 <code>pk</code> 來匹配，導致錯誤。</p><hr><h3 id=總結>總結</h3><p>在這篇教學中，我們深入學習了 Django <strong>Function-Based Views</strong>（FBV）的核心知識：</p><ul><li><strong>View 的角色</strong>：在 MTV 架構中，View 負責接收 HttpRequest、執行邏輯、回傳 HttpResponse，是連接 Model 與 Template 的橋樑。</li><li><strong>HttpRequest 物件</strong>：封裝了請求的所有資訊，包括 <code>method</code>、<code>GET</code>、<code>POST</code>、<code>body</code>、<code>user</code>、<code>session</code> 等屬性。</li><li><strong>HttpResponse 物件</strong>：代表伺服器的回應，可以設定 <code>status_code</code>、<code>content</code> 以及自訂標頭。</li><li><strong>快捷函數</strong>：<code>render()</code> 結合模板渲染、<code>redirect()</code> 處理重導向、<code>get_object_or_404()</code> 安全地查詢單一物件。</li><li><strong>JsonResponse</strong>：專門用於回傳 JSON 格式的回應，自動處理序列化與 Content-Type 設定。</li><li><strong>裝飾器</strong>：<code>@require_http_methods</code>、<code>@require_GET</code>、<code>@require_POST</code> 限制允許的 HTTP 方法；<code>@login_required</code> 保護需要登入才能存取的 View。</li><li><strong>完整 CRUD 範例</strong>：以 Post Model 為例，展示了列表、詳情、建立、更新、刪除五個 View 的實作方式與 URL 路由設定。</li></ul><p>FBV 的最大優勢是直觀易懂，程式碼的執行流程一目了然。對於邏輯簡單或高度客製化的需求，FBV 是非常好的選擇。在後續的教學中，我們將學習 <strong>Class-Based Views</strong>（CBV），透過類別繼承和 Mixin 機制實現更高效的程式碼複用。</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
+</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/django/011-django-orm-queryset/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django ORM 與 QuerySet 查詢語法完全指南 | Django 教學</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/05/31</span>
+</a><a href=https://benzhub.github.io/post/django/010-django-migrations/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django Migrations 資料庫遷移實戰指南 | Django 教學</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/05/30</span>
+</a><a href=https://benzhub.github.io/post/django/009-django-models-relationships/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django Models 關聯關係：一對一、一對多、多對多完全解析 | Django 教學</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/05/29</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/django/011-django-orm-queryset/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+<span class="text-sm font-medium">Django ORM 與 QuerySet 查詢語法完全指南 | Django 教學</span></a></div><div><a href=https://benzhub.github.io/post/django/013-django-cbv/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+<span class="text-sm font-medium">Django Views：Class-Based Views 類別視圖深入解析 | Django 教學</span></a></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
+</a><a href=/tags/acid><span class=tag-pill>acid</span>
+</a><a href=/tags/ai><span class=tag-pill>ai</span>
+</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
+</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
+</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
+</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
+</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
+</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
+</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
+</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
+</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
+</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
+</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
+</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
+</a><a href=/tags/api><span class=tag-pill>api</span>
+</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
+</a><a href=/tags/autovacuum><span class=tag-pill>autovacuum</span>
+</a><a href=/tags/background-processes><span class=tag-pill>background-processes</span>
+</a><a href=/tags/big-o><span class=tag-pill>big o</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (14)</span>
+</a><a href=/post/javascript/><span class=tag-pill>JavaScript (69)</span>
+</a><a href=/post/django/><span class=tag-pill>Django (31)</span>
+</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
+</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
+</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
+</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
+</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/django/031-django-signals/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Signals 信號機制：觀察者模式實戰 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/20</p></a><a href=/post/postgresql/014-dml-advanced/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">DML 進階操作：Upsert、MERGE、RETURNING 與 COPY 批量匯入 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/20</p></a><a href=/post/javascript/data-structures--algorithms/007-sorting/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">排序演算法 — Bubble、Merge、Quick Sort 等十大排序完整比較 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/20</p></a><a href=/post/postgresql/013-ddl-schema/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/19</p></a><a href=/post/django/030-django-custom-user-model/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django 自訂使用者模型：AbstractUser 與 AbstractBaseUser | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/19</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>

@@ -1,1325 +1,345 @@
-<!DOCTYPE html>
-
-<html lang="zh-TW">
-<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><title>Django URLs 路由設計與配置完全指南 | Django 教學 | BenzHub</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="apple-touch-icon" sizes="180x180" href='/favicon/apple-touch-icon.png'>
-    <link rel="icon" type="image/png" sizes="32x32" href='/favicon/favicon-32x32.png'>
-    <link rel="icon" type="image/png" sizes="16x16" href='/favicon/favicon-16x16.png'>
-    <link rel="manifest" href='/favicon/site.webmanifest' />
-    <link rel="mask-icon" href=' /favicon/safari-pinned-tab.svg' color="#5bbad5" />
-    <link rel="shortcut icon" href='/favicon/favicon.ico' />
-    <meta name="theme-color" content="#fafafa">
-    <meta property="og:title" content="Django URLs 路由設計與配置完全指南 | Django 教學 | BenzHub" />
-    
-    
-    <link rel="stylesheet" href="/css/style.css" />
-    
-    <link href=' /css/blonde.min.css' rel="stylesheet" type="text/css" media="print"
-        onload="this.media=' all'">
-    
-
-
-
-
-
-
-
-  
-
-
-
-
-  
-
-<meta name="description" content="Django URL 路由完全指南：從 URLconf 基礎、path() 與 re_path() 函數、路徑轉換器、include() 模組化路由、URL 命名與 reverse() 反向解析、Namespace 命名空間到 RESTful 風格設計，帶你掌握 Django 路由系統的核心知識。">
-<meta property="og:site_name" content="BenzHub">
-<meta property="og:description" content="Django URL 路由完全指南：從 URLconf 基礎、path() 與 re_path() 函數、路徑轉換器、include() 模組化路由、URL 命名與 reverse() 反向解析、Namespace 命名空間到 RESTful 風格設計，帶你掌握 Django 路由系統的核心知識。">
-<meta property="og:url" content="http://localhost:1313/post/django/014-django-urls/">
-<meta property="og:type" content="article">
-<meta property="og:locale" content="zh_TW">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="">
-
-<link rel="canonical" href="http://localhost:1313/post/django/014-django-urls/">
-
-<meta name="twitter:description" content="Django URL 路由完全指南：從 URLconf 基礎、path() 與 re_path() 函數、路徑轉換器、include() 模組化路由、URL 命名與 reverse() 反向解析、Namespace 命名空間到 RESTful 風格設計，帶你掌握 Django 路由系統的核心知識。">
-<meta property="article:published_time" content="2026-06-03T00:00:00&#43;00:00">
-<meta property="article:updated_time" content="2026-05-24T00:00:00&#43;00:00">
-
-
-
-
-
-    
-<meta property="og:image" content="http://localhost:1313/img/django/014-Django-URLs.png">
-<meta property="og:image:url" content="http://localhost:1313/img/django/014-Django-URLs.png">
-    
-
-    
-    <link rel="stylesheet" href='/css/custom.css'>
-    <i class="dark hidden"></i>
-    
-<link rel="alternate" hreflang="zh-TW" href="http://localhost:1313/post/django/014-django-urls/" />
-
-<link rel="alternate" hreflang="x-default" href="http://localhost:1313/post/django/014-django-urls/" />
-
-    
-
-
-
-
-
-
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BlogPosting",
-  "headline": "\"Django URLs 路由設計與配置完全指南 | Django 教學\"",
-  "description": "\"Django URL 路由完全指南：從 URLconf 基礎、path() 與 re_path() 函數、路徑轉換器、include() 模組化路由、URL 命名與 reverse() 反向解析、Namespace 命名空間到 RESTful 風格設計，帶你掌握 Django 路由系統的核心知識。\"",
-  "author": {
-    "@type": "Person",
-    "name": "\"BenzHub\"",
-    "url": "http:\/\/localhost:1313\/about",
-    "jobTitle": "\"Software Developer\"",
-    "sameAs": [
-      "\"https://github.com/benzhub\""
-    ]
-  },
-  "datePublished": "2026-06-03T00:00:00\u002b00:00",
-  "dateModified": "2026-05-24T00:00:00\u002b00:00",
-  "image": "http:\/\/localhost:1313\/img\/django\/014-Django-URLs.png",
-  "publisher": {
-    "@type": "Organization",
-    "name": "\"BenzHub\"",
-    "url": "\"http://localhost:1313/\"",
-    "sameAs": [
-      "\"https://github.com/benzhub\""
-    ]
-  },
-  "mainEntityOfPage": {
-    "@type": "WebPage",
-    "@id": "http:\/\/localhost:1313\/post\/django\/014-django-urls\/"
-  },
-  "inLanguage": "zh-TW"
-}
-</script>
-
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    {
-      "@type": "ListItem",
-      "position": 1,
-      "name": "\"BenzHub\"",
-      "item": "http:\/\/localhost:1313\/"
-    }
-    
-    
-      
-      
-    ,{
-      "@type": "ListItem",
-      "position": 2,
-      "name": "\"Blog\"",
-      "item": "http:\/\/localhost:1313\/post\/django\/"
-    }
-      
-      
-    
-    ,{
-      "@type": "ListItem",
-      "position":  3 ,
-      "name": "\"Django URLs 路由設計與配置完全指南 | Django 教學\""
-    }
-  ]
-}
-</script>
-
-
-
-
-
-
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    
-    
-    {
-      "@type": "Question",
-      "name": "\"Django 的 path() 和 re_path() 有什麼差別？應該用哪個？\"",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "\"path() 是 Django 2.0 引入的現代語法，使用路徑轉換器（如 \\u003cint:pk\\u003e）自動做型別轉換，語法簡潔直觀。re_path() 使用正規表達式匹配，參數一律為字串，適合複雜匹配規則。建議優先使用 path()，只在需要複雜匹配邏輯時才使用 re_path()。\""
-      }
-    }
-    
-    ,
-    {
-      "@type": "Question",
-      "name": "\"Django 為什麼要用 URL 命名和 reverse()？直接寫死 URL 不行嗎？\"",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "\"硬編碼 URL 會導致維護困難——當 URL 路徑變更時，所有用到該路徑的地方都要手動修改。使用 URL 命名搭配 reverse() 或模板的 {% url %} 標籤做反向解析，當路由變更時只需修改 urls.py 的定義，其他地方會自動對應新路徑，大幅提升可維護性。\""
-      }
-    }
-    
-    ,
-    {
-      "@type": "Question",
-      "name": "\"Django 的 Namespace 命名空間有什麼用？什麼時候需要用到？\"",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "\"Namespace 解決不同 App 之間 URL 名稱衝突的問題。例如 blog App 和 shop App 都有名為 detail 的 URL，透過 Namespace 可以用 blog:detail 和 shop:detail 區分。當專案有多個 App 時，強烈建議為每個 App 設定 app_name 做命名空間管理。\""
-      }
-    }
-    
-  ]
-}
-</script>
-
-
-
-
-
-</head>
-<body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class="site-nav" id="siteNav">
-    <div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full">
-        
-        <a href="http://localhost:1313/" class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">
-            BenzHub
-        </a>
-
-        
-        <div class="hidden md:flex items-center gap-6">
-            
-            <a href="/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                首頁
-            </a>
-            
-            <a href="/about/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                關於
-            </a>
-            
-            <a href="/contact/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                聯絡
-            </a>
-            
-            <a href="/resourses/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                資源
-            </a>
-            
-
-            
-            <div class="flex items-center gap-2">
-                <form class="flex items-center" role="search" method="get" action="https://google.com/search" id="navSearchForm">
-                    <input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50"
-                        type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋" id="navSearchInput">
-                    <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
-                </form>
-                <button onclick="toggleNavSearch()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
-                    <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-                    </svg>
-                </button>
-            </div>
-
-            
-            <span class="text-zinc-200 dark:text-zinc-700">|</span>
-
-            
-            
-
-
-
-
-<div class="lang-switcher relative hidden md:block">
-    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-        <span>🌐</span>
-        <span>繁體中文</span>
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-    </button>
-    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
-        
-            
-            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-                
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-
-<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
-    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
-    <div class="flex gap-2">
-        
-            
-            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-                
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-
-            
-            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-                <i id="icon2" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
-            </button>
-        </div>
-
-        
-        <div class="flex md:hidden items-center gap-1">
-            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-                <i id="icon" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
-            </button>
-            <button id="hamburgerbtn" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Menu">
-                <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
-            </button>
-        </div>
-    </div>
-
-    
-    <div class="mobile-menu md:hidden" id="mobileMenu">
-        
-        <a href="/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            首頁
-        </a>
-        
-        <a href="/about/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            關於
-        </a>
-        
-        <a href="/contact/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            聯絡
-        </a>
-        
-        <a href="/resourses/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            資源
-        </a>
-        
-        <form class="mt-2" role="search" method="get" action="https://google.com/search">
-            <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
-            <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
-        </form>
-        
-        
-
-
-
-
-<div class="lang-switcher relative hidden md:block">
-    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-        <span>🌐</span>
-        <span>繁體中文</span>
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-    </button>
-    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
-        
-            
-            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-                
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-
-<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
-    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
-    <div class="flex gap-2">
-        
-            
-            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-                
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-    </div>
-</nav>
-
-<script>
-    
-    document.getElementById('hamburgerbtn').addEventListener('click', function () {
-        document.getElementById('mobileMenu').classList.toggle('active');
-    });
-
-    
-    window.addEventListener('scroll', function () {
-        var nav = document.getElementById('siteNav');
-        if (window.scrollY > 50) {
-            nav.classList.add('scrolled');
-        } else {
-            nav.classList.remove('scrolled');
-        }
-    });
-
-    
-    function toggleNavSearch() {
-        var input = document.getElementById('navSearchInput');
-        input.classList.toggle('expanded');
-        if (input.classList.contains('expanded')) {
-            input.focus();
-        }
-    }
-
-    
-    function toggleLangMenu() {
-        var dropdown = document.getElementById('langDropdown');
-        dropdown.classList.toggle('hidden');
-    }
-
-    
-    document.addEventListener('click', function (e) {
-        
-        var form = document.getElementById('navSearchForm');
-        var input = document.getElementById('navSearchInput');
-        if (form && input && !form.contains(e.target) && !e.target.closest('[aria-label="Toggle Search"]')) {
-            input.classList.remove('expanded');
-        }
-        
-        var langSwitcher = e.target.closest('.lang-switcher');
-        if (!langSwitcher) {
-            var dropdown = document.getElementById('langDropdown');
-            if (dropdown) dropdown.classList.add('hidden');
-        }
-    });
-</script>
-<div class="nav-spacer"></div>
-    <div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id="content">
-        <div class="lg:mx-5">
-<div class="grid grid-cols-3 gap-6">
-  
-  <div class="col-span-3 lg:col-span-2">
-  
-      
-      <div class="post-detail fade-in my-4">
-        <h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Django URLs 路由設計與配置完全指南 | Django 教學</h1>
-        <div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4">
-            <span class="flex items-center gap-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/03
-            </span>
-            
-            <span class="flex items-center gap-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                2026/05/24
-            </span>
-            
-        </div>
-        
-        <div class="flex flex-wrap gap-1.5 mb-5">
-            
-            <a href='/tags/python' class="tag-pill no-underline">python</a>
-            
-            <a href='/tags/django' class="tag-pill no-underline">django</a>
-            
-        </div>
-        
-        
-        <img class="py-4 m-auto rounded-lg thumb-img" src="http://localhost:1313/img/django/014-Django-URLs.png" alt="Django URLs 路由設計與配置完全指南 | Django 教學">
-        
-        
-        <div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote>
-<p>當使用者在瀏覽器輸入一個網址並按下 Enter，Django 如何知道該呼叫哪個 View 來處理這個請求？答案就是 <strong>URL 路由系統（URLconf）</strong>。URLconf 是 Django 請求處理流程的關鍵環節，它負責將傳入的 URL 對應到正確的 <strong>View</strong> 函數或類別。本篇文章將從 <strong>urlpatterns</strong> 基礎、<strong>path()</strong> 與 <strong>re_path()</strong> 函數、<strong>路徑轉換器（Path Converters）</strong>、<strong>include()</strong> 模組化路由、<strong>URL 命名</strong> 與 <strong>reverse() 反向解析（Reverse Resolution）</strong>、<strong>Namespace 命名空間</strong> 到 <strong>RESTful 風格</strong> 的 URL 設計最佳實踐，帶你全面掌握 Django 路由系統。</p>
-</blockquote>
-<h3 id="url-配置基礎urlconf">URL 配置基礎（URLconf）</h3>
-<p>Django 的路由核心是一個名為 <code>urlpatterns</code> 的 Python 列表，定義在專案的 <code>urls.py</code> 檔案中。當 HTTP 請求進來時，Django 從 <code>settings.py</code> 的 <code>ROOT_URLCONF</code> 設定所指定的模組載入 <code>urlpatterns</code>，然後由上而下依序嘗試匹配每一條路由規則。<strong>第一個匹配成功的規則會生效</strong>，後續規則不再比對。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># myproject/urls.py（ROOT_URLCONF 指向的模組）</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.contrib <span style="color:#f92672">import</span> admin
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.urls <span style="color:#f92672">import</span> path
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>urlpatterns <span style="color:#f92672">=</span> [
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;admin/&#39;</span>, admin<span style="color:#f92672">.</span>site<span style="color:#f92672">.</span>urls),
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;hello/&#39;</span>, views<span style="color:#f92672">.</span>hello_world),
-</span></span><span style="display:flex;"><span>]
-</span></span></code></pre></div><p>這段程式碼做了兩件事：</p>
-<ol>
-<li>將 <code>/admin/</code> 開頭的 URL 交給 Django 內建的管理後台處理</li>
-<li>將 <code>/hello/</code> 這個 URL 對應到 <code>views.hello_world</code> 這個 View 函數</li>
-</ol>
-<h4 id="django-如何匹配-url">Django 如何匹配 URL？</h4>
-<p>Django 匹配 URL 時有幾個重要規則：</p>
-<ul>
-<li><strong>不匹配域名和 GET 參數</strong>：對 <code>https://example.com/articles/?page=2</code> 這個請求，Django 只會拿 <code>articles/</code> 來比對</li>
-<li><strong>由上而下依序比對</strong>：匹配到第一個符合的規則就停止，因此路由的順序很重要</li>
-<li><strong>開頭不含斜線</strong>：<code>urlpatterns</code> 中的路由路徑不需要加上前導斜線，例如寫 <code>articles/</code> 而非 <code>/articles/</code></li>
-</ul>
-<h3 id="path-函數詳解">path() 函數詳解</h3>
-<p><code>path()</code> 是 Django 路由系統最核心的函數，它接受四個參數：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>path(route, view, kwargs<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>, name<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>)
-</span></span></code></pre></div><table>
-	<thead>
-			<tr>
-					<th>參數</th>
-					<th>說明</th>
-					<th>是否必填</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td><code>route</code></td>
-					<td>URL 匹配模式，例如 <code>'articles/&lt;int:pk&gt;/'</code></td>
-					<td>必填</td>
-			</tr>
-			<tr>
-					<td><code>view</code></td>
-					<td>匹配成功後呼叫的 View callable</td>
-					<td>必填</td>
-			</tr>
-			<tr>
-					<td><code>kwargs</code></td>
-					<td>額外傳遞給 View 的關鍵字參數（dict）</td>
-					<td>選填</td>
-			</tr>
-			<tr>
-					<td><code>name</code></td>
-					<td>URL 的命名，用於反向解析</td>
-					<td>選填</td>
-			</tr>
-	</tbody>
-</table>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> django.urls <span style="color:#f92672">import</span> path
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> . <span style="color:#f92672">import</span> views
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>urlpatterns <span style="color:#f92672">=</span> [
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 基本用法：route + view</span>
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;articles/&#39;</span>, views<span style="color:#f92672">.</span>article_list),
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 帶路徑參數：&lt;int:pk&gt; 會自動轉換為 int 型別</span>
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;articles/&lt;int:pk&gt;/&#39;</span>, views<span style="color:#f92672">.</span>article_detail),
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 帶額外參數：透過 kwargs 傳遞固定值給 View</span>
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;blog/&#39;</span>, views<span style="color:#f92672">.</span>article_list, kwargs<span style="color:#f92672">=</span>{<span style="color:#e6db74">&#39;blog_mode&#39;</span>: <span style="color:#66d9ef">True</span>}),
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 帶命名：方便反向解析</span>
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;articles/&lt;int:pk&gt;/&#39;</span>, views<span style="color:#f92672">.</span>article_detail, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;article-detail&#39;</span>),
-</span></span><span style="display:flex;"><span>]
-</span></span></code></pre></div><h3 id="路徑轉換器path-converters">路徑轉換器（Path Converters）</h3>
-<p><code>path()</code> 函數的一大優勢是內建的路徑轉換器，能自動將 URL 字串轉換為對應的 Python 型別。Django 提供了五種內建轉換器：</p>
-<table>
-	<thead>
-			<tr>
-					<th>轉換器</th>
-					<th>匹配規則</th>
-					<th>Python 型別</th>
-					<th>範例</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td><code>str</code></td>
-					<td>非 <code>/</code> 的任何非空字串（預設）</td>
-					<td><code>str</code></td>
-					<td><code>&lt;str:name&gt;</code></td>
-			</tr>
-			<tr>
-					<td><code>int</code></td>
-					<td>零或正整數</td>
-					<td><code>int</code></td>
-					<td><code>&lt;int:pk&gt;</code></td>
-			</tr>
-			<tr>
-					<td><code>slug</code></td>
-					<td>ASCII 字母、數字、連字號、底線</td>
-					<td><code>str</code></td>
-					<td><code>&lt;slug:slug&gt;</code></td>
-			</tr>
-			<tr>
-					<td><code>uuid</code></td>
-					<td>UUID 格式字串</td>
-					<td><code>uuid.UUID</code></td>
-					<td><code>&lt;uuid:uid&gt;</code></td>
-			</tr>
-			<tr>
-					<td><code>path</code></td>
-					<td>包含 <code>/</code> 的任意非空字串</td>
-					<td><code>str</code></td>
-					<td><code>&lt;path:file_path&gt;</code></td>
-			</tr>
-	</tbody>
-</table>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> django.urls <span style="color:#f92672">import</span> path
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> . <span style="color:#f92672">import</span> views
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>urlpatterns <span style="color:#f92672">=</span> [
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># int：匹配整數，自動轉為 Python int</span>
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;users/&lt;int:user_id&gt;/&#39;</span>, views<span style="color:#f92672">.</span>user_detail),
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># slug：匹配 slug 格式的字串（如 my-first-post）</span>
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;posts/&lt;slug:post_slug&gt;/&#39;</span>, views<span style="color:#f92672">.</span>post_detail),
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># uuid：匹配 UUID 格式（如 075194d3-6885-417e-a8a8-6c931e272f00）</span>
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;items/&lt;uuid:item_uuid&gt;/&#39;</span>, views<span style="color:#f92672">.</span>item_detail),
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># path：匹配含有斜線的完整路徑</span>
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;files/&lt;path:file_path&gt;/&#39;</span>, views<span style="color:#f92672">.</span>serve_file),
-</span></span><span style="display:flex;"><span>]
-</span></span></code></pre></div><h4 id="自訂路徑轉換器">自訂路徑轉換器</h4>
-<p>如果內建的轉換器無法滿足需求，你可以自訂。一個轉換器需要定義 <code>regex</code> 屬性、<code>to_python()</code> 方法和 <code>to_url()</code> 方法：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># converters.py</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">FourDigitYearConverter</span>:
-</span></span><span style="display:flex;"><span>    regex <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;[0-9]</span><span style="color:#e6db74">{4}</span><span style="color:#e6db74">&#39;</span>  <span style="color:#75715e"># 匹配規則（正規表達式）</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">to_python</span>(self, value):
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> int(value)  <span style="color:#75715e"># URL 字串 → Python 型別</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">to_url</span>(self, value):
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#39;</span><span style="color:#e6db74">%04d</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">%</span> value  <span style="color:#75715e"># Python 型別 → URL 字串</span>
-</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># urls.py</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.urls <span style="color:#f92672">import</span> path, register_converter
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> . <span style="color:#f92672">import</span> converters, views
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 註冊自訂轉換器，命名為 &#39;yyyy&#39;</span>
-</span></span><span style="display:flex;"><span>register_converter(converters<span style="color:#f92672">.</span>FourDigitYearConverter, <span style="color:#e6db74">&#39;yyyy&#39;</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>urlpatterns <span style="color:#f92672">=</span> [
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 使用自訂轉換器</span>
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;articles/&lt;yyyy:year&gt;/&#39;</span>, views<span style="color:#f92672">.</span>year_archive, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;year-archive&#39;</span>),
-</span></span><span style="display:flex;"><span>]
-</span></span></code></pre></div><h3 id="re_path-正則表達式路由">re_path() 正則表達式路由</h3>
-<p>對於 <code>path()</code> 無法處理的複雜匹配邏輯，Django 提供了 <code>re_path()</code>，它使用正規表達式（Regular Expression）來定義匹配規則：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> django.urls <span style="color:#f92672">import</span> re_path
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> . <span style="color:#f92672">import</span> views
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>urlpatterns <span style="color:#f92672">=</span> [
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 匹配兩位數的月份（01-12）</span>
-</span></span><span style="display:flex;"><span>    re_path(<span style="color:#e6db74">r</span><span style="color:#e6db74">&#39;^articles/(?P&lt;year&gt;[0-9]</span><span style="color:#e6db74">{4}</span><span style="color:#e6db74">)/(?P&lt;month&gt;0[1-9]|1[0-2])/$&#39;</span>,
-</span></span><span style="display:flex;"><span>            views<span style="color:#f92672">.</span>month_archive),
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 匹配特定格式的產品編號（如 PRD-001）</span>
-</span></span><span style="display:flex;"><span>    re_path(<span style="color:#e6db74">r</span><span style="color:#e6db74">&#39;^products/(?P&lt;product_code&gt;[A-Z]</span><span style="color:#e6db74">{3}</span><span style="color:#e6db74">-[0-9]</span><span style="color:#e6db74">{3}</span><span style="color:#e6db74">)/$&#39;</span>,
-</span></span><span style="display:flex;"><span>            views<span style="color:#f92672">.</span>product_detail),
-</span></span><span style="display:flex;"><span>]
-</span></span></code></pre></div><p>需要注意的是，<code>re_path()</code> 擷取到的參數<strong>一律為字串</strong>，不會自動做型別轉換，你需要在 View 中自行處理型別轉換。</p>
-<p><strong>原則</strong>：優先使用 <code>path()</code>，只在需要複雜匹配邏輯時才使用 <code>re_path()</code>。</p>
-<h3 id="include-模組化路由">include() 模組化路由</h3>
-<p>隨著專案規模成長，把所有路由擠在一個 <code>urls.py</code> 會變得難以維護。<code>include()</code> 函數讓你將路由拆分到各個 App 的 <code>urls.py</code> 中，實現模組化管理：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># myproject/urls.py（專案級別）</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.contrib <span style="color:#f92672">import</span> admin
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.urls <span style="color:#f92672">import</span> path, include
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>urlpatterns <span style="color:#f92672">=</span> [
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;admin/&#39;</span>, admin<span style="color:#f92672">.</span>site<span style="color:#f92672">.</span>urls),
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;blog/&#39;</span>, include(<span style="color:#e6db74">&#39;blog.urls&#39;</span>)),       <span style="color:#75715e"># 將 /blog/ 開頭的 URL 交給 blog App 處理</span>
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;accounts/&#39;</span>, include(<span style="color:#e6db74">&#39;accounts.urls&#39;</span>)),  <span style="color:#75715e"># 將 /accounts/ 開頭的 URL 交給 accounts App 處理</span>
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;api/&#39;</span>, include(<span style="color:#e6db74">&#39;api.urls&#39;</span>)),         <span style="color:#75715e"># 將 /api/ 開頭的 URL 交給 api App 處理</span>
-</span></span><span style="display:flex;"><span>]
-</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># blog/urls.py（App 級別）</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.urls <span style="color:#f92672">import</span> path
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> . <span style="color:#f92672">import</span> views
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>app_name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;blog&#39;</span>  <span style="color:#75715e"># 設定 App 命名空間</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>urlpatterns <span style="color:#f92672">=</span> [
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;&#39;</span>, views<span style="color:#f92672">.</span>post_list, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;list&#39;</span>),              <span style="color:#75715e"># /blog/</span>
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;&lt;int:pk&gt;/&#39;</span>, views<span style="color:#f92672">.</span>post_detail, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;detail&#39;</span>),  <span style="color:#75715e"># /blog/1/</span>
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;create/&#39;</span>, views<span style="color:#f92672">.</span>post_create, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;create&#39;</span>),    <span style="color:#75715e"># /blog/create/</span>
-</span></span><span style="display:flex;"><span>]
-</span></span></code></pre></div><p>使用 <code>include()</code> 時，Django 會將已匹配的 URL 前綴去掉，把剩餘的部分傳給被引入的 URLconf 繼續匹配。例如對 <code>/blog/1/</code> 這個請求，Django 先在專案級別匹配到 <code>blog/</code>，然後將 <code>1/</code> 傳給 <code>blog/urls.py</code> 去比對。</p>
-<h3 id="url-命名name-參數">URL 命名（name 參數）</h3>
-<p>為 URL 設定名稱是 Django 路由設計的重要實踐。有了名稱，你就不需要在程式碼中硬編碼 URL 字串，當路由路徑改變時，只需修改 <code>urls.py</code> 中的定義即可：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 定義命名 URL</span>
-</span></span><span style="display:flex;"><span>path(<span style="color:#e6db74">&#39;articles/&lt;int:pk&gt;/&#39;</span>, views<span style="color:#f92672">.</span>article_detail, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;article-detail&#39;</span>),
-</span></span></code></pre></div><p>命名的好處在下面的反向解析段落中會更加明顯。</p>
-<h3 id="reverse-與-reverse_lazy">reverse() 與 reverse_lazy()</h3>
-<p><strong>反向解析（Reverse Resolution）</strong> 是指透過 URL 的名稱來取得實際的 URL 路徑，而不是硬編碼。Django 提供了 <code>reverse()</code> 函數來實現這個功能：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> django.urls <span style="color:#f92672">import</span> reverse
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.shortcuts <span style="color:#f92672">import</span> redirect
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">my_view</span>(request):
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 基本用法</span>
-</span></span><span style="display:flex;"><span>    url <span style="color:#f92672">=</span> reverse(<span style="color:#e6db74">&#39;article-detail&#39;</span>, kwargs<span style="color:#f92672">=</span>{<span style="color:#e6db74">&#39;pk&#39;</span>: <span style="color:#ae81ff">1</span>})
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 結果：&#39;/articles/1/&#39;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 使用位置參數</span>
-</span></span><span style="display:flex;"><span>    url <span style="color:#f92672">=</span> reverse(<span style="color:#e6db74">&#39;article-detail&#39;</span>, args<span style="color:#f92672">=</span>[<span style="color:#ae81ff">1</span>])
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 結果：&#39;/articles/1/&#39;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 帶命名空間的反向解析</span>
-</span></span><span style="display:flex;"><span>    url <span style="color:#f92672">=</span> reverse(<span style="color:#e6db74">&#39;blog:detail&#39;</span>, kwargs<span style="color:#f92672">=</span>{<span style="color:#e6db74">&#39;pk&#39;</span>: <span style="color:#ae81ff">1</span>})
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 結果：&#39;/blog/1/&#39;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 常見用途：重導向到另一個頁面</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> redirect(reverse(<span style="color:#e6db74">&#39;blog:list&#39;</span>))
-</span></span></code></pre></div><p><code>reverse_lazy()</code> 是 <code>reverse()</code> 的延遲求值（Lazy Evaluation）版本，它不會在匯入時就執行，而是在實際存取值時才進行解析。這在類別屬性中特別有用，因為類別定義時 URLconf 可能尚未載入完成：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> django.urls <span style="color:#f92672">import</span> reverse_lazy
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.views.generic <span style="color:#f92672">import</span> CreateView
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ArticleCreateView</span>(CreateView):
-</span></span><span style="display:flex;"><span>    model <span style="color:#f92672">=</span> Article
-</span></span><span style="display:flex;"><span>    fields <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;title&#39;</span>, <span style="color:#e6db74">&#39;content&#39;</span>]
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 使用 reverse_lazy() 而非 reverse()</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 因為類別屬性在模組載入時就會被求值</span>
-</span></span><span style="display:flex;"><span>    success_url <span style="color:#f92672">=</span> reverse_lazy(<span style="color:#e6db74">&#39;blog:list&#39;</span>)
-</span></span></code></pre></div><h3 id="模板中的--url--標籤">模板中的 {% url %} 標籤</h3>
-<p>在 Django 模板（Template）中，使用 <code>{% url %}</code> 標籤來做反向解析，效果等同於 Python 中的 <code>reverse()</code>：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-html" data-lang="html"><span style="display:flex;"><span><span style="color:#75715e">&lt;!-- 基本用法 --&gt;</span>
-</span></span><span style="display:flex;"><span>&lt;<span style="color:#f92672">a</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;{% url &#39;blog:list&#39; %}&#34;</span>&gt;文章列表&lt;/<span style="color:#f92672">a</span>&gt;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">&lt;!-- 帶關鍵字參數 --&gt;</span>
-</span></span><span style="display:flex;"><span>&lt;<span style="color:#f92672">a</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;{% url &#39;blog:detail&#39; pk=article.pk %}&#34;</span>&gt;{{ article.title }}&lt;/<span style="color:#f92672">a</span>&gt;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">&lt;!-- 帶位置參數 --&gt;</span>
-</span></span><span style="display:flex;"><span>&lt;<span style="color:#f92672">a</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;{% url &#39;blog:detail&#39; article.pk %}&#34;</span>&gt;{{ article.title }}&lt;/<span style="color:#f92672">a</span>&gt;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">&lt;!-- 搭配表單 action --&gt;</span>
-</span></span><span style="display:flex;"><span>&lt;<span style="color:#f92672">form</span> <span style="color:#a6e22e">method</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;post&#34;</span> <span style="color:#a6e22e">action</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;{% url &#39;blog:create&#39; %}&#34;</span>&gt;
-</span></span><span style="display:flex;"><span>    {% csrf_token %}
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e">&lt;!-- 表單欄位 --&gt;</span>
-</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">form</span>&gt;
-</span></span></code></pre></div><p>使用 <code>{% url %}</code> 標籤而非硬編碼 URL，是 Django 開發的<strong>基本功</strong>，能確保模板中的連結在路由變更後仍然正確。</p>
-<h3 id="namespace-命名空間app_name">Namespace 命名空間（app_name）</h3>
-<p>當專案包含多個 App 時，不同 App 中可能出現相同名稱的 URL（例如 <code>blog</code> 和 <code>shop</code> 都有 <code>detail</code>）。<strong>命名空間（Namespace）</strong> 透過前綴來解決這個衝突問題。</p>
-<p>Django 的命名空間分為兩種：</p>
-<ul>
-<li><strong>App Namespace（應用命名空間）</strong>：在 App 的 <code>urls.py</code> 中用 <code>app_name</code> 變數宣告，是 App 的固定識別符</li>
-<li><strong>Instance Namespace（實例命名空間）</strong>：在 <code>include()</code> 時透過 <code>namespace</code> 參數指定，用於同一個 App 被 include 多次的場景</li>
-</ul>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># blog/urls.py</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.urls <span style="color:#f92672">import</span> path
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> . <span style="color:#f92672">import</span> views
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>app_name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;blog&#39;</span>  <span style="color:#75715e"># App Namespace</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>urlpatterns <span style="color:#f92672">=</span> [
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;&#39;</span>, views<span style="color:#f92672">.</span>post_list, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;list&#39;</span>),
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;&lt;int:pk&gt;/&#39;</span>, views<span style="color:#f92672">.</span>post_detail, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;detail&#39;</span>),
-</span></span><span style="display:flex;"><span>]
-</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># shop/urls.py</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.urls <span style="color:#f92672">import</span> path
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> . <span style="color:#f92672">import</span> views
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>app_name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;shop&#39;</span>  <span style="color:#75715e"># App Namespace</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>urlpatterns <span style="color:#f92672">=</span> [
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;&#39;</span>, views<span style="color:#f92672">.</span>product_list, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;list&#39;</span>),
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;&lt;int:pk&gt;/&#39;</span>, views<span style="color:#f92672">.</span>product_detail, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;detail&#39;</span>),
-</span></span><span style="display:flex;"><span>]
-</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># myproject/urls.py</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.urls <span style="color:#f92672">import</span> path, include
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>urlpatterns <span style="color:#f92672">=</span> [
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;blog/&#39;</span>, include(<span style="color:#e6db74">&#39;blog.urls&#39;</span>)),   <span style="color:#75715e"># 反向解析：blog:list、blog:detail</span>
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;shop/&#39;</span>, include(<span style="color:#e6db74">&#39;shop.urls&#39;</span>)),   <span style="color:#75715e"># 反向解析：shop:list、shop:detail</span>
-</span></span><span style="display:flex;"><span>]
-</span></span></code></pre></div><p>現在即使兩個 App 都有名為 <code>list</code> 和 <code>detail</code> 的 URL，透過命名空間也能明確區分。</p>
-<h3 id="url-設計最佳實踐restful-風格">URL 設計最佳實踐（RESTful 風格）</h3>
-<p>良好的 URL 設計能讓 API 和頁面路徑直觀、易讀、可預測。以下是遵循 <strong>RESTful</strong> 風格的設計原則：</p>
-<ol>
-<li><strong>使用名詞而非動詞</strong>：<code>/articles/</code> 而非 <code>/get-articles/</code></li>
-<li><strong>使用複數名詞</strong>：<code>/articles/</code> 而非 <code>/article/</code></li>
-<li><strong>利用 HTTP 方法表達操作</strong>：GET 取得、POST 建立、PUT/PATCH 更新、DELETE 刪除</li>
-<li><strong>使用階層結構表達資源關係</strong>：<code>/articles/1/comments/</code> 表示文章 1 的所有留言</li>
-<li><strong>結尾統一加斜線</strong>：Django 預設行為 <code>APPEND_SLASH = True</code></li>
-<li><strong>使用連字號而非底線</strong>：<code>/my-article/</code> 而非 <code>/my_article/</code></li>
-</ol>
-<h4 id="url-路由效能考量">URL 路由效能考量</h4>
-<p><code>urlpatterns</code> 列表由上而下匹配，有幾個效能相關的建議：</p>
-<ul>
-<li><strong>高頻路由放在前面</strong>：將最常被存取的路由放在列表開頭，減少不必要的比對</li>
-<li><strong>使用 include() 分組</strong>：可以提前排除不匹配的路由群組，減少逐一比對的數量</li>
-<li><strong>避免頂層使用 re_path()</strong>：正規表達式的比對效能低於 <code>path()</code> 的路徑轉換器</li>
-</ul>
-<p>不過不需要過度擔心 — Django 會在首次請求時編譯所有 URLconf 並快取結果，後續請求不會重複編譯。</p>
-<h3 id="完整的-myblog-url-配置範例">完整的 myblog URL 配置範例</h3>
-<p>讓我們用一個完整的部落格專案 <code>myblog</code> 來整合以上所有知識：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># myblog/urls.py（專案級別 ROOT_URLCONF）</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.contrib <span style="color:#f92672">import</span> admin
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.urls <span style="color:#f92672">import</span> path, include
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.conf <span style="color:#f92672">import</span> settings
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.conf.urls.static <span style="color:#f92672">import</span> static
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>urlpatterns <span style="color:#f92672">=</span> [
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 首頁</span>
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;&#39;</span>, include(<span style="color:#e6db74">&#39;pages.urls&#39;</span>)),
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 部落格文章（最頻繁存取，放在前面）</span>
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;posts/&#39;</span>, include(<span style="color:#e6db74">&#39;posts.urls&#39;</span>)),
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 使用者帳號相關</span>
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;accounts/&#39;</span>, include(<span style="color:#e6db74">&#39;accounts.urls&#39;</span>)),
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 管理後台（最少使用，放在最後）</span>
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;admin/&#39;</span>, admin<span style="color:#f92672">.</span>site<span style="color:#f92672">.</span>urls),
-</span></span><span style="display:flex;"><span>]
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 開發環境下提供媒體檔案服務</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> settings<span style="color:#f92672">.</span>DEBUG:
-</span></span><span style="display:flex;"><span>    urlpatterns <span style="color:#f92672">+=</span> static(settings<span style="color:#f92672">.</span>MEDIA_URL, document_root<span style="color:#f92672">=</span>settings<span style="color:#f92672">.</span>MEDIA_ROOT)
-</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># posts/urls.py（App 級別）</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.urls <span style="color:#f92672">import</span> path
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> . <span style="color:#f92672">import</span> views
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>app_name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;posts&#39;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>urlpatterns <span style="color:#f92672">=</span> [
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 文章列表 — GET /posts/</span>
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;&#39;</span>, views<span style="color:#f92672">.</span>PostListView<span style="color:#f92672">.</span>as_view(), name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;list&#39;</span>),
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 建立文章 — GET /posts/create/（表單）、POST /posts/create/（送出）</span>
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;create/&#39;</span>, views<span style="color:#f92672">.</span>PostCreateView<span style="color:#f92672">.</span>as_view(), name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;create&#39;</span>),
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 文章詳情 — GET /posts/1/</span>
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;&lt;int:pk&gt;/&#39;</span>, views<span style="color:#f92672">.</span>PostDetailView<span style="color:#f92672">.</span>as_view(), name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;detail&#39;</span>),
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 更新文章 — GET /posts/1/edit/（表單）、POST /posts/1/edit/（送出）</span>
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;&lt;int:pk&gt;/edit/&#39;</span>, views<span style="color:#f92672">.</span>PostUpdateView<span style="color:#f92672">.</span>as_view(), name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;edit&#39;</span>),
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 刪除文章 — POST /posts/1/delete/</span>
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;&lt;int:pk&gt;/delete/&#39;</span>, views<span style="color:#f92672">.</span>PostDeleteView<span style="color:#f92672">.</span>as_view(), name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;delete&#39;</span>),
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 依 slug 存取文章 — GET /posts/my-first-post/</span>
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;&lt;slug:slug&gt;/&#39;</span>, views<span style="color:#f92672">.</span>PostBySlugView<span style="color:#f92672">.</span>as_view(), name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;detail-by-slug&#39;</span>),
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 依年份篩選文章 — GET /posts/archive/2026/</span>
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;archive/&lt;int:year&gt;/&#39;</span>, views<span style="color:#f92672">.</span>PostArchiveView<span style="color:#f92672">.</span>as_view(), name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;archive-year&#39;</span>),
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 文章留言（巢狀路由）— /posts/1/comments/</span>
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;&lt;int:post_pk&gt;/comments/&#39;</span>, include(<span style="color:#e6db74">&#39;comments.urls&#39;</span>)),
-</span></span><span style="display:flex;"><span>]
-</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># comments/urls.py</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.urls <span style="color:#f92672">import</span> path
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> . <span style="color:#f92672">import</span> views
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>app_name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;comments&#39;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>urlpatterns <span style="color:#f92672">=</span> [
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 留言列表 — GET /posts/1/comments/</span>
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;&#39;</span>, views<span style="color:#f92672">.</span>CommentListView<span style="color:#f92672">.</span>as_view(), name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;list&#39;</span>),
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 新增留言 — POST /posts/1/comments/create/</span>
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;create/&#39;</span>, views<span style="color:#f92672">.</span>CommentCreateView<span style="color:#f92672">.</span>as_view(), name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;create&#39;</span>),
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 刪除留言 — POST /posts/1/comments/5/delete/</span>
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;&lt;int:pk&gt;/delete/&#39;</span>, views<span style="color:#f92672">.</span>CommentDeleteView<span style="color:#f92672">.</span>as_view(), name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;delete&#39;</span>),
-</span></span><span style="display:flex;"><span>]
-</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># accounts/urls.py</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.urls <span style="color:#f92672">import</span> path
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> . <span style="color:#f92672">import</span> views
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>app_name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;accounts&#39;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>urlpatterns <span style="color:#f92672">=</span> [
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;login/&#39;</span>, views<span style="color:#f92672">.</span>LoginView<span style="color:#f92672">.</span>as_view(), name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;login&#39;</span>),
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;logout/&#39;</span>, views<span style="color:#f92672">.</span>LogoutView<span style="color:#f92672">.</span>as_view(), name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;logout&#39;</span>),
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;register/&#39;</span>, views<span style="color:#f92672">.</span>RegisterView<span style="color:#f92672">.</span>as_view(), name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;register&#39;</span>),
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;profile/&lt;int:pk&gt;/&#39;</span>, views<span style="color:#f92672">.</span>ProfileView<span style="color:#f92672">.</span>as_view(), name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;profile&#39;</span>),
-</span></span><span style="display:flex;"><span>]
-</span></span></code></pre></div><p>在模板中使用這些命名路由：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-html" data-lang="html"><span style="display:flex;"><span><span style="color:#75715e">&lt;!-- 導航列 --&gt;</span>
-</span></span><span style="display:flex;"><span>&lt;<span style="color:#f92672">nav</span>&gt;
-</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">a</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;{% url &#39;posts:list&#39; %}&#34;</span>&gt;所有文章&lt;/<span style="color:#f92672">a</span>&gt;
-</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">a</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;{% url &#39;posts:create&#39; %}&#34;</span>&gt;撰寫新文章&lt;/<span style="color:#f92672">a</span>&gt;
-</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">a</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;{% url &#39;accounts:profile&#39; pk=request.user.pk %}&#34;</span>&gt;個人檔案&lt;/<span style="color:#f92672">a</span>&gt;
-</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">a</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;{% url &#39;accounts:logout&#39; %}&#34;</span>&gt;登出&lt;/<span style="color:#f92672">a</span>&gt;
-</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">nav</span>&gt;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">&lt;!-- 文章列表中的連結 --&gt;</span>
-</span></span><span style="display:flex;"><span>{% for post in posts %}
-</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">article</span>&gt;
-</span></span><span style="display:flex;"><span>        &lt;<span style="color:#f92672">h2</span>&gt;&lt;<span style="color:#f92672">a</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;{% url &#39;posts:detail&#39; pk=post.pk %}&#34;</span>&gt;{{ post.title }}&lt;/<span style="color:#f92672">a</span>&gt;&lt;/<span style="color:#f92672">h2</span>&gt;
-</span></span><span style="display:flex;"><span>        &lt;<span style="color:#f92672">a</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;{% url &#39;posts:edit&#39; pk=post.pk %}&#34;</span>&gt;編輯&lt;/<span style="color:#f92672">a</span>&gt;
-</span></span><span style="display:flex;"><span>    &lt;/<span style="color:#f92672">article</span>&gt;
-</span></span><span style="display:flex;"><span>{% endfor %}
-</span></span></code></pre></div><p>在 View 中使用反向解析做重導向：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> django.urls <span style="color:#f92672">import</span> reverse
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.shortcuts <span style="color:#f92672">import</span> redirect
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">create_post</span>(request):
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> request<span style="color:#f92672">.</span>method <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;POST&#39;</span>:
-</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 處理表單資料並儲存文章...</span>
-</span></span><span style="display:flex;"><span>        post <span style="color:#f92672">=</span> form<span style="color:#f92672">.</span>save()
-</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 重導向到新建立的文章頁面</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> redirect(reverse(<span style="color:#e6db74">&#39;posts:detail&#39;</span>, kwargs<span style="color:#f92672">=</span>{<span style="color:#e6db74">&#39;pk&#39;</span>: post<span style="color:#f92672">.</span>pk}))
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># ...</span>
-</span></span></code></pre></div><h3 id="總結">總結</h3>
-<p>Django 的 URL 路由系統（URLconf）是整個請求處理流程的核心環節。本篇文章涵蓋了路由設計的方方面面：<code>urlpatterns</code> 列表的匹配機制、<code>path()</code> 函數的四個參數、五種內建路徑轉換器與自訂轉換器、<code>re_path()</code> 正則表達式路由、<code>include()</code> 模組化拆分、URL 命名與 <code>reverse()</code> / <code>reverse_lazy()</code> 反向解析、模板中的 <code>{% url %}</code> 標籤、以及 Namespace 命名空間的應用。</p>
-<p>掌握這些知識後，你應該能夠為任何規模的 Django 專案設計出清晰、可維護、符合 RESTful 風格的 URL 架構。記住幾個核心原則：優先使用 <code>path()</code> 而非 <code>re_path()</code>、永遠為 URL 命名並使用反向解析、善用 <code>include()</code> 和 Namespace 做模組化管理，以及遵循 RESTful 設計風格讓 URL 直觀可預測。</p></div>
-        
-        
-
-        
-        <div class="mt-8">
-          
-<div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose">
-  <div>
-    <div class="flex items-center gap-2 mb-1">
-      <a href="/about" class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">
-        BenZ
-      </a>
-      
-      <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span>
-      
-    </div>
-    <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">
-      熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。
-    </p>
-    <div class="flex items-center gap-3">
-      
-      <a href="https://github.com/benzhub" target="_blank" rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label="GitHub">
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-      </a>
-      
-      
-      
-    </div>
-  </div>
-</div>
-
-        </div>
-      </div>
-
-      
-      <div class="post-detail fade-in my-4">
-        
-
-
-<div>
-  <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3>
-  <div class="grid gap-2">
-    
-    <a href="http://localhost:1313/post/django/013-django-cbv/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
-      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django Views：Class-Based Views 類別視圖深入解析 | Django 教學</span>
-      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/02</span>
-    </a>
-    
-    <a href="http://localhost:1313/post/django/012-django-fbv/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
-      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django Views：Function-Based Views 函數視圖入門 | Django 教學</span>
-      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/01</span>
-    </a>
-    
-    <a href="http://localhost:1313/post/django/011-django-orm-queryset/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
-      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django ORM 與 QuerySet 查詢語法完全指南 | Django 教學</span>
-      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/05/31</span>
-    </a>
-    
-  </div>
-</div>
-
-
-      </div>
-
-      
-      <div class="post-detail fade-in my-4">
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            
-            <a href="http://localhost:1313/post/django/013-django-cbv/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
-                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
-                <span class="text-sm font-medium">Django Views：Class-Based Views 類別視圖深入解析 | Django 教學</span>
-            </a>
-            
-          </div>
-          <div>
-            
-            <a href="http://localhost:1313/post/django/015-django-templates-basics/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
-                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
-                <span class="text-sm font-medium">Django Templates 模板語言基礎入門 | Django 教學</span>
-            </a>
-            
-          </div>
-        </div>
-      </div>
-
-      
-      <div class="post-detail fade-in my-4">
-        
-<script src="https://giscus.app/client.js"
-        data-repo="benzhub/benzhub.github.io"
-        data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM="
-        data-category="Announcements"
-        data-category-id="MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1"
-        data-mapping="pathname"
-        data-strict="0"
-        data-reactions-enabled="1"
-        data-emit-metadata="0"
-        data-input-position="top"
-        data-theme="preferred_color_scheme"
-        data-lang="zh-TW"
-        crossorigin="anonymous"
-        async>
-</script>
-
-
-      </div>
-    </div>
-    
-    <div class="hidden lg:block lg:col-span-1 mt-4">
-    
-    
-            
-            <div class="widget fade-in">
-    <p class="widget-title">搜尋</p>
-    <form role="search" method="get" action="https://google.com/search">
-        <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
-        <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
-    </form>
-</div>
-
-        
-            
-            
-
-        
-            
-            
-<div class="widget fade-in">
-    <p class="widget-title">標籤</p>
-    <div class="flex flex-wrap gap-1.5">
-        <a href='/tags/80/20-%E6%B3%95%E5%89%87'>
-            <span class="tag-pill">80/20 法則</span>
-        </a>
-        <a href='/tags/acid'>
-            <span class="tag-pill">acid</span>
-        </a>
-        <a href='/tags/ai'>
-            <span class="tag-pill">ai</span>
-        </a>
-        <a href='/tags/ai-agent'>
-            <span class="tag-pill">ai agent</span>
-        </a>
-        <a href='/tags/ai-workflow'>
-            <span class="tag-pill">ai workflow</span>
-        </a>
-        <a href='/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE'>
-            <span class="tag-pill">ai 工具焦慮</span>
-        </a>
-        <a href='/tags/ai-%E6%8E%A5%E5%96%AE'>
-            <span class="tag-pill">ai 接單</span>
-        </a>
-        <a href='/tags/ai-%E7%B9%AA%E5%9C%96'>
-            <span class="tag-pill">ai 繪圖</span>
-        </a>
-        <a href='/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA'>
-            <span class="tag-pill">ai 虛擬人</span>
-        </a>
-        <a href='/tags/ai-%E8%A1%8C%E9%8A%B7'>
-            <span class="tag-pill">ai 行銷</span>
-        </a>
-        <a href='/tags/ai-%E8%A8%AD%E8%A8%88'>
-            <span class="tag-pill">ai 設計</span>
-        </a>
-        <a href='/tags/ai-%E8%AE%8A%E7%8F%BE'>
-            <span class="tag-pill">ai 變現</span>
-        </a>
-        <a href='/tags/ai-%E8%B3%BA%E9%8C%A2'>
-            <span class="tag-pill">ai 賺錢</span>
-        </a>
-        <a href='/tags/ai-income'>
-            <span class="tag-pill">ai-income</span>
-        </a>
-        <a href='/tags/ai-insights'>
-            <span class="tag-pill">ai-insights</span>
-        </a>
-        <a href='/tags/api'>
-            <span class="tag-pill">api</span>
-        </a>
-        <a href='/tags/architecture'>
-            <span class="tag-pill">architecture</span>
-        </a>
-        <a href='/tags/autovacuum'>
-            <span class="tag-pill">autovacuum</span>
-        </a>
-        <a href='/tags/background-processes'>
-            <span class="tag-pill">background-processes</span>
-        </a>
-        <a href='/tags/big-o'>
-            <span class="tag-pill">big o</span>
-        </a>
-    </div>
-</div>
-
-
-        
-            
-            
-<div class="widget fade-in">
-    <p class="widget-title">文章系列</p>
-    <div class="flex flex-wrap gap-1.5">
-        
-        
-        
-        
-        <a href='/post/postgresql/'>
-            <span class="tag-pill">PostgreSQL (13)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/javascript/'>
-            <span class="tag-pill">JavaScript (68)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/django/'>
-            <span class="tag-pill">Django (30)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/python/'>
-            <span class="tag-pill">Python (37)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/htmlcss/'>
-            <span class="tag-pill">HTML &amp; CSS (23)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/linux/'>
-            <span class="tag-pill">Linux (22)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/git/'>
-            <span class="tag-pill">Git (18)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/ai-insights/'>
-            <span class="tag-pill">AI Insights (13)</span>
-        </a>
-        
-        
-    </div>
-</div>
-
-
-        
-            
-            
-
-<div class="widget fade-in">
-    <p class="widget-title">最新文章</p>
-    <div class="flex flex-col gap-1">
-        <a href="/post/postgresql/013-ddl-schema/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/19
-            </p>
-        </a>
-        <a href="/post/django/030-django-custom-user-model/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django 自訂使用者模型：AbstractUser 與 AbstractBaseUser | Django 教學</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/19
-            </p>
-        </a>
-        <a href="/post/javascript/data-structures--algorithms/006-heap-priority-queue/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">堆積與優先佇列 — Min/Max Heap 原理與 Heap Sort 完整實作 | 資料結構與演算法</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/19
-            </p>
-        </a>
-        <a href="/post/django/029-django-authentication/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Authentication 使用者認證系統完全指南 | Django 教學</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/18
-            </p>
-        </a>
-        <a href="/post/postgresql/012-data-types/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/18
-            </p>
-        </a>
-    </div>
-</div>
-
-        
-    
-</div>
-
-    
-</div>
-
-        </div>
-    </div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]">
-    
-    <p>&copy; 2026 <a href="http://localhost:1313/" class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p>
-</footer>
-
-
-<script>
-    (function (window, document) {
-        function main() {
-            var ad = document.createElement('script');
-            ad.async = true;
-            ad.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606';
-            ad.crossOrigin = "anonymous";
-            var sc = document.getElementsByTagName('script')[0];
-            sc.parentNode.insertBefore(ad, sc);
-        }
-        var lazyLoad = false;
-        function onLazyLoad() {
-            if (lazyLoad === false) {
-                lazyLoad = true;
-                window.removeEventListener('scroll', onLazyLoad);
-                window.removeEventListener('mousemove', onLazyLoad);
-                window.removeEventListener('mousedown', onLazyLoad);
-                window.removeEventListener('touchstart', onLazyLoad);
-                window.removeEventListener('keydown', onLazyLoad);
-                main();
-            }
-        }
-        window.addEventListener('scroll', onLazyLoad);
-        window.addEventListener('mousemove', onLazyLoad);
-        window.addEventListener('mousedown', onLazyLoad);
-        window.addEventListener('touchstart', onLazyLoad);
-        window.addEventListener('keydown', onLazyLoad);
-        window.addEventListener('load', function () {
-            if (window.pageYOffset) {
-                onLazyLoad();
-                window.setTimeout(onLazyLoad, 3000);
-            }
-        });
-    })(window, document);
-</script>
-
-
-<script>
-    
-    var icon = document.getElementById("icon");
-    var icon2 = document.getElementById("icon2");
-    if (document.documentElement.classList.contains("dark") || localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
-        if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
-        document.documentElement.classList.add('dark');
-    } else {
-        document.documentElement.classList.remove('dark');
-    }
-    function toggleDarkMode() {
-        if (document.documentElement.classList.contains('dark')) {
-            if (icon) { icon.classList.remove("icon-sun"); icon.classList.add("icon-moon"); }
-            if (icon2) { icon2.classList.remove("icon-sun"); icon2.classList.add("icon-moon"); }
-            document.documentElement.classList.remove('dark');
-            localStorage.theme = 'light';
-        } else {
-            if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
-            if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
-            document.documentElement.classList.add('dark');
-            localStorage.theme = 'dark';
-        }
-    }
-
-    
-    document.addEventListener('DOMContentLoaded', function () {
-        var observer = new IntersectionObserver(function (entries) {
-            entries.forEach(function (entry) {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0 });
-
-        document.querySelectorAll('.fade-in').forEach(function (el) {
-            observer.observe(el);
-        });
-    });
-</script>
-</body>
-
-</html>
+<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>Django URLs 路由設計與配置完全指南 | Django 教學 | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="Django URLs 路由設計與配置完全指南 | Django 教學 | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="Django URL 路由完全指南：從 URLconf 基礎、path() 與 re_path() 函數、路徑轉換器、include() 模組化路由、URL 命名與 reverse() 反向解析、Namespace 命名空間到 RESTful 風格設計，帶你掌握 Django 路由系統的核心知識。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="Django URL 路由完全指南：從 URLconf 基礎、path() 與 re_path() 函數、路徑轉換器、include() 模組化路由、URL 命名與 reverse() 反向解析、Namespace 命名空間到 RESTful 風格設計，帶你掌握 Django 路由系統的核心知識。"><meta property="og:url" content="https://benzhub.github.io/post/django/014-django-urls/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/django/014-django-urls/><meta name=twitter:description content="Django URL 路由完全指南：從 URLconf 基礎、path() 與 re_path() 函數、路徑轉換器、include() 模組化路由、URL 命名與 reverse() 反向解析、Namespace 命名空間到 RESTful 風格設計，帶你掌握 Django 路由系統的核心知識。"><meta property="article:published_time" content="2026-06-03T00:00:00+00:00"><meta property="article:updated_time" content="2026-05-24T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/django/014-Django-URLs.png"><meta property="og:image:url" content="https://benzhub.github.io/img/django/014-Django-URLs.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/django/014-django-urls/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/django/014-django-urls/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"Django URLs 路由設計與配置完全指南 | Django 教學\"","description":"\"Django URL 路由完全指南：從 URLconf 基礎、path() 與 re_path() 函數、路徑轉換器、include() 模組化路由、URL 命名與 reverse() 反向解析、Namespace 命名空間到 RESTful 風格設計，帶你掌握 Django 路由系統的核心知識。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-06-03T00:00:00\u002b00:00","dateModified":"2026-05-24T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/django\/014-Django-URLs.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/django\/014-django-urls\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/django\/"},{"@type":"ListItem","position":3,"name":"\"Django URLs 路由設計與配置完全指南 | Django 教學\""}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"\"Django 的 path() 和 re_path() 有什麼差別？應該用哪個？\"","acceptedAnswer":{"@type":"Answer","text":"\"path() 是 Django 2.0 引入的現代語法，使用路徑轉換器（如 \\u003cint:pk\\u003e）自動做型別轉換，語法簡潔直觀。re_path() 使用正規表達式匹配，參數一律為字串，適合複雜匹配規則。建議優先使用 path()，只在需要複雜匹配邏輯時才使用 re_path()。\""}},{"@type":"Question","name":"\"Django 為什麼要用 URL 命名和 reverse()？直接寫死 URL 不行嗎？\"","acceptedAnswer":{"@type":"Answer","text":"\"硬編碼 URL 會導致維護困難——當 URL 路徑變更時，所有用到該路徑的地方都要手動修改。使用 URL 命名搭配 reverse() 或模板的 {% url %} 標籤做反向解析，當路由變更時只需修改 urls.py 的定義，其他地方會自動對應新路徑，大幅提升可維護性。\""}},{"@type":"Question","name":"\"Django 的 Namespace 命名空間有什麼用？什麼時候需要用到？\"","acceptedAnswer":{"@type":"Answer","text":"\"Namespace 解決不同 App 之間 URL 名稱衝突的問題。例如 blog App 和 shop App 都有名為 detail 的 URL，透過 Namespace 可以用 blog:detail 和 shop:detail 區分。當專案有多個 App 時，強烈建議為每個 App 設定 app_name 做命名空間管理。\""}}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Django URLs 路由設計與配置完全指南 | Django 教學</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/03
+</span><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001.0 004.582 9m0 0H9m11 11v-5h-.581m0 0A8.003 8.003.0 014.062 13m15.357 2H15"/></svg>
+2026/05/24</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/python class="tag-pill no-underline">python</a>
+<a href=/tags/django class="tag-pill no-underline">django</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/django/014-Django-URLs.png alt="Django URLs 路由設計與配置完全指南 | Django 教學"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p>當使用者在瀏覽器輸入一個網址並按下 Enter，Django 如何知道該呼叫哪個 View 來處理這個請求？答案就是 <strong>URL 路由系統（URLconf）</strong>。URLconf 是 Django 請求處理流程的關鍵環節，它負責將傳入的 URL 對應到正確的 <strong>View</strong> 函數或類別。本篇文章將從 <strong>urlpatterns</strong> 基礎、<strong>path()</strong> 與 <strong>re_path()</strong> 函數、<strong>路徑轉換器（Path Converters）</strong>、<strong>include()</strong> 模組化路由、<strong>URL 命名</strong> 與 <strong>reverse() 反向解析（Reverse Resolution）</strong>、<strong>Namespace 命名空間</strong> 到 <strong>RESTful 風格</strong> 的 URL 設計最佳實踐，帶你全面掌握 Django 路由系統。</p></blockquote><h3 id=url-配置基礎urlconf>URL 配置基礎（URLconf）</h3><p>Django 的路由核心是一個名為 <code>urlpatterns</code> 的 Python 列表，定義在專案的 <code>urls.py</code> 檔案中。當 HTTP 請求進來時，Django 從 <code>settings.py</code> 的 <code>ROOT_URLCONF</code> 設定所指定的模組載入 <code>urlpatterns</code>，然後由上而下依序嘗試匹配每一條路由規則。<strong>第一個匹配成功的規則會生效</strong>，後續規則不再比對。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># myproject/urls.py（ROOT_URLCONF 指向的模組）</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.contrib <span style=color:#f92672>import</span> admin
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.urls <span style=color:#f92672>import</span> path
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>urlpatterns <span style=color:#f92672>=</span> [
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;admin/&#39;</span>, admin<span style=color:#f92672>.</span>site<span style=color:#f92672>.</span>urls),
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;hello/&#39;</span>, views<span style=color:#f92672>.</span>hello_world),
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><p>這段程式碼做了兩件事：</p><ol><li>將 <code>/admin/</code> 開頭的 URL 交給 Django 內建的管理後台處理</li><li>將 <code>/hello/</code> 這個 URL 對應到 <code>views.hello_world</code> 這個 View 函數</li></ol><h4 id=django-如何匹配-url>Django 如何匹配 URL？</h4><p>Django 匹配 URL 時有幾個重要規則：</p><ul><li><strong>不匹配域名和 GET 參數</strong>：對 <code>https://example.com/articles/?page=2</code> 這個請求，Django 只會拿 <code>articles/</code> 來比對</li><li><strong>由上而下依序比對</strong>：匹配到第一個符合的規則就停止，因此路由的順序很重要</li><li><strong>開頭不含斜線</strong>：<code>urlpatterns</code> 中的路由路徑不需要加上前導斜線，例如寫 <code>articles/</code> 而非 <code>/articles/</code></li></ul><h3 id=path-函數詳解>path() 函數詳解</h3><p><code>path()</code> 是 Django 路由系統最核心的函數，它接受四個參數：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span>path(route, view, kwargs<span style=color:#f92672>=</span><span style=color:#66d9ef>None</span>, name<span style=color:#f92672>=</span><span style=color:#66d9ef>None</span>)
+</span></span></code></pre></div><table><thead><tr><th>參數</th><th>說明</th><th>是否必填</th></tr></thead><tbody><tr><td><code>route</code></td><td>URL 匹配模式，例如 <code>'articles/&lt;int:pk>/'</code></td><td>必填</td></tr><tr><td><code>view</code></td><td>匹配成功後呼叫的 View callable</td><td>必填</td></tr><tr><td><code>kwargs</code></td><td>額外傳遞給 View 的關鍵字參數（dict）</td><td>選填</td></tr><tr><td><code>name</code></td><td>URL 的命名，用於反向解析</td><td>選填</td></tr></tbody></table><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> django.urls <span style=color:#f92672>import</span> path
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> . <span style=color:#f92672>import</span> views
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>urlpatterns <span style=color:#f92672>=</span> [
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 基本用法：route + view</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;articles/&#39;</span>, views<span style=color:#f92672>.</span>article_list),
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 帶路徑參數：&lt;int:pk&gt; 會自動轉換為 int 型別</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;articles/&lt;int:pk&gt;/&#39;</span>, views<span style=color:#f92672>.</span>article_detail),
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 帶額外參數：透過 kwargs 傳遞固定值給 View</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;blog/&#39;</span>, views<span style=color:#f92672>.</span>article_list, kwargs<span style=color:#f92672>=</span>{<span style=color:#e6db74>&#39;blog_mode&#39;</span>: <span style=color:#66d9ef>True</span>}),
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 帶命名：方便反向解析</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;articles/&lt;int:pk&gt;/&#39;</span>, views<span style=color:#f92672>.</span>article_detail, name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;article-detail&#39;</span>),
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><h3 id=路徑轉換器path-converters>路徑轉換器（Path Converters）</h3><p><code>path()</code> 函數的一大優勢是內建的路徑轉換器，能自動將 URL 字串轉換為對應的 Python 型別。Django 提供了五種內建轉換器：</p><table><thead><tr><th>轉換器</th><th>匹配規則</th><th>Python 型別</th><th>範例</th></tr></thead><tbody><tr><td><code>str</code></td><td>非 <code>/</code> 的任何非空字串（預設）</td><td><code>str</code></td><td><code>&lt;str:name></code></td></tr><tr><td><code>int</code></td><td>零或正整數</td><td><code>int</code></td><td><code>&lt;int:pk></code></td></tr><tr><td><code>slug</code></td><td>ASCII 字母、數字、連字號、底線</td><td><code>str</code></td><td><code>&lt;slug:slug></code></td></tr><tr><td><code>uuid</code></td><td>UUID 格式字串</td><td><code>uuid.UUID</code></td><td><code>&lt;uuid:uid></code></td></tr><tr><td><code>path</code></td><td>包含 <code>/</code> 的任意非空字串</td><td><code>str</code></td><td><code>&lt;path:file_path></code></td></tr></tbody></table><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> django.urls <span style=color:#f92672>import</span> path
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> . <span style=color:#f92672>import</span> views
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>urlpatterns <span style=color:#f92672>=</span> [
+</span></span><span style=display:flex><span>    <span style=color:#75715e># int：匹配整數，自動轉為 Python int</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;users/&lt;int:user_id&gt;/&#39;</span>, views<span style=color:#f92672>.</span>user_detail),
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># slug：匹配 slug 格式的字串（如 my-first-post）</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;posts/&lt;slug:post_slug&gt;/&#39;</span>, views<span style=color:#f92672>.</span>post_detail),
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># uuid：匹配 UUID 格式（如 075194d3-6885-417e-a8a8-6c931e272f00）</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;items/&lt;uuid:item_uuid&gt;/&#39;</span>, views<span style=color:#f92672>.</span>item_detail),
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># path：匹配含有斜線的完整路徑</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;files/&lt;path:file_path&gt;/&#39;</span>, views<span style=color:#f92672>.</span>serve_file),
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><h4 id=自訂路徑轉換器>自訂路徑轉換器</h4><p>如果內建的轉換器無法滿足需求，你可以自訂。一個轉換器需要定義 <code>regex</code> 屬性、<code>to_python()</code> 方法和 <code>to_url()</code> 方法：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># converters.py</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>FourDigitYearConverter</span>:
+</span></span><span style=display:flex><span>    regex <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;[0-9]</span><span style=color:#e6db74>{4}</span><span style=color:#e6db74>&#39;</span>  <span style=color:#75715e># 匹配規則（正規表達式）</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>to_python</span>(self, value):
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> int(value)  <span style=color:#75715e># URL 字串 → Python 型別</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>to_url</span>(self, value):
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> <span style=color:#e6db74>&#39;</span><span style=color:#e6db74>%04d</span><span style=color:#e6db74>&#39;</span> <span style=color:#f92672>%</span> value  <span style=color:#75715e># Python 型別 → URL 字串</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># urls.py</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.urls <span style=color:#f92672>import</span> path, register_converter
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> . <span style=color:#f92672>import</span> converters, views
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 註冊自訂轉換器，命名為 &#39;yyyy&#39;</span>
+</span></span><span style=display:flex><span>register_converter(converters<span style=color:#f92672>.</span>FourDigitYearConverter, <span style=color:#e6db74>&#39;yyyy&#39;</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>urlpatterns <span style=color:#f92672>=</span> [
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 使用自訂轉換器</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;articles/&lt;yyyy:year&gt;/&#39;</span>, views<span style=color:#f92672>.</span>year_archive, name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;year-archive&#39;</span>),
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><h3 id=re_path-正則表達式路由>re_path() 正則表達式路由</h3><p>對於 <code>path()</code> 無法處理的複雜匹配邏輯，Django 提供了 <code>re_path()</code>，它使用正規表達式（Regular Expression）來定義匹配規則：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> django.urls <span style=color:#f92672>import</span> re_path
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> . <span style=color:#f92672>import</span> views
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>urlpatterns <span style=color:#f92672>=</span> [
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 匹配兩位數的月份（01-12）</span>
+</span></span><span style=display:flex><span>    re_path(<span style=color:#e6db74>r</span><span style=color:#e6db74>&#39;^articles/(?P&lt;year&gt;[0-9]</span><span style=color:#e6db74>{4}</span><span style=color:#e6db74>)/(?P&lt;month&gt;0[1-9]|1[0-2])/$&#39;</span>,
+</span></span><span style=display:flex><span>            views<span style=color:#f92672>.</span>month_archive),
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 匹配特定格式的產品編號（如 PRD-001）</span>
+</span></span><span style=display:flex><span>    re_path(<span style=color:#e6db74>r</span><span style=color:#e6db74>&#39;^products/(?P&lt;product_code&gt;[A-Z]</span><span style=color:#e6db74>{3}</span><span style=color:#e6db74>-[0-9]</span><span style=color:#e6db74>{3}</span><span style=color:#e6db74>)/$&#39;</span>,
+</span></span><span style=display:flex><span>            views<span style=color:#f92672>.</span>product_detail),
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><p>需要注意的是，<code>re_path()</code> 擷取到的參數<strong>一律為字串</strong>，不會自動做型別轉換，你需要在 View 中自行處理型別轉換。</p><p><strong>原則</strong>：優先使用 <code>path()</code>，只在需要複雜匹配邏輯時才使用 <code>re_path()</code>。</p><h3 id=include-模組化路由>include() 模組化路由</h3><p>隨著專案規模成長，把所有路由擠在一個 <code>urls.py</code> 會變得難以維護。<code>include()</code> 函數讓你將路由拆分到各個 App 的 <code>urls.py</code> 中，實現模組化管理：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># myproject/urls.py（專案級別）</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.contrib <span style=color:#f92672>import</span> admin
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.urls <span style=color:#f92672>import</span> path, include
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>urlpatterns <span style=color:#f92672>=</span> [
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;admin/&#39;</span>, admin<span style=color:#f92672>.</span>site<span style=color:#f92672>.</span>urls),
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;blog/&#39;</span>, include(<span style=color:#e6db74>&#39;blog.urls&#39;</span>)),       <span style=color:#75715e># 將 /blog/ 開頭的 URL 交給 blog App 處理</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;accounts/&#39;</span>, include(<span style=color:#e6db74>&#39;accounts.urls&#39;</span>)),  <span style=color:#75715e># 將 /accounts/ 開頭的 URL 交給 accounts App 處理</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;api/&#39;</span>, include(<span style=color:#e6db74>&#39;api.urls&#39;</span>)),         <span style=color:#75715e># 將 /api/ 開頭的 URL 交給 api App 處理</span>
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># blog/urls.py（App 級別）</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.urls <span style=color:#f92672>import</span> path
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> . <span style=color:#f92672>import</span> views
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>app_name <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;blog&#39;</span>  <span style=color:#75715e># 設定 App 命名空間</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>urlpatterns <span style=color:#f92672>=</span> [
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;&#39;</span>, views<span style=color:#f92672>.</span>post_list, name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;list&#39;</span>),              <span style=color:#75715e># /blog/</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;&lt;int:pk&gt;/&#39;</span>, views<span style=color:#f92672>.</span>post_detail, name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;detail&#39;</span>),  <span style=color:#75715e># /blog/1/</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;create/&#39;</span>, views<span style=color:#f92672>.</span>post_create, name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;create&#39;</span>),    <span style=color:#75715e># /blog/create/</span>
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><p>使用 <code>include()</code> 時，Django 會將已匹配的 URL 前綴去掉，把剩餘的部分傳給被引入的 URLconf 繼續匹配。例如對 <code>/blog/1/</code> 這個請求，Django 先在專案級別匹配到 <code>blog/</code>，然後將 <code>1/</code> 傳給 <code>blog/urls.py</code> 去比對。</p><h3 id=url-命名name-參數>URL 命名（name 參數）</h3><p>為 URL 設定名稱是 Django 路由設計的重要實踐。有了名稱，你就不需要在程式碼中硬編碼 URL 字串，當路由路徑改變時，只需修改 <code>urls.py</code> 中的定義即可：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># 定義命名 URL</span>
+</span></span><span style=display:flex><span>path(<span style=color:#e6db74>&#39;articles/&lt;int:pk&gt;/&#39;</span>, views<span style=color:#f92672>.</span>article_detail, name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;article-detail&#39;</span>),
+</span></span></code></pre></div><p>命名的好處在下面的反向解析段落中會更加明顯。</p><h3 id=reverse-與-reverse_lazy>reverse() 與 reverse_lazy()</h3><p><strong>反向解析（Reverse Resolution）</strong> 是指透過 URL 的名稱來取得實際的 URL 路徑，而不是硬編碼。Django 提供了 <code>reverse()</code> 函數來實現這個功能：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> django.urls <span style=color:#f92672>import</span> reverse
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.shortcuts <span style=color:#f92672>import</span> redirect
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>my_view</span>(request):
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 基本用法</span>
+</span></span><span style=display:flex><span>    url <span style=color:#f92672>=</span> reverse(<span style=color:#e6db74>&#39;article-detail&#39;</span>, kwargs<span style=color:#f92672>=</span>{<span style=color:#e6db74>&#39;pk&#39;</span>: <span style=color:#ae81ff>1</span>})
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 結果：&#39;/articles/1/&#39;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 使用位置參數</span>
+</span></span><span style=display:flex><span>    url <span style=color:#f92672>=</span> reverse(<span style=color:#e6db74>&#39;article-detail&#39;</span>, args<span style=color:#f92672>=</span>[<span style=color:#ae81ff>1</span>])
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 結果：&#39;/articles/1/&#39;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 帶命名空間的反向解析</span>
+</span></span><span style=display:flex><span>    url <span style=color:#f92672>=</span> reverse(<span style=color:#e6db74>&#39;blog:detail&#39;</span>, kwargs<span style=color:#f92672>=</span>{<span style=color:#e6db74>&#39;pk&#39;</span>: <span style=color:#ae81ff>1</span>})
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 結果：&#39;/blog/1/&#39;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 常見用途：重導向到另一個頁面</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> redirect(reverse(<span style=color:#e6db74>&#39;blog:list&#39;</span>))
+</span></span></code></pre></div><p><code>reverse_lazy()</code> 是 <code>reverse()</code> 的延遲求值（Lazy Evaluation）版本，它不會在匯入時就執行，而是在實際存取值時才進行解析。這在類別屬性中特別有用，因為類別定義時 URLconf 可能尚未載入完成：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> django.urls <span style=color:#f92672>import</span> reverse_lazy
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.views.generic <span style=color:#f92672>import</span> CreateView
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ArticleCreateView</span>(CreateView):
+</span></span><span style=display:flex><span>    model <span style=color:#f92672>=</span> Article
+</span></span><span style=display:flex><span>    fields <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#39;title&#39;</span>, <span style=color:#e6db74>&#39;content&#39;</span>]
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 使用 reverse_lazy() 而非 reverse()</span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 因為類別屬性在模組載入時就會被求值</span>
+</span></span><span style=display:flex><span>    success_url <span style=color:#f92672>=</span> reverse_lazy(<span style=color:#e6db74>&#39;blog:list&#39;</span>)
+</span></span></code></pre></div><h3 id=模板中的--url--標籤>模板中的 {% url %} 標籤</h3><p>在 Django 模板（Template）中，使用 <code>{% url %}</code> 標籤來做反向解析，效果等同於 Python 中的 <code>reverse()</code>：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-html data-lang=html><span style=display:flex><span><span style=color:#75715e>&lt;!-- 基本用法 --&gt;</span>
+</span></span><span style=display:flex><span>&lt;<span style=color:#f92672>a</span> <span style=color:#a6e22e>href</span><span style=color:#f92672>=</span><span style=color:#e6db74>&#34;{% url &#39;blog:list&#39; %}&#34;</span>&gt;文章列表&lt;/<span style=color:#f92672>a</span>&gt;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>&lt;!-- 帶關鍵字參數 --&gt;</span>
+</span></span><span style=display:flex><span>&lt;<span style=color:#f92672>a</span> <span style=color:#a6e22e>href</span><span style=color:#f92672>=</span><span style=color:#e6db74>&#34;{% url &#39;blog:detail&#39; pk=article.pk %}&#34;</span>&gt;{{ article.title }}&lt;/<span style=color:#f92672>a</span>&gt;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>&lt;!-- 帶位置參數 --&gt;</span>
+</span></span><span style=display:flex><span>&lt;<span style=color:#f92672>a</span> <span style=color:#a6e22e>href</span><span style=color:#f92672>=</span><span style=color:#e6db74>&#34;{% url &#39;blog:detail&#39; article.pk %}&#34;</span>&gt;{{ article.title }}&lt;/<span style=color:#f92672>a</span>&gt;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>&lt;!-- 搭配表單 action --&gt;</span>
+</span></span><span style=display:flex><span>&lt;<span style=color:#f92672>form</span> <span style=color:#a6e22e>method</span><span style=color:#f92672>=</span><span style=color:#e6db74>&#34;post&#34;</span> <span style=color:#a6e22e>action</span><span style=color:#f92672>=</span><span style=color:#e6db74>&#34;{% url &#39;blog:create&#39; %}&#34;</span>&gt;
+</span></span><span style=display:flex><span>    {% csrf_token %}
+</span></span><span style=display:flex><span>    <span style=color:#75715e>&lt;!-- 表單欄位 --&gt;</span>
+</span></span><span style=display:flex><span>&lt;/<span style=color:#f92672>form</span>&gt;
+</span></span></code></pre></div><p>使用 <code>{% url %}</code> 標籤而非硬編碼 URL，是 Django 開發的<strong>基本功</strong>，能確保模板中的連結在路由變更後仍然正確。</p><h3 id=namespace-命名空間app_name>Namespace 命名空間（app_name）</h3><p>當專案包含多個 App 時，不同 App 中可能出現相同名稱的 URL（例如 <code>blog</code> 和 <code>shop</code> 都有 <code>detail</code>）。<strong>命名空間（Namespace）</strong> 透過前綴來解決這個衝突問題。</p><p>Django 的命名空間分為兩種：</p><ul><li><strong>App Namespace（應用命名空間）</strong>：在 App 的 <code>urls.py</code> 中用 <code>app_name</code> 變數宣告，是 App 的固定識別符</li><li><strong>Instance Namespace（實例命名空間）</strong>：在 <code>include()</code> 時透過 <code>namespace</code> 參數指定，用於同一個 App 被 include 多次的場景</li></ul><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># blog/urls.py</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.urls <span style=color:#f92672>import</span> path
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> . <span style=color:#f92672>import</span> views
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>app_name <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;blog&#39;</span>  <span style=color:#75715e># App Namespace</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>urlpatterns <span style=color:#f92672>=</span> [
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;&#39;</span>, views<span style=color:#f92672>.</span>post_list, name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;list&#39;</span>),
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;&lt;int:pk&gt;/&#39;</span>, views<span style=color:#f92672>.</span>post_detail, name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;detail&#39;</span>),
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># shop/urls.py</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.urls <span style=color:#f92672>import</span> path
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> . <span style=color:#f92672>import</span> views
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>app_name <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;shop&#39;</span>  <span style=color:#75715e># App Namespace</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>urlpatterns <span style=color:#f92672>=</span> [
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;&#39;</span>, views<span style=color:#f92672>.</span>product_list, name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;list&#39;</span>),
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;&lt;int:pk&gt;/&#39;</span>, views<span style=color:#f92672>.</span>product_detail, name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;detail&#39;</span>),
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># myproject/urls.py</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.urls <span style=color:#f92672>import</span> path, include
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>urlpatterns <span style=color:#f92672>=</span> [
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;blog/&#39;</span>, include(<span style=color:#e6db74>&#39;blog.urls&#39;</span>)),   <span style=color:#75715e># 反向解析：blog:list、blog:detail</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;shop/&#39;</span>, include(<span style=color:#e6db74>&#39;shop.urls&#39;</span>)),   <span style=color:#75715e># 反向解析：shop:list、shop:detail</span>
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><p>現在即使兩個 App 都有名為 <code>list</code> 和 <code>detail</code> 的 URL，透過命名空間也能明確區分。</p><h3 id=url-設計最佳實踐restful-風格>URL 設計最佳實踐（RESTful 風格）</h3><p>良好的 URL 設計能讓 API 和頁面路徑直觀、易讀、可預測。以下是遵循 <strong>RESTful</strong> 風格的設計原則：</p><ol><li><strong>使用名詞而非動詞</strong>：<code>/articles/</code> 而非 <code>/get-articles/</code></li><li><strong>使用複數名詞</strong>：<code>/articles/</code> 而非 <code>/article/</code></li><li><strong>利用 HTTP 方法表達操作</strong>：GET 取得、POST 建立、PUT/PATCH 更新、DELETE 刪除</li><li><strong>使用階層結構表達資源關係</strong>：<code>/articles/1/comments/</code> 表示文章 1 的所有留言</li><li><strong>結尾統一加斜線</strong>：Django 預設行為 <code>APPEND_SLASH = True</code></li><li><strong>使用連字號而非底線</strong>：<code>/my-article/</code> 而非 <code>/my_article/</code></li></ol><h4 id=url-路由效能考量>URL 路由效能考量</h4><p><code>urlpatterns</code> 列表由上而下匹配，有幾個效能相關的建議：</p><ul><li><strong>高頻路由放在前面</strong>：將最常被存取的路由放在列表開頭，減少不必要的比對</li><li><strong>使用 include() 分組</strong>：可以提前排除不匹配的路由群組，減少逐一比對的數量</li><li><strong>避免頂層使用 re_path()</strong>：正規表達式的比對效能低於 <code>path()</code> 的路徑轉換器</li></ul><p>不過不需要過度擔心 — Django 會在首次請求時編譯所有 URLconf 並快取結果，後續請求不會重複編譯。</p><h3 id=完整的-myblog-url-配置範例>完整的 myblog URL 配置範例</h3><p>讓我們用一個完整的部落格專案 <code>myblog</code> 來整合以上所有知識：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># myblog/urls.py（專案級別 ROOT_URLCONF）</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.contrib <span style=color:#f92672>import</span> admin
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.urls <span style=color:#f92672>import</span> path, include
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.conf <span style=color:#f92672>import</span> settings
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.conf.urls.static <span style=color:#f92672>import</span> static
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>urlpatterns <span style=color:#f92672>=</span> [
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 首頁</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;&#39;</span>, include(<span style=color:#e6db74>&#39;pages.urls&#39;</span>)),
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 部落格文章（最頻繁存取，放在前面）</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;posts/&#39;</span>, include(<span style=color:#e6db74>&#39;posts.urls&#39;</span>)),
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 使用者帳號相關</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;accounts/&#39;</span>, include(<span style=color:#e6db74>&#39;accounts.urls&#39;</span>)),
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 管理後台（最少使用，放在最後）</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;admin/&#39;</span>, admin<span style=color:#f92672>.</span>site<span style=color:#f92672>.</span>urls),
+</span></span><span style=display:flex><span>]
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 開發環境下提供媒體檔案服務</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>if</span> settings<span style=color:#f92672>.</span>DEBUG:
+</span></span><span style=display:flex><span>    urlpatterns <span style=color:#f92672>+=</span> static(settings<span style=color:#f92672>.</span>MEDIA_URL, document_root<span style=color:#f92672>=</span>settings<span style=color:#f92672>.</span>MEDIA_ROOT)
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># posts/urls.py（App 級別）</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.urls <span style=color:#f92672>import</span> path
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> . <span style=color:#f92672>import</span> views
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>app_name <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;posts&#39;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>urlpatterns <span style=color:#f92672>=</span> [
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 文章列表 — GET /posts/</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;&#39;</span>, views<span style=color:#f92672>.</span>PostListView<span style=color:#f92672>.</span>as_view(), name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;list&#39;</span>),
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 建立文章 — GET /posts/create/（表單）、POST /posts/create/（送出）</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;create/&#39;</span>, views<span style=color:#f92672>.</span>PostCreateView<span style=color:#f92672>.</span>as_view(), name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;create&#39;</span>),
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 文章詳情 — GET /posts/1/</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;&lt;int:pk&gt;/&#39;</span>, views<span style=color:#f92672>.</span>PostDetailView<span style=color:#f92672>.</span>as_view(), name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;detail&#39;</span>),
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 更新文章 — GET /posts/1/edit/（表單）、POST /posts/1/edit/（送出）</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;&lt;int:pk&gt;/edit/&#39;</span>, views<span style=color:#f92672>.</span>PostUpdateView<span style=color:#f92672>.</span>as_view(), name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;edit&#39;</span>),
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 刪除文章 — POST /posts/1/delete/</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;&lt;int:pk&gt;/delete/&#39;</span>, views<span style=color:#f92672>.</span>PostDeleteView<span style=color:#f92672>.</span>as_view(), name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;delete&#39;</span>),
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 依 slug 存取文章 — GET /posts/my-first-post/</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;&lt;slug:slug&gt;/&#39;</span>, views<span style=color:#f92672>.</span>PostBySlugView<span style=color:#f92672>.</span>as_view(), name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;detail-by-slug&#39;</span>),
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 依年份篩選文章 — GET /posts/archive/2026/</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;archive/&lt;int:year&gt;/&#39;</span>, views<span style=color:#f92672>.</span>PostArchiveView<span style=color:#f92672>.</span>as_view(), name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;archive-year&#39;</span>),
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 文章留言（巢狀路由）— /posts/1/comments/</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;&lt;int:post_pk&gt;/comments/&#39;</span>, include(<span style=color:#e6db74>&#39;comments.urls&#39;</span>)),
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># comments/urls.py</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.urls <span style=color:#f92672>import</span> path
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> . <span style=color:#f92672>import</span> views
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>app_name <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;comments&#39;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>urlpatterns <span style=color:#f92672>=</span> [
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 留言列表 — GET /posts/1/comments/</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;&#39;</span>, views<span style=color:#f92672>.</span>CommentListView<span style=color:#f92672>.</span>as_view(), name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;list&#39;</span>),
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 新增留言 — POST /posts/1/comments/create/</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;create/&#39;</span>, views<span style=color:#f92672>.</span>CommentCreateView<span style=color:#f92672>.</span>as_view(), name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;create&#39;</span>),
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 刪除留言 — POST /posts/1/comments/5/delete/</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;&lt;int:pk&gt;/delete/&#39;</span>, views<span style=color:#f92672>.</span>CommentDeleteView<span style=color:#f92672>.</span>as_view(), name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;delete&#39;</span>),
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># accounts/urls.py</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.urls <span style=color:#f92672>import</span> path
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> . <span style=color:#f92672>import</span> views
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>app_name <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;accounts&#39;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>urlpatterns <span style=color:#f92672>=</span> [
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;login/&#39;</span>, views<span style=color:#f92672>.</span>LoginView<span style=color:#f92672>.</span>as_view(), name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;login&#39;</span>),
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;logout/&#39;</span>, views<span style=color:#f92672>.</span>LogoutView<span style=color:#f92672>.</span>as_view(), name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;logout&#39;</span>),
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;register/&#39;</span>, views<span style=color:#f92672>.</span>RegisterView<span style=color:#f92672>.</span>as_view(), name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;register&#39;</span>),
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;profile/&lt;int:pk&gt;/&#39;</span>, views<span style=color:#f92672>.</span>ProfileView<span style=color:#f92672>.</span>as_view(), name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;profile&#39;</span>),
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><p>在模板中使用這些命名路由：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-html data-lang=html><span style=display:flex><span><span style=color:#75715e>&lt;!-- 導航列 --&gt;</span>
+</span></span><span style=display:flex><span>&lt;<span style=color:#f92672>nav</span>&gt;
+</span></span><span style=display:flex><span>    &lt;<span style=color:#f92672>a</span> <span style=color:#a6e22e>href</span><span style=color:#f92672>=</span><span style=color:#e6db74>&#34;{% url &#39;posts:list&#39; %}&#34;</span>&gt;所有文章&lt;/<span style=color:#f92672>a</span>&gt;
+</span></span><span style=display:flex><span>    &lt;<span style=color:#f92672>a</span> <span style=color:#a6e22e>href</span><span style=color:#f92672>=</span><span style=color:#e6db74>&#34;{% url &#39;posts:create&#39; %}&#34;</span>&gt;撰寫新文章&lt;/<span style=color:#f92672>a</span>&gt;
+</span></span><span style=display:flex><span>    &lt;<span style=color:#f92672>a</span> <span style=color:#a6e22e>href</span><span style=color:#f92672>=</span><span style=color:#e6db74>&#34;{% url &#39;accounts:profile&#39; pk=request.user.pk %}&#34;</span>&gt;個人檔案&lt;/<span style=color:#f92672>a</span>&gt;
+</span></span><span style=display:flex><span>    &lt;<span style=color:#f92672>a</span> <span style=color:#a6e22e>href</span><span style=color:#f92672>=</span><span style=color:#e6db74>&#34;{% url &#39;accounts:logout&#39; %}&#34;</span>&gt;登出&lt;/<span style=color:#f92672>a</span>&gt;
+</span></span><span style=display:flex><span>&lt;/<span style=color:#f92672>nav</span>&gt;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>&lt;!-- 文章列表中的連結 --&gt;</span>
+</span></span><span style=display:flex><span>{% for post in posts %}
+</span></span><span style=display:flex><span>    &lt;<span style=color:#f92672>article</span>&gt;
+</span></span><span style=display:flex><span>        &lt;<span style=color:#f92672>h2</span>&gt;&lt;<span style=color:#f92672>a</span> <span style=color:#a6e22e>href</span><span style=color:#f92672>=</span><span style=color:#e6db74>&#34;{% url &#39;posts:detail&#39; pk=post.pk %}&#34;</span>&gt;{{ post.title }}&lt;/<span style=color:#f92672>a</span>&gt;&lt;/<span style=color:#f92672>h2</span>&gt;
+</span></span><span style=display:flex><span>        &lt;<span style=color:#f92672>a</span> <span style=color:#a6e22e>href</span><span style=color:#f92672>=</span><span style=color:#e6db74>&#34;{% url &#39;posts:edit&#39; pk=post.pk %}&#34;</span>&gt;編輯&lt;/<span style=color:#f92672>a</span>&gt;
+</span></span><span style=display:flex><span>    &lt;/<span style=color:#f92672>article</span>&gt;
+</span></span><span style=display:flex><span>{% endfor %}
+</span></span></code></pre></div><p>在 View 中使用反向解析做重導向：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> django.urls <span style=color:#f92672>import</span> reverse
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.shortcuts <span style=color:#f92672>import</span> redirect
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>create_post</span>(request):
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> request<span style=color:#f92672>.</span>method <span style=color:#f92672>==</span> <span style=color:#e6db74>&#39;POST&#39;</span>:
+</span></span><span style=display:flex><span>        <span style=color:#75715e># 處理表單資料並儲存文章...</span>
+</span></span><span style=display:flex><span>        post <span style=color:#f92672>=</span> form<span style=color:#f92672>.</span>save()
+</span></span><span style=display:flex><span>        <span style=color:#75715e># 重導向到新建立的文章頁面</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> redirect(reverse(<span style=color:#e6db74>&#39;posts:detail&#39;</span>, kwargs<span style=color:#f92672>=</span>{<span style=color:#e6db74>&#39;pk&#39;</span>: post<span style=color:#f92672>.</span>pk}))
+</span></span><span style=display:flex><span>    <span style=color:#75715e># ...</span>
+</span></span></code></pre></div><h3 id=總結>總結</h3><p>Django 的 URL 路由系統（URLconf）是整個請求處理流程的核心環節。本篇文章涵蓋了路由設計的方方面面：<code>urlpatterns</code> 列表的匹配機制、<code>path()</code> 函數的四個參數、五種內建路徑轉換器與自訂轉換器、<code>re_path()</code> 正則表達式路由、<code>include()</code> 模組化拆分、URL 命名與 <code>reverse()</code> / <code>reverse_lazy()</code> 反向解析、模板中的 <code>{% url %}</code> 標籤、以及 Namespace 命名空間的應用。</p><p>掌握這些知識後，你應該能夠為任何規模的 Django 專案設計出清晰、可維護、符合 RESTful 風格的 URL 架構。記住幾個核心原則：優先使用 <code>path()</code> 而非 <code>re_path()</code>、永遠為 URL 命名並使用反向解析、善用 <code>include()</code> 和 Namespace 做模組化管理，以及遵循 RESTful 設計風格讓 URL 直觀可預測。</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
+</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/django/013-django-cbv/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django Views：Class-Based Views 類別視圖深入解析 | Django 教學</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/02</span>
+</a><a href=https://benzhub.github.io/post/django/012-django-fbv/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django Views：Function-Based Views 函數視圖入門 | Django 教學</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/01</span>
+</a><a href=https://benzhub.github.io/post/django/011-django-orm-queryset/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django ORM 與 QuerySet 查詢語法完全指南 | Django 教學</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/05/31</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/django/013-django-cbv/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+<span class="text-sm font-medium">Django Views：Class-Based Views 類別視圖深入解析 | Django 教學</span></a></div><div><a href=https://benzhub.github.io/post/django/015-django-templates-basics/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+<span class="text-sm font-medium">Django Templates 模板語言基礎入門 | Django 教學</span></a></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
+</a><a href=/tags/acid><span class=tag-pill>acid</span>
+</a><a href=/tags/ai><span class=tag-pill>ai</span>
+</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
+</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
+</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
+</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
+</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
+</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
+</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
+</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
+</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
+</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
+</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
+</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
+</a><a href=/tags/api><span class=tag-pill>api</span>
+</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
+</a><a href=/tags/autovacuum><span class=tag-pill>autovacuum</span>
+</a><a href=/tags/background-processes><span class=tag-pill>background-processes</span>
+</a><a href=/tags/big-o><span class=tag-pill>big o</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (14)</span>
+</a><a href=/post/javascript/><span class=tag-pill>JavaScript (69)</span>
+</a><a href=/post/django/><span class=tag-pill>Django (31)</span>
+</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
+</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
+</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
+</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
+</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/django/031-django-signals/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Signals 信號機制：觀察者模式實戰 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/20</p></a><a href=/post/postgresql/014-dml-advanced/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">DML 進階操作：Upsert、MERGE、RETURNING 與 COPY 批量匯入 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/20</p></a><a href=/post/javascript/data-structures--algorithms/007-sorting/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">排序演算法 — Bubble、Merge、Quick Sort 等十大排序完整比較 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/20</p></a><a href=/post/postgresql/013-ddl-schema/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/19</p></a><a href=/post/django/030-django-custom-user-model/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django 自訂使用者模型：AbstractUser 與 AbstractBaseUser | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/19</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>

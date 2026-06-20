@@ -1,775 +1,265 @@
-<!DOCTYPE html>
-
-<html lang="zh-TW">
-<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><title>DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL | BenzHub</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="apple-touch-icon" sizes="180x180" href='/favicon/apple-touch-icon.png'>
-    <link rel="icon" type="image/png" sizes="32x32" href='/favicon/favicon-32x32.png'>
-    <link rel="icon" type="image/png" sizes="16x16" href='/favicon/favicon-16x16.png'>
-    <link rel="manifest" href='/favicon/site.webmanifest' />
-    <link rel="mask-icon" href=' /favicon/safari-pinned-tab.svg' color="#5bbad5" />
-    <link rel="shortcut icon" href='/favicon/favicon.ico' />
-    <meta name="theme-color" content="#fafafa">
-    <meta property="og:title" content="DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL | BenzHub" />
-    
-    
-    <link rel="stylesheet" href="/css/style.css" />
-    
-    <link href=' /css/blonde.min.css' rel="stylesheet" type="text/css" media="print"
-        onload="this.media=' all'">
-    
-
-
-
-
-
-
-
-  
-
-
-
-
-  
-
-<meta name="description" content="深入解析 PostgreSQL 的 DDL 操作與 Schema 管理，涵蓋 CREATE/ALTER/DROP TABLE、Constraints 實作機制、Declarative Partitioning 三種策略、Schema 命名空間、Online DDL 鎖影響與安全 DDL 策略。">
-<meta property="og:site_name" content="BenzHub">
-<meta property="og:description" content="深入解析 PostgreSQL 的 DDL 操作與 Schema 管理，涵蓋 CREATE/ALTER/DROP TABLE、Constraints 實作機制、Declarative Partitioning 三種策略、Schema 命名空間、Online DDL 鎖影響與安全 DDL 策略。">
-<meta property="og:url" content="http://localhost:1313/post/postgresql/013-ddl-schema/">
-<meta property="og:type" content="article">
-<meta property="og:locale" content="zh_TW">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="">
-
-<link rel="canonical" href="http://localhost:1313/post/postgresql/013-ddl-schema/">
-
-<meta name="twitter:description" content="深入解析 PostgreSQL 的 DDL 操作與 Schema 管理，涵蓋 CREATE/ALTER/DROP TABLE、Constraints 實作機制、Declarative Partitioning 三種策略、Schema 命名空間、Online DDL 鎖影響與安全 DDL 策略。">
-<meta property="article:published_time" content="2026-06-19T00:00:00&#43;00:00">
-<meta property="article:updated_time" content="2026-06-19T00:00:00&#43;00:00">
-
-
-
-
-
-    
-<meta property="og:image" content="http://localhost:1313/img/postgresql/013-DDL-Schema.png">
-<meta property="og:image:url" content="http://localhost:1313/img/postgresql/013-DDL-Schema.png">
-    
-
-    
-    <link rel="stylesheet" href='/css/custom.css'>
-    <i class="dark hidden"></i>
-    
-<link rel="alternate" hreflang="zh-TW" href="http://localhost:1313/post/postgresql/013-ddl-schema/" />
-
-<link rel="alternate" hreflang="x-default" href="http://localhost:1313/post/postgresql/013-ddl-schema/" />
-
-    
-
-
-
-
-
-
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BlogPosting",
-  "headline": "\"DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL\"",
-  "description": "\"深入解析 PostgreSQL 的 DDL 操作與 Schema 管理，涵蓋 CREATE/ALTER/DROP TABLE、Constraints 實作機制、Declarative Partitioning 三種策略、Schema 命名空間、Online DDL 鎖影響與安全 DDL 策略。\"",
-  "author": {
-    "@type": "Person",
-    "name": "\"BenzHub\"",
-    "url": "http:\/\/localhost:1313\/about",
-    "jobTitle": "\"Software Developer\"",
-    "sameAs": [
-      "\"https://github.com/benzhub\""
-    ]
-  },
-  "datePublished": "2026-06-19T00:00:00\u002b00:00",
-  "dateModified": "2026-06-19T00:00:00\u002b00:00",
-  "image": "http:\/\/localhost:1313\/img\/postgresql\/013-DDL-Schema.png",
-  "publisher": {
-    "@type": "Organization",
-    "name": "\"BenzHub\"",
-    "url": "\"http://localhost:1313/\"",
-    "sameAs": [
-      "\"https://github.com/benzhub\""
-    ]
-  },
-  "mainEntityOfPage": {
-    "@type": "WebPage",
-    "@id": "http:\/\/localhost:1313\/post\/postgresql\/013-ddl-schema\/"
-  },
-  "inLanguage": "zh-TW"
-}
-</script>
-
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    {
-      "@type": "ListItem",
-      "position": 1,
-      "name": "\"BenzHub\"",
-      "item": "http:\/\/localhost:1313\/"
-    }
-    
-    
-      
-      
-    ,{
-      "@type": "ListItem",
-      "position": 2,
-      "name": "\"Blog\"",
-      "item": "http:\/\/localhost:1313\/post\/postgresql\/"
-    }
-      
-      
-    
-    ,{
-      "@type": "ListItem",
-      "position":  3 ,
-      "name": "\"DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL\""
-    }
-  ]
-}
-</script>
-
-
-
-
-
-
-
-
-
-
-
-</head>
-<body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class="site-nav" id="siteNav">
-    <div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full">
-        
-        <a href="http://localhost:1313/" class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">
-            BenzHub
-        </a>
-
-        
-        <div class="hidden md:flex items-center gap-6">
-            
-            <a href="/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                首頁
-            </a>
-            
-            <a href="/about/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                關於
-            </a>
-            
-            <a href="/contact/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                聯絡
-            </a>
-            
-            <a href="/resourses/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                資源
-            </a>
-            
-
-            
-            <div class="flex items-center gap-2">
-                <form class="flex items-center" role="search" method="get" action="https://google.com/search" id="navSearchForm">
-                    <input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50"
-                        type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋" id="navSearchInput">
-                    <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
-                </form>
-                <button onclick="toggleNavSearch()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
-                    <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-                    </svg>
-                </button>
-            </div>
-
-            
-            <span class="text-zinc-200 dark:text-zinc-700">|</span>
-
-            
-            
-
-
-
-
-<div class="lang-switcher relative hidden md:block">
-    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-        <span>🌐</span>
-        <span>繁體中文</span>
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-    </button>
-    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
-        
-            
-            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-                
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-
-<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
-    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
-    <div class="flex gap-2">
-        
-            
-            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-                
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-
-            
-            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-                <i id="icon2" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
-            </button>
-        </div>
-
-        
-        <div class="flex md:hidden items-center gap-1">
-            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-                <i id="icon" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
-            </button>
-            <button id="hamburgerbtn" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Menu">
-                <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
-            </button>
-        </div>
-    </div>
-
-    
-    <div class="mobile-menu md:hidden" id="mobileMenu">
-        
-        <a href="/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            首頁
-        </a>
-        
-        <a href="/about/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            關於
-        </a>
-        
-        <a href="/contact/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            聯絡
-        </a>
-        
-        <a href="/resourses/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            資源
-        </a>
-        
-        <form class="mt-2" role="search" method="get" action="https://google.com/search">
-            <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
-            <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
-        </form>
-        
-        
-
-
-
-
-<div class="lang-switcher relative hidden md:block">
-    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-        <span>🌐</span>
-        <span>繁體中文</span>
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-    </button>
-    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
-        
-            
-            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-                
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-
-<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
-    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
-    <div class="flex gap-2">
-        
-            
-            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-                
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-    </div>
-</nav>
-
-<script>
-    
-    document.getElementById('hamburgerbtn').addEventListener('click', function () {
-        document.getElementById('mobileMenu').classList.toggle('active');
-    });
-
-    
-    window.addEventListener('scroll', function () {
-        var nav = document.getElementById('siteNav');
-        if (window.scrollY > 50) {
-            nav.classList.add('scrolled');
-        } else {
-            nav.classList.remove('scrolled');
-        }
-    });
-
-    
-    function toggleNavSearch() {
-        var input = document.getElementById('navSearchInput');
-        input.classList.toggle('expanded');
-        if (input.classList.contains('expanded')) {
-            input.focus();
-        }
-    }
-
-    
-    function toggleLangMenu() {
-        var dropdown = document.getElementById('langDropdown');
-        dropdown.classList.toggle('hidden');
-    }
-
-    
-    document.addEventListener('click', function (e) {
-        
-        var form = document.getElementById('navSearchForm');
-        var input = document.getElementById('navSearchInput');
-        if (form && input && !form.contains(e.target) && !e.target.closest('[aria-label="Toggle Search"]')) {
-            input.classList.remove('expanded');
-        }
-        
-        var langSwitcher = e.target.closest('.lang-switcher');
-        if (!langSwitcher) {
-            var dropdown = document.getElementById('langDropdown');
-            if (dropdown) dropdown.classList.add('hidden');
-        }
-    });
-</script>
-<div class="nav-spacer"></div>
-    <div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id="content">
-        <div class="lg:mx-5">
-<div class="grid grid-cols-3 gap-6">
-  
-  <div class="col-span-3 lg:col-span-2">
-  
-      
-      <div class="post-detail fade-in my-4">
-        <h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL</h1>
-        <div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4">
-            <span class="flex items-center gap-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/19
-            </span>
-            
-        </div>
-        
-        <div class="flex flex-wrap gap-1.5 mb-5">
-            
-            <a href='/tags/postgresql' class="tag-pill no-underline">postgresql</a>
-            
-            <a href='/tags/ddl' class="tag-pill no-underline">ddl</a>
-            
-            <a href='/tags/schema' class="tag-pill no-underline">schema</a>
-            
-            <a href='/tags/partitioning' class="tag-pill no-underline">partitioning</a>
-            
-        </div>
-        
-        
-        <img class="py-4 m-auto rounded-lg thumb-img" src="http://localhost:1313/img/postgresql/013-DDL-Schema.png" alt="DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL">
-        
-        
-        <div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote>
-<p><strong>DDL（Data Definition Language）</strong> 負責定義、修改和刪除資料庫物件。在 <strong>PostgreSQL</strong> 中，DDL 不僅影響邏輯結構，更直接操作<strong>系統目錄（System Catalog）</strong>，並可能持有<strong>排他鎖（Exclusive Lock）</strong> 影響並行工作負載。掌握 DDL 的鎖定行為與<strong>宣告式分區（Declarative Partitioning）</strong>，是生產環境 Schema 管理的核心能力。</p>
-</blockquote>
-<h3 id="ddl-與系統目錄的關係">DDL 與系統目錄的關係</h3>
-<p>執行 <code>CREATE TABLE</code> 時，PostgreSQL 在系統目錄中寫入多筆紀錄：</p>
-<table>
-	<thead>
-			<tr>
-					<th>目錄表</th>
-					<th>用途</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td><code>pg_class</code></td>
-					<td>表格、視圖、索引、序列等關係物件</td>
-			</tr>
-			<tr>
-					<td><code>pg_attribute</code></td>
-					<td>每個欄位的名稱、型別、位置、是否可 NULL</td>
-			</tr>
-			<tr>
-					<td><code>pg_constraint</code></td>
-					<td>PK、FK、UNIQUE、CHECK 等約束</td>
-			</tr>
-			<tr>
-					<td><code>pg_index</code></td>
-					<td>索引的詳細資訊</td>
-			</tr>
-			<tr>
-					<td><code>pg_namespace</code></td>
-					<td>Schema（命名空間）資訊</td>
-			</tr>
-	</tbody>
-</table>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 建立表格後，查看系統目錄紀錄
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> orders (
-</span></span><span style="display:flex;"><span>    order_id bigint <span style="color:#66d9ef">GENERATED</span> ALWAYS <span style="color:#66d9ef">AS</span> <span style="color:#66d9ef">IDENTITY</span> <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
-</span></span><span style="display:flex;"><span>    customer_id bigint <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
-</span></span><span style="display:flex;"><span>    total_amount numeric(<span style="color:#ae81ff">12</span>, <span style="color:#ae81ff">2</span>)
-</span></span><span style="display:flex;"><span>);
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 查看 pg_class 中的紀錄
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> relname, relkind, relnatts, relhaspkey
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> pg_class
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> relname <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;orders&#39;</span>;
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- relkind: &#39;r&#39;=普通表格, &#39;i&#39;=索引, &#39;v&#39;=視圖, &#39;p&#39;=分區父表
-</span></span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 查看欄位資訊
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> attname, atttypid::regtype, attnum, attnotnull
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> pg_attribute
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> attrelid <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;orders&#39;</span>::regclass
-</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">AND</span> attnum <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> attnum;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 查看 Constraint 資訊
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> conname, contype, pg_get_constraintdef(oid)
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> pg_constraint
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> conrelid <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;orders&#39;</span>::regclass;
-</span></span></code></pre></div><h3 id="create--alter--drop-table">CREATE / ALTER / DROP TABLE</h3>
-<h4 id="create-table">CREATE TABLE</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 基本建表
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> <span style="color:#66d9ef">IF</span> <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">EXISTS</span> products (
-</span></span><span style="display:flex;"><span>    product_id bigint <span style="color:#66d9ef">GENERATED</span> ALWAYS <span style="color:#66d9ef">AS</span> <span style="color:#66d9ef">IDENTITY</span> <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
-</span></span><span style="display:flex;"><span>    sku        varchar(<span style="color:#ae81ff">50</span>)    <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">UNIQUE</span>,
-</span></span><span style="display:flex;"><span>    name       text           <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
-</span></span><span style="display:flex;"><span>    price      numeric(<span style="color:#ae81ff">10</span>, <span style="color:#ae81ff">2</span>) <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">CHECK</span> (price <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>),
-</span></span><span style="display:flex;"><span>    category_id int           <span style="color:#66d9ef">REFERENCES</span> categories(category_id) <span style="color:#66d9ef">ON</span> <span style="color:#66d9ef">DELETE</span> <span style="color:#66d9ef">SET</span> <span style="color:#66d9ef">NULL</span>,
-</span></span><span style="display:flex;"><span>    is_active  boolean        <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">DEFAULT</span> <span style="color:#66d9ef">true</span>,
-</span></span><span style="display:flex;"><span>    metadata   jsonb,
-</span></span><span style="display:flex;"><span>    created_at timestamptz    <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">DEFAULT</span> now(),
-</span></span><span style="display:flex;"><span>    updated_at timestamptz    <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">DEFAULT</span> now()
-</span></span><span style="display:flex;"><span>);
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 從查詢結果建立表格（含資料）
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> orders_archive <span style="color:#66d9ef">AS</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> orders <span style="color:#66d9ef">WHERE</span> created_at <span style="color:#f92672">&lt;</span> <span style="color:#e6db74">&#39;2024-01-01&#39;</span>;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 指定儲存參數
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> high_write_table (
-</span></span><span style="display:flex;"><span>    id bigint <span style="color:#66d9ef">GENERATED</span> ALWAYS <span style="color:#66d9ef">AS</span> <span style="color:#66d9ef">IDENTITY</span> <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">data</span> text
-</span></span><span style="display:flex;"><span>) <span style="color:#66d9ef">WITH</span> (fillfactor <span style="color:#f92672">=</span> <span style="color:#ae81ff">70</span>);  <span style="color:#75715e">-- 留 30% 空間給 UPDATE（HOT 優化）
-</span></span></span></code></pre></div><h4 id="alter-table">ALTER TABLE</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 新增欄位（PG11+ 有預設值幾乎即時完成，無需重寫表格）
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> products <span style="color:#66d9ef">ADD</span> <span style="color:#66d9ef">COLUMN</span> in_stock boolean <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">DEFAULT</span> <span style="color:#66d9ef">true</span>;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 刪除欄位
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> products <span style="color:#66d9ef">DROP</span> <span style="color:#66d9ef">COLUMN</span> weight_kg;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 修改欄位型別（需確認相容性，可能重寫表格）
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> products <span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">COLUMN</span> name <span style="color:#66d9ef">TYPE</span> varchar(<span style="color:#ae81ff">200</span>);
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 重命名欄位
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> products <span style="color:#66d9ef">RENAME</span> <span style="color:#66d9ef">COLUMN</span> sku <span style="color:#66d9ef">TO</span> product_code;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 設定/移除 NOT NULL
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> products <span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">COLUMN</span> metadata <span style="color:#66d9ef">SET</span> <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> products <span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">COLUMN</span> metadata <span style="color:#66d9ef">DROP</span> <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>;
-</span></span></code></pre></div><h4 id="drop--truncate">DROP / TRUNCATE</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 安全刪除
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">DROP</span> <span style="color:#66d9ef">TABLE</span> <span style="color:#66d9ef">IF</span> <span style="color:#66d9ef">EXISTS</span> temp_import;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 級聯刪除（同時刪除依賴物件）
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">DROP</span> <span style="color:#66d9ef">TABLE</span> <span style="color:#66d9ef">IF</span> <span style="color:#66d9ef">EXISTS</span> categories <span style="color:#66d9ef">CASCADE</span>;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 清空表格（比 DELETE 快，重置序列）
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">TRUNCATE</span> <span style="color:#66d9ef">TABLE</span> orders_archive <span style="color:#66d9ef">RESTART</span> <span style="color:#66d9ef">IDENTITY</span>;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">TRUNCATE</span> <span style="color:#66d9ef">TABLE</span> orders, order_items <span style="color:#66d9ef">CASCADE</span>;  <span style="color:#75715e">-- 多表同時清空
-</span></span></span></code></pre></div><h3 id="constraints-詳細說明">Constraints 詳細說明</h3>
-<h4 id="primary-key">PRIMARY KEY</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 單欄主鍵
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> users (
-</span></span><span style="display:flex;"><span>    user_id bigint <span style="color:#66d9ef">GENERATED</span> ALWAYS <span style="color:#66d9ef">AS</span> <span style="color:#66d9ef">IDENTITY</span> <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
-</span></span><span style="display:flex;"><span>    email text <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>
-</span></span><span style="display:flex;"><span>);
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 複合主鍵
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> order_items (
-</span></span><span style="display:flex;"><span>    order_id   bigint,
-</span></span><span style="display:flex;"><span>    product_id bigint,
-</span></span><span style="display:flex;"><span>    quantity   int <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span> (order_id, product_id)
-</span></span><span style="display:flex;"><span>);
-</span></span></code></pre></div><p><strong>實作機制</strong>：PK = 唯一索引 + NOT NULL。建立 PK 時自動建立 B-tree 索引。</p>
-<h4 id="foreign-key">FOREIGN KEY</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> orders (
-</span></span><span style="display:flex;"><span>    order_id    bigint <span style="color:#66d9ef">GENERATED</span> ALWAYS <span style="color:#66d9ef">AS</span> <span style="color:#66d9ef">IDENTITY</span> <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
-</span></span><span style="display:flex;"><span>    customer_id bigint <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">CONSTRAINT</span> fk_orders_customer
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">FOREIGN</span> <span style="color:#66d9ef">KEY</span> (customer_id)
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">REFERENCES</span> customers(customer_id)
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">ON</span> <span style="color:#66d9ef">DELETE</span> <span style="color:#66d9ef">RESTRICT</span>     <span style="color:#75715e">-- 不允許刪除被引用的客戶
-</span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">ON</span> <span style="color:#66d9ef">UPDATE</span> <span style="color:#66d9ef">CASCADE</span>      <span style="color:#75715e">-- 客戶 ID 變更時自動更新
-</span></span></span><span style="display:flex;"><span>);
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 延遲 FK 檢查（適合批量資料載入）
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> order_items (
-</span></span><span style="display:flex;"><span>    item_id  bigint <span style="color:#66d9ef">GENERATED</span> ALWAYS <span style="color:#66d9ef">AS</span> <span style="color:#66d9ef">IDENTITY</span> <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
-</span></span><span style="display:flex;"><span>    order_id bigint,
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">CONSTRAINT</span> fk_item_order
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">FOREIGN</span> <span style="color:#66d9ef">KEY</span> (order_id) <span style="color:#66d9ef">REFERENCES</span> orders(order_id)
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">DEFERRABLE</span> <span style="color:#66d9ef">INITIALLY</span> <span style="color:#66d9ef">DEFERRED</span>  <span style="color:#75715e">-- Transaction 結束時才檢查
-</span></span></span><span style="display:flex;"><span>);
-</span></span></code></pre></div><p><strong>實作機制</strong>：FK 透過隱藏的<strong>觸發器（Trigger）</strong> 實作——<code>AFTER INSERT/UPDATE</code> 驗證值存在，<code>AFTER DELETE/UPDATE</code>（在參照表上）驗證不違反引用完整性。</p>
-<h4 id="unique">UNIQUE</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 單欄唯一
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> users <span style="color:#66d9ef">ADD</span> <span style="color:#66d9ef">CONSTRAINT</span> uq_email <span style="color:#66d9ef">UNIQUE</span> (email);
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 部分唯一索引（只對符合條件的資料強制唯一）
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">UNIQUE</span> <span style="color:#66d9ef">INDEX</span> uq_active_sku
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ON</span> products (sku)
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> is_active <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span>;
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 非活躍產品可有重複 SKU，活躍產品不行
-</span></span></span></code></pre></div><h4 id="check">CHECK</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> products (
-</span></span><span style="display:flex;"><span>    product_id bigint <span style="color:#66d9ef">GENERATED</span> ALWAYS <span style="color:#66d9ef">AS</span> <span style="color:#66d9ef">IDENTITY</span> <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
-</span></span><span style="display:flex;"><span>    price      numeric(<span style="color:#ae81ff">10</span>, <span style="color:#ae81ff">2</span>) <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
-</span></span><span style="display:flex;"><span>    sale_price numeric(<span style="color:#ae81ff">10</span>, <span style="color:#ae81ff">2</span>),
-</span></span><span style="display:flex;"><span>    status     text <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">CONSTRAINT</span> chk_price <span style="color:#66d9ef">CHECK</span> (price <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>),
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">CONSTRAINT</span> chk_sale <span style="color:#66d9ef">CHECK</span> (sale_price <span style="color:#66d9ef">IS</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">OR</span> sale_price <span style="color:#f92672">&lt;</span> price),
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">CONSTRAINT</span> chk_status <span style="color:#66d9ef">CHECK</span> (status <span style="color:#66d9ef">IN</span> (<span style="color:#e6db74">&#39;draft&#39;</span>, <span style="color:#e6db74">&#39;active&#39;</span>, <span style="color:#e6db74">&#39;discontinued&#39;</span>))
-</span></span><span style="display:flex;"><span>);
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 新增 CHECK 但跳過既有資料驗證（先上線，再排程驗證）
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> products
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ADD</span> <span style="color:#66d9ef">CONSTRAINT</span> chk_new <span style="color:#66d9ef">CHECK</span> (metadata <span style="color:#66d9ef">IS</span> <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>) <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">VALID</span>;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 後續驗證（只需 ShareUpdateExclusiveLock，不阻塞讀寫）
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> products VALIDATE <span style="color:#66d9ef">CONSTRAINT</span> chk_new;
-</span></span></code></pre></div><h4 id="exclude">EXCLUDE</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 需要先安裝 btree_gist 擴展
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> EXTENSION <span style="color:#66d9ef">IF</span> <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">EXISTS</span> btree_gist;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 同一房間同一時段不可重複預約
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> room_bookings (
-</span></span><span style="display:flex;"><span>    booking_id bigint <span style="color:#66d9ef">GENERATED</span> ALWAYS <span style="color:#66d9ef">AS</span> <span style="color:#66d9ef">IDENTITY</span> <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
-</span></span><span style="display:flex;"><span>    room_id    int <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
-</span></span><span style="display:flex;"><span>    during     tstzrange <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">CONSTRAINT</span> no_overlap EXCLUDE <span style="color:#66d9ef">USING</span> gist (
-</span></span><span style="display:flex;"><span>        room_id <span style="color:#66d9ef">WITH</span> <span style="color:#f92672">=</span>,    <span style="color:#75715e">-- 同一房間
-</span></span></span><span style="display:flex;"><span>        during <span style="color:#66d9ef">WITH</span> <span style="color:#f92672">&amp;&amp;</span>     <span style="color:#75715e">-- 時間範圍重疊
-</span></span></span><span style="display:flex;"><span>    )
-</span></span><span style="display:flex;"><span>);
-</span></span></code></pre></div><h3 id="declarative-partitioning">Declarative Partitioning</h3>
-<p>PostgreSQL 10 引入<strong>宣告式分區</strong>，以父表/子表架構實作。父表本身不儲存資料，只作為邏輯入口；每個子表是獨立表格，有自己的索引和統計資訊。</p>
-<h4 id="range-partitioning範圍分區">Range Partitioning（範圍分區）</h4>
-<p>最常見，適合<strong>時間序列資料</strong>：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 建立分區父表
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> events (
-</span></span><span style="display:flex;"><span>    event_id   bigint <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
-</span></span><span style="display:flex;"><span>    created_at timestamptz <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">DEFAULT</span> now(),
-</span></span><span style="display:flex;"><span>    event_type text <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
-</span></span><span style="display:flex;"><span>    payload    jsonb,
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span> (event_id, created_at)  <span style="color:#75715e">-- 主鍵必須包含分區鍵
-</span></span></span><span style="display:flex;"><span>) PARTITION <span style="color:#66d9ef">BY</span> RANGE (created_at);
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 建立子分區（每月一個）
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> events_2026_01 PARTITION <span style="color:#66d9ef">OF</span> events
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">FOR</span> <span style="color:#66d9ef">VALUES</span> <span style="color:#66d9ef">FROM</span> (<span style="color:#e6db74">&#39;2026-01-01&#39;</span>) <span style="color:#66d9ef">TO</span> (<span style="color:#e6db74">&#39;2026-02-01&#39;</span>);
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> events_2026_02 PARTITION <span style="color:#66d9ef">OF</span> events
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">FOR</span> <span style="color:#66d9ef">VALUES</span> <span style="color:#66d9ef">FROM</span> (<span style="color:#e6db74">&#39;2026-02-01&#39;</span>) <span style="color:#66d9ef">TO</span> (<span style="color:#e6db74">&#39;2026-03-01&#39;</span>);
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> events_2026_03 PARTITION <span style="color:#66d9ef">OF</span> events
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">FOR</span> <span style="color:#66d9ef">VALUES</span> <span style="color:#66d9ef">FROM</span> (<span style="color:#e6db74">&#39;2026-03-01&#39;</span>) <span style="color:#66d9ef">TO</span> (<span style="color:#e6db74">&#39;2026-04-01&#39;</span>);
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 預設分區（捕獲未命中的資料）
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> events_default PARTITION <span style="color:#66d9ef">OF</span> events <span style="color:#66d9ef">DEFAULT</span>;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 查詢時規劃器自動做 Partition Pruning
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> events
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> created_at <span style="color:#f92672">&gt;=</span> <span style="color:#e6db74">&#39;2026-02-01&#39;</span> <span style="color:#66d9ef">AND</span> created_at <span style="color:#f92672">&lt;</span> <span style="color:#e6db74">&#39;2026-03-01&#39;</span>;
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 只掃描 events_2026_02
-</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 動態建立下個月分區（適合放在定時任務中）
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">DO</span> <span style="color:#960050;background-color:#1e0010">$$</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">DECLARE</span>
-</span></span><span style="display:flex;"><span>    next_month date :<span style="color:#f92672">=</span> date_trunc(<span style="color:#e6db74">&#39;month&#39;</span>, now() <span style="color:#f92672">+</span> interval <span style="color:#e6db74">&#39;1 month&#39;</span>);
-</span></span><span style="display:flex;"><span>    partition_name text;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">BEGIN</span>
-</span></span><span style="display:flex;"><span>    partition_name :<span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;events_&#39;</span> <span style="color:#f92672">||</span> to_char(next_month, <span style="color:#e6db74">&#39;YYYY_MM&#39;</span>);
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">EXECUTE</span> format(
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;CREATE TABLE IF NOT EXISTS %I PARTITION OF events
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">         FOR VALUES FROM (%L) TO (%L)&#39;</span>,
-</span></span><span style="display:flex;"><span>        partition_name, next_month, next_month <span style="color:#f92672">+</span> interval <span style="color:#e6db74">&#39;1 month&#39;</span>
-</span></span><span style="display:flex;"><span>    );
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">END</span> <span style="color:#960050;background-color:#1e0010">$$</span>;
-</span></span></code></pre></div><h4 id="list-partitioning列表分區">List Partitioning（列表分區）</h4>
-<p>適合依<strong>離散值</strong>分區，如地區、狀態：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> orders (
-</span></span><span style="display:flex;"><span>    order_id bigint <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
-</span></span><span style="display:flex;"><span>    region   text <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
-</span></span><span style="display:flex;"><span>    amount   numeric(<span style="color:#ae81ff">12</span>, <span style="color:#ae81ff">2</span>),
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span> (order_id, region)
-</span></span><span style="display:flex;"><span>) PARTITION <span style="color:#66d9ef">BY</span> LIST (region);
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> orders_apac PARTITION <span style="color:#66d9ef">OF</span> orders
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">FOR</span> <span style="color:#66d9ef">VALUES</span> <span style="color:#66d9ef">IN</span> (<span style="color:#e6db74">&#39;TW&#39;</span>, <span style="color:#e6db74">&#39;JP&#39;</span>, <span style="color:#e6db74">&#39;KR&#39;</span>, <span style="color:#e6db74">&#39;SG&#39;</span>);
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> orders_emea PARTITION <span style="color:#66d9ef">OF</span> orders
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">FOR</span> <span style="color:#66d9ef">VALUES</span> <span style="color:#66d9ef">IN</span> (<span style="color:#e6db74">&#39;DE&#39;</span>, <span style="color:#e6db74">&#39;FR&#39;</span>, <span style="color:#e6db74">&#39;GB&#39;</span>, <span style="color:#e6db74">&#39;NL&#39;</span>);
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> orders_amer PARTITION <span style="color:#66d9ef">OF</span> orders
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">FOR</span> <span style="color:#66d9ef">VALUES</span> <span style="color:#66d9ef">IN</span> (<span style="color:#e6db74">&#39;US&#39;</span>, <span style="color:#e6db74">&#39;CA&#39;</span>, <span style="color:#e6db74">&#39;MX&#39;</span>, <span style="color:#e6db74">&#39;BR&#39;</span>);
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> orders_other PARTITION <span style="color:#66d9ef">OF</span> orders <span style="color:#66d9ef">DEFAULT</span>;
-</span></span></code></pre></div><h4 id="hash-partitioning雜湊分區">Hash Partitioning（雜湊分區）</h4>
-<p>適合<strong>均勻分散負載</strong>：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> user_activities (
-</span></span><span style="display:flex;"><span>    activity_id bigint <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
-</span></span><span style="display:flex;"><span>    user_id     bigint <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
-</span></span><span style="display:flex;"><span>    action      text,
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span> (activity_id, user_id)
-</span></span><span style="display:flex;"><span>) PARTITION <span style="color:#66d9ef">BY</span> HASH (user_id);
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> user_activities_0 PARTITION <span style="color:#66d9ef">OF</span> user_activities
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">FOR</span> <span style="color:#66d9ef">VALUES</span> <span style="color:#66d9ef">WITH</span> (MODULUS <span style="color:#ae81ff">4</span>, REMAINDER <span style="color:#ae81ff">0</span>);
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> user_activities_1 PARTITION <span style="color:#66d9ef">OF</span> user_activities
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">FOR</span> <span style="color:#66d9ef">VALUES</span> <span style="color:#66d9ef">WITH</span> (MODULUS <span style="color:#ae81ff">4</span>, REMAINDER <span style="color:#ae81ff">1</span>);
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> user_activities_2 PARTITION <span style="color:#66d9ef">OF</span> user_activities
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">FOR</span> <span style="color:#66d9ef">VALUES</span> <span style="color:#66d9ef">WITH</span> (MODULUS <span style="color:#ae81ff">4</span>, REMAINDER <span style="color:#ae81ff">2</span>);
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> user_activities_3 PARTITION <span style="color:#66d9ef">OF</span> user_activities
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">FOR</span> <span style="color:#66d9ef">VALUES</span> <span style="color:#66d9ef">WITH</span> (MODULUS <span style="color:#ae81ff">4</span>, REMAINDER <span style="color:#ae81ff">3</span>);
-</span></span></code></pre></div><h3 id="schema-管理">Schema 管理</h3>
-<p><strong>Schema（命名空間）</strong> 用於邏輯隔離資料庫物件，避免命名衝突：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 建立 Schema
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">SCHEMA</span> <span style="color:#66d9ef">IF</span> <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">EXISTS</span> reporting;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">SCHEMA</span> <span style="color:#66d9ef">IF</span> <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">EXISTS</span> staging;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 在特定 Schema 中建立物件
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> reporting.monthly_summary (
-</span></span><span style="display:flex;"><span>    summary_id serial <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
-</span></span><span style="display:flex;"><span>    report_month date <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
-</span></span><span style="display:flex;"><span>    total_sales numeric(<span style="color:#ae81ff">15</span>, <span style="color:#ae81ff">2</span>)
-</span></span><span style="display:flex;"><span>);
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 設定搜索路徑
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SET</span> search_path <span style="color:#66d9ef">TO</span> myapp, <span style="color:#66d9ef">public</span>;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 資料庫級設定（永久）
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">DATABASE</span> mydb <span style="color:#66d9ef">SET</span> search_path <span style="color:#66d9ef">TO</span> myapp, <span style="color:#66d9ef">public</span>;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 授權
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">GRANT</span> <span style="color:#66d9ef">USAGE</span> <span style="color:#66d9ef">ON</span> <span style="color:#66d9ef">SCHEMA</span> reporting <span style="color:#66d9ef">TO</span> readonly_role;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">GRANT</span> <span style="color:#66d9ef">SELECT</span> <span style="color:#66d9ef">ON</span> <span style="color:#66d9ef">ALL</span> TABLES <span style="color:#66d9ef">IN</span> <span style="color:#66d9ef">SCHEMA</span> reporting <span style="color:#66d9ef">TO</span> readonly_role;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 設定未來建立的表格也自動授權
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">DEFAULT</span> <span style="color:#66d9ef">PRIVILEGES</span> <span style="color:#66d9ef">IN</span> <span style="color:#66d9ef">SCHEMA</span> reporting
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">GRANT</span> <span style="color:#66d9ef">SELECT</span> <span style="color:#66d9ef">ON</span> TABLES <span style="color:#66d9ef">TO</span> readonly_role;
-</span></span></code></pre></div><h3 id="online-ddl-鎖影響">Online DDL 鎖影響</h3>
-<p>大多數 <code>ALTER TABLE</code> 操作需要 <code>AccessExclusiveLock</code>（表格級排他鎖），會<strong>阻塞所有讀寫操作</strong>：</p>
-<table>
-	<thead>
-			<tr>
-					<th>鎖類型</th>
-					<th>影響</th>
-					<th>典型操作</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td><code>ShareUpdateExclusiveLock</code></td>
-					<td>不阻塞讀寫</td>
-					<td><code>CREATE INDEX CONCURRENTLY</code>、<code>VALIDATE CONSTRAINT</code></td>
-			</tr>
-			<tr>
-					<td><code>ShareLock</code></td>
-					<td>阻塞寫入</td>
-					<td>傳統 <code>CREATE INDEX</code></td>
-			</tr>
-			<tr>
-					<td><code>AccessExclusiveLock</code></td>
-					<td>阻塞所有</td>
-					<td>大多數 <code>ALTER TABLE</code></td>
-			</tr>
-	</tbody>
-</table>
-<pre tabindex="0"><code>等待鎖的連鎖阻塞：
+<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="深入解析 PostgreSQL 的 DDL 操作與 Schema 管理，涵蓋 CREATE/ALTER/DROP TABLE、Constraints 實作機制、Declarative Partitioning 三種策略、Schema 命名空間、Online DDL 鎖影響與安全 DDL 策略。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="深入解析 PostgreSQL 的 DDL 操作與 Schema 管理，涵蓋 CREATE/ALTER/DROP TABLE、Constraints 實作機制、Declarative Partitioning 三種策略、Schema 命名空間、Online DDL 鎖影響與安全 DDL 策略。"><meta property="og:url" content="https://benzhub.github.io/post/postgresql/013-ddl-schema/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/postgresql/013-ddl-schema/><meta name=twitter:description content="深入解析 PostgreSQL 的 DDL 操作與 Schema 管理，涵蓋 CREATE/ALTER/DROP TABLE、Constraints 實作機制、Declarative Partitioning 三種策略、Schema 命名空間、Online DDL 鎖影響與安全 DDL 策略。"><meta property="article:published_time" content="2026-06-19T00:00:00+00:00"><meta property="article:updated_time" content="2026-06-19T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/postgresql/013-DDL-Schema.png"><meta property="og:image:url" content="https://benzhub.github.io/img/postgresql/013-DDL-Schema.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/postgresql/013-ddl-schema/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/postgresql/013-ddl-schema/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL\"","description":"\"深入解析 PostgreSQL 的 DDL 操作與 Schema 管理，涵蓋 CREATE/ALTER/DROP TABLE、Constraints 實作機制、Declarative Partitioning 三種策略、Schema 命名空間、Online DDL 鎖影響與安全 DDL 策略。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-06-19T00:00:00\u002b00:00","dateModified":"2026-06-19T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/postgresql\/013-DDL-Schema.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/postgresql\/013-ddl-schema\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/postgresql\/"},{"@type":"ListItem","position":3,"name":"\"DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL\""}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/19</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/postgresql class="tag-pill no-underline">postgresql</a>
+<a href=/tags/ddl class="tag-pill no-underline">ddl</a>
+<a href=/tags/schema class="tag-pill no-underline">schema</a>
+<a href=/tags/partitioning class="tag-pill no-underline">partitioning</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/postgresql/013-DDL-Schema.png alt="DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p><strong>DDL（Data Definition Language）</strong> 負責定義、修改和刪除資料庫物件。在 <strong>PostgreSQL</strong> 中，DDL 不僅影響邏輯結構，更直接操作<strong>系統目錄（System Catalog）</strong>，並可能持有<strong>排他鎖（Exclusive Lock）</strong> 影響並行工作負載。掌握 DDL 的鎖定行為與<strong>宣告式分區（Declarative Partitioning）</strong>，是生產環境 Schema 管理的核心能力。</p></blockquote><h3 id=ddl-與系統目錄的關係>DDL 與系統目錄的關係</h3><p>執行 <code>CREATE TABLE</code> 時，PostgreSQL 在系統目錄中寫入多筆紀錄：</p><table><thead><tr><th>目錄表</th><th>用途</th></tr></thead><tbody><tr><td><code>pg_class</code></td><td>表格、視圖、索引、序列等關係物件</td></tr><tr><td><code>pg_attribute</code></td><td>每個欄位的名稱、型別、位置、是否可 NULL</td></tr><tr><td><code>pg_constraint</code></td><td>PK、FK、UNIQUE、CHECK 等約束</td></tr><tr><td><code>pg_index</code></td><td>索引的詳細資訊</td></tr><tr><td><code>pg_namespace</code></td><td>Schema（命名空間）資訊</td></tr></tbody></table><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 建立表格後，查看系統目錄紀錄
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> orders (
+</span></span><span style=display:flex><span>    order_id bigint <span style=color:#66d9ef>GENERATED</span> ALWAYS <span style=color:#66d9ef>AS</span> <span style=color:#66d9ef>IDENTITY</span> <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span>,
+</span></span><span style=display:flex><span>    customer_id bigint <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span>    total_amount numeric(<span style=color:#ae81ff>12</span>, <span style=color:#ae81ff>2</span>)
+</span></span><span style=display:flex><span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 查看 pg_class 中的紀錄
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> relname, relkind, relnatts, relhaspkey
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_class
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> relname <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;orders&#39;</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- relkind: &#39;r&#39;=普通表格, &#39;i&#39;=索引, &#39;v&#39;=視圖, &#39;p&#39;=分區父表
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 查看欄位資訊
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> attname, atttypid::regtype, attnum, attnotnull
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_attribute
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> attrelid <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;orders&#39;</span>::regclass
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>AND</span> attnum <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> attnum;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 查看 Constraint 資訊
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> conname, contype, pg_get_constraintdef(oid)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_constraint
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> conrelid <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;orders&#39;</span>::regclass;
+</span></span></code></pre></div><h3 id=create--alter--drop-table>CREATE / ALTER / DROP TABLE</h3><h4 id=create-table>CREATE TABLE</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 基本建表
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> <span style=color:#66d9ef>IF</span> <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>EXISTS</span> products (
+</span></span><span style=display:flex><span>    product_id bigint <span style=color:#66d9ef>GENERATED</span> ALWAYS <span style=color:#66d9ef>AS</span> <span style=color:#66d9ef>IDENTITY</span> <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span>,
+</span></span><span style=display:flex><span>    sku        varchar(<span style=color:#ae81ff>50</span>)    <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span> <span style=color:#66d9ef>UNIQUE</span>,
+</span></span><span style=display:flex><span>    name       text           <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span>    price      numeric(<span style=color:#ae81ff>10</span>, <span style=color:#ae81ff>2</span>) <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span> <span style=color:#66d9ef>CHECK</span> (price <span style=color:#f92672>&gt;=</span> <span style=color:#ae81ff>0</span>),
+</span></span><span style=display:flex><span>    category_id int           <span style=color:#66d9ef>REFERENCES</span> categories(category_id) <span style=color:#66d9ef>ON</span> <span style=color:#66d9ef>DELETE</span> <span style=color:#66d9ef>SET</span> <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span>    is_active  boolean        <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span> <span style=color:#66d9ef>DEFAULT</span> <span style=color:#66d9ef>true</span>,
+</span></span><span style=display:flex><span>    metadata   jsonb,
+</span></span><span style=display:flex><span>    created_at timestamptz    <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span> <span style=color:#66d9ef>DEFAULT</span> now(),
+</span></span><span style=display:flex><span>    updated_at timestamptz    <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span> <span style=color:#66d9ef>DEFAULT</span> now()
+</span></span><span style=display:flex><span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 從查詢結果建立表格（含資料）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> orders_archive <span style=color:#66d9ef>AS</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> orders <span style=color:#66d9ef>WHERE</span> created_at <span style=color:#f92672>&lt;</span> <span style=color:#e6db74>&#39;2024-01-01&#39;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 指定儲存參數
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> high_write_table (
+</span></span><span style=display:flex><span>    id bigint <span style=color:#66d9ef>GENERATED</span> ALWAYS <span style=color:#66d9ef>AS</span> <span style=color:#66d9ef>IDENTITY</span> <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span>,
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>data</span> text
+</span></span><span style=display:flex><span>) <span style=color:#66d9ef>WITH</span> (fillfactor <span style=color:#f92672>=</span> <span style=color:#ae81ff>70</span>);  <span style=color:#75715e>-- 留 30% 空間給 UPDATE（HOT 優化）
+</span></span></span></code></pre></div><h4 id=alter-table>ALTER TABLE</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 新增欄位（PG11+ 有預設值幾乎即時完成，無需重寫表格）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>TABLE</span> products <span style=color:#66d9ef>ADD</span> <span style=color:#66d9ef>COLUMN</span> in_stock boolean <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span> <span style=color:#66d9ef>DEFAULT</span> <span style=color:#66d9ef>true</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 刪除欄位
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>TABLE</span> products <span style=color:#66d9ef>DROP</span> <span style=color:#66d9ef>COLUMN</span> weight_kg;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 修改欄位型別（需確認相容性，可能重寫表格）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>TABLE</span> products <span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>COLUMN</span> name <span style=color:#66d9ef>TYPE</span> varchar(<span style=color:#ae81ff>200</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 重命名欄位
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>TABLE</span> products <span style=color:#66d9ef>RENAME</span> <span style=color:#66d9ef>COLUMN</span> sku <span style=color:#66d9ef>TO</span> product_code;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 設定/移除 NOT NULL
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>TABLE</span> products <span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>COLUMN</span> metadata <span style=color:#66d9ef>SET</span> <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>TABLE</span> products <span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>COLUMN</span> metadata <span style=color:#66d9ef>DROP</span> <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>;
+</span></span></code></pre></div><h4 id=drop--truncate>DROP / TRUNCATE</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 安全刪除
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>DROP</span> <span style=color:#66d9ef>TABLE</span> <span style=color:#66d9ef>IF</span> <span style=color:#66d9ef>EXISTS</span> temp_import;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 級聯刪除（同時刪除依賴物件）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>DROP</span> <span style=color:#66d9ef>TABLE</span> <span style=color:#66d9ef>IF</span> <span style=color:#66d9ef>EXISTS</span> categories <span style=color:#66d9ef>CASCADE</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 清空表格（比 DELETE 快，重置序列）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>TRUNCATE</span> <span style=color:#66d9ef>TABLE</span> orders_archive <span style=color:#66d9ef>RESTART</span> <span style=color:#66d9ef>IDENTITY</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>TRUNCATE</span> <span style=color:#66d9ef>TABLE</span> orders, order_items <span style=color:#66d9ef>CASCADE</span>;  <span style=color:#75715e>-- 多表同時清空
+</span></span></span></code></pre></div><h3 id=constraints-詳細說明>Constraints 詳細說明</h3><h4 id=primary-key>PRIMARY KEY</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 單欄主鍵
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> users (
+</span></span><span style=display:flex><span>    user_id bigint <span style=color:#66d9ef>GENERATED</span> ALWAYS <span style=color:#66d9ef>AS</span> <span style=color:#66d9ef>IDENTITY</span> <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span>,
+</span></span><span style=display:flex><span>    email text <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>
+</span></span><span style=display:flex><span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 複合主鍵
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> order_items (
+</span></span><span style=display:flex><span>    order_id   bigint,
+</span></span><span style=display:flex><span>    product_id bigint,
+</span></span><span style=display:flex><span>    quantity   int <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span> (order_id, product_id)
+</span></span><span style=display:flex><span>);
+</span></span></code></pre></div><p><strong>實作機制</strong>：PK = 唯一索引 + NOT NULL。建立 PK 時自動建立 B-tree 索引。</p><h4 id=foreign-key>FOREIGN KEY</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> orders (
+</span></span><span style=display:flex><span>    order_id    bigint <span style=color:#66d9ef>GENERATED</span> ALWAYS <span style=color:#66d9ef>AS</span> <span style=color:#66d9ef>IDENTITY</span> <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span>,
+</span></span><span style=display:flex><span>    customer_id bigint <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>CONSTRAINT</span> fk_orders_customer
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>FOREIGN</span> <span style=color:#66d9ef>KEY</span> (customer_id)
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>REFERENCES</span> customers(customer_id)
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>ON</span> <span style=color:#66d9ef>DELETE</span> <span style=color:#66d9ef>RESTRICT</span>     <span style=color:#75715e>-- 不允許刪除被引用的客戶
+</span></span></span><span style=display:flex><span>        <span style=color:#66d9ef>ON</span> <span style=color:#66d9ef>UPDATE</span> <span style=color:#66d9ef>CASCADE</span>      <span style=color:#75715e>-- 客戶 ID 變更時自動更新
+</span></span></span><span style=display:flex><span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 延遲 FK 檢查（適合批量資料載入）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> order_items (
+</span></span><span style=display:flex><span>    item_id  bigint <span style=color:#66d9ef>GENERATED</span> ALWAYS <span style=color:#66d9ef>AS</span> <span style=color:#66d9ef>IDENTITY</span> <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span>,
+</span></span><span style=display:flex><span>    order_id bigint,
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>CONSTRAINT</span> fk_item_order
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>FOREIGN</span> <span style=color:#66d9ef>KEY</span> (order_id) <span style=color:#66d9ef>REFERENCES</span> orders(order_id)
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>DEFERRABLE</span> <span style=color:#66d9ef>INITIALLY</span> <span style=color:#66d9ef>DEFERRED</span>  <span style=color:#75715e>-- Transaction 結束時才檢查
+</span></span></span><span style=display:flex><span>);
+</span></span></code></pre></div><p><strong>實作機制</strong>：FK 透過隱藏的<strong>觸發器（Trigger）</strong> 實作——<code>AFTER INSERT/UPDATE</code> 驗證值存在，<code>AFTER DELETE/UPDATE</code>（在參照表上）驗證不違反引用完整性。</p><h4 id=unique>UNIQUE</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 單欄唯一
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>TABLE</span> users <span style=color:#66d9ef>ADD</span> <span style=color:#66d9ef>CONSTRAINT</span> uq_email <span style=color:#66d9ef>UNIQUE</span> (email);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 部分唯一索引（只對符合條件的資料強制唯一）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>UNIQUE</span> <span style=color:#66d9ef>INDEX</span> uq_active_sku
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ON</span> products (sku)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> is_active <span style=color:#f92672>=</span> <span style=color:#66d9ef>true</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 非活躍產品可有重複 SKU，活躍產品不行
+</span></span></span></code></pre></div><h4 id=check>CHECK</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> products (
+</span></span><span style=display:flex><span>    product_id bigint <span style=color:#66d9ef>GENERATED</span> ALWAYS <span style=color:#66d9ef>AS</span> <span style=color:#66d9ef>IDENTITY</span> <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span>,
+</span></span><span style=display:flex><span>    price      numeric(<span style=color:#ae81ff>10</span>, <span style=color:#ae81ff>2</span>) <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span>    sale_price numeric(<span style=color:#ae81ff>10</span>, <span style=color:#ae81ff>2</span>),
+</span></span><span style=display:flex><span>    status     text <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>CONSTRAINT</span> chk_price <span style=color:#66d9ef>CHECK</span> (price <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>),
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>CONSTRAINT</span> chk_sale <span style=color:#66d9ef>CHECK</span> (sale_price <span style=color:#66d9ef>IS</span> <span style=color:#66d9ef>NULL</span> <span style=color:#66d9ef>OR</span> sale_price <span style=color:#f92672>&lt;</span> price),
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>CONSTRAINT</span> chk_status <span style=color:#66d9ef>CHECK</span> (status <span style=color:#66d9ef>IN</span> (<span style=color:#e6db74>&#39;draft&#39;</span>, <span style=color:#e6db74>&#39;active&#39;</span>, <span style=color:#e6db74>&#39;discontinued&#39;</span>))
+</span></span><span style=display:flex><span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 新增 CHECK 但跳過既有資料驗證（先上線，再排程驗證）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>TABLE</span> products
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ADD</span> <span style=color:#66d9ef>CONSTRAINT</span> chk_new <span style=color:#66d9ef>CHECK</span> (metadata <span style=color:#66d9ef>IS</span> <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>) <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>VALID</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 後續驗證（只需 ShareUpdateExclusiveLock，不阻塞讀寫）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>TABLE</span> products VALIDATE <span style=color:#66d9ef>CONSTRAINT</span> chk_new;
+</span></span></code></pre></div><h4 id=exclude>EXCLUDE</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 需要先安裝 btree_gist 擴展
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> EXTENSION <span style=color:#66d9ef>IF</span> <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>EXISTS</span> btree_gist;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 同一房間同一時段不可重複預約
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> room_bookings (
+</span></span><span style=display:flex><span>    booking_id bigint <span style=color:#66d9ef>GENERATED</span> ALWAYS <span style=color:#66d9ef>AS</span> <span style=color:#66d9ef>IDENTITY</span> <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span>,
+</span></span><span style=display:flex><span>    room_id    int <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span>    during     tstzrange <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>CONSTRAINT</span> no_overlap EXCLUDE <span style=color:#66d9ef>USING</span> gist (
+</span></span><span style=display:flex><span>        room_id <span style=color:#66d9ef>WITH</span> <span style=color:#f92672>=</span>,    <span style=color:#75715e>-- 同一房間
+</span></span></span><span style=display:flex><span>        during <span style=color:#66d9ef>WITH</span> <span style=color:#f92672>&amp;&amp;</span>     <span style=color:#75715e>-- 時間範圍重疊
+</span></span></span><span style=display:flex><span>    )
+</span></span><span style=display:flex><span>);
+</span></span></code></pre></div><h3 id=declarative-partitioning>Declarative Partitioning</h3><p>PostgreSQL 10 引入<strong>宣告式分區</strong>，以父表/子表架構實作。父表本身不儲存資料，只作為邏輯入口；每個子表是獨立表格，有自己的索引和統計資訊。</p><h4 id=range-partitioning範圍分區>Range Partitioning（範圍分區）</h4><p>最常見，適合<strong>時間序列資料</strong>：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 建立分區父表
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> events (
+</span></span><span style=display:flex><span>    event_id   bigint <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span>    created_at timestamptz <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span> <span style=color:#66d9ef>DEFAULT</span> now(),
+</span></span><span style=display:flex><span>    event_type text <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span>    payload    jsonb,
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span> (event_id, created_at)  <span style=color:#75715e>-- 主鍵必須包含分區鍵
+</span></span></span><span style=display:flex><span>) PARTITION <span style=color:#66d9ef>BY</span> RANGE (created_at);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 建立子分區（每月一個）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> events_2026_01 PARTITION <span style=color:#66d9ef>OF</span> events
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>FOR</span> <span style=color:#66d9ef>VALUES</span> <span style=color:#66d9ef>FROM</span> (<span style=color:#e6db74>&#39;2026-01-01&#39;</span>) <span style=color:#66d9ef>TO</span> (<span style=color:#e6db74>&#39;2026-02-01&#39;</span>);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> events_2026_02 PARTITION <span style=color:#66d9ef>OF</span> events
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>FOR</span> <span style=color:#66d9ef>VALUES</span> <span style=color:#66d9ef>FROM</span> (<span style=color:#e6db74>&#39;2026-02-01&#39;</span>) <span style=color:#66d9ef>TO</span> (<span style=color:#e6db74>&#39;2026-03-01&#39;</span>);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> events_2026_03 PARTITION <span style=color:#66d9ef>OF</span> events
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>FOR</span> <span style=color:#66d9ef>VALUES</span> <span style=color:#66d9ef>FROM</span> (<span style=color:#e6db74>&#39;2026-03-01&#39;</span>) <span style=color:#66d9ef>TO</span> (<span style=color:#e6db74>&#39;2026-04-01&#39;</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 預設分區（捕獲未命中的資料）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> events_default PARTITION <span style=color:#66d9ef>OF</span> events <span style=color:#66d9ef>DEFAULT</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 查詢時規劃器自動做 Partition Pruning
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> events
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> created_at <span style=color:#f92672>&gt;=</span> <span style=color:#e6db74>&#39;2026-02-01&#39;</span> <span style=color:#66d9ef>AND</span> created_at <span style=color:#f92672>&lt;</span> <span style=color:#e6db74>&#39;2026-03-01&#39;</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 只掃描 events_2026_02
+</span></span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 動態建立下個月分區（適合放在定時任務中）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>DO</span> <span style=color:#960050;background-color:#1e0010>$$</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>DECLARE</span>
+</span></span><span style=display:flex><span>    next_month date :<span style=color:#f92672>=</span> date_trunc(<span style=color:#e6db74>&#39;month&#39;</span>, now() <span style=color:#f92672>+</span> interval <span style=color:#e6db74>&#39;1 month&#39;</span>);
+</span></span><span style=display:flex><span>    partition_name text;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>    partition_name :<span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;events_&#39;</span> <span style=color:#f92672>||</span> to_char(next_month, <span style=color:#e6db74>&#39;YYYY_MM&#39;</span>);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>EXECUTE</span> format(
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;CREATE TABLE IF NOT EXISTS %I PARTITION OF events
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>         FOR VALUES FROM (%L) TO (%L)&#39;</span>,
+</span></span><span style=display:flex><span>        partition_name, next_month, next_month <span style=color:#f92672>+</span> interval <span style=color:#e6db74>&#39;1 month&#39;</span>
+</span></span><span style=display:flex><span>    );
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span> <span style=color:#960050;background-color:#1e0010>$$</span>;
+</span></span></code></pre></div><h4 id=list-partitioning列表分區>List Partitioning（列表分區）</h4><p>適合依<strong>離散值</strong>分區，如地區、狀態：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> orders (
+</span></span><span style=display:flex><span>    order_id bigint <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span>    region   text <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span>    amount   numeric(<span style=color:#ae81ff>12</span>, <span style=color:#ae81ff>2</span>),
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span> (order_id, region)
+</span></span><span style=display:flex><span>) PARTITION <span style=color:#66d9ef>BY</span> LIST (region);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> orders_apac PARTITION <span style=color:#66d9ef>OF</span> orders
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>FOR</span> <span style=color:#66d9ef>VALUES</span> <span style=color:#66d9ef>IN</span> (<span style=color:#e6db74>&#39;TW&#39;</span>, <span style=color:#e6db74>&#39;JP&#39;</span>, <span style=color:#e6db74>&#39;KR&#39;</span>, <span style=color:#e6db74>&#39;SG&#39;</span>);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> orders_emea PARTITION <span style=color:#66d9ef>OF</span> orders
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>FOR</span> <span style=color:#66d9ef>VALUES</span> <span style=color:#66d9ef>IN</span> (<span style=color:#e6db74>&#39;DE&#39;</span>, <span style=color:#e6db74>&#39;FR&#39;</span>, <span style=color:#e6db74>&#39;GB&#39;</span>, <span style=color:#e6db74>&#39;NL&#39;</span>);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> orders_amer PARTITION <span style=color:#66d9ef>OF</span> orders
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>FOR</span> <span style=color:#66d9ef>VALUES</span> <span style=color:#66d9ef>IN</span> (<span style=color:#e6db74>&#39;US&#39;</span>, <span style=color:#e6db74>&#39;CA&#39;</span>, <span style=color:#e6db74>&#39;MX&#39;</span>, <span style=color:#e6db74>&#39;BR&#39;</span>);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> orders_other PARTITION <span style=color:#66d9ef>OF</span> orders <span style=color:#66d9ef>DEFAULT</span>;
+</span></span></code></pre></div><h4 id=hash-partitioning雜湊分區>Hash Partitioning（雜湊分區）</h4><p>適合<strong>均勻分散負載</strong>：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> user_activities (
+</span></span><span style=display:flex><span>    activity_id bigint <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span>    user_id     bigint <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span>    action      text,
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span> (activity_id, user_id)
+</span></span><span style=display:flex><span>) PARTITION <span style=color:#66d9ef>BY</span> HASH (user_id);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> user_activities_0 PARTITION <span style=color:#66d9ef>OF</span> user_activities
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>FOR</span> <span style=color:#66d9ef>VALUES</span> <span style=color:#66d9ef>WITH</span> (MODULUS <span style=color:#ae81ff>4</span>, REMAINDER <span style=color:#ae81ff>0</span>);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> user_activities_1 PARTITION <span style=color:#66d9ef>OF</span> user_activities
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>FOR</span> <span style=color:#66d9ef>VALUES</span> <span style=color:#66d9ef>WITH</span> (MODULUS <span style=color:#ae81ff>4</span>, REMAINDER <span style=color:#ae81ff>1</span>);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> user_activities_2 PARTITION <span style=color:#66d9ef>OF</span> user_activities
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>FOR</span> <span style=color:#66d9ef>VALUES</span> <span style=color:#66d9ef>WITH</span> (MODULUS <span style=color:#ae81ff>4</span>, REMAINDER <span style=color:#ae81ff>2</span>);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> user_activities_3 PARTITION <span style=color:#66d9ef>OF</span> user_activities
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>FOR</span> <span style=color:#66d9ef>VALUES</span> <span style=color:#66d9ef>WITH</span> (MODULUS <span style=color:#ae81ff>4</span>, REMAINDER <span style=color:#ae81ff>3</span>);
+</span></span></code></pre></div><h3 id=schema-管理>Schema 管理</h3><p><strong>Schema（命名空間）</strong> 用於邏輯隔離資料庫物件，避免命名衝突：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 建立 Schema
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>SCHEMA</span> <span style=color:#66d9ef>IF</span> <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>EXISTS</span> reporting;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>SCHEMA</span> <span style=color:#66d9ef>IF</span> <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>EXISTS</span> staging;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 在特定 Schema 中建立物件
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> reporting.monthly_summary (
+</span></span><span style=display:flex><span>    summary_id serial <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span>,
+</span></span><span style=display:flex><span>    report_month date <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span>    total_sales numeric(<span style=color:#ae81ff>15</span>, <span style=color:#ae81ff>2</span>)
+</span></span><span style=display:flex><span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 設定搜索路徑
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SET</span> search_path <span style=color:#66d9ef>TO</span> myapp, <span style=color:#66d9ef>public</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 資料庫級設定（永久）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>DATABASE</span> mydb <span style=color:#66d9ef>SET</span> search_path <span style=color:#66d9ef>TO</span> myapp, <span style=color:#66d9ef>public</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 授權
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>GRANT</span> <span style=color:#66d9ef>USAGE</span> <span style=color:#66d9ef>ON</span> <span style=color:#66d9ef>SCHEMA</span> reporting <span style=color:#66d9ef>TO</span> readonly_role;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>GRANT</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#66d9ef>ON</span> <span style=color:#66d9ef>ALL</span> TABLES <span style=color:#66d9ef>IN</span> <span style=color:#66d9ef>SCHEMA</span> reporting <span style=color:#66d9ef>TO</span> readonly_role;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 設定未來建立的表格也自動授權
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>DEFAULT</span> <span style=color:#66d9ef>PRIVILEGES</span> <span style=color:#66d9ef>IN</span> <span style=color:#66d9ef>SCHEMA</span> reporting
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>GRANT</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#66d9ef>ON</span> TABLES <span style=color:#66d9ef>TO</span> readonly_role;
+</span></span></code></pre></div><h3 id=online-ddl-鎖影響>Online DDL 鎖影響</h3><p>大多數 <code>ALTER TABLE</code> 操作需要 <code>AccessExclusiveLock</code>（表格級排他鎖），會<strong>阻塞所有讀寫操作</strong>：</p><table><thead><tr><th>鎖類型</th><th>影響</th><th>典型操作</th></tr></thead><tbody><tr><td><code>ShareUpdateExclusiveLock</code></td><td>不阻塞讀寫</td><td><code>CREATE INDEX CONCURRENTLY</code>、<code>VALIDATE CONSTRAINT</code></td></tr><tr><td><code>ShareLock</code></td><td>阻塞寫入</td><td>傳統 <code>CREATE INDEX</code></td></tr><tr><td><code>AccessExclusiveLock</code></td><td>阻塞所有</td><td>大多數 <code>ALTER TABLE</code></td></tr></tbody></table><pre tabindex=0><code>等待鎖的連鎖阻塞：
 
 Session A: 持有 ShareLock（長查詢）
 Session B: 等待 AccessExclusiveLock（ALTER TABLE）← 被 A 阻塞
@@ -777,541 +267,122 @@ Session C: 等待 ShareLock（普通 SELECT）← 被 B 阻塞！
 Session D: 等待 ShareLock（普通 SELECT）← 也被 B 阻塞！
 
 → 即使很短的 DDL 也可能造成連鎖阻塞
-</code></pre><h3 id="安全-ddl-策略">安全 DDL 策略</h3>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 策略一：lock_timeout 避免長時間等待
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">BEGIN</span>;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SET</span> lock_timeout <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;3s&#39;</span>;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SET</span> statement_timeout <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;60s&#39;</span>;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> orders <span style="color:#66d9ef">ADD</span> <span style="color:#66d9ef">COLUMN</span> payment_method text;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">COMMIT</span>;
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 超時則捕獲錯誤並稍後重試
-</span></span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 策略二：CREATE INDEX CONCURRENTLY（不阻塞讀寫）
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">INDEX</span> CONCURRENTLY idx_orders_customer <span style="color:#66d9ef">ON</span> orders (customer_id);
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 注意：不能在 Transaction 中執行
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e">-- 如果中途失敗，會留下 INVALID 索引，需手動 DROP 再重試
-</span></span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 策略三：NOT VALID + VALIDATE 兩步走
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> orders
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ADD</span> <span style="color:#66d9ef">CONSTRAINT</span> chk_amount <span style="color:#66d9ef">CHECK</span> (amount <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>) <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">VALID</span>;
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 第二步：驗證既有資料（不阻塞讀寫）
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> orders VALIDATE <span style="color:#66d9ef">CONSTRAINT</span> chk_amount;
-</span></span></code></pre></div><h3 id="if-not-exists-冪等-ddl">IF NOT EXISTS 冪等 DDL</h3>
-<p><code>IF NOT EXISTS</code> 是自動化腳本和遷移工具的核心：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">SCHEMA</span> <span style="color:#66d9ef">IF</span> <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">EXISTS</span> myapp;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> <span style="color:#66d9ef">IF</span> <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">EXISTS</span> users (
-</span></span><span style="display:flex;"><span>    user_id bigint <span style="color:#66d9ef">GENERATED</span> ALWAYS <span style="color:#66d9ef">AS</span> <span style="color:#66d9ef">IDENTITY</span> <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
-</span></span><span style="display:flex;"><span>    email text <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">UNIQUE</span>
-</span></span><span style="display:flex;"><span>);
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">INDEX</span> <span style="color:#66d9ef">IF</span> <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">EXISTS</span> idx_users_email <span style="color:#66d9ef">ON</span> users (email);
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- Enum 沒有 IF NOT EXISTS，需要用 DO 區塊
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">DO</span> <span style="color:#960050;background-color:#1e0010">$$</span> <span style="color:#66d9ef">BEGIN</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TYPE</span> order_status <span style="color:#66d9ef">AS</span> ENUM (<span style="color:#e6db74">&#39;pending&#39;</span>, <span style="color:#e6db74">&#39;confirmed&#39;</span>, <span style="color:#e6db74">&#39;shipped&#39;</span>);
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">EXCEPTION</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">WHEN</span> duplicate_object <span style="color:#66d9ef">THEN</span> <span style="color:#66d9ef">NULL</span>;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">END</span> <span style="color:#960050;background-color:#1e0010">$$</span>;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 新增欄位（PG 9.6+）
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> users <span style="color:#66d9ef">ADD</span> <span style="color:#66d9ef">COLUMN</span> <span style="color:#66d9ef">IF</span> <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">EXISTS</span> last_login timestamptz;
-</span></span></code></pre></div><h3 id="partition-pruning-驗證">Partition Pruning 驗證</h3>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 確認規劃器是否正確修剪分區
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">EXPLAIN</span> (<span style="color:#66d9ef">ANALYZE</span>, BUFFERS)
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> events
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> created_at <span style="color:#f92672">&gt;=</span> <span style="color:#e6db74">&#39;2026-02-01&#39;</span> <span style="color:#66d9ef">AND</span> created_at <span style="color:#f92672">&lt;</span> <span style="color:#e6db74">&#39;2026-03-01&#39;</span>;
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 期望只掃描 events_2026_02
-</span></span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 查看分區列表
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> parent.relname <span style="color:#66d9ef">AS</span> parent,
-</span></span><span style="display:flex;"><span>       child.relname <span style="color:#66d9ef">AS</span> partition,
-</span></span><span style="display:flex;"><span>       pg_get_expr(child.relpartbound, child.oid) <span style="color:#66d9ef">AS</span> bound
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> pg_class parent
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">JOIN</span> pg_inherits <span style="color:#66d9ef">ON</span> inhparent <span style="color:#f92672">=</span> parent.oid
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">JOIN</span> pg_class child <span style="color:#66d9ef">ON</span> inhrelid <span style="color:#f92672">=</span> child.oid
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> parent.relname <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;events&#39;</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> child.relname;
-</span></span></code></pre></div><p><strong>常見 Pruning 失效原因</strong>：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 失效：對分區鍵做函數運算
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> events <span style="color:#66d9ef">WHERE</span> date_trunc(<span style="color:#e6db74">&#39;month&#39;</span>, created_at) <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;2026-02-01&#39;</span>;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 正確：使用範圍條件
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> events
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> created_at <span style="color:#f92672">&gt;=</span> <span style="color:#e6db74">&#39;2026-02-01&#39;</span> <span style="color:#66d9ef">AND</span> created_at <span style="color:#f92672">&lt;</span> <span style="color:#e6db74">&#39;2026-03-01&#39;</span>;
-</span></span></code></pre></div><h3 id="常見陷阱">常見陷阱</h3>
-<h4 id="分區表的主鍵必須包含分區鍵">分區表的主鍵必須包含分區鍵</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 錯誤
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> events (
-</span></span><span style="display:flex;"><span>    event_id bigint <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,  <span style="color:#75715e">-- 不含分區鍵
-</span></span></span><span style="display:flex;"><span>    created_at timestamptz <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>
-</span></span><span style="display:flex;"><span>) PARTITION <span style="color:#66d9ef">BY</span> RANGE (created_at);
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- ERROR: insufficient columns in PRIMARY KEY
-</span></span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 正確
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> events (
-</span></span><span style="display:flex;"><span>    event_id bigint <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
-</span></span><span style="display:flex;"><span>    created_at timestamptz <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span> (event_id, created_at)
-</span></span><span style="display:flex;"><span>) PARTITION <span style="color:#66d9ef">BY</span> RANGE (created_at);
-</span></span></code></pre></div><h4 id="truncate-與外鍵">TRUNCATE 與外鍵</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">TRUNCATE</span> <span style="color:#66d9ef">TABLE</span> customers;
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- ERROR: cannot truncate a table referenced in a FK constraint
-</span></span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">TRUNCATE</span> <span style="color:#66d9ef">TABLE</span> customers <span style="color:#66d9ef">CASCADE</span>;
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 會同時清空 orders 等所有引用表——謹慎使用！
-</span></span></span></code></pre></div><h4 id="pg11-前後的-add-column-行為差異">PG11 前後的 ADD COLUMN 行為差異</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- PG 11+：有預設值的 NOT NULL 欄位不需重寫表格（即時完成）
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> big_table <span style="color:#66d9ef">ADD</span> <span style="color:#66d9ef">COLUMN</span> processed boolean <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">DEFAULT</span> <span style="color:#66d9ef">false</span>;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- PG 10 以前：需要重寫整張表，長時間持有排他鎖
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e">-- 安全做法：先加可 NULL 欄位 → 批量填充 → 再設定 NOT NULL
-</span></span></span></code></pre></div><h3 id="版本演進">版本演進</h3>
-<table>
-	<thead>
-			<tr>
-					<th>版本</th>
-					<th>重要 DDL / 分區功能</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td>PG10</td>
-					<td>Declarative Partitioning（Range、List）</td>
-			</tr>
-			<tr>
-					<td>PG11</td>
-					<td>Hash 分區、DEFAULT 分區、<code>ADD COLUMN DEFAULT</code> 不再重寫表格</td>
-			</tr>
-			<tr>
-					<td>PG12</td>
-					<td>Partition Pruning 大幅改善（含 JOIN 動態修剪）</td>
-			</tr>
-			<tr>
-					<td>PG13</td>
-					<td>分區表支援 <code>BEFORE</code> 觸發器</td>
-			</tr>
-			<tr>
-					<td>PG14</td>
-					<td>VACUUM/ANALYZE 改善分區表效率</td>
-			</tr>
-			<tr>
-					<td>PG15</td>
-					<td><code>MERGE</code> 語句正式引入</td>
-			</tr>
-	</tbody>
-</table>
-<h3 id="總結">總結</h3>
-<p><strong>DDL 與 Schema 管理</strong> 是 PostgreSQL 資料結構的基石：</p>
-<ul>
-<li><strong>CREATE TABLE</strong> 搭配 Constraints（PK、FK、UNIQUE、CHECK、EXCLUDE）確保資料完整性</li>
-<li><strong>ALTER TABLE</strong> 在生產環境要注意鎖影響，善用 <code>lock_timeout</code> 與 <code>NOT VALID + VALIDATE</code> 策略</li>
-<li><strong>Declarative Partitioning</strong> 提供 Range、List、Hash 三種策略，主鍵必須包含分區鍵</li>
-<li><strong>Schema</strong> 實現命名空間隔離，搭配 <code>search_path</code> 與 <code>DEFAULT PRIVILEGES</code> 管理權限</li>
-<li><strong>CREATE INDEX CONCURRENTLY</strong> 是生產環境建立索引的首選方式</li>
-<li><strong>IF NOT EXISTS</strong> 讓 DDL 腳本具備冪等性，適合自動化部署</li>
-</ul>
-<p>下一篇，我們將深入探討 <strong>DML 進階操作</strong>——INSERT、UPDATE、DELETE、UPSERT 與 RETURNING 的實戰技巧。</p></div>
-        
-        
-
-        
-        <div class="mt-8">
-          
-<div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose">
-  <div>
-    <div class="flex items-center gap-2 mb-1">
-      <a href="/about" class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">
-        BenZ
-      </a>
-      
-      <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span>
-      
-    </div>
-    <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">
-      熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。
-    </p>
-    <div class="flex items-center gap-3">
-      
-      <a href="https://github.com/benzhub" target="_blank" rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label="GitHub">
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-      </a>
-      
-      
-      
-    </div>
-  </div>
-</div>
-
-        </div>
-      </div>
-
-      
-      <div class="post-detail fade-in my-4">
-        
-
-
-<div>
-  <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3>
-  <div class="grid gap-2">
-    
-    <a href="http://localhost:1313/post/postgresql/012-data-types/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
-      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL</span>
-      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/18</span>
-    </a>
-    
-    <a href="http://localhost:1313/post/postgresql/011-background-processes/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
-      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">背景進程：PostgreSQL 的幕後工作者們 | PostgreSQL</span>
-      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/17</span>
-    </a>
-    
-    <a href="http://localhost:1313/post/postgresql/010-concurrency-control/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
-      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">並行控制與鎖機制：PostgreSQL 如何協調多用戶同時存取 | PostgreSQL</span>
-      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/16</span>
-    </a>
-    
-  </div>
-</div>
-
-
-      </div>
-
-      
-      <div class="post-detail fade-in my-4">
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            
-            <a href="http://localhost:1313/post/postgresql/012-data-types/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
-                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
-                <span class="text-sm font-medium">資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL</span>
-            </a>
-            
-          </div>
-          <div>
-            
-          </div>
-        </div>
-      </div>
-
-      
-      <div class="post-detail fade-in my-4">
-        
-<script src="https://giscus.app/client.js"
-        data-repo="benzhub/benzhub.github.io"
-        data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM="
-        data-category="Announcements"
-        data-category-id="MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1"
-        data-mapping="pathname"
-        data-strict="0"
-        data-reactions-enabled="1"
-        data-emit-metadata="0"
-        data-input-position="top"
-        data-theme="preferred_color_scheme"
-        data-lang="zh-TW"
-        crossorigin="anonymous"
-        async>
-</script>
-
-
-      </div>
-    </div>
-    
-    <div class="hidden lg:block lg:col-span-1 mt-4">
-    
-    
-            
-            <div class="widget fade-in">
-    <p class="widget-title">搜尋</p>
-    <form role="search" method="get" action="https://google.com/search">
-        <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
-        <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
-    </form>
-</div>
-
-        
-            
-            
-
-        
-            
-            
-<div class="widget fade-in">
-    <p class="widget-title">標籤</p>
-    <div class="flex flex-wrap gap-1.5">
-        <a href='/tags/80/20-%E6%B3%95%E5%89%87'>
-            <span class="tag-pill">80/20 法則</span>
-        </a>
-        <a href='/tags/acid'>
-            <span class="tag-pill">acid</span>
-        </a>
-        <a href='/tags/ai'>
-            <span class="tag-pill">ai</span>
-        </a>
-        <a href='/tags/ai-agent'>
-            <span class="tag-pill">ai agent</span>
-        </a>
-        <a href='/tags/ai-workflow'>
-            <span class="tag-pill">ai workflow</span>
-        </a>
-        <a href='/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE'>
-            <span class="tag-pill">ai 工具焦慮</span>
-        </a>
-        <a href='/tags/ai-%E6%8E%A5%E5%96%AE'>
-            <span class="tag-pill">ai 接單</span>
-        </a>
-        <a href='/tags/ai-%E7%B9%AA%E5%9C%96'>
-            <span class="tag-pill">ai 繪圖</span>
-        </a>
-        <a href='/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA'>
-            <span class="tag-pill">ai 虛擬人</span>
-        </a>
-        <a href='/tags/ai-%E8%A1%8C%E9%8A%B7'>
-            <span class="tag-pill">ai 行銷</span>
-        </a>
-        <a href='/tags/ai-%E8%A8%AD%E8%A8%88'>
-            <span class="tag-pill">ai 設計</span>
-        </a>
-        <a href='/tags/ai-%E8%AE%8A%E7%8F%BE'>
-            <span class="tag-pill">ai 變現</span>
-        </a>
-        <a href='/tags/ai-%E8%B3%BA%E9%8C%A2'>
-            <span class="tag-pill">ai 賺錢</span>
-        </a>
-        <a href='/tags/ai-income'>
-            <span class="tag-pill">ai-income</span>
-        </a>
-        <a href='/tags/ai-insights'>
-            <span class="tag-pill">ai-insights</span>
-        </a>
-        <a href='/tags/api'>
-            <span class="tag-pill">api</span>
-        </a>
-        <a href='/tags/architecture'>
-            <span class="tag-pill">architecture</span>
-        </a>
-        <a href='/tags/autovacuum'>
-            <span class="tag-pill">autovacuum</span>
-        </a>
-        <a href='/tags/background-processes'>
-            <span class="tag-pill">background-processes</span>
-        </a>
-        <a href='/tags/big-o'>
-            <span class="tag-pill">big o</span>
-        </a>
-    </div>
-</div>
-
-
-        
-            
-            
-<div class="widget fade-in">
-    <p class="widget-title">文章系列</p>
-    <div class="flex flex-wrap gap-1.5">
-        
-        
-        
-        
-        <a href='/post/postgresql/'>
-            <span class="tag-pill">PostgreSQL (13)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/javascript/'>
-            <span class="tag-pill">JavaScript (68)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/django/'>
-            <span class="tag-pill">Django (30)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/python/'>
-            <span class="tag-pill">Python (37)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/htmlcss/'>
-            <span class="tag-pill">HTML &amp; CSS (23)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/linux/'>
-            <span class="tag-pill">Linux (22)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/git/'>
-            <span class="tag-pill">Git (18)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/ai-insights/'>
-            <span class="tag-pill">AI Insights (13)</span>
-        </a>
-        
-        
-    </div>
-</div>
-
-
-        
-            
-            
-
-<div class="widget fade-in">
-    <p class="widget-title">最新文章</p>
-    <div class="flex flex-col gap-1">
-        <a href="/post/postgresql/013-ddl-schema/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/19
-            </p>
-        </a>
-        <a href="/post/django/030-django-custom-user-model/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django 自訂使用者模型：AbstractUser 與 AbstractBaseUser | Django 教學</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/19
-            </p>
-        </a>
-        <a href="/post/javascript/data-structures--algorithms/006-heap-priority-queue/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">堆積與優先佇列 — Min/Max Heap 原理與 Heap Sort 完整實作 | 資料結構與演算法</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/19
-            </p>
-        </a>
-        <a href="/post/django/029-django-authentication/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Authentication 使用者認證系統完全指南 | Django 教學</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/18
-            </p>
-        </a>
-        <a href="/post/postgresql/012-data-types/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/18
-            </p>
-        </a>
-    </div>
-</div>
-
-        
-    
-</div>
-
-    
-</div>
-
-        </div>
-    </div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]">
-    
-    <p>&copy; 2026 <a href="http://localhost:1313/" class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p>
-</footer>
-
-
-<script>
-    (function (window, document) {
-        function main() {
-            var ad = document.createElement('script');
-            ad.async = true;
-            ad.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606';
-            ad.crossOrigin = "anonymous";
-            var sc = document.getElementsByTagName('script')[0];
-            sc.parentNode.insertBefore(ad, sc);
-        }
-        var lazyLoad = false;
-        function onLazyLoad() {
-            if (lazyLoad === false) {
-                lazyLoad = true;
-                window.removeEventListener('scroll', onLazyLoad);
-                window.removeEventListener('mousemove', onLazyLoad);
-                window.removeEventListener('mousedown', onLazyLoad);
-                window.removeEventListener('touchstart', onLazyLoad);
-                window.removeEventListener('keydown', onLazyLoad);
-                main();
-            }
-        }
-        window.addEventListener('scroll', onLazyLoad);
-        window.addEventListener('mousemove', onLazyLoad);
-        window.addEventListener('mousedown', onLazyLoad);
-        window.addEventListener('touchstart', onLazyLoad);
-        window.addEventListener('keydown', onLazyLoad);
-        window.addEventListener('load', function () {
-            if (window.pageYOffset) {
-                onLazyLoad();
-                window.setTimeout(onLazyLoad, 3000);
-            }
-        });
-    })(window, document);
-</script>
-
-
-<script>
-    
-    var icon = document.getElementById("icon");
-    var icon2 = document.getElementById("icon2");
-    if (document.documentElement.classList.contains("dark") || localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
-        if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
-        document.documentElement.classList.add('dark');
-    } else {
-        document.documentElement.classList.remove('dark');
-    }
-    function toggleDarkMode() {
-        if (document.documentElement.classList.contains('dark')) {
-            if (icon) { icon.classList.remove("icon-sun"); icon.classList.add("icon-moon"); }
-            if (icon2) { icon2.classList.remove("icon-sun"); icon2.classList.add("icon-moon"); }
-            document.documentElement.classList.remove('dark');
-            localStorage.theme = 'light';
-        } else {
-            if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
-            if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
-            document.documentElement.classList.add('dark');
-            localStorage.theme = 'dark';
-        }
-    }
-
-    
-    document.addEventListener('DOMContentLoaded', function () {
-        var observer = new IntersectionObserver(function (entries) {
-            entries.forEach(function (entry) {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0 });
-
-        document.querySelectorAll('.fade-in').forEach(function (el) {
-            observer.observe(el);
-        });
-    });
-</script>
-</body>
-
-</html>
+</code></pre><h3 id=安全-ddl-策略>安全 DDL 策略</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 策略一：lock_timeout 避免長時間等待
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SET</span> lock_timeout <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;3s&#39;</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SET</span> statement_timeout <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;60s&#39;</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>TABLE</span> orders <span style=color:#66d9ef>ADD</span> <span style=color:#66d9ef>COLUMN</span> payment_method text;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>COMMIT</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 超時則捕獲錯誤並稍後重試
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 策略二：CREATE INDEX CONCURRENTLY（不阻塞讀寫）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> CONCURRENTLY idx_orders_customer <span style=color:#66d9ef>ON</span> orders (customer_id);
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 注意：不能在 Transaction 中執行
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 如果中途失敗，會留下 INVALID 索引，需手動 DROP 再重試
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 策略三：NOT VALID + VALIDATE 兩步走
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>TABLE</span> orders
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ADD</span> <span style=color:#66d9ef>CONSTRAINT</span> chk_amount <span style=color:#66d9ef>CHECK</span> (amount <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>) <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>VALID</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 第二步：驗證既有資料（不阻塞讀寫）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>TABLE</span> orders VALIDATE <span style=color:#66d9ef>CONSTRAINT</span> chk_amount;
+</span></span></code></pre></div><h3 id=if-not-exists-冪等-ddl>IF NOT EXISTS 冪等 DDL</h3><p><code>IF NOT EXISTS</code> 是自動化腳本和遷移工具的核心：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>SCHEMA</span> <span style=color:#66d9ef>IF</span> <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>EXISTS</span> myapp;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> <span style=color:#66d9ef>IF</span> <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>EXISTS</span> users (
+</span></span><span style=display:flex><span>    user_id bigint <span style=color:#66d9ef>GENERATED</span> ALWAYS <span style=color:#66d9ef>AS</span> <span style=color:#66d9ef>IDENTITY</span> <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span>,
+</span></span><span style=display:flex><span>    email text <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span> <span style=color:#66d9ef>UNIQUE</span>
+</span></span><span style=display:flex><span>);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> <span style=color:#66d9ef>IF</span> <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>EXISTS</span> idx_users_email <span style=color:#66d9ef>ON</span> users (email);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- Enum 沒有 IF NOT EXISTS，需要用 DO 區塊
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>DO</span> <span style=color:#960050;background-color:#1e0010>$$</span> <span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TYPE</span> order_status <span style=color:#66d9ef>AS</span> ENUM (<span style=color:#e6db74>&#39;pending&#39;</span>, <span style=color:#e6db74>&#39;confirmed&#39;</span>, <span style=color:#e6db74>&#39;shipped&#39;</span>);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>EXCEPTION</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>WHEN</span> duplicate_object <span style=color:#66d9ef>THEN</span> <span style=color:#66d9ef>NULL</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span> <span style=color:#960050;background-color:#1e0010>$$</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 新增欄位（PG 9.6+）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>TABLE</span> users <span style=color:#66d9ef>ADD</span> <span style=color:#66d9ef>COLUMN</span> <span style=color:#66d9ef>IF</span> <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>EXISTS</span> last_login timestamptz;
+</span></span></code></pre></div><h3 id=partition-pruning-驗證>Partition Pruning 驗證</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 確認規劃器是否正確修剪分區
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>EXPLAIN</span> (<span style=color:#66d9ef>ANALYZE</span>, BUFFERS)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> events
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> created_at <span style=color:#f92672>&gt;=</span> <span style=color:#e6db74>&#39;2026-02-01&#39;</span> <span style=color:#66d9ef>AND</span> created_at <span style=color:#f92672>&lt;</span> <span style=color:#e6db74>&#39;2026-03-01&#39;</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 期望只掃描 events_2026_02
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 查看分區列表
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> parent.relname <span style=color:#66d9ef>AS</span> parent,
+</span></span><span style=display:flex><span>       child.relname <span style=color:#66d9ef>AS</span> partition,
+</span></span><span style=display:flex><span>       pg_get_expr(child.relpartbound, child.oid) <span style=color:#66d9ef>AS</span> bound
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_class parent
+</span></span><span style=display:flex><span><span style=color:#66d9ef>JOIN</span> pg_inherits <span style=color:#66d9ef>ON</span> inhparent <span style=color:#f92672>=</span> parent.oid
+</span></span><span style=display:flex><span><span style=color:#66d9ef>JOIN</span> pg_class child <span style=color:#66d9ef>ON</span> inhrelid <span style=color:#f92672>=</span> child.oid
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> parent.relname <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;events&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> child.relname;
+</span></span></code></pre></div><p><strong>常見 Pruning 失效原因</strong>：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 失效：對分區鍵做函數運算
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> events <span style=color:#66d9ef>WHERE</span> date_trunc(<span style=color:#e6db74>&#39;month&#39;</span>, created_at) <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;2026-02-01&#39;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 正確：使用範圍條件
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> events
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> created_at <span style=color:#f92672>&gt;=</span> <span style=color:#e6db74>&#39;2026-02-01&#39;</span> <span style=color:#66d9ef>AND</span> created_at <span style=color:#f92672>&lt;</span> <span style=color:#e6db74>&#39;2026-03-01&#39;</span>;
+</span></span></code></pre></div><h3 id=常見陷阱>常見陷阱</h3><h4 id=分區表的主鍵必須包含分區鍵>分區表的主鍵必須包含分區鍵</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 錯誤
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> events (
+</span></span><span style=display:flex><span>    event_id bigint <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span>,  <span style=color:#75715e>-- 不含分區鍵
+</span></span></span><span style=display:flex><span>    created_at timestamptz <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>
+</span></span><span style=display:flex><span>) PARTITION <span style=color:#66d9ef>BY</span> RANGE (created_at);
+</span></span><span style=display:flex><span><span style=color:#75715e>-- ERROR: insufficient columns in PRIMARY KEY
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 正確
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> events (
+</span></span><span style=display:flex><span>    event_id bigint <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span>    created_at timestamptz <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span> (event_id, created_at)
+</span></span><span style=display:flex><span>) PARTITION <span style=color:#66d9ef>BY</span> RANGE (created_at);
+</span></span></code></pre></div><h4 id=truncate-與外鍵>TRUNCATE 與外鍵</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>TRUNCATE</span> <span style=color:#66d9ef>TABLE</span> customers;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- ERROR: cannot truncate a table referenced in a FK constraint
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>TRUNCATE</span> <span style=color:#66d9ef>TABLE</span> customers <span style=color:#66d9ef>CASCADE</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 會同時清空 orders 等所有引用表——謹慎使用！
+</span></span></span></code></pre></div><h4 id=pg11-前後的-add-column-行為差異>PG11 前後的 ADD COLUMN 行為差異</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- PG 11+：有預設值的 NOT NULL 欄位不需重寫表格（即時完成）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>TABLE</span> big_table <span style=color:#66d9ef>ADD</span> <span style=color:#66d9ef>COLUMN</span> processed boolean <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span> <span style=color:#66d9ef>DEFAULT</span> <span style=color:#66d9ef>false</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- PG 10 以前：需要重寫整張表，長時間持有排他鎖
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 安全做法：先加可 NULL 欄位 → 批量填充 → 再設定 NOT NULL
+</span></span></span></code></pre></div><h3 id=版本演進>版本演進</h3><table><thead><tr><th>版本</th><th>重要 DDL / 分區功能</th></tr></thead><tbody><tr><td>PG10</td><td>Declarative Partitioning（Range、List）</td></tr><tr><td>PG11</td><td>Hash 分區、DEFAULT 分區、<code>ADD COLUMN DEFAULT</code> 不再重寫表格</td></tr><tr><td>PG12</td><td>Partition Pruning 大幅改善（含 JOIN 動態修剪）</td></tr><tr><td>PG13</td><td>分區表支援 <code>BEFORE</code> 觸發器</td></tr><tr><td>PG14</td><td>VACUUM/ANALYZE 改善分區表效率</td></tr><tr><td>PG15</td><td><code>MERGE</code> 語句正式引入</td></tr></tbody></table><h3 id=總結>總結</h3><p><strong>DDL 與 Schema 管理</strong> 是 PostgreSQL 資料結構的基石：</p><ul><li><strong>CREATE TABLE</strong> 搭配 Constraints（PK、FK、UNIQUE、CHECK、EXCLUDE）確保資料完整性</li><li><strong>ALTER TABLE</strong> 在生產環境要注意鎖影響，善用 <code>lock_timeout</code> 與 <code>NOT VALID + VALIDATE</code> 策略</li><li><strong>Declarative Partitioning</strong> 提供 Range、List、Hash 三種策略，主鍵必須包含分區鍵</li><li><strong>Schema</strong> 實現命名空間隔離，搭配 <code>search_path</code> 與 <code>DEFAULT PRIVILEGES</code> 管理權限</li><li><strong>CREATE INDEX CONCURRENTLY</strong> 是生產環境建立索引的首選方式</li><li><strong>IF NOT EXISTS</strong> 讓 DDL 腳本具備冪等性，適合自動化部署</li></ul><p>下一篇，我們將深入探討 <strong>DML 進階操作</strong>——INSERT、UPDATE、DELETE、UPSERT 與 RETURNING 的實戰技巧。</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
+</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/postgresql/012-data-types/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/18</span>
+</a><a href=https://benzhub.github.io/post/postgresql/011-background-processes/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">背景進程：PostgreSQL 的幕後工作者們 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/17</span>
+</a><a href=https://benzhub.github.io/post/postgresql/010-concurrency-control/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">並行控制與鎖機制：PostgreSQL 如何協調多用戶同時存取 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/16</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/postgresql/012-data-types/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+<span class="text-sm font-medium">資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL</span></a></div><div><a href=https://benzhub.github.io/post/postgresql/014-dml-advanced/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+<span class="text-sm font-medium">DML 進階操作：Upsert、MERGE、RETURNING 與 COPY 批量匯入 | PostgreSQL</span></a></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
+</a><a href=/tags/acid><span class=tag-pill>acid</span>
+</a><a href=/tags/ai><span class=tag-pill>ai</span>
+</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
+</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
+</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
+</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
+</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
+</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
+</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
+</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
+</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
+</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
+</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
+</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
+</a><a href=/tags/api><span class=tag-pill>api</span>
+</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
+</a><a href=/tags/autovacuum><span class=tag-pill>autovacuum</span>
+</a><a href=/tags/background-processes><span class=tag-pill>background-processes</span>
+</a><a href=/tags/big-o><span class=tag-pill>big o</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (14)</span>
+</a><a href=/post/javascript/><span class=tag-pill>JavaScript (69)</span>
+</a><a href=/post/django/><span class=tag-pill>Django (31)</span>
+</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
+</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
+</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
+</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
+</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/django/031-django-signals/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Signals 信號機制：觀察者模式實戰 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/20</p></a><a href=/post/postgresql/014-dml-advanced/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">DML 進階操作：Upsert、MERGE、RETURNING 與 COPY 批量匯入 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/20</p></a><a href=/post/javascript/data-structures--algorithms/007-sorting/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">排序演算法 — Bubble、Merge、Quick Sort 等十大排序完整比較 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/20</p></a><a href=/post/postgresql/013-ddl-schema/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/19</p></a><a href=/post/django/030-django-custom-user-model/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django 自訂使用者模型：AbstractUser 與 AbstractBaseUser | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/19</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>

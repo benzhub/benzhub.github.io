@@ -1,1282 +1,301 @@
-<!DOCTYPE html>
-
-<html lang="zh-TW">
-<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><title>Django REST Framework 入門：建立你的第一個 API | Django 教學 | BenzHub</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="apple-touch-icon" sizes="180x180" href='/favicon/apple-touch-icon.png'>
-    <link rel="icon" type="image/png" sizes="32x32" href='/favicon/favicon-32x32.png'>
-    <link rel="icon" type="image/png" sizes="16x16" href='/favicon/favicon-16x16.png'>
-    <link rel="manifest" href='/favicon/site.webmanifest' />
-    <link rel="mask-icon" href=' /favicon/safari-pinned-tab.svg' color="#5bbad5" />
-    <link rel="shortcut icon" href='/favicon/favicon.ico' />
-    <meta name="theme-color" content="#fafafa">
-    <meta property="og:title" content="Django REST Framework 入門：建立你的第一個 API | Django 教學 | BenzHub" />
-    
-    
-    <link rel="stylesheet" href="/css/style.css" />
-    
-    <link href=' /css/blonde.min.css' rel="stylesheet" type="text/css" media="print"
-        onload="this.media=' all'">
-    
-
-
-
-
-
-
-
-  
-
-
-
-
-  
-
-<meta name="description" content="Django REST Framework（DRF）入門教學！從 REST API 基礎概念、HTTP 方法與 CRUD 對應，到安裝 DRF、建立 Serializer、撰寫 API View、配置 URL，一步步帶你建立第一個 RESTful API，並介紹 Browsable API 與核心組件概覽。">
-<meta property="og:site_name" content="BenzHub">
-<meta property="og:description" content="Django REST Framework（DRF）入門教學！從 REST API 基礎概念、HTTP 方法與 CRUD 對應，到安裝 DRF、建立 Serializer、撰寫 API View、配置 URL，一步步帶你建立第一個 RESTful API，並介紹 Browsable API 與核心組件概覽。">
-<meta property="og:url" content="http://localhost:1313/post/django/021-drf-introduction/">
-<meta property="og:type" content="article">
-<meta property="og:locale" content="zh_TW">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="">
-
-<link rel="canonical" href="http://localhost:1313/post/django/021-drf-introduction/">
-
-<meta name="twitter:description" content="Django REST Framework（DRF）入門教學！從 REST API 基礎概念、HTTP 方法與 CRUD 對應，到安裝 DRF、建立 Serializer、撰寫 API View、配置 URL，一步步帶你建立第一個 RESTful API，並介紹 Browsable API 與核心組件概覽。">
-<meta property="article:published_time" content="2026-06-10T00:00:00&#43;00:00">
-<meta property="article:updated_time" content="2026-05-21T00:00:00&#43;00:00">
-
-
-
-
-
-    
-<meta property="og:image" content="http://localhost:1313/img/django/021-DRF-Introduction.png">
-<meta property="og:image:url" content="http://localhost:1313/img/django/021-DRF-Introduction.png">
-    
-
-    
-    <link rel="stylesheet" href='/css/custom.css'>
-    <i class="dark hidden"></i>
-    
-<link rel="alternate" hreflang="zh-TW" href="http://localhost:1313/post/django/021-drf-introduction/" />
-
-<link rel="alternate" hreflang="x-default" href="http://localhost:1313/post/django/021-drf-introduction/" />
-
-    
-
-
-
-
-
-
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BlogPosting",
-  "headline": "\"Django REST Framework 入門：建立你的第一個 API | Django 教學\"",
-  "description": "\"Django REST Framework（DRF）入門教學！從 REST API 基礎概念、HTTP 方法與 CRUD 對應，到安裝 DRF、建立 Serializer、撰寫 API View、配置 URL，一步步帶你建立第一個 RESTful API，並介紹 Browsable API 與核心組件概覽。\"",
-  "author": {
-    "@type": "Person",
-    "name": "\"BenzHub\"",
-    "url": "http:\/\/localhost:1313\/about",
-    "jobTitle": "\"Software Developer\"",
-    "sameAs": [
-      "\"https://github.com/benzhub\""
-    ]
-  },
-  "datePublished": "2026-06-10T00:00:00\u002b00:00",
-  "dateModified": "2026-05-21T00:00:00\u002b00:00",
-  "image": "http:\/\/localhost:1313\/img\/django\/021-DRF-Introduction.png",
-  "publisher": {
-    "@type": "Organization",
-    "name": "\"BenzHub\"",
-    "url": "\"http://localhost:1313/\"",
-    "sameAs": [
-      "\"https://github.com/benzhub\""
-    ]
-  },
-  "mainEntityOfPage": {
-    "@type": "WebPage",
-    "@id": "http:\/\/localhost:1313\/post\/django\/021-drf-introduction\/"
-  },
-  "inLanguage": "zh-TW"
-}
-</script>
-
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    {
-      "@type": "ListItem",
-      "position": 1,
-      "name": "\"BenzHub\"",
-      "item": "http:\/\/localhost:1313\/"
-    }
-    
-    
-      
-      
-    ,{
-      "@type": "ListItem",
-      "position": 2,
-      "name": "\"Blog\"",
-      "item": "http:\/\/localhost:1313\/post\/django\/"
-    }
-      
-      
-    
-    ,{
-      "@type": "ListItem",
-      "position":  3 ,
-      "name": "\"Django REST Framework 入門：建立你的第一個 API | Django 教學\""
-    }
-  ]
-}
-</script>
-
-
-
-
-
-
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    
-    
-    {
-      "@type": "Question",
-      "name": "\"Django REST Framework 是什麼？跟 Django 有什麼關係？\"",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "\"Django REST Framework（DRF）是建構於 Django 之上的第三方套件，由 Tom Christie 於 2011 年發布，專門用於開發 RESTful API。它提供 Serializer、ViewSet、Router、Authentication、Permissions 等完整工具，讓你可以快速將 Django Model 轉換為 JSON API，是 Python 生態系中建構 REST API 的事實標準。\""
-      }
-    }
-    
-    ,
-    {
-      "@type": "Question",
-      "name": "\"REST API 的 HTTP 方法如何對應 CRUD 操作？\"",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "\"REST API 使用 HTTP 方法對應 CRUD 操作：GET 對應 Read（讀取資源）、POST 對應 Create（建立資源）、PUT 對應 Update（完整更新資源）、PATCH 對應 Update（部分更新資源）、DELETE 對應 Delete（刪除資源）。這是 RESTful 架構的核心設計原則之一。\""
-      }
-    }
-    
-    ,
-    {
-      "@type": "Question",
-      "name": "\"DRF 的 Browsable API 是什麼？有什麼好處？\"",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "\"Browsable API 是 DRF 內建的自動化 HTML 介面，當你用瀏覽器直接訪問 API Endpoint 時，會看到一個可互動的頁面，顯示回應資料、可用的 HTTP 方法與表單。它讓開發者不需要額外工具就能測試 API，大幅提升開發階段的除錯效率。\""
-      }
-    }
-    
-  ]
-}
-</script>
-
-
-
-
-
-</head>
-<body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class="site-nav" id="siteNav">
-    <div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full">
-        
-        <a href="http://localhost:1313/" class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">
-            BenzHub
-        </a>
-
-        
-        <div class="hidden md:flex items-center gap-6">
-            
-            <a href="/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                首頁
-            </a>
-            
-            <a href="/about/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                關於
-            </a>
-            
-            <a href="/contact/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                聯絡
-            </a>
-            
-            <a href="/resourses/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                資源
-            </a>
-            
-
-            
-            <div class="flex items-center gap-2">
-                <form class="flex items-center" role="search" method="get" action="https://google.com/search" id="navSearchForm">
-                    <input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50"
-                        type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋" id="navSearchInput">
-                    <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
-                </form>
-                <button onclick="toggleNavSearch()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
-                    <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-                    </svg>
-                </button>
-            </div>
-
-            
-            <span class="text-zinc-200 dark:text-zinc-700">|</span>
-
-            
-            
-
-
-
-
-<div class="lang-switcher relative hidden md:block">
-    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-        <span>🌐</span>
-        <span>繁體中文</span>
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-    </button>
-    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
-        
-            
-            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-                
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-
-<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
-    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
-    <div class="flex gap-2">
-        
-            
-            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-                
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-
-            
-            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-                <i id="icon2" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
-            </button>
-        </div>
-
-        
-        <div class="flex md:hidden items-center gap-1">
-            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-                <i id="icon" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
-            </button>
-            <button id="hamburgerbtn" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Menu">
-                <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
-            </button>
-        </div>
-    </div>
-
-    
-    <div class="mobile-menu md:hidden" id="mobileMenu">
-        
-        <a href="/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            首頁
-        </a>
-        
-        <a href="/about/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            關於
-        </a>
-        
-        <a href="/contact/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            聯絡
-        </a>
-        
-        <a href="/resourses/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            資源
-        </a>
-        
-        <form class="mt-2" role="search" method="get" action="https://google.com/search">
-            <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
-            <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
-        </form>
-        
-        
-
-
-
-
-<div class="lang-switcher relative hidden md:block">
-    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-        <span>🌐</span>
-        <span>繁體中文</span>
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-    </button>
-    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
-        
-            
-            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-                
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-
-<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
-    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
-    <div class="flex gap-2">
-        
-            
-            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-                
-            
-        
-            
-                
-                
-                <a href="http://localhost:1313/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-    </div>
-</nav>
-
-<script>
-    
-    document.getElementById('hamburgerbtn').addEventListener('click', function () {
-        document.getElementById('mobileMenu').classList.toggle('active');
-    });
-
-    
-    window.addEventListener('scroll', function () {
-        var nav = document.getElementById('siteNav');
-        if (window.scrollY > 50) {
-            nav.classList.add('scrolled');
-        } else {
-            nav.classList.remove('scrolled');
-        }
-    });
-
-    
-    function toggleNavSearch() {
-        var input = document.getElementById('navSearchInput');
-        input.classList.toggle('expanded');
-        if (input.classList.contains('expanded')) {
-            input.focus();
-        }
-    }
-
-    
-    function toggleLangMenu() {
-        var dropdown = document.getElementById('langDropdown');
-        dropdown.classList.toggle('hidden');
-    }
-
-    
-    document.addEventListener('click', function (e) {
-        
-        var form = document.getElementById('navSearchForm');
-        var input = document.getElementById('navSearchInput');
-        if (form && input && !form.contains(e.target) && !e.target.closest('[aria-label="Toggle Search"]')) {
-            input.classList.remove('expanded');
-        }
-        
-        var langSwitcher = e.target.closest('.lang-switcher');
-        if (!langSwitcher) {
-            var dropdown = document.getElementById('langDropdown');
-            if (dropdown) dropdown.classList.add('hidden');
-        }
-    });
-</script>
-<div class="nav-spacer"></div>
-    <div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id="content">
-        <div class="lg:mx-5">
-<div class="grid grid-cols-3 gap-6">
-  
-  <div class="col-span-3 lg:col-span-2">
-  
-      
-      <div class="post-detail fade-in my-4">
-        <h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Django REST Framework 入門：建立你的第一個 API | Django 教學</h1>
-        <div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4">
-            <span class="flex items-center gap-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/10
-            </span>
-            
-            <span class="flex items-center gap-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                2026/05/21
-            </span>
-            
-        </div>
-        
-        <div class="flex flex-wrap gap-1.5 mb-5">
-            
-            <a href='/tags/python' class="tag-pill no-underline">python</a>
-            
-            <a href='/tags/django' class="tag-pill no-underline">django</a>
-            
-        </div>
-        
-        
-        <img class="py-4 m-auto rounded-lg thumb-img" src="http://localhost:1313/img/django/021-DRF-Introduction.png" alt="Django REST Framework 入門：建立你的第一個 API | Django 教學">
-        
-        
-        <div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote>
-<p><strong>Django REST Framework</strong>（簡稱 <strong>DRF</strong>）是 Python 生態系中建構 <strong>RESTful API</strong> 的事實標準框架，建構於 <strong>Django</strong> 之上，提供 <strong>Serializer</strong>（序列化器）、<strong>ViewSet</strong>、<strong>Router</strong>、<strong>Authentication</strong>（認證）與 <strong>Permissions</strong>（權限）等完整工具組。本文將從 <strong>REST API</strong> 的基礎概念出發，帶你安裝 DRF、建立第一個 API Endpoint，並認識 <strong>Browsable API</strong> 與 DRF 的核心組件，為後續深入學習打下基礎。</p>
-</blockquote>
-<h3 id="什麼是-rest-api">什麼是 REST API？</h3>
-<p><strong>REST</strong>（Representational State Transfer，表現層狀態轉移）是一種軟體架構風格，由 Roy Fielding 於 2000 年在博士論文中提出。遵循 REST 原則的 API 稱為 <strong>RESTful API</strong>，它是現代 Web 應用程式中前後端溝通的主流方式。</p>
-<p>RESTful 架構有幾個核心原則：</p>
-<ul>
-<li><strong>資源導向（Resource-Oriented）</strong>：每個 URL 代表一個資源，例如 <code>/api/articles/</code> 代表文章列表、<code>/api/articles/1/</code> 代表 ID 為 1 的文章</li>
-<li><strong>統一介面（Uniform Interface）</strong>：使用標準的 HTTP 方法（GET、POST、PUT、DELETE）操作資源</li>
-<li><strong>無狀態（Stateless）</strong>：每次請求都是獨立的，伺服器不儲存客戶端的狀態</li>
-<li><strong>可快取（Cacheable）</strong>：回應可以被標記為可快取或不可快取，提升效能</li>
-<li><strong>分層系統（Layered System）</strong>：客戶端不需要知道是直接連接伺服器還是中間的代理層</li>
-</ul>
-<hr>
-<h3 id="http-方法與-crud-對應">HTTP 方法與 CRUD 對應</h3>
-<p>REST API 使用 HTTP 方法（HTTP Methods）來定義對資源的操作，與資料庫的 <strong>CRUD</strong>（Create、Read、Update、Delete）操作有清楚的對應關係：</p>
-<table>
-	<thead>
-			<tr>
-					<th>HTTP 方法</th>
-					<th>CRUD 操作</th>
-					<th>說明</th>
-					<th>範例 URL</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td><code>GET</code></td>
-					<td>Read（讀取）</td>
-					<td>取得資源列表或單一資源</td>
-					<td><code>GET /api/articles/</code></td>
-			</tr>
-			<tr>
-					<td><code>POST</code></td>
-					<td>Create（建立）</td>
-					<td>建立新資源</td>
-					<td><code>POST /api/articles/</code></td>
-			</tr>
-			<tr>
-					<td><code>PUT</code></td>
-					<td>Update（完整更新）</td>
-					<td>更新整個資源，需提供所有欄位</td>
-					<td><code>PUT /api/articles/1/</code></td>
-			</tr>
-			<tr>
-					<td><code>PATCH</code></td>
-					<td>Update（部分更新）</td>
-					<td>只更新指定的欄位</td>
-					<td><code>PATCH /api/articles/1/</code></td>
-			</tr>
-			<tr>
-					<td><code>DELETE</code></td>
-					<td>Delete（刪除）</td>
-					<td>刪除指定資源</td>
-					<td><code>DELETE /api/articles/1/</code></td>
-			</tr>
-	</tbody>
-</table>
-<p>理解這張對應表非常重要，因為 DRF 的 View 和 Router 都是圍繞這些 HTTP 方法設計的。</p>
-<hr>
-<h3 id="django-rest-framework-簡介">Django REST Framework 簡介</h3>
-<p><strong>Django REST Framework</strong>（DRF）由 Tom Christie 於 2011 年發布，是一個建構於 Django 之上的強大 REST API 開發框架。它採用 BSD-2-Clause 授權，是開源社群中最受歡迎的 Python API 框架之一。</p>
-<p>為什麼選擇 DRF？</p>
-<ul>
-<li><strong>完整的工具組</strong>：從序列化、驗證、認證到分頁，一個框架搞定</li>
-<li><strong>與 Django 深度整合</strong>：直接使用 Django Model、ORM、Authentication 系統</li>
-<li><strong>Browsable API</strong>：內建可操作的 HTML 測試介面</li>
-<li><strong>豐富的生態系</strong>：大量的第三方套件支援（JWT、OpenAPI 文件生成等）</li>
-<li><strong>成熟穩定</strong>：超過 10 年的發展歷史，廣泛用於生產環境</li>
-</ul>
-<hr>
-<h3 id="安裝-django-rest-framework">安裝 Django REST Framework</h3>
-<p>確保你已經有一個 Django 專案，接著安裝 DRF：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 安裝 Django REST Framework</span>
-</span></span><span style="display:flex;"><span>pip install djangorestframework
-</span></span></code></pre></div><p>安裝完成後，將 <code>rest_framework</code> 加入 <code>settings.py</code> 的 <code>INSTALLED_APPS</code>：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># settings.py</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>INSTALLED_APPS <span style="color:#f92672">=</span> [
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.contrib.admin&#39;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.contrib.auth&#39;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.contrib.contenttypes&#39;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.contrib.sessions&#39;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.contrib.messages&#39;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;django.contrib.staticfiles&#39;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 第三方套件</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;rest_framework&#39;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 你的 App</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;articles&#39;</span>,
-</span></span><span style="display:flex;"><span>]
-</span></span></code></pre></div><p>接著可以在 <code>settings.py</code> 中加入 DRF 的全域設定：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># settings.py</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>REST_FRAMEWORK <span style="color:#f92672">=</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 預設的 Renderer（渲染器）</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;DEFAULT_RENDERER_CLASSES&#39;</span>: [
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;rest_framework.renderers.JSONRenderer&#39;</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;rest_framework.renderers.BrowsableAPIRenderer&#39;</span>,
-</span></span><span style="display:flex;"><span>    ],
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 預設的 Parser（解析器）</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;DEFAULT_PARSER_CLASSES&#39;</span>: [
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;rest_framework.parsers.JSONParser&#39;</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;rest_framework.parsers.FormParser&#39;</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;rest_framework.parsers.MultiPartParser&#39;</span>,
-</span></span><span style="display:flex;"><span>    ],
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 預設的認證方式</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;DEFAULT_AUTHENTICATION_CLASSES&#39;</span>: [
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;rest_framework.authentication.SessionAuthentication&#39;</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;rest_framework.authentication.BasicAuthentication&#39;</span>,
-</span></span><span style="display:flex;"><span>    ],
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 預設的權限設定</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;DEFAULT_PERMISSION_CLASSES&#39;</span>: [
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;rest_framework.permissions.AllowAny&#39;</span>,
-</span></span><span style="display:flex;"><span>    ],
-</span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><blockquote>
-<p>在開發階段建議保留 <code>BrowsableAPIRenderer</code>，方便透過瀏覽器直接測試 API。正式環境中可以移除它，只保留 <code>JSONRenderer</code>。</p>
-</blockquote>
-<hr>
-<h3 id="建立第一個-api-endpoint">建立第一個 API Endpoint</h3>
-<p>接下來我們從零開始建立一個完整的 API Endpoint，假設你已經有一個 <code>articles</code> App 和對應的 Model：</p>
-<h4 id="步驟一確認-model">步驟一：確認 Model</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># articles/models.py</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.db <span style="color:#f92672">import</span> models
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Article</span>(models<span style="color:#f92672">.</span>Model):
-</span></span><span style="display:flex;"><span>    title <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>CharField(<span style="color:#e6db74">&#39;標題&#39;</span>, max_length<span style="color:#f92672">=</span><span style="color:#ae81ff">200</span>)
-</span></span><span style="display:flex;"><span>    content <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>TextField(<span style="color:#e6db74">&#39;內容&#39;</span>)
-</span></span><span style="display:flex;"><span>    created_at <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>DateTimeField(<span style="color:#e6db74">&#39;建立時間&#39;</span>, auto_now_add<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
-</span></span><span style="display:flex;"><span>    updated_at <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>DateTimeField(<span style="color:#e6db74">&#39;更新時間&#39;</span>, auto_now<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Meta</span>:
-</span></span><span style="display:flex;"><span>        ordering <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;-created_at&#39;</span>]
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__str__</span>(self):
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>title
-</span></span></code></pre></div><h4 id="步驟二建立-serializer">步驟二：建立 Serializer</h4>
-<p><strong>Serializer</strong>（序列化器）是 DRF 的核心組件，負責將 Django Model 物件轉換為 JSON 格式（序列化），以及將客戶端傳來的 JSON 資料轉換回 Python 物件並進行驗證（反序列化）。</p>
-<p>在 <code>articles</code> App 下建立 <code>serializers.py</code>：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># articles/serializers.py</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> rest_framework <span style="color:#f92672">import</span> serializers
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> .models <span style="color:#f92672">import</span> Article
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ArticleSerializer</span>(serializers<span style="color:#f92672">.</span>ModelSerializer):
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;文章序列化器&#34;&#34;&#34;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Meta</span>:
-</span></span><span style="display:flex;"><span>        model <span style="color:#f92672">=</span> Article
-</span></span><span style="display:flex;"><span>        fields <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;id&#39;</span>, <span style="color:#e6db74">&#39;title&#39;</span>, <span style="color:#e6db74">&#39;content&#39;</span>, <span style="color:#e6db74">&#39;created_at&#39;</span>, <span style="color:#e6db74">&#39;updated_at&#39;</span>]
-</span></span><span style="display:flex;"><span>        read_only_fields <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;created_at&#39;</span>, <span style="color:#e6db74">&#39;updated_at&#39;</span>]
-</span></span></code></pre></div><p><code>ModelSerializer</code> 會根據 Model 的欄位定義自動生成對應的序列化欄位，包含驗證規則。<code>read_only_fields</code> 指定哪些欄位只能讀取、不接受寫入。</p>
-<h4 id="步驟三建立-view">步驟三：建立 View</h4>
-<p>DRF 提供多種建立 View 的方式，最簡單的是使用 <code>@api_view</code> 裝飾器（Decorator）：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># articles/views.py</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> rest_framework.decorators <span style="color:#f92672">import</span> api_view
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> rest_framework.response <span style="color:#f92672">import</span> Response
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> rest_framework <span style="color:#f92672">import</span> status
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> .models <span style="color:#f92672">import</span> Article
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> .serializers <span style="color:#f92672">import</span> ArticleSerializer
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@api_view</span>([<span style="color:#e6db74">&#39;GET&#39;</span>, <span style="color:#e6db74">&#39;POST&#39;</span>])
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">article_list</span>(request):
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    GET: 取得所有文章列表
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    POST: 建立新文章
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> request<span style="color:#f92672">.</span>method <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;GET&#39;</span>:
-</span></span><span style="display:flex;"><span>        articles <span style="color:#f92672">=</span> Article<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>all()
-</span></span><span style="display:flex;"><span>        serializer <span style="color:#f92672">=</span> ArticleSerializer(articles, many<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> Response(serializer<span style="color:#f92672">.</span>data)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">elif</span> request<span style="color:#f92672">.</span>method <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;POST&#39;</span>:
-</span></span><span style="display:flex;"><span>        serializer <span style="color:#f92672">=</span> ArticleSerializer(data<span style="color:#f92672">=</span>request<span style="color:#f92672">.</span>data)
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> serializer<span style="color:#f92672">.</span>is_valid():
-</span></span><span style="display:flex;"><span>            serializer<span style="color:#f92672">.</span>save()
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> Response(serializer<span style="color:#f92672">.</span>data, status<span style="color:#f92672">=</span>status<span style="color:#f92672">.</span>HTTP_201_CREATED)
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> Response(serializer<span style="color:#f92672">.</span>errors, status<span style="color:#f92672">=</span>status<span style="color:#f92672">.</span>HTTP_400_BAD_REQUEST)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@api_view</span>([<span style="color:#e6db74">&#39;GET&#39;</span>, <span style="color:#e6db74">&#39;PUT&#39;</span>, <span style="color:#e6db74">&#39;DELETE&#39;</span>])
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">article_detail</span>(request, pk):
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    GET: 取得單一文章
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    PUT: 更新文章
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    DELETE: 刪除文章
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">try</span>:
-</span></span><span style="display:flex;"><span>        article <span style="color:#f92672">=</span> Article<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>get(pk<span style="color:#f92672">=</span>pk)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">except</span> Article<span style="color:#f92672">.</span>DoesNotExist:
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> Response(
-</span></span><span style="display:flex;"><span>            {<span style="color:#e6db74">&#39;error&#39;</span>: <span style="color:#e6db74">&#39;文章不存在&#39;</span>},
-</span></span><span style="display:flex;"><span>            status<span style="color:#f92672">=</span>status<span style="color:#f92672">.</span>HTTP_404_NOT_FOUND
-</span></span><span style="display:flex;"><span>        )
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> request<span style="color:#f92672">.</span>method <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;GET&#39;</span>:
-</span></span><span style="display:flex;"><span>        serializer <span style="color:#f92672">=</span> ArticleSerializer(article)
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> Response(serializer<span style="color:#f92672">.</span>data)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">elif</span> request<span style="color:#f92672">.</span>method <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;PUT&#39;</span>:
-</span></span><span style="display:flex;"><span>        serializer <span style="color:#f92672">=</span> ArticleSerializer(article, data<span style="color:#f92672">=</span>request<span style="color:#f92672">.</span>data)
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> serializer<span style="color:#f92672">.</span>is_valid():
-</span></span><span style="display:flex;"><span>            serializer<span style="color:#f92672">.</span>save()
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> Response(serializer<span style="color:#f92672">.</span>data)
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> Response(serializer<span style="color:#f92672">.</span>errors, status<span style="color:#f92672">=</span>status<span style="color:#f92672">.</span>HTTP_400_BAD_REQUEST)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">elif</span> request<span style="color:#f92672">.</span>method <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;DELETE&#39;</span>:
-</span></span><span style="display:flex;"><span>        article<span style="color:#f92672">.</span>delete()
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> Response(status<span style="color:#f92672">=</span>status<span style="color:#f92672">.</span>HTTP_204_NO_CONTENT)
-</span></span></code></pre></div><p><code>@api_view</code> 裝飾器接收一個 HTTP 方法的列表，定義這個 View 可以處理哪些請求方法。<code>Response</code> 物件會根據客戶端的 <code>Accept</code> Header 自動選擇回應格式。</p>
-<h4 id="步驟四配置-url">步驟四：配置 URL</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># articles/urls.py</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.urls <span style="color:#f92672">import</span> path
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> . <span style="color:#f92672">import</span> views
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>urlpatterns <span style="color:#f92672">=</span> [
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;api/articles/&#39;</span>, views<span style="color:#f92672">.</span>article_list, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;article-list&#39;</span>),
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;api/articles/&lt;int:pk&gt;/&#39;</span>, views<span style="color:#f92672">.</span>article_detail, name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;article-detail&#39;</span>),
-</span></span><span style="display:flex;"><span>]
-</span></span></code></pre></div><p>別忘了在專案的主 <code>urls.py</code> 中 include 這個 App 的 URL：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># myproject/urls.py</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.contrib <span style="color:#f92672">import</span> admin
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> django.urls <span style="color:#f92672">import</span> path, include
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>urlpatterns <span style="color:#f92672">=</span> [
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;admin/&#39;</span>, admin<span style="color:#f92672">.</span>site<span style="color:#f92672">.</span>urls),
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;&#39;</span>, include(<span style="color:#e6db74">&#39;articles.urls&#39;</span>)),
-</span></span><span style="display:flex;"><span>]
-</span></span></code></pre></div><h4 id="步驟五測試-api">步驟五：測試 API</h4>
-<p>啟動開發伺服器後，可以透過多種方式測試 API：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 啟動開發伺服器</span>
-</span></span><span style="display:flex;"><span>python manage.py runserver
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 使用 curl 取得文章列表</span>
-</span></span><span style="display:flex;"><span>curl http://127.0.0.1:8000/api/articles/
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 使用 curl 建立新文章</span>
-</span></span><span style="display:flex;"><span>curl -X POST http://127.0.0.1:8000/api/articles/ <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span>  -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span>  -d <span style="color:#e6db74">&#39;{&#34;title&#34;: &#34;我的第一篇文章&#34;, &#34;content&#34;: &#34;這是透過 API 建立的文章&#34;}&#39;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 使用 httpie（更友善的指令列 HTTP 工具）</span>
-</span></span><span style="display:flex;"><span>http GET http://127.0.0.1:8000/api/articles/
-</span></span><span style="display:flex;"><span>http POST http://127.0.0.1:8000/api/articles/ title<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Hello DRF&#34;</span> content<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;API 測試&#34;</span>
-</span></span></code></pre></div><p>你也可以直接在瀏覽器輸入 <code>http://127.0.0.1:8000/api/articles/</code>，會看到 DRF 的 Browsable API 介面。</p>
-<hr>
-<h3 id="browsable-api-介面">Browsable API 介面</h3>
-<p><strong>Browsable API</strong> 是 DRF 最具特色的功能之一。當你用瀏覽器訪問 API Endpoint 時，DRF 會自動渲染一個可互動的 HTML 頁面，包含：</p>
-<ul>
-<li><strong>回應資料</strong>：以格式化的 JSON 顯示 API 回傳的資料</li>
-<li><strong>可用的 HTTP 方法</strong>：頁面上會顯示 GET、POST、PUT、DELETE 等按鈕</li>
-<li><strong>表單</strong>：提供 HTML 表單與 Raw JSON 輸入框，直接在瀏覽器中測試寫入操作</li>
-<li><strong>認證狀態</strong>：顯示目前的登入狀態</li>
-</ul>
-<p>這讓你在開發階段完全不需要依賴 Postman 或 curl 就能快速測試 API，大幅提升開發效率。</p>
-<p>如果你想在 Browsable API 中加入登入/登出功能，可以在主 <code>urls.py</code> 加入：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># myproject/urls.py</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>urlpatterns <span style="color:#f92672">=</span> [
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># ... 其他 URL</span>
-</span></span><span style="display:flex;"><span>    path(<span style="color:#e6db74">&#39;api-auth/&#39;</span>, include(<span style="color:#e6db74">&#39;rest_framework.urls&#39;</span>)),
-</span></span><span style="display:flex;"><span>]
-</span></span></code></pre></div><hr>
-<h3 id="json-回應格式">JSON 回應格式</h3>
-<p>DRF 預設以 JSON 格式回傳資料。以下是典型的 API 回應範例：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-json" data-lang="json"><span style="display:flex;"><span><span style="color:#75715e">// GET /api/articles/ 的回應（列表）
-</span></span></span><span style="display:flex;"><span>[
-</span></span><span style="display:flex;"><span>    {
-</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;id&#34;</span>: <span style="color:#ae81ff">1</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;title&#34;</span>: <span style="color:#e6db74">&#34;Django 入門教學&#34;</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;content&#34;</span>: <span style="color:#e6db74">&#34;Django 是一個 Python Web 框架...&#34;</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;created_at&#34;</span>: <span style="color:#e6db74">&#34;2026-06-10T08:30:00Z&#34;</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;updated_at&#34;</span>: <span style="color:#e6db74">&#34;2026-06-10T08:30:00Z&#34;</span>
-</span></span><span style="display:flex;"><span>    },
-</span></span><span style="display:flex;"><span>    {
-</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;id&#34;</span>: <span style="color:#ae81ff">2</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;title&#34;</span>: <span style="color:#e6db74">&#34;DRF 快速上手&#34;</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;content&#34;</span>: <span style="color:#e6db74">&#34;Django REST Framework 是...&#34;</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;created_at&#34;</span>: <span style="color:#e6db74">&#34;2026-06-10T09:00:00Z&#34;</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;updated_at&#34;</span>: <span style="color:#e6db74">&#34;2026-06-10T09:00:00Z&#34;</span>
-</span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>]
-</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-json" data-lang="json"><span style="display:flex;"><span><span style="color:#75715e">// POST /api/articles/ 驗證失敗的回應
-</span></span></span><span style="display:flex;"><span>{
-</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;title&#34;</span>: [<span style="color:#e6db74">&#34;這個欄位是必須的。&#34;</span>],
-</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;content&#34;</span>: [<span style="color:#e6db74">&#34;這個欄位是必須的。&#34;</span>]
-</span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><p>DRF 的錯誤回應會自動按照欄位名稱分組，方便前端逐一顯示驗證錯誤訊息。</p>
-<hr>
-<h3 id="drf-核心組件概覽">DRF 核心組件概覽</h3>
-<p>DRF 提供了一整套完整的工具組件，以下是你在後續學習中會深入接觸的核心元素：</p>
-<h4 id="serializers序列化器">Serializers（序列化器）</h4>
-<p>負責資料的序列化（Model -&gt; JSON）與反序列化（JSON -&gt; Model），同時處理資料驗證。主要有 <code>Serializer</code>、<code>ModelSerializer</code>、<code>HyperlinkedModelSerializer</code> 三種。</p>
-<h4 id="views視圖">Views（視圖）</h4>
-<p>DRF 提供多個層級的 View 抽象：</p>
-<ul>
-<li><code>@api_view</code>：函式導向，最簡單的方式</li>
-<li><code>APIView</code>：類別導向，提供更多控制</li>
-<li><code>GenericAPIView</code> + Mixins：組合常用的 CRUD 邏輯</li>
-<li><code>ViewSet</code> / <code>ModelViewSet</code>：最高層級的抽象，一個類別搞定所有 CRUD</li>
-</ul>
-<h4 id="routers路由器">Routers（路由器）</h4>
-<p><code>Router</code> 搭配 <code>ViewSet</code> 使用，可以自動生成 URL patterns，不再需要手動定義每個 Endpoint 的 URL。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> rest_framework.routers <span style="color:#f92672">import</span> DefaultRouter
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>router <span style="color:#f92672">=</span> DefaultRouter()
-</span></span><span style="display:flex;"><span>router<span style="color:#f92672">.</span>register(<span style="color:#e6db74">r</span><span style="color:#e6db74">&#39;articles&#39;</span>, ArticleViewSet)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>urlpatterns <span style="color:#f92672">=</span> router<span style="color:#f92672">.</span>urls
-</span></span></code></pre></div><h4 id="authentication認證">Authentication（認證）</h4>
-<p>DRF 內建多種認證方式：<code>SessionAuthentication</code>、<code>BasicAuthentication</code>、<code>TokenAuthentication</code>。第三方套件如 <code>djangorestframework-simplejwt</code> 則提供 <strong>JWT</strong>（JSON Web Token）認證。</p>
-<h4 id="permissions權限">Permissions（權限）</h4>
-<p>控制誰可以存取哪些資源：<code>AllowAny</code>（任何人）、<code>IsAuthenticated</code>（已登入用戶）、<code>IsAdminUser</code>（管理員）、<code>IsAuthenticatedOrReadOnly</code>（已登入可寫，未登入只能讀）。也支援自訂權限類別。</p>
-<h4 id="pagination分頁">Pagination（分頁）</h4>
-<p>當資料量龐大時，分頁是不可或缺的功能。DRF 提供 <code>PageNumberPagination</code>（頁碼分頁）、<code>LimitOffsetPagination</code>（偏移量分頁）與 <code>CursorPagination</code>（游標分頁）。</p>
-<hr>
-<h3 id="常用的-rest_framework-設定項">常用的 REST_FRAMEWORK 設定項</h3>
-<p>以下整理開發中常用的全域設定，放在 <code>settings.py</code> 的 <code>REST_FRAMEWORK</code> 字典中：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># settings.py</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>REST_FRAMEWORK <span style="color:#f92672">=</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 分頁設定</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;DEFAULT_PAGINATION_CLASS&#39;</span>: <span style="color:#e6db74">&#39;rest_framework.pagination.PageNumberPagination&#39;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;PAGE_SIZE&#39;</span>: <span style="color:#ae81ff">20</span>,
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 認證方式</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;DEFAULT_AUTHENTICATION_CLASSES&#39;</span>: [
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;rest_framework.authentication.SessionAuthentication&#39;</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;rest_framework.authentication.TokenAuthentication&#39;</span>,
-</span></span><span style="display:flex;"><span>    ],
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 權限設定</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;DEFAULT_PERMISSION_CLASSES&#39;</span>: [
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;rest_framework.permissions.IsAuthenticatedOrReadOnly&#39;</span>,
-</span></span><span style="display:flex;"><span>    ],
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 限流（Throttling）設定</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;DEFAULT_THROTTLE_CLASSES&#39;</span>: [
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;rest_framework.throttling.AnonRateThrottle&#39;</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;rest_framework.throttling.UserRateThrottle&#39;</span>,
-</span></span><span style="display:flex;"><span>    ],
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;DEFAULT_THROTTLE_RATES&#39;</span>: {
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;anon&#39;</span>: <span style="color:#e6db74">&#39;100/hour&#39;</span>,   <span style="color:#75715e"># 匿名用戶每小時 100 次</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;user&#39;</span>: <span style="color:#e6db74">&#39;1000/hour&#39;</span>,  <span style="color:#75715e"># 登入用戶每小時 1000 次</span>
-</span></span><span style="display:flex;"><span>    },
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 日期時間格式</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;DATETIME_FORMAT&#39;</span>: <span style="color:#e6db74">&#39;%Y-%m-</span><span style="color:#e6db74">%d</span><span style="color:#e6db74">T%H:%M:%SZ&#39;</span>,
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 篩選後端</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;DEFAULT_FILTER_BACKENDS&#39;</span>: [
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;django_filters.rest_framework.DjangoFilterBackend&#39;</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;rest_framework.filters.SearchFilter&#39;</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;rest_framework.filters.OrderingFilter&#39;</span>,
-</span></span><span style="display:flex;"><span>    ],
-</span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><p>每個設定項也可以在個別 View 中覆寫，提供了全域統一與局部客製化的彈性。</p>
-<hr>
-<h3 id="總結">總結</h3>
-<p>本文從 REST API 的基礎概念開始，帶你完成了 Django REST Framework 的完整入門流程：</p>
-<ol>
-<li><strong>REST 原則</strong>：資源導向、統一介面、無狀態是 RESTful 架構的核心</li>
-<li><strong>HTTP 方法與 CRUD</strong>：GET/POST/PUT/PATCH/DELETE 分別對應讀取/建立/更新/刪除操作</li>
-<li><strong>安裝與設定</strong>：<code>pip install djangorestframework</code>，加入 <code>INSTALLED_APPS</code> 並配置 <code>REST_FRAMEWORK</code></li>
-<li><strong>第一個 API</strong>：透過 Serializer 處理資料轉換、<code>@api_view</code> 處理請求邏輯、URL 配置路由</li>
-<li><strong>Browsable API</strong>：DRF 獨有的瀏覽器測試介面，開發階段的利器</li>
-<li><strong>核心組件</strong>：Serializers、Views、Routers、Authentication、Permissions、Pagination 構成 DRF 的完整功能體系</li>
-</ol>
-<p>DRF 的設計哲學是「漸進式複雜度」——你可以從最簡單的 <code>@api_view</code> 開始，隨著需求成長逐步升級到 <code>APIView</code>、<code>GenericAPIView</code>，最終使用 <code>ModelViewSet</code> + <code>Router</code> 達到最高的開發效率。在接下來的教學中，我們將逐一深入每個核心組件，學習如何建構生產等級的 RESTful API。</p></div>
-        
-        
-
-        
-        <div class="mt-8">
-          
-<div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose">
-  <div>
-    <div class="flex items-center gap-2 mb-1">
-      <a href="/about" class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">
-        BenZ
-      </a>
-      
-      <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span>
-      
-    </div>
-    <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">
-      熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。
-    </p>
-    <div class="flex items-center gap-3">
-      
-      <a href="https://github.com/benzhub" target="_blank" rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label="GitHub">
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-      </a>
-      
-      
-      
-    </div>
-  </div>
-</div>
-
-        </div>
-      </div>
-
-      
-      <div class="post-detail fade-in my-4">
-        
-
-
-<div>
-  <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3>
-  <div class="grid gap-2">
-    
-    <a href="http://localhost:1313/post/django/020-django-admin-advanced/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
-      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django Admin 進階：Inline 編輯、自訂 Actions 與權限控制 | Django 教學</span>
-      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/09</span>
-    </a>
-    
-    <a href="http://localhost:1313/post/django/019-django-admin-basics/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
-      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django Admin 後台管理介面入門 | Django 教學</span>
-      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/08</span>
-    </a>
-    
-    <a href="http://localhost:1313/post/django/018-django-forms-advanced/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
-      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django Forms 進階：ModelForm、Formset 與檔案上傳 | Django 教學</span>
-      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/07</span>
-    </a>
-    
-  </div>
-</div>
-
-
-      </div>
-
-      
-      <div class="post-detail fade-in my-4">
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            
-            <a href="http://localhost:1313/post/django/020-django-admin-advanced/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
-                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
-                <span class="text-sm font-medium">Django Admin 進階：Inline 編輯、自訂 Actions 與權限控制 | Django 教學</span>
-            </a>
-            
-          </div>
-          <div>
-            
-            <a href="http://localhost:1313/post/django/022-drf-serializers-basics/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
-                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
-                <span class="text-sm font-medium">DRF Serializers 基礎：序列化與反序列化完全解析 | Django 教學</span>
-            </a>
-            
-          </div>
-        </div>
-      </div>
-
-      
-      <div class="post-detail fade-in my-4">
-        
-<script src="https://giscus.app/client.js"
-        data-repo="benzhub/benzhub.github.io"
-        data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM="
-        data-category="Announcements"
-        data-category-id="MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1"
-        data-mapping="pathname"
-        data-strict="0"
-        data-reactions-enabled="1"
-        data-emit-metadata="0"
-        data-input-position="top"
-        data-theme="preferred_color_scheme"
-        data-lang="zh-TW"
-        crossorigin="anonymous"
-        async>
-</script>
-
-
-      </div>
-    </div>
-    
-    <div class="hidden lg:block lg:col-span-1 mt-4">
-    
-    
-            
-            <div class="widget fade-in">
-    <p class="widget-title">搜尋</p>
-    <form role="search" method="get" action="https://google.com/search">
-        <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
-        <input type="hidden" name="sitesearch" value="http://localhost:1313/" />
-    </form>
-</div>
-
-        
-            
-            
-
-        
-            
-            
-<div class="widget fade-in">
-    <p class="widget-title">標籤</p>
-    <div class="flex flex-wrap gap-1.5">
-        <a href='/tags/80/20-%E6%B3%95%E5%89%87'>
-            <span class="tag-pill">80/20 法則</span>
-        </a>
-        <a href='/tags/acid'>
-            <span class="tag-pill">acid</span>
-        </a>
-        <a href='/tags/ai'>
-            <span class="tag-pill">ai</span>
-        </a>
-        <a href='/tags/ai-agent'>
-            <span class="tag-pill">ai agent</span>
-        </a>
-        <a href='/tags/ai-workflow'>
-            <span class="tag-pill">ai workflow</span>
-        </a>
-        <a href='/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE'>
-            <span class="tag-pill">ai 工具焦慮</span>
-        </a>
-        <a href='/tags/ai-%E6%8E%A5%E5%96%AE'>
-            <span class="tag-pill">ai 接單</span>
-        </a>
-        <a href='/tags/ai-%E7%B9%AA%E5%9C%96'>
-            <span class="tag-pill">ai 繪圖</span>
-        </a>
-        <a href='/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA'>
-            <span class="tag-pill">ai 虛擬人</span>
-        </a>
-        <a href='/tags/ai-%E8%A1%8C%E9%8A%B7'>
-            <span class="tag-pill">ai 行銷</span>
-        </a>
-        <a href='/tags/ai-%E8%A8%AD%E8%A8%88'>
-            <span class="tag-pill">ai 設計</span>
-        </a>
-        <a href='/tags/ai-%E8%AE%8A%E7%8F%BE'>
-            <span class="tag-pill">ai 變現</span>
-        </a>
-        <a href='/tags/ai-%E8%B3%BA%E9%8C%A2'>
-            <span class="tag-pill">ai 賺錢</span>
-        </a>
-        <a href='/tags/ai-income'>
-            <span class="tag-pill">ai-income</span>
-        </a>
-        <a href='/tags/ai-insights'>
-            <span class="tag-pill">ai-insights</span>
-        </a>
-        <a href='/tags/api'>
-            <span class="tag-pill">api</span>
-        </a>
-        <a href='/tags/architecture'>
-            <span class="tag-pill">architecture</span>
-        </a>
-        <a href='/tags/autovacuum'>
-            <span class="tag-pill">autovacuum</span>
-        </a>
-        <a href='/tags/background-processes'>
-            <span class="tag-pill">background-processes</span>
-        </a>
-        <a href='/tags/big-o'>
-            <span class="tag-pill">big o</span>
-        </a>
-    </div>
-</div>
-
-
-        
-            
-            
-<div class="widget fade-in">
-    <p class="widget-title">文章系列</p>
-    <div class="flex flex-wrap gap-1.5">
-        
-        
-        
-        
-        <a href='/post/postgresql/'>
-            <span class="tag-pill">PostgreSQL (13)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/javascript/'>
-            <span class="tag-pill">JavaScript (68)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/django/'>
-            <span class="tag-pill">Django (30)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/python/'>
-            <span class="tag-pill">Python (37)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/htmlcss/'>
-            <span class="tag-pill">HTML &amp; CSS (23)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/linux/'>
-            <span class="tag-pill">Linux (22)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/git/'>
-            <span class="tag-pill">Git (18)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/ai-insights/'>
-            <span class="tag-pill">AI Insights (13)</span>
-        </a>
-        
-        
-    </div>
-</div>
-
-
-        
-            
-            
-
-<div class="widget fade-in">
-    <p class="widget-title">最新文章</p>
-    <div class="flex flex-col gap-1">
-        <a href="/post/postgresql/013-ddl-schema/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/19
-            </p>
-        </a>
-        <a href="/post/django/030-django-custom-user-model/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django 自訂使用者模型：AbstractUser 與 AbstractBaseUser | Django 教學</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/19
-            </p>
-        </a>
-        <a href="/post/javascript/data-structures--algorithms/006-heap-priority-queue/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">堆積與優先佇列 — Min/Max Heap 原理與 Heap Sort 完整實作 | 資料結構與演算法</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/19
-            </p>
-        </a>
-        <a href="/post/django/029-django-authentication/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Authentication 使用者認證系統完全指南 | Django 教學</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/18
-            </p>
-        </a>
-        <a href="/post/postgresql/012-data-types/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/06/18
-            </p>
-        </a>
-    </div>
-</div>
-
-        
-    
-</div>
-
-    
-</div>
-
-        </div>
-    </div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]">
-    
-    <p>&copy; 2026 <a href="http://localhost:1313/" class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p>
-</footer>
-
-
-<script>
-    (function (window, document) {
-        function main() {
-            var ad = document.createElement('script');
-            ad.async = true;
-            ad.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606';
-            ad.crossOrigin = "anonymous";
-            var sc = document.getElementsByTagName('script')[0];
-            sc.parentNode.insertBefore(ad, sc);
-        }
-        var lazyLoad = false;
-        function onLazyLoad() {
-            if (lazyLoad === false) {
-                lazyLoad = true;
-                window.removeEventListener('scroll', onLazyLoad);
-                window.removeEventListener('mousemove', onLazyLoad);
-                window.removeEventListener('mousedown', onLazyLoad);
-                window.removeEventListener('touchstart', onLazyLoad);
-                window.removeEventListener('keydown', onLazyLoad);
-                main();
-            }
-        }
-        window.addEventListener('scroll', onLazyLoad);
-        window.addEventListener('mousemove', onLazyLoad);
-        window.addEventListener('mousedown', onLazyLoad);
-        window.addEventListener('touchstart', onLazyLoad);
-        window.addEventListener('keydown', onLazyLoad);
-        window.addEventListener('load', function () {
-            if (window.pageYOffset) {
-                onLazyLoad();
-                window.setTimeout(onLazyLoad, 3000);
-            }
-        });
-    })(window, document);
-</script>
-
-
-<script>
-    
-    var icon = document.getElementById("icon");
-    var icon2 = document.getElementById("icon2");
-    if (document.documentElement.classList.contains("dark") || localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
-        if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
-        document.documentElement.classList.add('dark');
-    } else {
-        document.documentElement.classList.remove('dark');
-    }
-    function toggleDarkMode() {
-        if (document.documentElement.classList.contains('dark')) {
-            if (icon) { icon.classList.remove("icon-sun"); icon.classList.add("icon-moon"); }
-            if (icon2) { icon2.classList.remove("icon-sun"); icon2.classList.add("icon-moon"); }
-            document.documentElement.classList.remove('dark');
-            localStorage.theme = 'light';
-        } else {
-            if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
-            if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
-            document.documentElement.classList.add('dark');
-            localStorage.theme = 'dark';
-        }
-    }
-
-    
-    document.addEventListener('DOMContentLoaded', function () {
-        var observer = new IntersectionObserver(function (entries) {
-            entries.forEach(function (entry) {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0 });
-
-        document.querySelectorAll('.fade-in').forEach(function (el) {
-            observer.observe(el);
-        });
-    });
-</script>
-</body>
-
-</html>
+<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>Django REST Framework 入門：建立你的第一個 API | Django 教學 | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="Django REST Framework 入門：建立你的第一個 API | Django 教學 | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="Django REST Framework（DRF）入門教學！從 REST API 基礎概念、HTTP 方法與 CRUD 對應，到安裝 DRF、建立 Serializer、撰寫 API View、配置 URL，一步步帶你建立第一個 RESTful API，並介紹 Browsable API 與核心組件概覽。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="Django REST Framework（DRF）入門教學！從 REST API 基礎概念、HTTP 方法與 CRUD 對應，到安裝 DRF、建立 Serializer、撰寫 API View、配置 URL，一步步帶你建立第一個 RESTful API，並介紹 Browsable API 與核心組件概覽。"><meta property="og:url" content="https://benzhub.github.io/post/django/021-drf-introduction/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/django/021-drf-introduction/><meta name=twitter:description content="Django REST Framework（DRF）入門教學！從 REST API 基礎概念、HTTP 方法與 CRUD 對應，到安裝 DRF、建立 Serializer、撰寫 API View、配置 URL，一步步帶你建立第一個 RESTful API，並介紹 Browsable API 與核心組件概覽。"><meta property="article:published_time" content="2026-06-10T00:00:00+00:00"><meta property="article:updated_time" content="2026-05-21T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/django/021-DRF-Introduction.png"><meta property="og:image:url" content="https://benzhub.github.io/img/django/021-DRF-Introduction.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/django/021-drf-introduction/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/django/021-drf-introduction/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"Django REST Framework 入門：建立你的第一個 API | Django 教學\"","description":"\"Django REST Framework（DRF）入門教學！從 REST API 基礎概念、HTTP 方法與 CRUD 對應，到安裝 DRF、建立 Serializer、撰寫 API View、配置 URL，一步步帶你建立第一個 RESTful API，並介紹 Browsable API 與核心組件概覽。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-06-10T00:00:00\u002b00:00","dateModified":"2026-05-21T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/django\/021-DRF-Introduction.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/django\/021-drf-introduction\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/django\/"},{"@type":"ListItem","position":3,"name":"\"Django REST Framework 入門：建立你的第一個 API | Django 教學\""}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"\"Django REST Framework 是什麼？跟 Django 有什麼關係？\"","acceptedAnswer":{"@type":"Answer","text":"\"Django REST Framework（DRF）是建構於 Django 之上的第三方套件，由 Tom Christie 於 2011 年發布，專門用於開發 RESTful API。它提供 Serializer、ViewSet、Router、Authentication、Permissions 等完整工具，讓你可以快速將 Django Model 轉換為 JSON API，是 Python 生態系中建構 REST API 的事實標準。\""}},{"@type":"Question","name":"\"REST API 的 HTTP 方法如何對應 CRUD 操作？\"","acceptedAnswer":{"@type":"Answer","text":"\"REST API 使用 HTTP 方法對應 CRUD 操作：GET 對應 Read（讀取資源）、POST 對應 Create（建立資源）、PUT 對應 Update（完整更新資源）、PATCH 對應 Update（部分更新資源）、DELETE 對應 Delete（刪除資源）。這是 RESTful 架構的核心設計原則之一。\""}},{"@type":"Question","name":"\"DRF 的 Browsable API 是什麼？有什麼好處？\"","acceptedAnswer":{"@type":"Answer","text":"\"Browsable API 是 DRF 內建的自動化 HTML 介面，當你用瀏覽器直接訪問 API Endpoint 時，會看到一個可互動的頁面，顯示回應資料、可用的 HTTP 方法與表單。它讓開發者不需要額外工具就能測試 API，大幅提升開發階段的除錯效率。\""}}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Django REST Framework 入門：建立你的第一個 API | Django 教學</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/10
+</span><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001.0 004.582 9m0 0H9m11 11v-5h-.581m0 0A8.003 8.003.0 014.062 13m15.357 2H15"/></svg>
+2026/05/21</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/python class="tag-pill no-underline">python</a>
+<a href=/tags/django class="tag-pill no-underline">django</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/django/021-DRF-Introduction.png alt="Django REST Framework 入門：建立你的第一個 API | Django 教學"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p><strong>Django REST Framework</strong>（簡稱 <strong>DRF</strong>）是 Python 生態系中建構 <strong>RESTful API</strong> 的事實標準框架，建構於 <strong>Django</strong> 之上，提供 <strong>Serializer</strong>（序列化器）、<strong>ViewSet</strong>、<strong>Router</strong>、<strong>Authentication</strong>（認證）與 <strong>Permissions</strong>（權限）等完整工具組。本文將從 <strong>REST API</strong> 的基礎概念出發，帶你安裝 DRF、建立第一個 API Endpoint，並認識 <strong>Browsable API</strong> 與 DRF 的核心組件，為後續深入學習打下基礎。</p></blockquote><h3 id=什麼是-rest-api>什麼是 REST API？</h3><p><strong>REST</strong>（Representational State Transfer，表現層狀態轉移）是一種軟體架構風格，由 Roy Fielding 於 2000 年在博士論文中提出。遵循 REST 原則的 API 稱為 <strong>RESTful API</strong>，它是現代 Web 應用程式中前後端溝通的主流方式。</p><p>RESTful 架構有幾個核心原則：</p><ul><li><strong>資源導向（Resource-Oriented）</strong>：每個 URL 代表一個資源，例如 <code>/api/articles/</code> 代表文章列表、<code>/api/articles/1/</code> 代表 ID 為 1 的文章</li><li><strong>統一介面（Uniform Interface）</strong>：使用標準的 HTTP 方法（GET、POST、PUT、DELETE）操作資源</li><li><strong>無狀態（Stateless）</strong>：每次請求都是獨立的，伺服器不儲存客戶端的狀態</li><li><strong>可快取（Cacheable）</strong>：回應可以被標記為可快取或不可快取，提升效能</li><li><strong>分層系統（Layered System）</strong>：客戶端不需要知道是直接連接伺服器還是中間的代理層</li></ul><hr><h3 id=http-方法與-crud-對應>HTTP 方法與 CRUD 對應</h3><p>REST API 使用 HTTP 方法（HTTP Methods）來定義對資源的操作，與資料庫的 <strong>CRUD</strong>（Create、Read、Update、Delete）操作有清楚的對應關係：</p><table><thead><tr><th>HTTP 方法</th><th>CRUD 操作</th><th>說明</th><th>範例 URL</th></tr></thead><tbody><tr><td><code>GET</code></td><td>Read（讀取）</td><td>取得資源列表或單一資源</td><td><code>GET /api/articles/</code></td></tr><tr><td><code>POST</code></td><td>Create（建立）</td><td>建立新資源</td><td><code>POST /api/articles/</code></td></tr><tr><td><code>PUT</code></td><td>Update（完整更新）</td><td>更新整個資源，需提供所有欄位</td><td><code>PUT /api/articles/1/</code></td></tr><tr><td><code>PATCH</code></td><td>Update（部分更新）</td><td>只更新指定的欄位</td><td><code>PATCH /api/articles/1/</code></td></tr><tr><td><code>DELETE</code></td><td>Delete（刪除）</td><td>刪除指定資源</td><td><code>DELETE /api/articles/1/</code></td></tr></tbody></table><p>理解這張對應表非常重要，因為 DRF 的 View 和 Router 都是圍繞這些 HTTP 方法設計的。</p><hr><h3 id=django-rest-framework-簡介>Django REST Framework 簡介</h3><p><strong>Django REST Framework</strong>（DRF）由 Tom Christie 於 2011 年發布，是一個建構於 Django 之上的強大 REST API 開發框架。它採用 BSD-2-Clause 授權，是開源社群中最受歡迎的 Python API 框架之一。</p><p>為什麼選擇 DRF？</p><ul><li><strong>完整的工具組</strong>：從序列化、驗證、認證到分頁，一個框架搞定</li><li><strong>與 Django 深度整合</strong>：直接使用 Django Model、ORM、Authentication 系統</li><li><strong>Browsable API</strong>：內建可操作的 HTML 測試介面</li><li><strong>豐富的生態系</strong>：大量的第三方套件支援（JWT、OpenAPI 文件生成等）</li><li><strong>成熟穩定</strong>：超過 10 年的發展歷史，廣泛用於生產環境</li></ul><hr><h3 id=安裝-django-rest-framework>安裝 Django REST Framework</h3><p>確保你已經有一個 Django 專案，接著安裝 DRF：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 安裝 Django REST Framework</span>
+</span></span><span style=display:flex><span>pip install djangorestframework
+</span></span></code></pre></div><p>安裝完成後，將 <code>rest_framework</code> 加入 <code>settings.py</code> 的 <code>INSTALLED_APPS</code>：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># settings.py</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>INSTALLED_APPS <span style=color:#f92672>=</span> [
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.admin&#39;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.auth&#39;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.contenttypes&#39;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.sessions&#39;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.messages&#39;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.staticfiles&#39;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 第三方套件</span>
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;rest_framework&#39;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 你的 App</span>
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;articles&#39;</span>,
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><p>接著可以在 <code>settings.py</code> 中加入 DRF 的全域設定：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># settings.py</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>REST_FRAMEWORK <span style=color:#f92672>=</span> {
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 預設的 Renderer（渲染器）</span>
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;DEFAULT_RENDERER_CLASSES&#39;</span>: [
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;rest_framework.renderers.JSONRenderer&#39;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;rest_framework.renderers.BrowsableAPIRenderer&#39;</span>,
+</span></span><span style=display:flex><span>    ],
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 預設的 Parser（解析器）</span>
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;DEFAULT_PARSER_CLASSES&#39;</span>: [
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;rest_framework.parsers.JSONParser&#39;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;rest_framework.parsers.FormParser&#39;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;rest_framework.parsers.MultiPartParser&#39;</span>,
+</span></span><span style=display:flex><span>    ],
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 預設的認證方式</span>
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;DEFAULT_AUTHENTICATION_CLASSES&#39;</span>: [
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;rest_framework.authentication.SessionAuthentication&#39;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;rest_framework.authentication.BasicAuthentication&#39;</span>,
+</span></span><span style=display:flex><span>    ],
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 預設的權限設定</span>
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;DEFAULT_PERMISSION_CLASSES&#39;</span>: [
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;rest_framework.permissions.AllowAny&#39;</span>,
+</span></span><span style=display:flex><span>    ],
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><blockquote><p>在開發階段建議保留 <code>BrowsableAPIRenderer</code>，方便透過瀏覽器直接測試 API。正式環境中可以移除它，只保留 <code>JSONRenderer</code>。</p></blockquote><hr><h3 id=建立第一個-api-endpoint>建立第一個 API Endpoint</h3><p>接下來我們從零開始建立一個完整的 API Endpoint，假設你已經有一個 <code>articles</code> App 和對應的 Model：</p><h4 id=步驟一確認-model>步驟一：確認 Model</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># articles/models.py</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.db <span style=color:#f92672>import</span> models
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Article</span>(models<span style=color:#f92672>.</span>Model):
+</span></span><span style=display:flex><span>    title <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>CharField(<span style=color:#e6db74>&#39;標題&#39;</span>, max_length<span style=color:#f92672>=</span><span style=color:#ae81ff>200</span>)
+</span></span><span style=display:flex><span>    content <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>TextField(<span style=color:#e6db74>&#39;內容&#39;</span>)
+</span></span><span style=display:flex><span>    created_at <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>DateTimeField(<span style=color:#e6db74>&#39;建立時間&#39;</span>, auto_now_add<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
+</span></span><span style=display:flex><span>    updated_at <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>DateTimeField(<span style=color:#e6db74>&#39;更新時間&#39;</span>, auto_now<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Meta</span>:
+</span></span><span style=display:flex><span>        ordering <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#39;-created_at&#39;</span>]
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>__str__</span>(self):
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> self<span style=color:#f92672>.</span>title
+</span></span></code></pre></div><h4 id=步驟二建立-serializer>步驟二：建立 Serializer</h4><p><strong>Serializer</strong>（序列化器）是 DRF 的核心組件，負責將 Django Model 物件轉換為 JSON 格式（序列化），以及將客戶端傳來的 JSON 資料轉換回 Python 物件並進行驗證（反序列化）。</p><p>在 <code>articles</code> App 下建立 <code>serializers.py</code>：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># articles/serializers.py</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework <span style=color:#f92672>import</span> serializers
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> .models <span style=color:#f92672>import</span> Article
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ArticleSerializer</span>(serializers<span style=color:#f92672>.</span>ModelSerializer):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;文章序列化器&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Meta</span>:
+</span></span><span style=display:flex><span>        model <span style=color:#f92672>=</span> Article
+</span></span><span style=display:flex><span>        fields <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#39;id&#39;</span>, <span style=color:#e6db74>&#39;title&#39;</span>, <span style=color:#e6db74>&#39;content&#39;</span>, <span style=color:#e6db74>&#39;created_at&#39;</span>, <span style=color:#e6db74>&#39;updated_at&#39;</span>]
+</span></span><span style=display:flex><span>        read_only_fields <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#39;created_at&#39;</span>, <span style=color:#e6db74>&#39;updated_at&#39;</span>]
+</span></span></code></pre></div><p><code>ModelSerializer</code> 會根據 Model 的欄位定義自動生成對應的序列化欄位，包含驗證規則。<code>read_only_fields</code> 指定哪些欄位只能讀取、不接受寫入。</p><h4 id=步驟三建立-view>步驟三：建立 View</h4><p>DRF 提供多種建立 View 的方式，最簡單的是使用 <code>@api_view</code> 裝飾器（Decorator）：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># articles/views.py</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework.decorators <span style=color:#f92672>import</span> api_view
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework.response <span style=color:#f92672>import</span> Response
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework <span style=color:#f92672>import</span> status
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> .models <span style=color:#f92672>import</span> Article
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> .serializers <span style=color:#f92672>import</span> ArticleSerializer
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>@api_view</span>([<span style=color:#e6db74>&#39;GET&#39;</span>, <span style=color:#e6db74>&#39;POST&#39;</span>])
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>article_list</span>(request):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>    GET: 取得所有文章列表
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>    POST: 建立新文章
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>    &#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> request<span style=color:#f92672>.</span>method <span style=color:#f92672>==</span> <span style=color:#e6db74>&#39;GET&#39;</span>:
+</span></span><span style=display:flex><span>        articles <span style=color:#f92672>=</span> Article<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>all()
+</span></span><span style=display:flex><span>        serializer <span style=color:#f92672>=</span> ArticleSerializer(articles, many<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> Response(serializer<span style=color:#f92672>.</span>data)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>elif</span> request<span style=color:#f92672>.</span>method <span style=color:#f92672>==</span> <span style=color:#e6db74>&#39;POST&#39;</span>:
+</span></span><span style=display:flex><span>        serializer <span style=color:#f92672>=</span> ArticleSerializer(data<span style=color:#f92672>=</span>request<span style=color:#f92672>.</span>data)
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> serializer<span style=color:#f92672>.</span>is_valid():
+</span></span><span style=display:flex><span>            serializer<span style=color:#f92672>.</span>save()
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> Response(serializer<span style=color:#f92672>.</span>data, status<span style=color:#f92672>=</span>status<span style=color:#f92672>.</span>HTTP_201_CREATED)
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> Response(serializer<span style=color:#f92672>.</span>errors, status<span style=color:#f92672>=</span>status<span style=color:#f92672>.</span>HTTP_400_BAD_REQUEST)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>@api_view</span>([<span style=color:#e6db74>&#39;GET&#39;</span>, <span style=color:#e6db74>&#39;PUT&#39;</span>, <span style=color:#e6db74>&#39;DELETE&#39;</span>])
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>article_detail</span>(request, pk):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>    GET: 取得單一文章
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>    PUT: 更新文章
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>    DELETE: 刪除文章
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>    &#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>try</span>:
+</span></span><span style=display:flex><span>        article <span style=color:#f92672>=</span> Article<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>get(pk<span style=color:#f92672>=</span>pk)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>except</span> Article<span style=color:#f92672>.</span>DoesNotExist:
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> Response(
+</span></span><span style=display:flex><span>            {<span style=color:#e6db74>&#39;error&#39;</span>: <span style=color:#e6db74>&#39;文章不存在&#39;</span>},
+</span></span><span style=display:flex><span>            status<span style=color:#f92672>=</span>status<span style=color:#f92672>.</span>HTTP_404_NOT_FOUND
+</span></span><span style=display:flex><span>        )
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> request<span style=color:#f92672>.</span>method <span style=color:#f92672>==</span> <span style=color:#e6db74>&#39;GET&#39;</span>:
+</span></span><span style=display:flex><span>        serializer <span style=color:#f92672>=</span> ArticleSerializer(article)
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> Response(serializer<span style=color:#f92672>.</span>data)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>elif</span> request<span style=color:#f92672>.</span>method <span style=color:#f92672>==</span> <span style=color:#e6db74>&#39;PUT&#39;</span>:
+</span></span><span style=display:flex><span>        serializer <span style=color:#f92672>=</span> ArticleSerializer(article, data<span style=color:#f92672>=</span>request<span style=color:#f92672>.</span>data)
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> serializer<span style=color:#f92672>.</span>is_valid():
+</span></span><span style=display:flex><span>            serializer<span style=color:#f92672>.</span>save()
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> Response(serializer<span style=color:#f92672>.</span>data)
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> Response(serializer<span style=color:#f92672>.</span>errors, status<span style=color:#f92672>=</span>status<span style=color:#f92672>.</span>HTTP_400_BAD_REQUEST)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>elif</span> request<span style=color:#f92672>.</span>method <span style=color:#f92672>==</span> <span style=color:#e6db74>&#39;DELETE&#39;</span>:
+</span></span><span style=display:flex><span>        article<span style=color:#f92672>.</span>delete()
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> Response(status<span style=color:#f92672>=</span>status<span style=color:#f92672>.</span>HTTP_204_NO_CONTENT)
+</span></span></code></pre></div><p><code>@api_view</code> 裝飾器接收一個 HTTP 方法的列表，定義這個 View 可以處理哪些請求方法。<code>Response</code> 物件會根據客戶端的 <code>Accept</code> Header 自動選擇回應格式。</p><h4 id=步驟四配置-url>步驟四：配置 URL</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># articles/urls.py</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.urls <span style=color:#f92672>import</span> path
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> . <span style=color:#f92672>import</span> views
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>urlpatterns <span style=color:#f92672>=</span> [
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;api/articles/&#39;</span>, views<span style=color:#f92672>.</span>article_list, name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;article-list&#39;</span>),
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;api/articles/&lt;int:pk&gt;/&#39;</span>, views<span style=color:#f92672>.</span>article_detail, name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;article-detail&#39;</span>),
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><p>別忘了在專案的主 <code>urls.py</code> 中 include 這個 App 的 URL：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># myproject/urls.py</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.contrib <span style=color:#f92672>import</span> admin
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.urls <span style=color:#f92672>import</span> path, include
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>urlpatterns <span style=color:#f92672>=</span> [
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;admin/&#39;</span>, admin<span style=color:#f92672>.</span>site<span style=color:#f92672>.</span>urls),
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;&#39;</span>, include(<span style=color:#e6db74>&#39;articles.urls&#39;</span>)),
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><h4 id=步驟五測試-api>步驟五：測試 API</h4><p>啟動開發伺服器後，可以透過多種方式測試 API：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 啟動開發伺服器</span>
+</span></span><span style=display:flex><span>python manage.py runserver
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 使用 curl 取得文章列表</span>
+</span></span><span style=display:flex><span>curl http://127.0.0.1:8000/api/articles/
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 使用 curl 建立新文章</span>
+</span></span><span style=display:flex><span>curl -X POST http://127.0.0.1:8000/api/articles/ <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  -H <span style=color:#e6db74>&#34;Content-Type: application/json&#34;</span> <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  -d <span style=color:#e6db74>&#39;{&#34;title&#34;: &#34;我的第一篇文章&#34;, &#34;content&#34;: &#34;這是透過 API 建立的文章&#34;}&#39;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 使用 httpie（更友善的指令列 HTTP 工具）</span>
+</span></span><span style=display:flex><span>http GET http://127.0.0.1:8000/api/articles/
+</span></span><span style=display:flex><span>http POST http://127.0.0.1:8000/api/articles/ title<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;Hello DRF&#34;</span> content<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;API 測試&#34;</span>
+</span></span></code></pre></div><p>你也可以直接在瀏覽器輸入 <code>http://127.0.0.1:8000/api/articles/</code>，會看到 DRF 的 Browsable API 介面。</p><hr><h3 id=browsable-api-介面>Browsable API 介面</h3><p><strong>Browsable API</strong> 是 DRF 最具特色的功能之一。當你用瀏覽器訪問 API Endpoint 時，DRF 會自動渲染一個可互動的 HTML 頁面，包含：</p><ul><li><strong>回應資料</strong>：以格式化的 JSON 顯示 API 回傳的資料</li><li><strong>可用的 HTTP 方法</strong>：頁面上會顯示 GET、POST、PUT、DELETE 等按鈕</li><li><strong>表單</strong>：提供 HTML 表單與 Raw JSON 輸入框，直接在瀏覽器中測試寫入操作</li><li><strong>認證狀態</strong>：顯示目前的登入狀態</li></ul><p>這讓你在開發階段完全不需要依賴 Postman 或 curl 就能快速測試 API，大幅提升開發效率。</p><p>如果你想在 Browsable API 中加入登入/登出功能，可以在主 <code>urls.py</code> 加入：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># myproject/urls.py</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>urlpatterns <span style=color:#f92672>=</span> [
+</span></span><span style=display:flex><span>    <span style=color:#75715e># ... 其他 URL</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;api-auth/&#39;</span>, include(<span style=color:#e6db74>&#39;rest_framework.urls&#39;</span>)),
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><hr><h3 id=json-回應格式>JSON 回應格式</h3><p>DRF 預設以 JSON 格式回傳資料。以下是典型的 API 回應範例：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-json data-lang=json><span style=display:flex><span><span style=color:#75715e>// GET /api/articles/ 的回應（列表）
+</span></span></span><span style=display:flex><span>[
+</span></span><span style=display:flex><span>    {
+</span></span><span style=display:flex><span>        <span style=color:#f92672>&#34;id&#34;</span>: <span style=color:#ae81ff>1</span>,
+</span></span><span style=display:flex><span>        <span style=color:#f92672>&#34;title&#34;</span>: <span style=color:#e6db74>&#34;Django 入門教學&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#f92672>&#34;content&#34;</span>: <span style=color:#e6db74>&#34;Django 是一個 Python Web 框架...&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#f92672>&#34;created_at&#34;</span>: <span style=color:#e6db74>&#34;2026-06-10T08:30:00Z&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#f92672>&#34;updated_at&#34;</span>: <span style=color:#e6db74>&#34;2026-06-10T08:30:00Z&#34;</span>
+</span></span><span style=display:flex><span>    },
+</span></span><span style=display:flex><span>    {
+</span></span><span style=display:flex><span>        <span style=color:#f92672>&#34;id&#34;</span>: <span style=color:#ae81ff>2</span>,
+</span></span><span style=display:flex><span>        <span style=color:#f92672>&#34;title&#34;</span>: <span style=color:#e6db74>&#34;DRF 快速上手&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#f92672>&#34;content&#34;</span>: <span style=color:#e6db74>&#34;Django REST Framework 是...&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#f92672>&#34;created_at&#34;</span>: <span style=color:#e6db74>&#34;2026-06-10T09:00:00Z&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#f92672>&#34;updated_at&#34;</span>: <span style=color:#e6db74>&#34;2026-06-10T09:00:00Z&#34;</span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-json data-lang=json><span style=display:flex><span><span style=color:#75715e>// POST /api/articles/ 驗證失敗的回應
+</span></span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;title&#34;</span>: [<span style=color:#e6db74>&#34;這個欄位是必須的。&#34;</span>],
+</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;content&#34;</span>: [<span style=color:#e6db74>&#34;這個欄位是必須的。&#34;</span>]
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>DRF 的錯誤回應會自動按照欄位名稱分組，方便前端逐一顯示驗證錯誤訊息。</p><hr><h3 id=drf-核心組件概覽>DRF 核心組件概覽</h3><p>DRF 提供了一整套完整的工具組件，以下是你在後續學習中會深入接觸的核心元素：</p><h4 id=serializers序列化器>Serializers（序列化器）</h4><p>負責資料的序列化（Model -> JSON）與反序列化（JSON -> Model），同時處理資料驗證。主要有 <code>Serializer</code>、<code>ModelSerializer</code>、<code>HyperlinkedModelSerializer</code> 三種。</p><h4 id=views視圖>Views（視圖）</h4><p>DRF 提供多個層級的 View 抽象：</p><ul><li><code>@api_view</code>：函式導向，最簡單的方式</li><li><code>APIView</code>：類別導向，提供更多控制</li><li><code>GenericAPIView</code> + Mixins：組合常用的 CRUD 邏輯</li><li><code>ViewSet</code> / <code>ModelViewSet</code>：最高層級的抽象，一個類別搞定所有 CRUD</li></ul><h4 id=routers路由器>Routers（路由器）</h4><p><code>Router</code> 搭配 <code>ViewSet</code> 使用，可以自動生成 URL patterns，不再需要手動定義每個 Endpoint 的 URL。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework.routers <span style=color:#f92672>import</span> DefaultRouter
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>router <span style=color:#f92672>=</span> DefaultRouter()
+</span></span><span style=display:flex><span>router<span style=color:#f92672>.</span>register(<span style=color:#e6db74>r</span><span style=color:#e6db74>&#39;articles&#39;</span>, ArticleViewSet)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>urlpatterns <span style=color:#f92672>=</span> router<span style=color:#f92672>.</span>urls
+</span></span></code></pre></div><h4 id=authentication認證>Authentication（認證）</h4><p>DRF 內建多種認證方式：<code>SessionAuthentication</code>、<code>BasicAuthentication</code>、<code>TokenAuthentication</code>。第三方套件如 <code>djangorestframework-simplejwt</code> 則提供 <strong>JWT</strong>（JSON Web Token）認證。</p><h4 id=permissions權限>Permissions（權限）</h4><p>控制誰可以存取哪些資源：<code>AllowAny</code>（任何人）、<code>IsAuthenticated</code>（已登入用戶）、<code>IsAdminUser</code>（管理員）、<code>IsAuthenticatedOrReadOnly</code>（已登入可寫，未登入只能讀）。也支援自訂權限類別。</p><h4 id=pagination分頁>Pagination（分頁）</h4><p>當資料量龐大時，分頁是不可或缺的功能。DRF 提供 <code>PageNumberPagination</code>（頁碼分頁）、<code>LimitOffsetPagination</code>（偏移量分頁）與 <code>CursorPagination</code>（游標分頁）。</p><hr><h3 id=常用的-rest_framework-設定項>常用的 REST_FRAMEWORK 設定項</h3><p>以下整理開發中常用的全域設定，放在 <code>settings.py</code> 的 <code>REST_FRAMEWORK</code> 字典中：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># settings.py</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>REST_FRAMEWORK <span style=color:#f92672>=</span> {
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 分頁設定</span>
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;DEFAULT_PAGINATION_CLASS&#39;</span>: <span style=color:#e6db74>&#39;rest_framework.pagination.PageNumberPagination&#39;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;PAGE_SIZE&#39;</span>: <span style=color:#ae81ff>20</span>,
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 認證方式</span>
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;DEFAULT_AUTHENTICATION_CLASSES&#39;</span>: [
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;rest_framework.authentication.SessionAuthentication&#39;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;rest_framework.authentication.TokenAuthentication&#39;</span>,
+</span></span><span style=display:flex><span>    ],
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 權限設定</span>
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;DEFAULT_PERMISSION_CLASSES&#39;</span>: [
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;rest_framework.permissions.IsAuthenticatedOrReadOnly&#39;</span>,
+</span></span><span style=display:flex><span>    ],
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 限流（Throttling）設定</span>
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;DEFAULT_THROTTLE_CLASSES&#39;</span>: [
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;rest_framework.throttling.AnonRateThrottle&#39;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;rest_framework.throttling.UserRateThrottle&#39;</span>,
+</span></span><span style=display:flex><span>    ],
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;DEFAULT_THROTTLE_RATES&#39;</span>: {
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;anon&#39;</span>: <span style=color:#e6db74>&#39;100/hour&#39;</span>,   <span style=color:#75715e># 匿名用戶每小時 100 次</span>
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;user&#39;</span>: <span style=color:#e6db74>&#39;1000/hour&#39;</span>,  <span style=color:#75715e># 登入用戶每小時 1000 次</span>
+</span></span><span style=display:flex><span>    },
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 日期時間格式</span>
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;DATETIME_FORMAT&#39;</span>: <span style=color:#e6db74>&#39;%Y-%m-</span><span style=color:#e6db74>%d</span><span style=color:#e6db74>T%H:%M:%SZ&#39;</span>,
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 篩選後端</span>
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;DEFAULT_FILTER_BACKENDS&#39;</span>: [
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;django_filters.rest_framework.DjangoFilterBackend&#39;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;rest_framework.filters.SearchFilter&#39;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;rest_framework.filters.OrderingFilter&#39;</span>,
+</span></span><span style=display:flex><span>    ],
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>每個設定項也可以在個別 View 中覆寫，提供了全域統一與局部客製化的彈性。</p><hr><h3 id=總結>總結</h3><p>本文從 REST API 的基礎概念開始，帶你完成了 Django REST Framework 的完整入門流程：</p><ol><li><strong>REST 原則</strong>：資源導向、統一介面、無狀態是 RESTful 架構的核心</li><li><strong>HTTP 方法與 CRUD</strong>：GET/POST/PUT/PATCH/DELETE 分別對應讀取/建立/更新/刪除操作</li><li><strong>安裝與設定</strong>：<code>pip install djangorestframework</code>，加入 <code>INSTALLED_APPS</code> 並配置 <code>REST_FRAMEWORK</code></li><li><strong>第一個 API</strong>：透過 Serializer 處理資料轉換、<code>@api_view</code> 處理請求邏輯、URL 配置路由</li><li><strong>Browsable API</strong>：DRF 獨有的瀏覽器測試介面，開發階段的利器</li><li><strong>核心組件</strong>：Serializers、Views、Routers、Authentication、Permissions、Pagination 構成 DRF 的完整功能體系</li></ol><p>DRF 的設計哲學是「漸進式複雜度」——你可以從最簡單的 <code>@api_view</code> 開始，隨著需求成長逐步升級到 <code>APIView</code>、<code>GenericAPIView</code>，最終使用 <code>ModelViewSet</code> + <code>Router</code> 達到最高的開發效率。在接下來的教學中，我們將逐一深入每個核心組件，學習如何建構生產等級的 RESTful API。</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
+</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/django/020-django-admin-advanced/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django Admin 進階：Inline 編輯、自訂 Actions 與權限控制 | Django 教學</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/09</span>
+</a><a href=https://benzhub.github.io/post/django/019-django-admin-basics/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django Admin 後台管理介面入門 | Django 教學</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/08</span>
+</a><a href=https://benzhub.github.io/post/django/018-django-forms-advanced/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django Forms 進階：ModelForm、Formset 與檔案上傳 | Django 教學</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/07</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/django/020-django-admin-advanced/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+<span class="text-sm font-medium">Django Admin 進階：Inline 編輯、自訂 Actions 與權限控制 | Django 教學</span></a></div><div><a href=https://benzhub.github.io/post/django/022-drf-serializers-basics/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+<span class="text-sm font-medium">DRF Serializers 基礎：序列化與反序列化完全解析 | Django 教學</span></a></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
+</a><a href=/tags/acid><span class=tag-pill>acid</span>
+</a><a href=/tags/ai><span class=tag-pill>ai</span>
+</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
+</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
+</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
+</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
+</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
+</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
+</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
+</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
+</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
+</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
+</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
+</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
+</a><a href=/tags/api><span class=tag-pill>api</span>
+</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
+</a><a href=/tags/autovacuum><span class=tag-pill>autovacuum</span>
+</a><a href=/tags/background-processes><span class=tag-pill>background-processes</span>
+</a><a href=/tags/big-o><span class=tag-pill>big o</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (14)</span>
+</a><a href=/post/javascript/><span class=tag-pill>JavaScript (69)</span>
+</a><a href=/post/django/><span class=tag-pill>Django (31)</span>
+</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
+</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
+</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
+</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
+</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/django/031-django-signals/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Signals 信號機制：觀察者模式實戰 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/20</p></a><a href=/post/postgresql/014-dml-advanced/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">DML 進階操作：Upsert、MERGE、RETURNING 與 COPY 批量匯入 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/20</p></a><a href=/post/javascript/data-structures--algorithms/007-sorting/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">排序演算法 — Bubble、Merge、Quick Sort 等十大排序完整比較 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/20</p></a><a href=/post/postgresql/013-ddl-schema/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/19</p></a><a href=/post/django/030-django-custom-user-model/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django 自訂使用者模型：AbstractUser 與 AbstractBaseUser | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/19</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>
