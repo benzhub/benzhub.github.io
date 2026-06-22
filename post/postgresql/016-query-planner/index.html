@@ -1,0 +1,478 @@
+<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>查詢規劃器與執行計畫：PostgreSQL 如何選擇最優路徑 | PostgreSQL | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="查詢規劃器與執行計畫：PostgreSQL 如何選擇最優路徑 | PostgreSQL | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="深入解析 PostgreSQL 查詢規劃器的運作機制，涵蓋 SQL 處理五階段流程、Cost-Based Optimizer 成本模型、統計資訊與選擇率估算、四種掃描策略、三種 Join 演算法、EXPLAIN 輸出解讀、JIT 編譯、Parallel Query，以及常見慢查詢模式的診斷與修正。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="深入解析 PostgreSQL 查詢規劃器的運作機制，涵蓋 SQL 處理五階段流程、Cost-Based Optimizer 成本模型、統計資訊與選擇率估算、四種掃描策略、三種 Join 演算法、EXPLAIN 輸出解讀、JIT 編譯、Parallel Query，以及常見慢查詢模式的診斷與修正。"><meta property="og:url" content="https://benzhub.github.io/post/postgresql/016-query-planner/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/postgresql/016-query-planner/><meta name=twitter:description content="深入解析 PostgreSQL 查詢規劃器的運作機制，涵蓋 SQL 處理五階段流程、Cost-Based Optimizer 成本模型、統計資訊與選擇率估算、四種掃描策略、三種 Join 演算法、EXPLAIN 輸出解讀、JIT 編譯、Parallel Query，以及常見慢查詢模式的診斷與修正。"><meta property="article:published_time" content="2026-06-22T00:00:00+00:00"><meta property="article:updated_time" content="2026-06-22T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/postgresql/016-Query-Planner.png"><meta property="og:image:url" content="https://benzhub.github.io/img/postgresql/016-Query-Planner.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/postgresql/016-query-planner/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/postgresql/016-query-planner/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"查詢規劃器與執行計畫：PostgreSQL 如何選擇最優路徑 | PostgreSQL\"","description":"\"深入解析 PostgreSQL 查詢規劃器的運作機制，涵蓋 SQL 處理五階段流程、Cost-Based Optimizer 成本模型、統計資訊與選擇率估算、四種掃描策略、三種 Join 演算法、EXPLAIN 輸出解讀、JIT 編譯、Parallel Query，以及常見慢查詢模式的診斷與修正。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-06-22T00:00:00\u002b00:00","dateModified":"2026-06-22T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/postgresql\/016-Query-Planner.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/postgresql\/016-query-planner\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/postgresql\/"},{"@type":"ListItem","position":3,"name":"\"查詢規劃器與執行計畫：PostgreSQL 如何選擇最優路徑 | PostgreSQL\""}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">查詢規劃器與執行計畫：PostgreSQL 如何選擇最優路徑 | PostgreSQL</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/22</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/postgresql class="tag-pill no-underline">postgresql</a>
+<a href=/tags/query-planner class="tag-pill no-underline">query-planner</a>
+<a href=/tags/explain class="tag-pill no-underline">explain</a>
+<a href=/tags/performance class="tag-pill no-underline">performance</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/postgresql/016-Query-Planner.png alt="查詢規劃器與執行計畫：PostgreSQL 如何選擇最優路徑 | PostgreSQL"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p><strong>查詢規劃器（Query Planner）</strong> 是 PostgreSQL 效能的幕後操盤手——它決定每條 SQL 要走哪條索引、用哪種 Join 演算法、是否啟用平行查詢。理解 <strong>Cost-Based Optimizer</strong> 的成本模型與 <strong>EXPLAIN</strong> 輸出解讀，是從「會寫 SQL」進階到「會調效能」的關鍵轉折點。</p></blockquote><h3 id=sql-查詢處理流程>SQL 查詢處理流程</h3><p>一條 SQL 從送入到取得結果，需要經歷五個階段：</p><pre tabindex=0><code>SQL 文字
+  │
+  ▼
+Parser（語法解析器）
+  │  將 SQL 文字解析為 Abstract Syntax Tree
+  │  進行語法檢查，不合法的 SQL 在此被拒絕
+  ▼
+Analyzer（語意分析器）
+  │  驗證表名、欄名是否存在（查詢 pg_catalog）
+  │  解析型別、函式、運算子，建立 Query Tree
+  ▼
+Rewriter（規則改寫器）
+  │  套用系統規則（Rules）改寫 Query Tree
+  │  展開 Views 為底層查詢
+  ▼
+Planner / Optimizer（規劃器）  ← 核心
+  │  枚舉所有可行的執行路徑（Paths）
+  │  使用 Cost-Based Optimizer 估算每條路徑的成本
+  │  選擇總成本最低的 Plan Tree
+  ▼
+Executor（執行器）
+  │  按照 Plan Tree 逐節點遞迴執行
+  │  讀取 Buffer Cache，必要時從磁碟載入
+  ▼
+Results
+</code></pre><table><thead><tr><th>階段</th><th>輸入</th><th>輸出</th><th>關鍵工作</th></tr></thead><tbody><tr><td>Parser</td><td>SQL 文字</td><td>Raw Parse Tree</td><td>語法檢查</td></tr><tr><td>Analyzer</td><td>Raw Parse Tree</td><td>Query Tree</td><td>語意驗證、型別解析</td></tr><tr><td>Rewriter</td><td>Query Tree</td><td>Query Tree（改寫後）</td><td>視圖展開、規則套用</td></tr><tr><td>Planner</td><td>Query Tree</td><td>Plan Tree</td><td>成本估算、最佳路徑選擇</td></tr><tr><td>Executor</td><td>Plan Tree</td><td>Tuples</td><td>實際讀取資料並回傳</td></tr></tbody></table><h3 id=cost-based-optimizer-原理>Cost-Based Optimizer 原理</h3><p><strong>PostgreSQL</strong> 的 Planner 使用成本模型（Cost Model）來比較不同執行計畫的代價，而非依賴固定規則。</p><h4 id=成本的表示>成本的表示</h4><p>每個執行計畫節點都有兩個成本值：</p><pre tabindex=0><code>cost = startup_cost..total_cost
+</code></pre><ul><li><code>startup_cost</code>：回傳第一行資料之前所需的代價（例如 Hash Join 需要先建完 hash table）</li><li><code>total_cost</code>：回傳所有資料的總代價</li><li>若查詢有 <code>LIMIT</code>，Planner 會估算取出 N 行的 partial cost</li></ul><h4 id=基礎成本參數>基礎成本參數</h4><table><thead><tr><th>參數</th><th>預設值</th><th>意義</th></tr></thead><tbody><tr><td><code>seq_page_cost</code></td><td>1.0</td><td>循序讀取一個 8KB 頁面的代價（基準值）</td></tr><tr><td><code>random_page_cost</code></td><td>4.0</td><td>隨機讀取一個頁面的代價</td></tr><tr><td><code>cpu_tuple_cost</code></td><td>0.01</td><td>處理一個 tuple 的 CPU 代價</td></tr><tr><td><code>cpu_index_tuple_cost</code></td><td>0.005</td><td>處理一個索引 tuple 的 CPU 代價</td></tr><tr><td><code>cpu_operator_cost</code></td><td>0.0025</td><td>執行一個運算子的 CPU 代價</td></tr><tr><td><code>parallel_tuple_cost</code></td><td>0.1</td><td>並行查詢傳遞一個 tuple 的代價</td></tr><tr><td><code>parallel_setup_cost</code></td><td>1000.0</td><td>啟動並行 Worker 的固定代價</td></tr></tbody></table><p><strong>SSD 環境調整</strong>：SSD 的隨機存取與循序存取差異遠小於 HDD，建議調降 <code>random_page_cost</code>：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- SSD 環境下的典型設定
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SET</span> random_page_cost <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>.<span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SET</span> seq_page_cost <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>.<span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 讓 Planner 更願意選擇 Index Scan
+</span></span></span></code></pre></div><h4 id=成本計算範例>成本計算範例</h4><p>以 Seq Scan 為例：</p><pre tabindex=0><code>cost = (頁面數 × seq_page_cost) + (總行數 × cpu_tuple_cost)
+
+-- 例：10,000 頁的資料表，100 萬行
+cost = (10000 × 1.0) + (1000000 × 0.01)
+     = 10000 + 10000
+     = 20000
+</code></pre><h3 id=統計資訊與選擇率>統計資訊與選擇率</h3><p>Planner 使用 <code>pg_stats</code> 中的統計資料來估算中間結果的行數（rows），行數估算的準確性直接決定計畫品質。</p><h4 id=關鍵統計欄位>關鍵統計欄位</h4><table><thead><tr><th>統計欄位</th><th>說明</th><th>用途</th></tr></thead><tbody><tr><td><code>n_distinct</code></td><td>不重複值數量（負數表示比例）</td><td>估算 GROUP BY 後的行數</td></tr><tr><td><code>most_common_vals</code></td><td>最常見的值列表</td><td>等值條件的選擇率估算</td></tr><tr><td><code>most_common_freqs</code></td><td>對應的頻率列表</td><td>搭配 most_common_vals</td></tr><tr><td><code>histogram_bounds</code></td><td>直方圖邊界值</td><td>範圍查詢的選擇率估算</td></tr><tr><td><code>correlation</code></td><td>實體順序與邏輯順序的相關性（-1 到 1）</td><td>決定 Index Scan 的成本</td></tr><tr><td><code>null_frac</code></td><td>NULL 值的比例</td><td>IS NULL / IS NOT NULL 估算</td></tr></tbody></table><h4 id=行數估算邏輯>行數估算邏輯</h4><pre tabindex=0><code>-- 等值條件：WHERE status = &#39;active&#39;
+若 &#39;active&#39; 在 most_common_vals 中，直接取對應頻率：
+  rows = total_rows × most_common_freqs[i]
+
+-- 範圍條件：WHERE age BETWEEN 20 AND 30
+使用 histogram_bounds 插值估算涵蓋比例：
+  rows = total_rows × (涵蓋的直方圖比例)
+
+-- 多條件 AND：選擇率相乘（假設獨立）
+  selectivity = sel_cond1 × sel_cond2
+
+-- 多條件 OR：
+  selectivity = sel_cond1 + sel_cond2 - sel_cond1 × sel_cond2
+</code></pre><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 查看特定欄位的統計資訊
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>    attname,
+</span></span><span style=display:flex><span>    null_frac,
+</span></span><span style=display:flex><span>    n_distinct,
+</span></span><span style=display:flex><span>    most_common_vals,
+</span></span><span style=display:flex><span>    most_common_freqs,
+</span></span><span style=display:flex><span>    histogram_bounds,
+</span></span><span style=display:flex><span>    correlation
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stats
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> tablename <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;orders&#39;</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>AND</span> attname <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;status&#39;</span>;
+</span></span></code></pre></div><h3 id=四種掃描策略>四種掃描策略</h3><p>Planner 根據統計資訊、可用索引和查詢條件，選擇最合適的掃描方式。</p><h4 id=sequential-scan全表掃描>Sequential Scan（全表掃描）</h4><pre tabindex=0><code>┌──────────────────────────────────────────────┐
+│                Heap（資料表）                  │
+│  Page 1 │ Page 2 │ Page 3 │ ... │ Page N     │
+│  ←────── 循序讀取所有頁面 ──────────────→     │
+└──────────────────────────────────────────────┘
+</code></pre><ul><li><strong>優點</strong>：循序 I/O 效率高，適合讀取大比例資料</li><li><strong>缺點</strong>：即使只需少數行，也必須掃描整個表</li><li><strong>適用</strong>：選擇率高（>5-10%）、表格很小、無合適索引</li></ul><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> orders <span style=color:#66d9ef>WHERE</span> status <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;pending&#39;</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 若 pending 佔比很高（&gt;10%），會選擇 Seq Scan
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- Seq Scan on orders  (cost=0.00..2500.00 rows=50000 width=120)
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--   Filter: (status = &#39;pending&#39;::text)
+</span></span></span></code></pre></div><h4 id=index-scan索引掃描>Index Scan（索引掃描）</h4><pre tabindex=0><code>┌────────────────────────┐     ┌──────────────────────┐
+│       B-tree 索引       │     │     Heap（資料表）     │
+│  key → ctid 指標        │────→│  隨機跳讀對應頁面      │
+└────────────────────────┘     └──────────────────────┘
+</code></pre><ul><li>先走索引取得符合條件的 ctid，再到 Heap 隨機讀取</li><li><code>correlation</code> 接近 1 或 -1 時效率較好（實體順序接近邏輯順序）</li><li><strong>適用</strong>：選擇率低（&lt;1%）、有合適索引</li></ul><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> users <span style=color:#66d9ef>WHERE</span> user_id <span style=color:#f92672>=</span> <span style=color:#ae81ff>12345</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- Index Scan using users_pkey on users  (cost=0.43..8.45 rows=1 width=200)
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--   Index Cond: (user_id = 12345)
+</span></span></span></code></pre></div><h4 id=index-only-scan純索引掃描>Index Only Scan（純索引掃描）</h4><pre tabindex=0><code>┌────────────────────────────────────────┐
+│              B-tree 索引                │
+│  包含所有需要的欄位 → 不需回 Heap        │
+└──────────────────┬─────────────────────┘
+                   ↓ 需確認 Visibility Map
+┌──────────────────────────────────────┐
+│  Visibility Map（確認 tuple 可見性）  │
+└──────────────────────────────────────┘
+</code></pre><ul><li>查詢所需的所有欄位都在索引中（Covering Index）</li><li>必須透過 Visibility Map 確認 tuple 可見性</li><li><strong>效能最好的掃描方式</strong>：完全避免 Heap I/O</li></ul><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 建立 Covering Index
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_orders_status_covering
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ON</span> orders(status) INCLUDE (order_id, created_at, total_amount);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> order_id, created_at, total_amount
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> orders <span style=color:#66d9ef>WHERE</span> status <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;shipped&#39;</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- Index Only Scan using idx_orders_status_covering on orders
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--   Index Cond: (status = &#39;shipped&#39;::text)
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--   Heap Fetches: 0  ← 完全不碰 Heap
+</span></span></span></code></pre></div><h4 id=bitmap-scan點陣圖掃描>Bitmap Scan（點陣圖掃描）</h4><pre tabindex=0><code>第一階段：Bitmap Index Scan
+  走索引，建立記憶體中的 Bitmap
+  標記哪些 Heap 頁面包含符合條件的 tuple
+
+第二階段：Bitmap Heap Scan
+  依 Bitmap 的頁面編號，以接近循序的順序讀取 Heap
+  避免重複讀取同一頁面
+</code></pre><ul><li><strong>適用</strong>：中等選擇率（1-10%）</li><li>多個索引條件可以合併 Bitmap（BitmapAnd / BitmapOr）</li><li>若 Bitmap 超過 <code>work_mem</code>，會降格為 lossy 模式（需 Recheck）</li></ul><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> orders
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> status <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;processing&#39;</span> <span style=color:#66d9ef>AND</span> region <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;TW&#39;</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- Bitmap Heap Scan on orders
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--   Recheck Cond: ((status = &#39;processing&#39;) AND (region = &#39;TW&#39;))
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--   -&gt;  BitmapAnd
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--       -&gt;  Bitmap Index Scan on idx_orders_status
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--       -&gt;  Bitmap Index Scan on idx_orders_region
+</span></span></span></code></pre></div><h4 id=掃描策略選擇總結>掃描策略選擇總結</h4><table><thead><tr><th>掃描類型</th><th>選擇率</th><th>I/O 模式</th><th>最適場景</th></tr></thead><tbody><tr><td>Seq Scan</td><td>高（>5-10%）</td><td>循序</td><td>大量讀取、無索引</td></tr><tr><td>Index Scan</td><td>低（&lt;1%）</td><td>隨機</td><td>極少量精確查詢</td></tr><tr><td>Index Only Scan</td><td>低</td><td>極少</td><td>查詢欄位皆在索引中</td></tr><tr><td>Bitmap Scan</td><td>中（1-10%）</td><td>接近循序</td><td>中等選擇率、多條件合併</td></tr></tbody></table><h3 id=三種-join-策略>三種 Join 策略</h3><p>當查詢涉及多張表時，Planner 需要選擇 Join 演算法。</p><h4 id=nested-loop-join>Nested Loop Join</h4><pre tabindex=0><code>FOR each row in outer_table:          ← 外表（驅動表）
+    FOR each matching row in inner:   ← 內表（被驅動表）
+        output joined row
+</code></pre><ul><li>支援所有類型的 Join 條件（等值、範圍、任意表達式）</li><li>內表有索引時，每次只需 index lookup</li><li><strong>startup_cost 最低</strong>，適合外表結果集很小的場景</li></ul><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 典型 Nested Loop：主鍵連接
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> o.<span style=color:#f92672>*</span>, u.name
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> orders o <span style=color:#66d9ef>JOIN</span> users u <span style=color:#66d9ef>ON</span> o.user_id <span style=color:#f92672>=</span> u.user_id
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> o.order_id <span style=color:#f92672>=</span> <span style=color:#ae81ff>99999</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- Nested Loop  (cost=0.86..17.89 rows=1 width=220)
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--   -&gt;  Index Scan on orders  (cost=0.43..8.45 rows=1)
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--   -&gt;  Index Scan on users   (cost=0.43..8.45 rows=1)
+</span></span></span></code></pre></div><h4 id=hash-join>Hash Join</h4><pre tabindex=0><code>Build Phase：
+  掃描小表，依 join key 建立 hash table (in memory)
+
+Probe Phase：
+  掃描大表，依 join key 查 hash table，匹配則輸出
+
+  small_table ────→ Hash Table (in memory)
+                          │ 查找
+  large_table ───────────→┘
+</code></pre><ul><li>只支援等值（equi-join）條件</li><li>需要足夠的 <code>work_mem</code> 存放 hash table（不足則 spill to disk）</li><li><strong>最適場景</strong>：兩個中大型表的等值 Join、無合適索引</li></ul><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>SET</span> work_mem <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;64MB&#39;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>EXPLAIN</span> (<span style=color:#66d9ef>ANALYZE</span>, BUFFERS)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> o.order_id, p.product_name
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> orders o <span style=color:#66d9ef>JOIN</span> products p <span style=color:#66d9ef>ON</span> o.product_id <span style=color:#f92672>=</span> p.product_id;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- Hash Join  (cost=450.00..12500.00 rows=200000 width=50)
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--   Hash Cond: (o.product_id = p.product_id)
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--   -&gt;  Seq Scan on orders
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--   -&gt;  Hash
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--       Buckets: 65536  Batches: 1  Memory Usage: 7825kB
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--                        ^^^^^^^^ Batches=1 表示全在記憶體中
+</span></span></span></code></pre></div><h4 id=merge-join>Merge Join</h4><pre tabindex=0><code>前提：兩個輸入都已按 join key 排序
+
+  outer: [1, 3, 5, 7, 9, ...]   (已排序)
+  inner: [1, 2, 3, 5, 8, ...]   (已排序)
+
+  同步推進兩個指針，成本 O(N + M)
+  但需要先排序 O(N log N + M log M)
+</code></pre><ul><li>若兩邊有已排序的索引，可跳過排序步驟</li><li><strong>最適場景</strong>：兩邊都有排序（如 Primary Key 索引）、大型等值 Join</li></ul><h4 id=三種-join-比較>三種 Join 比較</h4><table><thead><tr><th>特性</th><th>Nested Loop</th><th>Hash Join</th><th>Merge Join</th></tr></thead><tbody><tr><td>支援條件</td><td>所有條件</td><td>等值</td><td>等值、部份範圍</td></tr><tr><td>startup_cost</td><td>最低</td><td>中（建 hash table）</td><td>高（需排序）或低（有索引）</td></tr><tr><td>最適外表大小</td><td>小</td><td>任意</td><td>大（有排序）</td></tr><tr><td>記憶體需求</td><td>低</td><td>高（work_mem）</td><td>低（有索引時）</td></tr><tr><td>支援並行</td><td>有限</td><td>完整（PG11+）</td><td>有限</td></tr><tr><td>最差情境</td><td>大表 × 大表（無索引）</td><td>work_mem 不足</td><td>無索引需排序</td></tr></tbody></table><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 診斷用：強制停用特定 Join 策略（不建議長期使用）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SET</span> enable_nestloop <span style=color:#f92672>=</span> <span style=color:#66d9ef>off</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SET</span> enable_hashjoin <span style=color:#f92672>=</span> <span style=color:#66d9ef>off</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SET</span> enable_mergejoin <span style=color:#f92672>=</span> <span style=color:#66d9ef>off</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 觀察 Planner 在受限條件下的選擇
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 使用後記得 RESET
+</span></span></span></code></pre></div><h3 id=explain-輸出解讀>EXPLAIN 輸出解讀</h3><p><code>EXPLAIN</code> 是診斷查詢效能的核心工具。</p><h4 id=基本-explain>基本 EXPLAIN</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> orders <span style=color:#66d9ef>WHERE</span> user_id <span style=color:#f92672>=</span> <span style=color:#ae81ff>100</span>;
+</span></span></code></pre></div><pre tabindex=0><code>Index Scan using idx_orders_user_id on orders  (cost=0.43..52.20 rows=15 width=120)
+  Index Cond: (user_id = 100)
+</code></pre><ul><li><code>cost=0.43..52.20</code>：startup_cost..total_cost（Planner 估算，非實際時間）</li><li><code>rows=15</code>：估算回傳行數</li><li><code>width=120</code>：每行平均位元組數</li></ul><h4 id=explain-analyze真實執行>EXPLAIN ANALYZE（真實執行）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>ANALYZE</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> orders <span style=color:#66d9ef>WHERE</span> user_id <span style=color:#f92672>=</span> <span style=color:#ae81ff>100</span>;
+</span></span></code></pre></div><pre tabindex=0><code>Index Scan using idx_orders_user_id on orders
+  (cost=0.43..52.20 rows=15 width=120)
+  (actual time=0.042..0.318 rows=17 loops=1)
+  Index Cond: (user_id = 100)
+Planning Time: 0.250 ms
+Execution Time: 0.412 ms
+</code></pre><ul><li><code>actual time=0.042..0.318</code>：實際 startup..完成時間（毫秒）</li><li><code>rows=17</code>：實際行數（與估算 rows=15 接近，估算良好）</li><li><code>loops=1</code>：節點被執行的次數（Nested Loop 內層可能 >1）</li></ul><p><strong>重要</strong>：<code>EXPLAIN ANALYZE</code> 會真實執行查詢。對於 DML 操作，務必包在 Transaction 中：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>ANALYZE</span> <span style=color:#66d9ef>UPDATE</span> orders <span style=color:#66d9ef>SET</span> status <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;processed&#39;</span> <span style=color:#66d9ef>WHERE</span> user_id <span style=color:#f92672>=</span> <span style=color:#ae81ff>100</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ROLLBACK</span>;  <span style=color:#75715e>-- 撤銷實際修改
+</span></span></span></code></pre></div><h4 id=explain-analyze-buffers>EXPLAIN (ANALYZE, BUFFERS)</h4><p>加上 <code>BUFFERS</code> 可看到 I/O 細節：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>EXPLAIN</span> (<span style=color:#66d9ef>ANALYZE</span>, BUFFERS)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> o.<span style=color:#f92672>*</span>, u.name <span style=color:#66d9ef>FROM</span> orders o <span style=color:#66d9ef>JOIN</span> users u <span style=color:#66d9ef>ON</span> o.user_id <span style=color:#f92672>=</span> u.user_id
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> o.created_at <span style=color:#f92672>&gt;</span> NOW() <span style=color:#f92672>-</span> INTERVAL <span style=color:#e6db74>&#39;7 days&#39;</span>;
+</span></span></code></pre></div><pre tabindex=0><code>Hash Join  (cost=2500.00..18000.00 rows=150000 width=320)
+           (actual time=45.231..892.445 rows=143250 loops=1)
+  Hash Cond: (o.user_id = u.user_id)
+  Buffers: shared hit=12450 read=8920
+  -&gt;  Seq Scan on orders
+        Filter: (created_at &gt; ...)
+        Rows Removed by Filter: 1856750
+        Buffers: shared hit=10200 read=8500
+  -&gt;  Hash
+        Buckets: 65536  Batches: 1  Memory Usage: 7825kB
+        Buffers: shared hit=2250 read=420
+        -&gt;  Seq Scan on users
+Planning Time: 2.340 ms
+Execution Time: 942.118 ms
+</code></pre><p><strong>Buffer 統計解讀：</strong></p><table><thead><tr><th>欄位</th><th>意義</th></tr></thead><tbody><tr><td><code>shared hit</code></td><td>從 Shared Buffer Cache 命中的頁面數（好）</td></tr><tr><td><code>shared read</code></td><td>從磁碟讀入的頁面數（cache miss）</td></tr><tr><td><code>shared written</code></td><td>寫入的 dirty 頁面數</td></tr><tr><td><code>temp read/written</code></td><td>溢出到磁碟的臨時文件（如 Hash Join spill）</td></tr></tbody></table><h4 id=其他-explain-選項>其他 EXPLAIN 選項</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- JSON 格式（適合程式解析，可貼入視覺化工具）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>EXPLAIN</span> (FORMAT JSON, <span style=color:#66d9ef>ANALYZE</span>, BUFFERS) <span style=color:#66d9ef>SELECT</span> ...;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- PG16+：顯示記憶體使用
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>EXPLAIN</span> (<span style=color:#66d9ef>ANALYZE</span>, MEMORY) <span style=color:#66d9ef>SELECT</span> ...;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- PG16+：顯示通用計畫（Prepared Statements 診斷）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>EXPLAIN</span> (GENERIC_PLAN) <span style=color:#66d9ef>SELECT</span> <span style=color:#960050;background-color:#1e0010>$</span><span style=color:#ae81ff>1</span>::int <span style=color:#f92672>+</span> <span style=color:#960050;background-color:#1e0010>$</span><span style=color:#ae81ff>2</span>::int;
+</span></span></code></pre></div><h3 id=常見執行計畫節點>常見執行計畫節點</h3><h4 id=aggregate-節點>Aggregate 節點</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> status, <span style=color:#66d9ef>COUNT</span>(<span style=color:#f92672>*</span>) <span style=color:#66d9ef>FROM</span> orders <span style=color:#66d9ef>GROUP</span> <span style=color:#66d9ef>BY</span> status;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- HashAggregate  ← 記憶體中建 hash table 統計
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 或 GroupAggregate  ← 依賴已排序的輸入
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#66d9ef>SUM</span>(amount) <span style=color:#66d9ef>FROM</span> orders;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- Aggregate（無 GROUP BY）
+</span></span></span></code></pre></div><ul><li><strong>HashAggregate</strong>：不要求輸入有序，適合分組鍵少且記憶體足夠</li><li><strong>GroupAggregate</strong>：要求輸入已排序（可利用索引），記憶體使用低</li></ul><h4 id=sort-與-incremental-sort>Sort 與 Incremental Sort</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> orders <span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> created_at <span style=color:#66d9ef>DESC</span> <span style=color:#66d9ef>LIMIT</span> <span style=color:#ae81ff>10</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- Sort  Sort Key: created_at DESC
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--   -&gt;  Seq Scan on orders
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- PG13+ Incremental Sort（利用部份排序的索引）
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 假設有索引 ON orders(user_id)
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> orders <span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> user_id, created_at <span style=color:#66d9ef>DESC</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- Incremental Sort
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--   Sort Key: user_id, created_at DESC
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--   Presorted Key: user_id  ← 利用索引已排好 user_id
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--   -&gt;  Index Scan using idx_orders_user_id on orders
+</span></span></span></code></pre></div><h4 id=gather--gather-merge平行查詢>Gather / Gather Merge（平行查詢）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>SET</span> max_parallel_workers_per_gather <span style=color:#f92672>=</span> <span style=color:#ae81ff>4</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#66d9ef>COUNT</span>(<span style=color:#f92672>*</span>) <span style=color:#66d9ef>FROM</span> very_large_table;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- Finalize Aggregate
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--   -&gt;  Gather  (workers=4)
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--         -&gt;  Partial Aggregate
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--               -&gt;  Parallel Seq Scan on very_large_table
+</span></span></span></code></pre></div><h3 id=常見慢查詢模式與修正>常見慢查詢模式與修正</h3><h4 id=模式一大表-seq-scan應走索引>模式一：大表 Seq Scan（應走索引）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 問題：500 萬行表對低選擇率條件全表掃描
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> orders <span style=color:#66d9ef>WHERE</span> order_number <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;ORD-2024-00001&#39;</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- Seq Scan on orders  (cost=0.00..125000.00 rows=1 width=200)
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 解決：建立索引
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_orders_order_number <span style=color:#66d9ef>ON</span> orders(order_number);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 驗證：成本從 125000 降至 8.58
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> orders <span style=color:#66d9ef>WHERE</span> order_number <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;ORD-2024-00001&#39;</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- Index Scan using idx_orders_order_number  (cost=0.56..8.58 rows=1)
+</span></span></span></code></pre></div><h4 id=模式二nested-loop-處理大結果集>模式二：Nested Loop 處理大結果集</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 問題：Planner 的 rows 估算嚴重偏低，選了錯誤策略
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>ANALYZE</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> orders o <span style=color:#66d9ef>JOIN</span> order_items i <span style=color:#66d9ef>ON</span> o.order_id <span style=color:#f92672>=</span> i.order_id
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> o.created_at <span style=color:#f92672>&gt;</span> <span style=color:#e6db74>&#39;2024-01-01&#39;</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- Nested Loop  (actual time=0.025..48230.000 rows=2000000 loops=1)
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 解決方案一：更新統計資訊
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ANALYZE</span> orders;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ANALYZE</span> order_items;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 解決方案二：增加 work_mem 讓 Hash Join 有足夠記憶體
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SET</span> work_mem <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;256MB&#39;</span>;
+</span></span></code></pre></div><h4 id=模式三hash-join-溢出磁碟>模式三：Hash Join 溢出磁碟</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>EXPLAIN</span> (<span style=color:#66d9ef>ANALYZE</span>, BUFFERS)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> large_a <span style=color:#66d9ef>JOIN</span> large_b <span style=color:#66d9ef>ON</span> large_a.id <span style=color:#f92672>=</span> large_b.a_id;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- Hash Join
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--   Buckets: 131072  Batches: 32  Memory Usage: 8192kB
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--                    ^^^^^^^^ Batches &gt; 1 = spill to disk
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 解決：增加 work_mem
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SET</span> work_mem <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;512MB&#39;</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- Batches: 1  ← 不再溢出，效能大幅提升
+</span></span></span></code></pre></div><h4 id=模式四統計資訊過時>模式四：統計資訊過時</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 問題：批量匯入後統計資訊未更新
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> events <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> events_staging;  <span style=color:#75715e>-- 匯入 100 萬筆
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#66d9ef>COUNT</span>(<span style=color:#f92672>*</span>) <span style=color:#66d9ef>FROM</span> events <span style=color:#66d9ef>WHERE</span> <span style=color:#66d9ef>type</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;click&#39;</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- actual rows=150000  vs  估算 rows=1500  ← 100 倍誤差
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 檢查最後 ANALYZE 時間
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> tablename, last_analyze, last_autoanalyze, n_live_tup
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stat_user_tables <span style=color:#66d9ef>WHERE</span> tablename <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;events&#39;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 解決：手動更新統計
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ANALYZE</span> events;
+</span></span></code></pre></div><h4 id=模式五函式破壞索引>模式五：函式破壞索引</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 問題：WHERE 中對索引欄使用函式
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> users <span style=color:#66d9ef>WHERE</span> <span style=color:#66d9ef>UPPER</span>(email) <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;USER@EXAMPLE.COM&#39;</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- Seq Scan  ← 無法使用 idx_users_email
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 解決方案一：Expression Index
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_users_email_upper <span style=color:#66d9ef>ON</span> users(<span style=color:#66d9ef>UPPER</span>(email));
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 解決方案二：調整查詢（應用層預處理）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> users <span style=color:#66d9ef>WHERE</span> email <span style=color:#f92672>=</span> <span style=color:#66d9ef>LOWER</span>(<span style=color:#e6db74>&#39;USER@EXAMPLE.COM&#39;</span>);
+</span></span></code></pre></div><h3 id=統計資訊管理>統計資訊管理</h3><h4 id=調整-statistics-target>調整 Statistics Target</h4><p><code>default_statistics_target</code>（預設 100）控制直方圖的桶數。值越高，估算越精確，但 ANALYZE 耗時越長。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 針對特定欄位調整（估算一直不準時）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>TABLE</span> orders <span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>COLUMN</span> status <span style=color:#66d9ef>SET</span> <span style=color:#66d9ef>STATISTICS</span> <span style=color:#ae81ff>500</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ANALYZE</span> orders(status);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 資料分布均勻的欄位可降低
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>TABLE</span> logs <span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>COLUMN</span> log_level <span style=color:#66d9ef>SET</span> <span style=color:#66d9ef>STATISTICS</span> <span style=color:#ae81ff>50</span>;
+</span></span></code></pre></div><h4 id=監控-analyze-執行>監控 ANALYZE 執行</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 找出統計資訊最舊的大表（高風險）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>    tablename,
+</span></span><span style=display:flex><span>    n_live_tup,
+</span></span><span style=display:flex><span>    last_autoanalyze,
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>EXTRACT</span>(EPOCH <span style=color:#66d9ef>FROM</span> (NOW() <span style=color:#f92672>-</span> last_autoanalyze))<span style=color:#f92672>/</span><span style=color:#ae81ff>3600</span> <span style=color:#66d9ef>AS</span> hours_ago
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stat_user_tables
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> n_live_tup <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>100000</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> last_autoanalyze NULLS <span style=color:#66d9ef>FIRST</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LIMIT</span> <span style=color:#ae81ff>20</span>;
+</span></span></code></pre></div><h4 id=autovacuum-與-autoanalyze>Autovacuum 與 Autoanalyze</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 確認 autoanalyze 正常運作
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SHOW</span> autovacuum;                       <span style=color:#75715e>-- on
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SHOW</span> autovacuum_analyze_threshold;     <span style=color:#75715e>-- 50（行數觸發閾值）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SHOW</span> autovacuum_analyze_scale_factor;  <span style=color:#75715e>-- 0.2（20% 變動觸發）
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 觸發條件：dead tuples &gt; threshold + scale_factor × n_live_tup
+</span></span></span></code></pre></div><h3 id=jit-compilation即時編譯>JIT Compilation（即時編譯）</h3><p><strong>JIT</strong> 是 PG11 引入的功能，基於 LLVM 將查詢執行過程中的部份計算編譯為機器碼。</p><h4 id=三個編譯階段>三個編譯階段</h4><ol><li><strong>Expression Evaluation</strong>：將 WHERE 條件、投影計算編譯為機器碼</li><li><strong>Tuple Deforming</strong>：優化行解包（磁碟格式 → 記憶體格式）</li><li><strong>Function Inlining</strong>：將 PL/pgSQL 函式內聯到查詢中</li></ol><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 在 EXPLAIN ANALYZE 輸出中觀察 JIT
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>EXPLAIN</span> (<span style=color:#66d9ef>ANALYZE</span>) <span style=color:#66d9ef>SELECT</span> <span style=color:#66d9ef>COUNT</span>(<span style=color:#f92672>*</span>), <span style=color:#66d9ef>SUM</span>(amount)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> very_large_orders
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> created_at <span style=color:#f92672>&gt;</span> <span style=color:#e6db74>&#39;2023-01-01&#39;</span> <span style=color:#66d9ef>AND</span> status <span style=color:#66d9ef>IN</span> (<span style=color:#e6db74>&#39;completed&#39;</span>, <span style=color:#e6db74>&#39;shipped&#39;</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 輸出末尾：
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- JIT:
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--   Functions: 8
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--   Options: Inlining true, Optimization true, Expressions true, Deforming true
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--   Timing: Generation 2.5 ms, Inlining 15.2 ms, Optimization 32.1 ms,
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--           Emission 12.5 ms, Total 62.4 ms
+</span></span></span></code></pre></div><h4 id=jit-何時反而更慢>JIT 何時反而更慢</h4><ul><li>短暫查詢（執行時間 &lt; JIT 編譯時間）</li><li>OLTP 工作負載（每次都是小查詢）</li></ul><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 針對 OLTP 角色停用 JIT
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>ROLE</span> oltp_user <span style=color:#66d9ef>SET</span> jit <span style=color:#f92672>=</span> <span style=color:#66d9ef>off</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- JIT 啟用門檻（預設值通常足夠）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SHOW</span> jit_above_cost;           <span style=color:#75715e>-- 100000
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SHOW</span> jit_inline_above_cost;    <span style=color:#75715e>-- 500000
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SHOW</span> jit_optimize_above_cost;  <span style=color:#75715e>-- 500000
+</span></span></span></code></pre></div><h3 id=parallel-query平行查詢>Parallel Query（平行查詢）</h3><p>平行查詢讓一個查詢可以使用多個 CPU 核心。</p><pre tabindex=0><code>            Leader Process（領導程序）
+            Gather / Gather Merge
+                    │ 分配工作
+        ┌───────────┼───────────┐
+        │           │           │
+   Worker #1   Worker #2   Worker #3
+   Parallel    Parallel    Parallel
+   Seq Scan    Seq Scan    Seq Scan
+   (分片 1)    (分片 2)    (分片 3)
+</code></pre><h4 id=相關參數>相關參數</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>SHOW</span> max_parallel_workers;              <span style=color:#75715e>-- 8（系統總並行 Worker 上限）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SHOW</span> max_parallel_workers_per_gather;   <span style=color:#75715e>-- 2（單一 Gather 的 Worker 數）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SHOW</span> min_parallel_table_scan_size;      <span style=color:#75715e>-- 8MB（表超過此大小才考慮並行）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SHOW</span> min_parallel_index_scan_size;      <span style=color:#75715e>-- 512kB
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 允許更多並行 Worker
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SET</span> max_parallel_workers_per_gather <span style=color:#f92672>=</span> <span style=color:#ae81ff>4</span>;
+</span></span></code></pre></div><h4 id=支援並行的節點類型>支援並行的節點類型</h4><table><thead><tr><th>節點類型</th><th>支援版本</th></tr></thead><tbody><tr><td>Parallel Seq Scan</td><td>PG9.6+</td></tr><tr><td>Parallel Index Scan</td><td>PG10+</td></tr><tr><td>Parallel Index Only Scan</td><td>PG10+</td></tr><tr><td>Parallel Bitmap Heap Scan</td><td>PG10+</td></tr><tr><td>Parallel Hash Join</td><td>PG11+</td></tr><tr><td>Parallel Aggregate</td><td>PG9.6+</td></tr></tbody></table><h4 id=不支援並行的情況>不支援並行的情況</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 1. 查詢包含 parallel-unsafe 的函式
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 需明確標記 PARALLEL SAFE
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>FUNCTION</span> my_func() <span style=color:#66d9ef>RETURNS</span> void
+</span></span><span style=display:flex><span><span style=color:#66d9ef>AS</span> <span style=color:#960050;background-color:#1e0010>$$</span> ... <span style=color:#960050;background-color:#1e0010>$$</span> <span style=color:#66d9ef>LANGUAGE</span> plpgsql PARALLEL SAFE;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 2. DML 操作（UPDATE/DELETE/INSERT）
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 3. SERIALIZABLE 隔離級別
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 4. 使用 nextval()、currval() 等序列函式
+</span></span></span></code></pre></div><h3 id=效能診斷工具>效能診斷工具</h3><h4 id=auto_explain-擴展>auto_explain 擴展</h4><p>自動記錄超過閾值的查詢執行計畫到日誌：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 載入擴展
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>LOAD</span> <span style=color:#e6db74>&#39;auto_explain&#39;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SET</span> auto_explain.log_min_duration <span style=color:#f92672>=</span> <span style=color:#ae81ff>1000</span>;   <span style=color:#75715e>-- 超過 1 秒才記錄
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SET</span> auto_explain.log_analyze <span style=color:#f92672>=</span> <span style=color:#66d9ef>on</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SET</span> auto_explain.log_buffers <span style=color:#f92672>=</span> <span style=color:#66d9ef>on</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SET</span> auto_explain.log_nested_statements <span style=color:#f92672>=</span> <span style=color:#66d9ef>on</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 永久啟用（postgresql.conf）
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- shared_preload_libraries = &#39;auto_explain&#39;
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- auto_explain.log_min_duration = &#39;1s&#39;
+</span></span></span></code></pre></div><h4 id=pg_stat_statements>pg_stat_statements</h4><p>追蹤所有查詢的統計資訊：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 找出最耗時的查詢
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>    query,
+</span></span><span style=display:flex><span>    calls,
+</span></span><span style=display:flex><span>    round(total_exec_time::numeric, <span style=color:#ae81ff>2</span>) <span style=color:#66d9ef>AS</span> total_ms,
+</span></span><span style=display:flex><span>    round((total_exec_time <span style=color:#f92672>/</span> calls)::numeric, <span style=color:#ae81ff>2</span>) <span style=color:#66d9ef>AS</span> avg_ms,
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>rows</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stat_statements
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> total_exec_time <span style=color:#66d9ef>DESC</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LIMIT</span> <span style=color:#ae81ff>20</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 找出平均最慢的查詢（至少執行 100 次）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> query, calls,
+</span></span><span style=display:flex><span>    round(mean_exec_time::numeric, <span style=color:#ae81ff>2</span>) <span style=color:#66d9ef>AS</span> avg_ms
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stat_statements
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> calls <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>100</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> mean_exec_time <span style=color:#66d9ef>DESC</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LIMIT</span> <span style=color:#ae81ff>10</span>;
+</span></span></code></pre></div><h4 id=視覺化分析工具>視覺化分析工具</h4><p>將 <code>EXPLAIN (ANALYZE, BUFFERS, FORMAT TEXT)</code> 的輸出貼入以下工具進行視覺化：</p><ul><li><strong>explain.depesz.com</strong>：老牌工具，顏色標記高成本節點</li><li><strong>explain.dalibo.com</strong>：視覺化樹狀圖，直觀易懂</li><li><strong>PEV2</strong>：開源版本，可自行部署</li></ul><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 輔助診斷：找出使用 Seq Scan 最多的表（可能需要索引）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> relname, seq_scan, seq_tup_read, idx_scan,
+</span></span><span style=display:flex><span>       <span style=color:#66d9ef>CASE</span> <span style=color:#66d9ef>WHEN</span> seq_scan <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>THEN</span> round(seq_tup_read::numeric <span style=color:#f92672>/</span> seq_scan, <span style=color:#ae81ff>0</span>)
+</span></span><span style=display:flex><span>       <span style=color:#66d9ef>END</span> <span style=color:#66d9ef>AS</span> avg_seq_tup
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stat_user_tables
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> seq_scan <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>1000</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> seq_tup_read <span style=color:#66d9ef>DESC</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LIMIT</span> <span style=color:#ae81ff>20</span>;
+</span></span></code></pre></div><h3 id=版本演進>版本演進</h3><table><thead><tr><th>版本</th><th>主要查詢規劃改進</th></tr></thead><tbody><tr><td>PG9.6</td><td>Parallel Query 初步支援（Parallel Seq Scan、Parallel Aggregate）</td></tr><tr><td>PG10</td><td>Parallel Index Scan、Parallel Bitmap Scan</td></tr><tr><td>PG11</td><td>Parallel Hash Join、JIT Compilation（LLVM）</td></tr><tr><td>PG12</td><td>CTE NOT MATERIALIZED（inline 優化）、plan_cache_mode 控制</td></tr><tr><td>PG13</td><td>Incremental Sort（利用部份排序減少工作量）</td></tr><tr><td>PG14</td><td>非同步執行（Async Append for FDW）、改進 multirange 索引</td></tr><tr><td>PG15</td><td>改進 Hash Join 記憶體使用、增強統計資訊收集</td></tr><tr><td>PG16</td><td>EXPLAIN 新增 MEMORY 選項、更多節點支援並行</td></tr><tr><td>PG17</td><td>改進 Merge Join 效能、增強聚合優化、更好的 JIT 決策</td></tr></tbody></table><h3 id=常見陷阱>常見陷阱</h3><h4 id=prepared-statements-的-generic-plan>Prepared Statements 的 Generic Plan</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>PREPARE</span> stmt <span style=color:#66d9ef>AS</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> orders <span style=color:#66d9ef>WHERE</span> status <span style=color:#f92672>=</span> <span style=color:#960050;background-color:#1e0010>$</span><span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 前 5 次：Custom Plan（針對實際參數值優化）
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 第 6 次起：可能切換為 Generic Plan（通用計畫）
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 若資料分佈不均，Generic Plan 可能效能差很多
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 強制使用 Custom Plan
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SET</span> plan_cache_mode <span style=color:#f92672>=</span> force_custom_plan;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 強制使用 Generic Plan（參數分布均勻時）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SET</span> plan_cache_mode <span style=color:#f92672>=</span> force_generic_plan;
+</span></span></code></pre></div><h4 id=cte-的-materializationpg12-前後差異>CTE 的 Materialization（PG12 前後差異）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- PG11：CTE 是 optimization fence，強制 materialize
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- PG12+：CTE 預設可被 inline，Planner 能優化整個查詢
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 強制 materialize（保證 CTE 只執行一次）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>WITH</span> recent <span style=color:#66d9ef>AS</span> MATERIALIZED (
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> orders <span style=color:#66d9ef>WHERE</span> created_at <span style=color:#f92672>&gt;</span> NOW() <span style=color:#f92672>-</span> INTERVAL <span style=color:#e6db74>&#39;30 days&#39;</span>
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> recent <span style=color:#66d9ef>WHERE</span> user_id <span style=color:#f92672>=</span> <span style=color:#ae81ff>100</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 明確允許 inline 優化
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>WITH</span> recent <span style=color:#66d9ef>AS</span> <span style=color:#66d9ef>NOT</span> MATERIALIZED (
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> orders <span style=color:#66d9ef>WHERE</span> created_at <span style=color:#f92672>&gt;</span> NOW() <span style=color:#f92672>-</span> INTERVAL <span style=color:#e6db74>&#39;30 days&#39;</span>
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> recent <span style=color:#66d9ef>WHERE</span> user_id <span style=color:#f92672>=</span> <span style=color:#ae81ff>100</span>;
+</span></span></code></pre></div><h4 id=型別不匹配導致索引失效>型別不匹配導致索引失效</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 欄位為 integer，傳入字串可能導致索引失效
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> orders <span style=color:#66d9ef>WHERE</span> user_id <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;12345&#39;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 更危險：ORM 傳入錯誤型別
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 解決：確保查詢參數型別與欄位型別完全匹配
+</span></span></span></code></pre></div><h4 id=相關子查詢效能陷阱>相關子查詢效能陷阱</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 問題：相關子查詢每行執行一次
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> o.order_id,
+</span></span><span style=display:flex><span>    (<span style=color:#66d9ef>SELECT</span> <span style=color:#66d9ef>COUNT</span>(<span style=color:#f92672>*</span>) <span style=color:#66d9ef>FROM</span> order_items <span style=color:#66d9ef>WHERE</span> order_id <span style=color:#f92672>=</span> o.order_id)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> orders o;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 若 orders 有 100 萬行，子查詢執行 100 萬次
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 解決：改用 JOIN
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> o.order_id, <span style=color:#66d9ef>COUNT</span>(i.item_id) <span style=color:#66d9ef>AS</span> item_count
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> orders o <span style=color:#66d9ef>LEFT</span> <span style=color:#66d9ef>JOIN</span> order_items i <span style=color:#66d9ef>ON</span> o.order_id <span style=color:#f92672>=</span> i.order_id
+</span></span><span style=display:flex><span><span style=color:#66d9ef>GROUP</span> <span style=color:#66d9ef>BY</span> o.order_id;
+</span></span></code></pre></div><h3 id=總結>總結</h3><p><strong>查詢規劃器</strong> 是 PostgreSQL 效能調校的核心：</p><ul><li><strong>Cost-Based Optimizer</strong> 基於統計資訊估算成本，選擇最優執行路徑</li><li><strong>四種掃描策略</strong>（Seq / Index / Index Only / Bitmap）各有適用場景，選擇率是關鍵指標</li><li><strong>三種 Join 演算法</strong>（Nested Loop / Hash / Merge）依資料量、索引、記憶體而定</li><li><strong>EXPLAIN ANALYZE BUFFERS</strong> 是診斷效能問題的第一步，關注估算 vs 實際的差異</li><li><strong>統計資訊</strong>是 Planner 決策的基礎，批量匯入後務必執行 ANALYZE</li><li><strong>JIT</strong> 適合 OLAP 長查詢，OLTP 場景建議停用</li><li><strong>Parallel Query</strong> 可大幅加速大資料量查詢，PG11+ 支援 Parallel Hash Join</li></ul><p>下一篇，我們將深入探討 <strong>窗口函式與進階查詢</strong>——PostgreSQL 強大的分析型查詢能力。</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
+</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/postgresql/015-index-types/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">索引類型與設計：B-Tree、GIN、GiST、BRIN 完全指南 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/21</span>
+</a><a href=https://benzhub.github.io/post/postgresql/014-dml-advanced/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">DML 進階操作：Upsert、MERGE、RETURNING 與 COPY 批量匯入 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/20</span>
+</a><a href=https://benzhub.github.io/post/postgresql/013-ddl-schema/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/19</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/postgresql/015-index-types/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+<span class="text-sm font-medium">索引類型與設計：B-Tree、GIN、GiST、BRIN 完全指南 | PostgreSQL</span></a></div><div></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
+</a><a href=/tags/acid><span class=tag-pill>acid</span>
+</a><a href=/tags/ai><span class=tag-pill>ai</span>
+</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
+</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
+</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
+</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
+</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
+</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
+</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
+</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
+</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
+</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
+</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
+</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
+</a><a href=/tags/api><span class=tag-pill>api</span>
+</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
+</a><a href=/tags/autovacuum><span class=tag-pill>autovacuum</span>
+</a><a href=/tags/b-tree><span class=tag-pill>b-tree</span>
+</a><a href=/tags/background-processes><span class=tag-pill>background-processes</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (16)</span>
+</a><a href=/post/javascript/><span class=tag-pill>JavaScript (71)</span>
+</a><a href=/post/django/><span class=tag-pill>Django (33)</span>
+</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
+</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
+</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
+</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
+</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/django/033-django-celery-basics/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django + Celery 非同步任務佇列入門 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/22</p></a><a href=/post/javascript/data-structures--algorithms/009-binary-tree/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">二元樹 — 四種遍歷方式與遞迴/迭代實作完整教學 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/22</p></a><a href=/post/postgresql/016-query-planner/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">查詢規劃器與執行計畫：PostgreSQL 如何選擇最優路徑 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/22</p></a><a href=/post/django/032-django-caching/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Caching 快取策略完全指南 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/21</p></a><a href=/post/javascript/data-structures--algorithms/008-binary-search/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">二分搜尋 — Binary Search 三種模板與二分答案技巧 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/21</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>

@@ -1,0 +1,336 @@
+<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>索引類型與設計：B-Tree、GIN、GiST、BRIN 完全指南 | PostgreSQL | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="索引類型與設計：B-Tree、GIN、GiST、BRIN 完全指南 | PostgreSQL | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="深入解析 PostgreSQL 的索引類型與設計策略，涵蓋 B-Tree 平衡樹結構、Hash 索引、GIN 倒排索引、GiST 通用搜尋樹、BRIN 區塊範圍索引、Partial Index、Expression Index、Covering Index（INCLUDE）、多欄位索引欄位順序策略、索引膨脹偵測與 CONCURRENTLY 線上重建。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="深入解析 PostgreSQL 的索引類型與設計策略，涵蓋 B-Tree 平衡樹結構、Hash 索引、GIN 倒排索引、GiST 通用搜尋樹、BRIN 區塊範圍索引、Partial Index、Expression Index、Covering Index（INCLUDE）、多欄位索引欄位順序策略、索引膨脹偵測與 CONCURRENTLY 線上重建。"><meta property="og:url" content="https://benzhub.github.io/post/postgresql/015-index-types/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/postgresql/015-index-types/><meta name=twitter:description content="深入解析 PostgreSQL 的索引類型與設計策略，涵蓋 B-Tree 平衡樹結構、Hash 索引、GIN 倒排索引、GiST 通用搜尋樹、BRIN 區塊範圍索引、Partial Index、Expression Index、Covering Index（INCLUDE）、多欄位索引欄位順序策略、索引膨脹偵測與 CONCURRENTLY 線上重建。"><meta property="article:published_time" content="2026-06-21T00:00:00+00:00"><meta property="article:updated_time" content="2026-06-21T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/postgresql/015-Index-Types.png"><meta property="og:image:url" content="https://benzhub.github.io/img/postgresql/015-Index-Types.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/postgresql/015-index-types/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/postgresql/015-index-types/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"索引類型與設計：B-Tree、GIN、GiST、BRIN 完全指南 | PostgreSQL\"","description":"\"深入解析 PostgreSQL 的索引類型與設計策略，涵蓋 B-Tree 平衡樹結構、Hash 索引、GIN 倒排索引、GiST 通用搜尋樹、BRIN 區塊範圍索引、Partial Index、Expression Index、Covering Index（INCLUDE）、多欄位索引欄位順序策略、索引膨脹偵測與 CONCURRENTLY 線上重建。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-06-21T00:00:00\u002b00:00","dateModified":"2026-06-21T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/postgresql\/015-Index-Types.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/postgresql\/015-index-types\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/postgresql\/"},{"@type":"ListItem","position":3,"name":"\"索引類型與設計：B-Tree、GIN、GiST、BRIN 完全指南 | PostgreSQL\""}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">索引類型與設計：B-Tree、GIN、GiST、BRIN 完全指南 | PostgreSQL</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/21</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/postgresql class="tag-pill no-underline">postgresql</a>
+<a href=/tags/index class="tag-pill no-underline">index</a>
+<a href=/tags/b-tree class="tag-pill no-underline">b-tree</a>
+<a href=/tags/gin class="tag-pill no-underline">gin</a>
+<a href=/tags/performance class="tag-pill no-underline">performance</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/postgresql/015-Index-Types.png alt="索引類型與設計：B-Tree、GIN、GiST、BRIN 完全指南 | PostgreSQL"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p><strong>索引（Index）</strong> 是 PostgreSQL 中加速查詢的輔助資料結構。不同於只有一種索引的資料庫，<strong>PostgreSQL</strong> 提供了 <strong>B-Tree</strong>、<strong>Hash</strong>、<strong>GIN</strong>、<strong>GiST</strong>、<strong>SP-GiST</strong>、<strong>BRIN</strong> 六種索引類型，各自針對特定查詢模式優化。搭配 <strong>Partial Index</strong>、<strong>Expression Index</strong>、<strong>Covering Index</strong> 等進階技巧，能在寫入效能與查詢速度之間取得最佳平衡。</p></blockquote><h3 id=索引與-heap-table-的關係>索引與 Heap Table 的關係</h3><p>PostgreSQL 的資料儲存採用 Heap Table 結構。索引是獨立的資料結構，每個索引條目儲存指向實際 Row 的 <strong>TID</strong>（Tuple Identifier）：</p><pre tabindex=0><code>索引 → Heap 的關係：
+
+┌──────────────────────────────────────────┐
+│              Index Structure              │
+│                                          │
+│  key=42  →  TID (Block=7, Offset=3)     │
+│  key=55  →  TID (Block=7, Offset=8)     │
+│  key=91  →  TID (Block=12, Offset=1)    │
+└──────────────────────────────────────────┘
+                     │
+                     ▼
+┌──────────────────────────────────────────┐
+│             Heap Table Pages             │
+│                                          │
+│  Page 7:  [Item 3 ← 實際 Row data]      │
+│  Page 12: [Item 1 ← 實際 Row data]      │
+└──────────────────────────────────────────┘
+</code></pre><h4 id=index-only-scan-與-visibility-map>Index-Only Scan 與 Visibility Map</h4><p>當查詢只需要索引中已包含的欄位時，PostgreSQL 可執行 <strong>Index-Only Scan</strong>，不需回訪 Heap。但由於 MVCC 機制，索引不儲存可見性資訊，必須參考 <strong>Visibility Map（VM）</strong>：</p><ul><li>VM 標記為 <code>all-visible</code> 的 Page → 直接跳過 Heap</li><li>VM 未標記的 Page → 仍需回訪 Heap，退化為普通 Index Scan</li></ul><p>定期 VACUUM 會更新 VM，對 Index-Only Scan 效能至關重要。</p><h3 id=b-tree-索引>B-Tree 索引</h3><p><strong>B-Tree</strong> 是預設索引類型，採用平衡樹結構：</p><pre tabindex=0><code>B-Tree 結構：
+
+                ┌──────────┐
+                │   Root   │
+                │ [50 | 75]│
+                └──────────┘
+               /      |      \
+     ┌────────┘       │       └────────┐
+     ▼                ▼                ▼
+┌──────────┐   ┌──────────┐   ┌──────────┐
+│ [20 | 35]│   │ [55 | 65]│   │ [80 | 90]│
+└──────────┘   └──────────┘   └──────────┘
+  / | \          / | \          / | \
+ ▼  ▼  ▼       ▼  ▼  ▼       ▼  ▼  ▼
+[Leaf] ↔ [Leaf] ↔ [Leaf] ↔ [Leaf] ↔ [Leaf]
+       Leaf 節點以雙向連結串列相連
+</code></pre><p><strong>核心特性：</strong></p><ul><li><strong>平衡性</strong>：所有 Leaf 距 Root 深度相同，保證 O(log n) 查詢</li><li><strong>排序性</strong>：Leaf 按鍵值有序排列，支援範圍掃描</li><li><strong>雙向連結</strong>：Leaf 層雙向連結使範圍查詢可線性掃描</li></ul><p><strong>支援的操作：</strong></p><table><thead><tr><th>操作</th><th>範例</th></tr></thead><tbody><tr><td>等值查詢</td><td><code>WHERE id = 42</code></td></tr><tr><td>範圍查詢</td><td><code>WHERE age BETWEEN 20 AND 30</code></td></tr><tr><td>前綴 LIKE</td><td><code>WHERE name LIKE 'John%'</code></td></tr><tr><td>排序</td><td><code>ORDER BY created_at</code></td></tr><tr><td>NULL 判斷</td><td><code>WHERE status IS NULL</code></td></tr></tbody></table><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 基本 B-Tree 索引
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_users_email <span style=color:#66d9ef>ON</span> users(email);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 唯一索引
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>UNIQUE</span> <span style=color:#66d9ef>INDEX</span> idx_users_email_unique <span style=color:#66d9ef>ON</span> users(email);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 排序方向
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_products_price <span style=color:#66d9ef>ON</span> products(price <span style=color:#66d9ef>DESC</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 前綴 LIKE（需使用 text_pattern_ops）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_users_name_prefix
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>ON</span> users(name text_pattern_ops);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> users <span style=color:#66d9ef>WHERE</span> name <span style=color:#66d9ef>LIKE</span> <span style=color:#e6db74>&#39;John%&#39;</span>;
+</span></span></code></pre></div><h3 id=hash-索引>Hash 索引</h3><p>Hash 索引對鍵值套用 Hash 函式，只支援等值查詢（<code>=</code>），不支援範圍或排序：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_sessions_token <span style=color:#66d9ef>ON</span> sessions <span style=color:#66d9ef>USING</span> hash(token);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 適用
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> sessions <span style=color:#66d9ef>WHERE</span> token <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;abc123def456&#39;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 不適用（無法使用 Hash 索引）
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- SELECT * FROM sessions WHERE token &gt; &#39;abc&#39;;
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- SELECT * FROM sessions ORDER BY token;
+</span></span></span></code></pre></div><p>PG10 之前 Hash 索引不寫 WAL，無法從崩潰中恢復。PG10 後已修正，但實務上 B-Tree 仍是首選。</p><h3 id=gin-索引倒排索引>GIN 索引（倒排索引）</h3><p><strong>GIN</strong>（Generalized Inverted Index）的結構類似搜尋引擎的倒排索引，適合一個 Row 對應多個鍵值的場景：</p><pre tabindex=0><code>GIN 倒排索引（Array 欄位範例）：
+
+Row 1: tags = {python, django, api}
+Row 2: tags = {python, fastapi}
+Row 3: tags = {django, celery}
+
+GIN 索引：
+  &#34;api&#34;     → [Row 1]
+  &#34;celery&#34;  → [Row 3]
+  &#34;django&#34;  → [Row 1, Row 3]
+  &#34;fastapi&#34; → [Row 2]
+  &#34;python&#34;  → [Row 1, Row 2]
+</code></pre><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- Array 包含查詢
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_articles_tags <span style=color:#66d9ef>ON</span> articles <span style=color:#66d9ef>USING</span> gin(tags);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> articles <span style=color:#66d9ef>WHERE</span> tags <span style=color:#f92672>@&gt;</span> ARRAY[<span style=color:#e6db74>&#39;python&#39;</span>, <span style=color:#e6db74>&#39;django&#39;</span>];
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- JSONB 查詢
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_products_attrs <span style=color:#66d9ef>ON</span> products <span style=color:#66d9ef>USING</span> gin(attributes);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> products <span style=color:#66d9ef>WHERE</span> attributes <span style=color:#f92672>@&gt;</span> <span style=color:#e6db74>&#39;{&#34;color&#34;: &#34;red&#34;}&#39;</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> products <span style=color:#66d9ef>WHERE</span> attributes <span style=color:#f92672>?</span> <span style=color:#e6db74>&#39;warranty&#39;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 全文搜尋
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_articles_fts <span style=color:#66d9ef>ON</span> articles <span style=color:#66d9ef>USING</span> gin(search_vector);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> title <span style=color:#66d9ef>FROM</span> articles
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> search_vector <span style=color:#f92672>@@</span> plainto_tsquery(<span style=color:#e6db74>&#39;english&#39;</span>, <span style=color:#e6db74>&#39;machine learning&#39;</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- pg_trgm 模糊搜尋（支援 %keyword%）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> EXTENSION <span style=color:#66d9ef>IF</span> <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>EXISTS</span> pg_trgm;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_users_name_trgm <span style=color:#66d9ef>ON</span> users <span style=color:#66d9ef>USING</span> gin(name gin_trgm_ops);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> users <span style=color:#66d9ef>WHERE</span> name <span style=color:#66d9ef>ILIKE</span> <span style=color:#e6db74>&#39;%john%&#39;</span>;
+</span></span></code></pre></div><p>GIN 寫入時使用 <strong>Pending List</strong> 暫存新增條目，由 VACUUM 或達到閾值時合併，避免每次寫入都重建倒排結構。</p><h3 id=gist-索引通用搜尋樹>GiST 索引（通用搜尋樹）</h3><p><strong>GiST</strong>（Generalized Search Tree）是可擴展的索引框架，支援空間查詢、範圍重疊等：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- PostGIS 空間查詢
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_locations_geom <span style=color:#66d9ef>ON</span> locations <span style=color:#66d9ef>USING</span> gist(geom);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> locations
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> ST_DWithin(geom, ST_MakePoint(<span style=color:#ae81ff>121</span>.<span style=color:#ae81ff>5</span>, <span style=color:#ae81ff>25</span>.<span style=color:#ae81ff>0</span>)::geography, <span style=color:#ae81ff>1000</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- Range Type 重疊查詢
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_schedules_slot <span style=color:#66d9ef>ON</span> schedules <span style=color:#66d9ef>USING</span> gist(time_slot);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> schedules
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> time_slot <span style=color:#f92672>&amp;&amp;</span> tstzrange(<span style=color:#e6db74>&#39;2024-01-01 09:00&#39;</span>, <span style=color:#e6db74>&#39;2024-01-01 10:00&#39;</span>);
+</span></span></code></pre></div><p>GiST vs GIN 在全文搜尋上的差異：GiST 更新快但查詢慢，GIN 查詢快但更新有 Pending List 開銷。</p><h3 id=sp-gist-索引>SP-GiST 索引</h3><p><strong>SP-GiST</strong> 採用非平衡的空間分割方式，適合具有遞迴分割特性的資料：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- IP 位址查詢
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_logs_ip <span style=color:#66d9ef>ON</span> access_logs <span style=color:#66d9ef>USING</span> spgist(client_ip);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> access_logs
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> client_ip <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#39;192.168.0.0/16&#39;</span>::inet;  <span style=color:#75715e>-- 子網路包含
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 電話號碼前綴查詢
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_contacts_phone <span style=color:#66d9ef>ON</span> contacts <span style=color:#66d9ef>USING</span> spgist(phone text_ops);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> contacts <span style=color:#66d9ef>WHERE</span> phone <span style=color:#f92672>^@</span> <span style=color:#e6db74>&#39;+886&#39;</span>;
+</span></span></code></pre></div><h3 id=brin-索引區塊範圍索引>BRIN 索引（區塊範圍索引）</h3><p><strong>BRIN</strong>（Block Range INdex）以每個 Block Range（預設 128 個連續 Page）為單位，記錄最小值/最大值。索引極小（通常數 KB），但前提是資料有良好的物理排序性：</p><pre tabindex=0><code>BRIN 結構（時序資料範例）：
+
+Pages 0-127:   created_at [2024-01-01 ~ 2024-01-15]
+Pages 128-255: created_at [2024-01-15 ~ 2024-01-31]
+Pages 256-383: created_at [2024-02-01 ~ 2024-02-15]
+
+查詢 WHERE created_at = &#39;2024-02-10&#39;:
+  → 只掃描 Block Range [256-383]
+  → 其餘直接跳過
+</code></pre><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 時序資料表的 BRIN 索引
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_events_created_brin
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>ON</span> events <span style=color:#66d9ef>USING</span> brin(created_at);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 自定義 pages_per_range
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_events_brin_64
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>ON</span> events <span style=color:#66d9ef>USING</span> brin(created_at)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>WITH</span> (pages_per_range <span style=color:#f92672>=</span> <span style=color:#ae81ff>64</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 比較索引大小
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> indexname,
+</span></span><span style=display:flex><span>       pg_size_pretty(pg_relation_size(indexrelid)) <span style=color:#66d9ef>AS</span> index_size
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stat_user_indexes
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> tablename <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;events&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> pg_relation_size(indexrelid) <span style=color:#66d9ef>DESC</span>;
+</span></span></code></pre></div><p>適合：時序資料表、日誌表、IoT 感測器資料等按時間插入的大表。</p><h3 id=partial-index部分索引>Partial Index（部分索引）</h3><p>只對滿足特定條件的 Row 建立索引，大幅縮小索引大小：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 只索引活躍用戶
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_users_active_email
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>ON</span> users(email) <span style=color:#66d9ef>WHERE</span> status <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;active&#39;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 查詢必須包含相同 WHERE 條件才會使用
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> users
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> email <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;user@example.com&#39;</span> <span style=color:#66d9ef>AND</span> status <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;active&#39;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 軟刪除場景
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_posts_published
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>ON</span> posts(published_at <span style=color:#66d9ef>DESC</span>)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>WHERE</span> deleted_at <span style=color:#66d9ef>IS</span> <span style=color:#66d9ef>NULL</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 排除 NULL 值
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_products_discount
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>ON</span> products(discount_rate)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>WHERE</span> discount_rate <span style=color:#66d9ef>IS</span> <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>;
+</span></span></code></pre></div><h3 id=expression-index表達式索引>Expression Index（表達式索引）</h3><p>對函式或表達式的結果建立索引：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 大小寫不敏感查詢
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_users_email_lower <span style=color:#66d9ef>ON</span> users(<span style=color:#66d9ef>LOWER</span>(email));
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> users <span style=color:#66d9ef>WHERE</span> <span style=color:#66d9ef>LOWER</span>(email) <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;user@example.com&#39;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 日期截斷索引
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_orders_date_trunc
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>ON</span> orders(DATE_TRUNC(<span style=color:#e6db74>&#39;day&#39;</span>, created_at));
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- JSONB 欄位的特定鍵值
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_users_metadata_role
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>ON</span> users((metadata<span style=color:#f92672>-&gt;&gt;</span><span style=color:#e6db74>&#39;role&#39;</span>));
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> users <span style=color:#66d9ef>WHERE</span> metadata<span style=color:#f92672>-&gt;&gt;</span><span style=color:#e6db74>&#39;role&#39;</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;admin&#39;</span>;
+</span></span></code></pre></div><h3 id=covering-indexinclude>Covering Index（INCLUDE）</h3><p>把非搜尋欄位加入索引，實現完全的 Index-Only Scan：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 不使用 INCLUDE：需回 Heap 取 price 和 stock
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_products_category <span style=color:#66d9ef>ON</span> products(category_id);
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 執行：Index Scan → Heap Fetch（兩次 I/O）
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 使用 INCLUDE：直接 Index-Only Scan
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_products_category_covering
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>ON</span> products(category_id)
+</span></span><span style=display:flex><span>    INCLUDE (price, stock);
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 執行：Index Only Scan（單次 I/O）
+</span></span></span></code></pre></div><p><strong>注意</strong>：INCLUDE 的欄位不能用於排序或範圍查詢，只是避免回 Heap。</p><h3 id=多欄位索引欄位順序策略>多欄位索引欄位順序策略</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 原則一：等值條件在前，範圍條件在後
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 差：範圍在前
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_bad <span style=color:#66d9ef>ON</span> orders(created_at, user_id);
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 好：等值在前
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_good <span style=color:#66d9ef>ON</span> orders(user_id, created_at);
+</span></span><span style=display:flex><span><span style=color:#75715e>-- WHERE user_id = 123 AND created_at &gt; &#39;2024-01-01&#39;
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- → 先精確定位 user_id=123，再做 created_at 範圍掃描
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 原則二：高選擇性欄位優先
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- status 只有 3 種值，user_id 有 100 萬種
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_good2 <span style=color:#66d9ef>ON</span> orders(user_id, status);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 原則三：前綴可重用
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- (a, b, c) 可服務：
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- WHERE a = ?
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- WHERE a = ? AND b = ?
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- WHERE a = ? AND b = ? AND c = ?
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 但無法服務 WHERE b = ?（缺少前綴 a）
+</span></span></span></code></pre></div><h3 id=索引選擇決策樹>索引選擇決策樹</h3><pre tabindex=0><code>需要加索引？
+     │
+     ▼
+查詢類型分析
+     │
+     ├─ 純等值（=）→ B-Tree（預設）或 Hash
+     │
+     ├─ 範圍/排序 → B-Tree（等值欄位在前）
+     │
+     ├─ 多值欄位（Array/JSONB/全文搜尋）→ GIN
+     │
+     ├─ 空間/範圍重疊 → GiST
+     │
+     ├─ 大表且物理排序良好（時序/日誌）→ BRIN
+     │
+     └─ 遞迴分割資料（IP/電話號碼）→ SP-GiST
+</code></pre><h3 id=create-index-concurrently>CREATE INDEX CONCURRENTLY</h3><p>一般 <code>CREATE INDEX</code> 會取得 <code>ShareLock</code>，阻塞寫入。<code>CONCURRENTLY</code> 採用兩階段流程：</p><pre tabindex=0><code>階段一：
+  1. 在系統目錄記錄索引（標記 &#34;not ready&#34;）
+  2. 等待所有現有事務完成
+  3. 第一次掃描 Heap，建立初始索引
+  （不阻塞任何 DML 操作）
+
+階段二：
+  1. 等待仍在讀取舊快照的事務完成
+  2. 第二次掃描 Heap，同步期間變更
+  3. 標記索引為 &#34;valid&#34;
+</code></pre><table><thead><tr><th>操作</th><th>取得的鎖</th><th>阻塞</th></tr></thead><tbody><tr><td>CREATE INDEX</td><td>ShareLock</td><td>阻塞 INSERT/UPDATE/DELETE</td></tr><tr><td>CREATE INDEX CONCURRENTLY</td><td>ShareUpdateExclusiveLock</td><td>不阻塞 DML</td></tr><tr><td>REINDEX CONCURRENTLY（PG12+）</td><td>ShareUpdateExclusiveLock</td><td>不阻塞 DML</td></tr></tbody></table><p><strong>INVALID 索引處理</strong>：CONCURRENTLY 失敗會留下 INVALID 索引，不被查詢使用但仍影響寫入效能，必須手動刪除重建：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 查詢 INVALID 索引
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#66d9ef>c</span>.relname <span style=color:#66d9ef>AS</span> index_name
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_class <span style=color:#66d9ef>c</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>JOIN</span> pg_index i <span style=color:#66d9ef>ON</span> i.indexrelid <span style=color:#f92672>=</span> <span style=color:#66d9ef>c</span>.oid
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> <span style=color:#66d9ef>NOT</span> i.indisvalid;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 刪除後重建
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>DROP</span> <span style=color:#66d9ef>INDEX</span> CONCURRENTLY idx_invalid;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> CONCURRENTLY idx_invalid <span style=color:#66d9ef>ON</span> users(email);
+</span></span></code></pre></div><h3 id=索引膨脹偵測與處理>索引膨脹偵測與處理</h3><p>頻繁 UPDATE/DELETE 後，B-Tree 葉節點可能出現大量 Dead 空間：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 安裝 pgstattuple 偵測膨脹率
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> EXTENSION <span style=color:#66d9ef>IF</span> <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>EXISTS</span> pgstattuple;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> pgstatindex(<span style=color:#e6db74>&#39;idx_users_email&#39;</span>);
+</span></span><span style=display:flex><span><span style=color:#75715e>-- avg_leaf_density &lt; 70% 表示膨脹
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 修復方式
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>REINDEX</span> <span style=color:#66d9ef>INDEX</span> CONCURRENTLY idx_users_email;  <span style=color:#75715e>-- PG12+
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 或使用 pg_repack（線上重建，不鎖表）
+</span></span></span></code></pre></div><h3 id=索引維護與監控>索引維護與監控</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 找出未使用的索引（idx_scan = 0）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> indexname, idx_scan,
+</span></span><span style=display:flex><span>       pg_size_pretty(pg_relation_size(indexrelid)) <span style=color:#66d9ef>AS</span> <span style=color:#66d9ef>size</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stat_user_indexes
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> idx_scan <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> pg_relation_size(indexrelid) <span style=color:#66d9ef>DESC</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 找出重複索引
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> t1.indexname <span style=color:#66d9ef>AS</span> index1, t2.indexname <span style=color:#66d9ef>AS</span> index2, t1.indexdef
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_indexes t1
+</span></span><span style=display:flex><span><span style=color:#66d9ef>JOIN</span> pg_indexes t2
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>ON</span> t1.tablename <span style=color:#f92672>=</span> t2.tablename
+</span></span><span style=display:flex><span>   <span style=color:#66d9ef>AND</span> t1.indexname <span style=color:#f92672>&lt;</span> t2.indexname
+</span></span><span style=display:flex><span>   <span style=color:#66d9ef>AND</span> t1.indexdef <span style=color:#f92672>=</span> t2.indexdef;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 索引 Buffer 命中率
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> indexrelname,
+</span></span><span style=display:flex><span>       <span style=color:#66d9ef>CASE</span> <span style=color:#66d9ef>WHEN</span> idx_blks_hit <span style=color:#f92672>+</span> idx_blks_read <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span> <span style=color:#66d9ef>THEN</span> <span style=color:#ae81ff>0</span>
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>ELSE</span> ROUND(<span style=color:#ae81ff>100</span>.<span style=color:#ae81ff>0</span> <span style=color:#f92672>*</span> idx_blks_hit <span style=color:#f92672>/</span>
+</span></span><span style=display:flex><span>                 (idx_blks_hit <span style=color:#f92672>+</span> idx_blks_read), <span style=color:#ae81ff>2</span>)
+</span></span><span style=display:flex><span>       <span style=color:#66d9ef>END</span> <span style=color:#66d9ef>AS</span> hit_rate_pct
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_statio_user_indexes
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> idx_blks_read <span style=color:#66d9ef>DESC</span>;
+</span></span></code></pre></div><h3 id=效能考量>效能考量</h3><h4 id=random_page_cost-調整>random_page_cost 調整</h4><p>索引掃描產生隨機 I/O，PostgreSQL 用 <code>random_page_cost</code>（預設 4.0）估算成本。SSD 環境建議降低：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- SSD 優化
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>SYSTEM</span> <span style=color:#66d9ef>SET</span> random_page_cost <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>.<span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> pg_reload_conf();
+</span></span></code></pre></div><p>當查詢回傳超過表的 10-15% 時，規劃器可能放棄索引改用 Sequential Scan。</p><h3 id=版本演進>版本演進</h3><table><thead><tr><th>版本</th><th>改進</th></tr></thead><tbody><tr><td>PG10</td><td>Hash Index 寫入 WAL，終於可靠</td></tr><tr><td>PG11</td><td>Covering Index（INCLUDE 子句）</td></tr><tr><td>PG12</td><td>REINDEX CONCURRENTLY</td></tr><tr><td>PG13</td><td>B-Tree Deduplication 縮小索引大小</td></tr><tr><td>PG14</td><td>BRIN multi-range 改進</td></tr><tr><td>PG15</td><td>BRIN bloom filter 減少誤判率</td></tr><tr><td>PG17</td><td>B-Tree 建立效能提升、WAL 優化</td></tr></tbody></table><h3 id=常見陷阱>常見陷阱</h3><h4 id=隱式型別轉換導致索引失效>隱式型別轉換導致索引失效</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 欄位是 INTEGER，查詢傳入字串 → 索引可能失效
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> users <span style=color:#66d9ef>WHERE</span> id <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;123&#39;</span>;   <span style=color:#75715e>-- 字串，可能不用索引
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> users <span style=color:#66d9ef>WHERE</span> id <span style=color:#f92672>=</span> <span style=color:#ae81ff>123</span>;     <span style=color:#75715e>-- 整數，使用索引
+</span></span></span></code></pre></div><h4 id=like-查詢限制>LIKE 查詢限制</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 只有前綴 LIKE 可用 B-Tree 索引
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> users <span style=color:#66d9ef>WHERE</span> name <span style=color:#66d9ef>LIKE</span> <span style=color:#e6db74>&#39;John%&#39;</span>;   <span style=color:#75715e>-- 可用
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> users <span style=color:#66d9ef>WHERE</span> name <span style=color:#66d9ef>LIKE</span> <span style=color:#e6db74>&#39;%John%&#39;</span>;  <span style=color:#75715e>-- 不可用
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 中間/後綴 LIKE 需要 pg_trgm + GIN
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_name_trgm <span style=color:#66d9ef>ON</span> users <span style=color:#66d9ef>USING</span> gin(name gin_trgm_ops);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> users <span style=color:#66d9ef>WHERE</span> name <span style=color:#66d9ef>ILIKE</span> <span style=color:#e6db74>&#39;%john%&#39;</span>;  <span style=color:#75715e>-- 可用 GIN
+</span></span></span></code></pre></div><h4 id=過多索引影響寫入>過多索引影響寫入</h4><p>每個索引都需要在 INSERT/UPDATE/DELETE 時同步維護。超過 10 個索引的表應審查是否有冗餘。</p><h3 id=總結>總結</h3><p><strong>索引設計</strong> 是 PostgreSQL 效能調校的核心技能：</p><ul><li><strong>B-Tree</strong> 是最通用的預設選擇，支援等值、範圍、排序</li><li><strong>GIN</strong> 適合 Array、JSONB、全文搜尋等多值查詢</li><li><strong>GiST</strong> 適合空間查詢與範圍重疊</li><li><strong>BRIN</strong> 以極小的索引大小處理物理有序的大表</li><li><strong>Partial Index</strong> 與 <strong>Covering Index</strong> 大幅提升特定查詢效能</li><li><strong>多欄位索引</strong> 遵循「等值在前、範圍在後、高選擇性優先」原則</li><li>線上環境必用 <strong>CONCURRENTLY</strong> 避免鎖表</li><li>定期監控未使用索引與膨脹率</li></ul><p>下一篇，我們將深入探討 <strong>查詢規劃器與執行計畫</strong>——PostgreSQL 如何選擇最優查詢路徑，以及如何解讀 EXPLAIN 輸出。</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
+</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/postgresql/014-dml-advanced/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">DML 進階操作：Upsert、MERGE、RETURNING 與 COPY 批量匯入 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/20</span>
+</a><a href=https://benzhub.github.io/post/postgresql/013-ddl-schema/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">DDL 與 Schema 管理：PostgreSQL 資料結構定義與分區策略 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/19</span>
+</a><a href=https://benzhub.github.io/post/postgresql/012-data-types/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">資料型別完全指南：PostgreSQL 豐富的型別系統 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/18</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/postgresql/014-dml-advanced/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+<span class="text-sm font-medium">DML 進階操作：Upsert、MERGE、RETURNING 與 COPY 批量匯入 | PostgreSQL</span></a></div><div><a href=https://benzhub.github.io/post/postgresql/016-query-planner/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+<span class="text-sm font-medium">查詢規劃器與執行計畫：PostgreSQL 如何選擇最優路徑 | PostgreSQL</span></a></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
+</a><a href=/tags/acid><span class=tag-pill>acid</span>
+</a><a href=/tags/ai><span class=tag-pill>ai</span>
+</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
+</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
+</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
+</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
+</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
+</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
+</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
+</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
+</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
+</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
+</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
+</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
+</a><a href=/tags/api><span class=tag-pill>api</span>
+</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
+</a><a href=/tags/autovacuum><span class=tag-pill>autovacuum</span>
+</a><a href=/tags/b-tree><span class=tag-pill>b-tree</span>
+</a><a href=/tags/background-processes><span class=tag-pill>background-processes</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (16)</span>
+</a><a href=/post/javascript/><span class=tag-pill>JavaScript (71)</span>
+</a><a href=/post/django/><span class=tag-pill>Django (33)</span>
+</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
+</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
+</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
+</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
+</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/django/033-django-celery-basics/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django + Celery 非同步任務佇列入門 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/22</p></a><a href=/post/javascript/data-structures--algorithms/009-binary-tree/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">二元樹 — 四種遍歷方式與遞迴/迭代實作完整教學 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/22</p></a><a href=/post/postgresql/016-query-planner/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">查詢規劃器與執行計畫：PostgreSQL 如何選擇最優路徑 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/22</p></a><a href=/post/django/032-django-caching/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Caching 快取策略完全指南 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/21</p></a><a href=/post/javascript/data-structures--algorithms/008-binary-search/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">二分搜尋 — Binary Search 三種模板與二分答案技巧 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/21</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>

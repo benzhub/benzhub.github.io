@@ -1,0 +1,393 @@
+<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>Django + Celery 非同步任務佇列入門 | Django 教學 | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="Django + Celery 非同步任務佇列入門 | Django 教學 | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="Django + Celery 非同步任務佇列入門教學！從為什麼需要非同步任務，到 Celery 架構（Broker、Worker、Result Backend）、Redis 安裝設定、celery.py 設定檔配置、@shared_task 定義任務、delay 與 apply_async 呼叫方式，以及 AsyncResult 監控任務結果與 Worker 啟動方式。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="Django + Celery 非同步任務佇列入門教學！從為什麼需要非同步任務，到 Celery 架構（Broker、Worker、Result Backend）、Redis 安裝設定、celery.py 設定檔配置、@shared_task 定義任務、delay 與 apply_async 呼叫方式，以及 AsyncResult 監控任務結果與 Worker 啟動方式。"><meta property="og:url" content="https://benzhub.github.io/post/django/033-django-celery-basics/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/django/033-django-celery-basics/><meta name=twitter:description content="Django + Celery 非同步任務佇列入門教學！從為什麼需要非同步任務，到 Celery 架構（Broker、Worker、Result Backend）、Redis 安裝設定、celery.py 設定檔配置、@shared_task 定義任務、delay 與 apply_async 呼叫方式，以及 AsyncResult 監控任務結果與 Worker 啟動方式。"><meta property="article:published_time" content="2026-06-22T00:00:00+00:00"><meta property="article:updated_time" content="2026-05-21T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/django/033-Django-Celery-Basics.png"><meta property="og:image:url" content="https://benzhub.github.io/img/django/033-Django-Celery-Basics.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/django/033-django-celery-basics/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/django/033-django-celery-basics/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"Django + Celery 非同步任務佇列入門 | Django 教學\"","description":"\"Django + Celery 非同步任務佇列入門教學！從為什麼需要非同步任務，到 Celery 架構（Broker、Worker、Result Backend）、Redis 安裝設定、celery.py 設定檔配置、@shared_task 定義任務、delay 與 apply_async 呼叫方式，以及 AsyncResult 監控任務結果與 Worker 啟動方式。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-06-22T00:00:00\u002b00:00","dateModified":"2026-05-21T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/django\/033-Django-Celery-Basics.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/django\/033-django-celery-basics\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/django\/"},{"@type":"ListItem","position":3,"name":"\"Django + Celery 非同步任務佇列入門 | Django 教學\""}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"\"為什麼 Django 需要搭配 Celery 處理非同步任務？\"","acceptedAnswer":{"@type":"Answer","text":"\"Django 處理 HTTP 請求時是同步且有時間限制的，若在 View 中執行耗時操作（如發送 Email、生成報表、處理圖片），使用者需要等待很久才能收到回應。Celery 可以將這些耗時工作從 HTTP 請求中分離出來，先立即回應使用者，再由背景 Worker 非同步執行任務，大幅提升使用者體驗與系統吞吐量。\""}},{"@type":"Question","name":"\"Celery 的 delay() 和 apply_async() 有什麼差別？\"","acceptedAnswer":{"@type":"Answer","text":"\"delay() 是 apply_async() 的簡化語法，只接受任務函式的原始參數，例如 send_email.delay(user_id)。apply_async() 則提供完整的控制能力，可以指定 countdown（延遲執行秒數）、eta（指定執行時間）、queue（指定佇列）、retry_policy（重試策略）等進階參數。一般用途使用 delay() 即可，需要精細控制時使用 apply_async()。\""}},{"@type":"Question","name":"\"Celery 的 Broker 和 Result Backend 有什麼差別？應該如何選擇？\"","acceptedAnswer":{"@type":"Answer","text":"\"Broker（訊息代理）負責傳輸任務訊息，是 Celery 的核心元件，常用 Redis 或 RabbitMQ。Result Backend（結果後端）負責儲存任務執行結果，是可選元件，支援 Redis、Django ORM 等。如果你不需要查詢任務結果（如發送 Email 後不需回傳），可以不設定 Result Backend。Redis 可同時擔任 Broker 和 Result Backend，是最簡便的選擇。\""}}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Django + Celery 非同步任務佇列入門 | Django 教學</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/22
+</span><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001.0 004.582 9m0 0H9m11 11v-5h-.581m0 0A8.003 8.003.0 014.062 13m15.357 2H15"/></svg>
+2026/05/21</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/python class="tag-pill no-underline">python</a>
+<a href=/tags/django class="tag-pill no-underline">django</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/django/033-Django-Celery-Basics.png alt="Django + Celery 非同步任務佇列入門 | Django 教學"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p>在 <strong>Django</strong> 應用程式中，當使用者觸發了 <strong>Email 發送</strong>、<strong>圖片處理</strong>、<strong>報表生成</strong> 等耗時操作時，若在 View 中同步執行，使用者將被迫等待很久才能收到回應。<strong>Celery</strong> 是 Python 生態系中最成熟的 <strong>分散式任務佇列（Distributed Task Queue）</strong> 系統，它能將耗時工作交給背景 <strong>Worker</strong> 非同步執行，讓 Django 立即回應使用者。本文將從 Celery 的架構概念出發，帶你完成 <strong>Redis</strong> 安裝設定、<code>celery.py</code> 設定檔配置、使用 <code>@shared_task</code> 定義任務，到透過 <code>delay()</code> 與 <code>apply_async()</code> 呼叫任務，最終啟動 Worker 並監控任務結果。</p></blockquote><h3 id=為什麼需要非同步任務>為什麼需要非同步任務？</h3><p>Django 的 HTTP 請求處理是同步的：使用者發出請求後，伺服器必須在回應前完成所有邏輯。這在大多數情況下沒有問題，但以下場景會讓回應時間變得不可接受：</p><ul><li><strong>Email 發送</strong>：使用者註冊後發送歡迎信、訂單確認通知，SMTP 連線可能需要數秒</li><li><strong>圖片處理</strong>：壓縮、縮圖、加浮水印，耗時取決於圖片大小</li><li><strong>報表生成</strong>：大型 CSV / PDF 匯出，需要查詢大量資料並處理格式</li><li><strong>第三方 API 呼叫</strong>：支付 Webhook、社群媒體發文，外部服務回應時間不可控</li><li><strong>資料同步</strong>：從外部來源批次匯入或同步資料</li></ul><p>如果這些操作在 View 中同步執行，使用者可能需要等待 10 秒、30 秒甚至更久。更糟的是，如果有大量使用者同時觸發耗時操作，所有 Web Server 的工作執行緒都會被佔滿，導致整個網站無法服務新的請求。</p><p>解決方案就是 <strong>非同步任務（Asynchronous Task）</strong>：View 只負責「發送任務訊息」，然後立即回應使用者；實際的耗時工作由獨立的 Worker 程序在背景執行。</p><hr><h3 id=celery-架構>Celery 架構</h3><p><strong>Celery</strong> 是由 Ask Solem 於 2009 年發布的開源分散式任務佇列系統，採用 BSD-3-Clause 授權。它的架構由四個核心元件組成：</p><pre tabindex=0><code>Django App（生產者）
+    | .delay() / .apply_async()
+    v
+Broker（訊息代理）
+    Redis 或 RabbitMQ
+    | 分發任務
+    v
+Celery Worker（消費者）
+    執行實際任務邏輯
+    | 儲存結果（可選）
+    v
+Result Backend
+    Redis / Django ORM / RPC
+</code></pre><table><thead><tr><th>元件</th><th>職責</th><th>常見選擇</th></tr></thead><tbody><tr><td>Django App</td><td>產生任務、呼叫 <code>.delay()</code></td><td>&ndash;</td></tr><tr><td><strong>Broker</strong>（訊息代理）</td><td>任務訊息的傳輸層，負責接收與分發任務</td><td>Redis、RabbitMQ</td></tr><tr><td><strong>Worker</strong>（工作者）</td><td>從 Broker 取出任務並執行的獨立程序</td><td><code>celery -A myproject worker</code></td></tr><tr><td><strong>Result Backend</strong>（結果後端）</td><td>儲存任務執行結果，供後續查詢</td><td>Redis、Django ORM</td></tr></tbody></table><p><strong>Broker</strong> 是整個架構的核心，Django App 將任務訊息推送到 Broker，Worker 從 Broker 取出任務執行。本教學使用 <strong>Redis</strong> 作為 Broker，因為它同時也能擔任 Result Backend，部署最為簡便。</p><hr><h3 id=安裝>安裝</h3><p>首先安裝 Celery 及相關套件：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 安裝 Celery、Redis 客戶端與 Django Celery Results</span>
+</span></span><span style=display:flex><span>pip install celery redis django-celery-results
+</span></span></code></pre></div><p>各套件的用途：</p><table><thead><tr><th>套件</th><th>用途</th></tr></thead><tbody><tr><td><code>celery</code></td><td>Celery 主體</td></tr><tr><td><code>redis</code></td><td>Python Redis 客戶端，讓 Celery 連線 Redis</td></tr><tr><td><code>django-celery-results</code></td><td>將任務結果儲存到 Django ORM（可選）</td></tr></tbody></table><p>確保你的環境中已經安裝並啟動了 Redis 服務：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># macOS（使用 Homebrew）</span>
+</span></span><span style=display:flex><span>brew install redis
+</span></span><span style=display:flex><span>brew services start redis
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Ubuntu / Debian</span>
+</span></span><span style=display:flex><span>sudo apt install redis-server
+</span></span><span style=display:flex><span>sudo systemctl start redis
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 驗證 Redis 是否正常運作</span>
+</span></span><span style=display:flex><span>redis-cli ping
+</span></span><span style=display:flex><span><span style=color:#75715e># 預期回應：PONG</span>
+</span></span></code></pre></div><hr><h3 id=settingspy-celery-設定>settings.py Celery 設定</h3><p>在 Django 的 <code>settings.py</code> 中加入 Celery 相關設定。Celery 會讀取所有以 <code>CELERY_</code> 為前綴的設定項：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># settings.py</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Celery Broker 設定（使用 Redis）</span>
+</span></span><span style=display:flex><span>CELERY_BROKER_URL <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;redis://localhost:6379/0&#39;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Result Backend 設定（使用 Redis）</span>
+</span></span><span style=display:flex><span>CELERY_RESULT_BACKEND <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;redis://localhost:6379/1&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 或使用 Django ORM 儲存結果：</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># CELERY_RESULT_BACKEND = &#39;django-db&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 需在 INSTALLED_APPS 加入 &#39;django_celery_results&#39;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 序列化設定（使用 JSON 格式）</span>
+</span></span><span style=display:flex><span>CELERY_ACCEPT_CONTENT <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#39;json&#39;</span>]
+</span></span><span style=display:flex><span>CELERY_TASK_SERIALIZER <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;json&#39;</span>
+</span></span><span style=display:flex><span>CELERY_RESULT_SERIALIZER <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;json&#39;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 時區設定</span>
+</span></span><span style=display:flex><span>CELERY_TIMEZONE <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;Asia/Taipei&#39;</span>
+</span></span><span style=display:flex><span>CELERY_ENABLE_UTC <span style=color:#f92672>=</span> <span style=color:#66d9ef>True</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 任務結果過期時間（秒）</span>
+</span></span><span style=display:flex><span>CELERY_RESULT_EXPIRES <span style=color:#f92672>=</span> <span style=color:#ae81ff>60</span> <span style=color:#f92672>*</span> <span style=color:#ae81ff>60</span> <span style=color:#f92672>*</span> <span style=color:#ae81ff>24</span>  <span style=color:#75715e># 24 小時後自動清除</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 任務超時設定</span>
+</span></span><span style=display:flex><span>CELERY_TASK_SOFT_TIME_LIMIT <span style=color:#f92672>=</span> <span style=color:#ae81ff>300</span>  <span style=color:#75715e># 5 分鐘，拋出 SoftTimeLimitExceeded（可捕捉）</span>
+</span></span><span style=display:flex><span>CELERY_TASK_TIME_LIMIT <span style=color:#f92672>=</span> <span style=color:#ae81ff>600</span>       <span style=color:#75715e># 10 分鐘，強制終止（無法捕捉）</span>
+</span></span></code></pre></div><p>如果選擇使用 Django ORM 作為 Result Backend，記得加入 <code>django_celery_results</code> 到 <code>INSTALLED_APPS</code> 並執行 migrate：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># settings.py</span>
+</span></span><span style=display:flex><span>INSTALLED_APPS <span style=color:#f92672>=</span> [
+</span></span><span style=display:flex><span>    <span style=color:#75715e># ... 其他 App</span>
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django_celery_results&#39;</span>,
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>python manage.py migrate django_celery_results
+</span></span></code></pre></div><hr><h3 id=celerypy-設定檔>celery.py 設定檔</h3><p>在 Django 專案的主模組（與 <code>settings.py</code> 同一目錄）中建立 <code>celery.py</code>，這是 Celery App 的設定檔：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># myproject/celery.py</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> os
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> celery <span style=color:#f92672>import</span> Celery
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 設定 Django settings 模組，讓 Celery 能讀取 Django 設定</span>
+</span></span><span style=display:flex><span>os<span style=color:#f92672>.</span>environ<span style=color:#f92672>.</span>setdefault(<span style=color:#e6db74>&#39;DJANGO_SETTINGS_MODULE&#39;</span>, <span style=color:#e6db74>&#39;myproject.settings&#39;</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 建立 Celery App 實例</span>
+</span></span><span style=display:flex><span>app <span style=color:#f92672>=</span> Celery(<span style=color:#e6db74>&#39;myproject&#39;</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 從 settings.py 中讀取所有 CELERY_ 開頭的設定</span>
+</span></span><span style=display:flex><span>app<span style=color:#f92672>.</span>config_from_object(<span style=color:#e6db74>&#39;django.conf:settings&#39;</span>, namespace<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;CELERY&#39;</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 自動探索所有 INSTALLED_APPS 中的 tasks.py 檔案</span>
+</span></span><span style=display:flex><span>app<span style=color:#f92672>.</span>autodiscover_tasks()
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>@app.task</span>(bind<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>, ignore_result<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>debug_task</span>(self):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;除錯用任務，印出 request 資訊&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>    print(<span style=color:#e6db74>f</span><span style=color:#e6db74>&#39;Request: </span><span style=color:#e6db74>{</span>self<span style=color:#f92672>.</span>request<span style=color:#e6db74>!r}</span><span style=color:#e6db74>&#39;</span>)
+</span></span></code></pre></div><p>關鍵設定說明：</p><ul><li><code>os.environ.setdefault()</code>：確保 Celery Worker 啟動時能找到 Django 設定</li><li><code>config_from_object(..., namespace='CELERY')</code>：讓 Celery 自動讀取 <code>settings.py</code> 中所有 <code>CELERY_</code> 開頭的設定</li><li><code>autodiscover_tasks()</code>：自動掃描所有已安裝 App 中的 <code>tasks.py</code> 檔案，註冊其中定義的任務</li></ul><hr><h3 id=__init__py-設定>__init__.py 設定</h3><p>修改專案主模組的 <code>__init__.py</code>，確保 Celery App 在 Django 啟動時自動載入：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># myproject/__init__.py</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> .celery <span style=color:#f92672>import</span> app <span style=color:#66d9ef>as</span> celery_app
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>__all__ <span style=color:#f92672>=</span> (<span style=color:#e6db74>&#39;celery_app&#39;</span>,)
+</span></span></code></pre></div><p>這一步非常重要。如果沒有在 <code>__init__.py</code> 中匯入 Celery App，<code>@shared_task</code> 裝飾器將無法正確註冊任務。</p><p>此時專案的目錄結構應該如下：</p><pre tabindex=0><code>myproject/
+    __init__.py      # 匯入 celery_app
+    celery.py        # Celery App 設定
+    settings.py      # Django 設定（含 CELERY_ 設定）
+    urls.py
+    wsgi.py
+apps/
+    users/
+        tasks.py     # 定義使用者相關的非同步任務
+    reports/
+        tasks.py     # 定義報表相關的非同步任務
+</code></pre><hr><h3 id=定義-taskshared_task>定義 Task（@shared_task）</h3><p>Celery 使用 <code>@shared_task</code> 裝飾器定義任務。<code>@shared_task</code> 是推薦的寫法，因為它不需要直接匯入 Celery App 實例，適合在 Django App 中使用，避免循環匯入問題。</p><p>在你的 Django App 中建立 <code>tasks.py</code>：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># apps/users/tasks.py</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> celery <span style=color:#f92672>import</span> shared_task
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> celery.utils.log <span style=color:#f92672>import</span> get_task_logger
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.core.mail <span style=color:#f92672>import</span> send_mail
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>logger <span style=color:#f92672>=</span> get_task_logger(__name__)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>@shared_task</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>send_welcome_email</span>(user_id: int) <span style=color:#f92672>-&gt;</span> dict:
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;發送歡迎 Email（最簡單的任務定義）&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>from</span> apps.users.models <span style=color:#f92672>import</span> User  <span style=color:#75715e># 延遲匯入，避免循環 import</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    user <span style=color:#f92672>=</span> User<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>get(pk<span style=color:#f92672>=</span>user_id)
+</span></span><span style=display:flex><span>    send_mail(
+</span></span><span style=display:flex><span>        subject<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;歡迎加入！&#39;</span>,
+</span></span><span style=display:flex><span>        message<span style=color:#f92672>=</span><span style=color:#e6db74>f</span><span style=color:#e6db74>&#39;親愛的 </span><span style=color:#e6db74>{</span>user<span style=color:#f92672>.</span>username<span style=color:#e6db74>}</span><span style=color:#e6db74>，歡迎加入我們的平台。&#39;</span>,
+</span></span><span style=display:flex><span>        from_email<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;noreply@example.com&#39;</span>,
+</span></span><span style=display:flex><span>        recipient_list<span style=color:#f92672>=</span>[user<span style=color:#f92672>.</span>email],
+</span></span><span style=display:flex><span>    )
+</span></span><span style=display:flex><span>    logger<span style=color:#f92672>.</span>info(<span style=color:#e6db74>f</span><span style=color:#e6db74>&#39;歡迎信已發送給 user_id=</span><span style=color:#e6db74>{</span>user_id<span style=color:#e6db74>}</span><span style=color:#e6db74>&#39;</span>)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> {<span style=color:#e6db74>&#39;status&#39;</span>: <span style=color:#e6db74>&#39;success&#39;</span>, <span style=color:#e6db74>&#39;user_id&#39;</span>: user_id}
+</span></span></code></pre></div><h4 id=進階任務定義bind-與重試>進階任務定義（bind 與重試）</h4><p>加上 <code>bind=True</code> 參數後，任務函式的第一個參數會是 <code>self</code>（Task 實例），讓你可以存取任務的中繼資料並觸發重試：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># apps/users/tasks.py</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>@shared_task</span>(
+</span></span><span style=display:flex><span>    bind<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>,              <span style=color:#75715e># self 參數可存取 task 實例</span>
+</span></span><span style=display:flex><span>    max_retries<span style=color:#f92672>=</span><span style=color:#ae81ff>3</span>,          <span style=color:#75715e># 最多重試 3 次</span>
+</span></span><span style=display:flex><span>    default_retry_delay<span style=color:#f92672>=</span><span style=color:#ae81ff>60</span>, <span style=color:#75715e># 每次重試間隔 60 秒</span>
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>send_welcome_email_with_retry</span>(self, user_id: int) <span style=color:#f92672>-&gt;</span> dict:
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;發送歡迎 Email，失敗時自動重試&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>from</span> apps.users.models <span style=color:#f92672>import</span> User
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>try</span>:
+</span></span><span style=display:flex><span>        user <span style=color:#f92672>=</span> User<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>get(pk<span style=color:#f92672>=</span>user_id)
+</span></span><span style=display:flex><span>        send_mail(
+</span></span><span style=display:flex><span>            subject<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;歡迎加入！&#39;</span>,
+</span></span><span style=display:flex><span>            message<span style=color:#f92672>=</span><span style=color:#e6db74>f</span><span style=color:#e6db74>&#39;親愛的 </span><span style=color:#e6db74>{</span>user<span style=color:#f92672>.</span>username<span style=color:#e6db74>}</span><span style=color:#e6db74>，歡迎加入我們的平台。&#39;</span>,
+</span></span><span style=display:flex><span>            from_email<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;noreply@example.com&#39;</span>,
+</span></span><span style=display:flex><span>            recipient_list<span style=color:#f92672>=</span>[user<span style=color:#f92672>.</span>email],
+</span></span><span style=display:flex><span>        )
+</span></span><span style=display:flex><span>        logger<span style=color:#f92672>.</span>info(<span style=color:#e6db74>f</span><span style=color:#e6db74>&#39;歡迎信已發送給 user_id=</span><span style=color:#e6db74>{</span>user_id<span style=color:#e6db74>}</span><span style=color:#e6db74>&#39;</span>)
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> {<span style=color:#e6db74>&#39;status&#39;</span>: <span style=color:#e6db74>&#39;success&#39;</span>, <span style=color:#e6db74>&#39;user_id&#39;</span>: user_id}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>except</span> User<span style=color:#f92672>.</span>DoesNotExist:
+</span></span><span style=display:flex><span>        logger<span style=color:#f92672>.</span>error(<span style=color:#e6db74>f</span><span style=color:#e6db74>&#39;找不到 user_id=</span><span style=color:#e6db74>{</span>user_id<span style=color:#e6db74>}</span><span style=color:#e6db74>&#39;</span>)
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>raise</span>  <span style=color:#75715e># 不重試，直接標記失敗</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>except</span> <span style=color:#a6e22e>Exception</span> <span style=color:#66d9ef>as</span> exc:
+</span></span><span style=display:flex><span>        logger<span style=color:#f92672>.</span>warning(<span style=color:#e6db74>f</span><span style=color:#e6db74>&#39;發送失敗，準備重試：</span><span style=color:#e6db74>{</span>exc<span style=color:#e6db74>}</span><span style=color:#e6db74>&#39;</span>)
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>raise</span> self<span style=color:#f92672>.</span>retry(exc<span style=color:#f92672>=</span>exc)  <span style=color:#75715e># 觸發重試機制</span>
+</span></span></code></pre></div><blockquote><p><strong>重要提醒</strong>：任務函式的參數必須是可 JSON 序列化的型別（int、str、list、dict 等）。不要傳入 Model 實例或 QuerySet，而是傳入 ID，在任務中重新查詢。這是因為任務可能在數秒甚至數分鐘後才執行，傳入的物件可能已經過時。</p></blockquote><hr><h3 id=呼叫-taskdelayapply_asyncsignature>呼叫 Task：delay、apply_async、signature</h3><p>定義好任務後，就可以在 Django 的 View、Signal 或其他地方呼叫它。Celery 提供三種呼叫方式：</p><h4 id=delay簡潔語法>delay()（簡潔語法）</h4><p><code>delay()</code> 是最常用的呼叫方式，語法簡潔，直接傳入任務函式的參數：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># views.py</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> apps.users.tasks <span style=color:#f92672>import</span> send_welcome_email
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>register_view</span>(request):
+</span></span><span style=display:flex><span>    <span style=color:#75715e># ... 處理註冊邏輯 ...</span>
+</span></span><span style=display:flex><span>    user <span style=color:#f92672>=</span> User<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>create_user(username<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;test&#39;</span>, email<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;test@example.com&#39;</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 非同步發送歡迎信（立即返回，不等待 Email 發送完成）</span>
+</span></span><span style=display:flex><span>    send_welcome_email<span style=color:#f92672>.</span>delay(user<span style=color:#f92672>.</span>id)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> JsonResponse({<span style=color:#e6db74>&#39;message&#39;</span>: <span style=color:#e6db74>&#39;註冊成功，歡迎信將稍後寄出&#39;</span>})
+</span></span></code></pre></div><h4 id=apply_async完整控制>apply_async()（完整控制）</h4><p><code>apply_async()</code> 提供所有可用的參數控制：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> datetime <span style=color:#f92672>import</span> datetime
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 10 秒後才執行</span>
+</span></span><span style=display:flex><span>send_welcome_email<span style=color:#f92672>.</span>apply_async(
+</span></span><span style=display:flex><span>    args<span style=color:#f92672>=</span>[user<span style=color:#f92672>.</span>id],
+</span></span><span style=display:flex><span>    countdown<span style=color:#f92672>=</span><span style=color:#ae81ff>10</span>,
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 指定執行時間</span>
+</span></span><span style=display:flex><span>send_welcome_email<span style=color:#f92672>.</span>apply_async(
+</span></span><span style=display:flex><span>    args<span style=color:#f92672>=</span>[user<span style=color:#f92672>.</span>id],
+</span></span><span style=display:flex><span>    eta<span style=color:#f92672>=</span>datetime(<span style=color:#ae81ff>2026</span>, <span style=color:#ae81ff>6</span>, <span style=color:#ae81ff>22</span>, <span style=color:#ae81ff>9</span>, <span style=color:#ae81ff>0</span>),
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 指定佇列</span>
+</span></span><span style=display:flex><span>send_welcome_email<span style=color:#f92672>.</span>apply_async(
+</span></span><span style=display:flex><span>    args<span style=color:#f92672>=</span>[user<span style=color:#f92672>.</span>id],
+</span></span><span style=display:flex><span>    queue<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;high_priority&#39;</span>,
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 設定重試策略</span>
+</span></span><span style=display:flex><span>send_welcome_email<span style=color:#f92672>.</span>apply_async(
+</span></span><span style=display:flex><span>    args<span style=color:#f92672>=</span>[user<span style=color:#f92672>.</span>id],
+</span></span><span style=display:flex><span>    retry<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>,
+</span></span><span style=display:flex><span>    retry_policy<span style=color:#f92672>=</span>{
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;max_retries&#39;</span>: <span style=color:#ae81ff>5</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;interval_start&#39;</span>: <span style=color:#ae81ff>0</span>,    <span style=color:#75715e># 第一次重試的等待秒數</span>
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;interval_step&#39;</span>: <span style=color:#ae81ff>0.2</span>,   <span style=color:#75715e># 每次重試遞增的秒數</span>
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;interval_max&#39;</span>: <span style=color:#ae81ff>0.5</span>,    <span style=color:#75715e># 最大等待秒數</span>
+</span></span><span style=display:flex><span>    },
+</span></span><span style=display:flex><span>)
+</span></span></code></pre></div><h4 id=signatures用於工作流組合>signature（s()，用於工作流組合）</h4><p><strong>Signature（簽名）</strong> 是任務的「包裝物件」，可以先建立但延遲執行，也可以用於組合複雜的工作流（下一篇將詳細介紹）：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> celery <span style=color:#f92672>import</span> signature
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 建立任務簽名</span>
+</span></span><span style=display:flex><span>task_sig <span style=color:#f92672>=</span> send_welcome_email<span style=color:#f92672>.</span>s(user<span style=color:#f92672>.</span>id)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 延遲執行</span>
+</span></span><span style=display:flex><span>task_sig<span style=color:#f92672>.</span>delay()
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 也可以直接用 apply_async</span>
+</span></span><span style=display:flex><span>task_sig<span style=color:#f92672>.</span>apply_async(countdown<span style=color:#f92672>=</span><span style=color:#ae81ff>30</span>)
+</span></span></code></pre></div><p>三種呼叫方式的比較：</p><table><thead><tr><th>方式</th><th>語法</th><th>適用場景</th></tr></thead><tbody><tr><td><code>delay()</code></td><td><code>task.delay(arg1, arg2)</code></td><td>一般用途，簡潔方便</td></tr><tr><td><code>apply_async()</code></td><td><code>task.apply_async(args=[...], **kwargs)</code></td><td>需要指定 countdown、eta、queue 等</td></tr><tr><td><code>s()</code> / <code>signature()</code></td><td><code>task.s(arg1)</code></td><td>工作流組合（chain、group、chord）</td></tr></tbody></table><hr><h3 id=監控-task-結果asyncresult>監控 Task 結果（AsyncResult）</h3><p>當你需要追蹤任務的執行狀態或取得結果時，可以使用 <strong>AsyncResult</strong> 物件。<code>delay()</code> 和 <code>apply_async()</code> 都會回傳一個 AsyncResult：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> apps.users.tasks <span style=color:#f92672>import</span> send_welcome_email
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 呼叫任務，取得 AsyncResult</span>
+</span></span><span style=display:flex><span>result <span style=color:#f92672>=</span> send_welcome_email<span style=color:#f92672>.</span>delay(user<span style=color:#f92672>.</span>id)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 取得任務 ID（唯一識別碼）</span>
+</span></span><span style=display:flex><span>print(result<span style=color:#f92672>.</span>id)       <span style=color:#75715e># 例如：&#39;a1b2c3d4-e5f6-7890-abcd-ef1234567890&#39;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 檢查任務狀態</span>
+</span></span><span style=display:flex><span>print(result<span style=color:#f92672>.</span>status)   <span style=color:#75715e># &#39;PENDING&#39; / &#39;STARTED&#39; / &#39;SUCCESS&#39; / &#39;FAILURE&#39; / &#39;RETRY&#39;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 檢查任務是否完成</span>
+</span></span><span style=display:flex><span>print(result<span style=color:#f92672>.</span>ready())  <span style=color:#75715e># True / False</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 檢查任務是否成功</span>
+</span></span><span style=display:flex><span>print(result<span style=color:#f92672>.</span>successful())  <span style=color:#75715e># True / False</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 取得任務結果（會阻塞直到任務完成，有 timeout 參數）</span>
+</span></span><span style=display:flex><span>print(result<span style=color:#f92672>.</span>get(timeout<span style=color:#f92672>=</span><span style=color:#ae81ff>10</span>))  <span style=color:#75715e># {&#39;status&#39;: &#39;success&#39;, &#39;user_id&#39;: 1}</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 如果任務失敗，取得例外資訊</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>if</span> result<span style=color:#f92672>.</span>failed():
+</span></span><span style=display:flex><span>    print(result<span style=color:#f92672>.</span>traceback)
+</span></span></code></pre></div><p>你也可以透過任務 ID 從任何地方查詢任務狀態：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> celery.result <span style=color:#f92672>import</span> AsyncResult
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 用任務 ID 重新建立 AsyncResult 物件</span>
+</span></span><span style=display:flex><span>result <span style=color:#f92672>=</span> AsyncResult(<span style=color:#e6db74>&#39;a1b2c3d4-e5f6-7890-abcd-ef1234567890&#39;</span>)
+</span></span><span style=display:flex><span>print(result<span style=color:#f92672>.</span>status)
+</span></span><span style=display:flex><span>print(result<span style=color:#f92672>.</span>result)
+</span></span></code></pre></div><p>任務的生命週期與狀態流轉：</p><table><thead><tr><th>狀態</th><th>說明</th></tr></thead><tbody><tr><td><code>PENDING</code></td><td>任務已送出但尚未被 Worker 接收</td></tr><tr><td><code>STARTED</code></td><td>Worker 已開始執行任務</td></tr><tr><td><code>SUCCESS</code></td><td>任務執行成功</td></tr><tr><td><code>FAILURE</code></td><td>任務執行失敗</td></tr><tr><td><code>RETRY</code></td><td>任務失敗後正在重試</td></tr><tr><td><code>REVOKED</code></td><td>任務被撤銷</td></tr></tbody></table><blockquote><p>注意：如果沒有設定 Result Backend，<code>result.status</code> 將永遠回傳 <code>PENDING</code>，因為 Celery 無處儲存任務狀態。如果你需要追蹤任務結果，務必設定 <code>CELERY_RESULT_BACKEND</code>。</p></blockquote><hr><h3 id=在-view-中整合實際範例>在 View 中整合實際範例</h3><p>以下是一個完整的範例，展示如何在 Django View 中使用 Celery 處理報表生成：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># apps/reports/tasks.py</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> celery <span style=color:#f92672>import</span> shared_task
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> celery.utils.log <span style=color:#f92672>import</span> get_task_logger
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>logger <span style=color:#f92672>=</span> get_task_logger(__name__)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>@shared_task</span>(bind<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>generate_report</span>(self, report_id: int) <span style=color:#f92672>-&gt;</span> dict:
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;生成報表（耗時操作）&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>from</span> apps.reports.models <span style=color:#f92672>import</span> Report
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    report <span style=color:#f92672>=</span> Report<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>get(pk<span style=color:#f92672>=</span>report_id)
+</span></span><span style=display:flex><span>    report<span style=color:#f92672>.</span>status <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;processing&#39;</span>
+</span></span><span style=display:flex><span>    report<span style=color:#f92672>.</span>task_id <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>request<span style=color:#f92672>.</span>id  <span style=color:#75715e># 儲存任務 ID，方便前端查詢進度</span>
+</span></span><span style=display:flex><span>    report<span style=color:#f92672>.</span>save()
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>try</span>:
+</span></span><span style=display:flex><span>        <span style=color:#75715e># 模擬耗時的報表生成邏輯</span>
+</span></span><span style=display:flex><span>        data <span style=color:#f92672>=</span> report<span style=color:#f92672>.</span>collect_data()
+</span></span><span style=display:flex><span>        file_path <span style=color:#f92672>=</span> report<span style=color:#f92672>.</span>render_to_pdf(data)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        report<span style=color:#f92672>.</span>status <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;completed&#39;</span>
+</span></span><span style=display:flex><span>        report<span style=color:#f92672>.</span>file_path <span style=color:#f92672>=</span> file_path
+</span></span><span style=display:flex><span>        report<span style=color:#f92672>.</span>save()
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        logger<span style=color:#f92672>.</span>info(<span style=color:#e6db74>f</span><span style=color:#e6db74>&#39;報表 </span><span style=color:#e6db74>{</span>report_id<span style=color:#e6db74>}</span><span style=color:#e6db74> 生成完成：</span><span style=color:#e6db74>{</span>file_path<span style=color:#e6db74>}</span><span style=color:#e6db74>&#39;</span>)
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> {<span style=color:#e6db74>&#39;status&#39;</span>: <span style=color:#e6db74>&#39;completed&#39;</span>, <span style=color:#e6db74>&#39;file_path&#39;</span>: file_path}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>except</span> <span style=color:#a6e22e>Exception</span> <span style=color:#66d9ef>as</span> exc:
+</span></span><span style=display:flex><span>        report<span style=color:#f92672>.</span>status <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;failed&#39;</span>
+</span></span><span style=display:flex><span>        report<span style=color:#f92672>.</span>save()
+</span></span><span style=display:flex><span>        logger<span style=color:#f92672>.</span>error(<span style=color:#e6db74>f</span><span style=color:#e6db74>&#39;報表 </span><span style=color:#e6db74>{</span>report_id<span style=color:#e6db74>}</span><span style=color:#e6db74> 生成失敗：</span><span style=color:#e6db74>{</span>exc<span style=color:#e6db74>}</span><span style=color:#e6db74>&#39;</span>)
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>raise</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># apps/reports/views.py</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.http <span style=color:#f92672>import</span> JsonResponse
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> apps.reports.models <span style=color:#f92672>import</span> Report
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> apps.reports.tasks <span style=color:#f92672>import</span> generate_report
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> celery.result <span style=color:#f92672>import</span> AsyncResult
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>create_report_view</span>(request):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;建立報表並觸發非同步生成&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>    report <span style=color:#f92672>=</span> Report<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>create(
+</span></span><span style=display:flex><span>        user<span style=color:#f92672>=</span>request<span style=color:#f92672>.</span>user,
+</span></span><span style=display:flex><span>        report_type<span style=color:#f92672>=</span>request<span style=color:#f92672>.</span>POST[<span style=color:#e6db74>&#39;type&#39;</span>],
+</span></span><span style=display:flex><span>        status<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;pending&#39;</span>,
+</span></span><span style=display:flex><span>    )
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 觸發非同步任務</span>
+</span></span><span style=display:flex><span>    result <span style=color:#f92672>=</span> generate_report<span style=color:#f92672>.</span>delay(report<span style=color:#f92672>.</span>id)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> JsonResponse({
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;message&#39;</span>: <span style=color:#e6db74>&#39;報表生成中，請稍候&#39;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;report_id&#39;</span>: report<span style=color:#f92672>.</span>id,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;task_id&#39;</span>: result<span style=color:#f92672>.</span>id,
+</span></span><span style=display:flex><span>    })
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>check_report_status_view</span>(request, task_id):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;查詢報表生成進度&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>    result <span style=color:#f92672>=</span> AsyncResult(task_id)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> JsonResponse({
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;task_id&#39;</span>: task_id,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;status&#39;</span>: result<span style=color:#f92672>.</span>status,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;result&#39;</span>: result<span style=color:#f92672>.</span>result <span style=color:#66d9ef>if</span> result<span style=color:#f92672>.</span>ready() <span style=color:#66d9ef>else</span> <span style=color:#66d9ef>None</span>,
+</span></span><span style=display:flex><span>    })
+</span></span></code></pre></div><hr><h3 id=啟動-worker>啟動 Worker</h3><p>所有設定完成後，需要啟動 Celery Worker 來執行任務。開啟一個新的終端機視窗：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 啟動 Worker（基本指令）</span>
+</span></span><span style=display:flex><span>celery -A myproject worker --loglevel<span style=color:#f92672>=</span>info
+</span></span></code></pre></div><p>啟動成功後會看到類似以下的輸出：</p><pre tabindex=0><code> -------------- celery@hostname v5.4.0 (opalescent)
+--- ***** -----
+-- ******* ---- Linux-5.15.0
+- *** --- * ---
+- ** ---------- [config]
+- ** ---------- .&gt; app:         myproject:0x...
+- ** ---------- .&gt; transport:   redis://localhost:6379/0
+- ** ---------- .&gt; results:     redis://localhost:6379/1
+- *** --- * --- .&gt; concurrency: 8 (prefork)
+-- ******* ---- .&gt; task events: OFF
+--- ***** -----
+ -------------- [queues]
+                .&gt; celery          exchange=celery(direct) key=celery
+
+[tasks]
+  . apps.users.tasks.send_welcome_email
+  . apps.reports.tasks.generate_report
+</code></pre><p>常用的啟動參數：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 指定併發數量（預設為 CPU 核心數）</span>
+</span></span><span style=display:flex><span>celery -A myproject worker --concurrency<span style=color:#f92672>=</span><span style=color:#ae81ff>4</span> --loglevel<span style=color:#f92672>=</span>info
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 指定監聽的佇列</span>
+</span></span><span style=display:flex><span>celery -A myproject worker -Q default,high_priority --loglevel<span style=color:#f92672>=</span>info
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 開發環境：使用 solo 模式（單執行緒，方便除錯）</span>
+</span></span><span style=display:flex><span>celery -A myproject worker --pool<span style=color:#f92672>=</span>solo --loglevel<span style=color:#f92672>=</span>debug
+</span></span></code></pre></div><blockquote><p><strong>開發提示</strong>：在開發階段，建議在 <code>settings.py</code> 中加入 <code>CELERY_TASK_ALWAYS_EAGER = True</code>，這樣所有任務會同步執行（不需要啟動 Worker），方便除錯。正式環境務必移除此設定。</p></blockquote><hr><h3 id=總結>總結</h3><p>本文從零開始帶你完成了 Django + Celery 的入門設定與基本使用：</p><ol><li><strong>為什麼需要非同步任務</strong>：Email 發送、圖片處理、報表生成等耗時操作不應該阻塞 HTTP 請求</li><li><strong>Celery 架構</strong>：Django App（生產者）透過 Broker（Redis）發送任務訊息，Worker（消費者）執行任務，Result Backend 儲存結果</li><li><strong>安裝與設定</strong>：<code>celery</code>、<code>redis</code>、<code>django-celery-results</code> 三個套件，搭配 <code>settings.py</code> 中的 <code>CELERY_</code> 設定</li><li><strong>celery.py 與 __init__.py</strong>：建立 Celery App 實例、設定自動探索任務、確保 Django 啟動時載入</li><li><strong>@shared_task 定義任務</strong>：使用裝飾器宣告任務，參數必須可 JSON 序列化，透過延遲匯入避免循環依賴</li><li><strong>呼叫任務</strong>：<code>delay()</code> 簡潔方便、<code>apply_async()</code> 完整控制、<code>s()</code> 用於工作流組合</li><li><strong>AsyncResult 監控結果</strong>：追蹤任務狀態（PENDING → STARTED → SUCCESS/FAILURE），透過 <code>result.get()</code> 取得結果</li><li><strong>啟動 Worker</strong>：<code>celery -A myproject worker --loglevel=info</code>，開發環境可使用 <code>CELERY_TASK_ALWAYS_EAGER</code> 同步執行</li></ol><p>掌握了 Celery 的基礎後，下一篇我們將深入探討 <strong>Celery Beat 排程任務</strong>、<strong>任務重試策略</strong>、<strong>Chain / Group / Chord 工作流</strong>、<strong>Flower 監控工具</strong> 等進階主題，帶你打造生產級的非同步任務系統。</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
+</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/django/032-django-caching/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django Caching 快取策略完全指南 | Django 教學</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/21</span>
+</a><a href=https://benzhub.github.io/post/django/031-django-signals/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django Signals 信號機制：觀察者模式實戰 | Django 教學</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/20</span>
+</a><a href=https://benzhub.github.io/post/django/030-django-custom-user-model/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django 自訂使用者模型：AbstractUser 與 AbstractBaseUser | Django 教學</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/19</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/django/032-django-caching/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+<span class="text-sm font-medium">Django Caching 快取策略完全指南 | Django 教學</span></a></div><div></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
+</a><a href=/tags/acid><span class=tag-pill>acid</span>
+</a><a href=/tags/ai><span class=tag-pill>ai</span>
+</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
+</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
+</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
+</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
+</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
+</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
+</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
+</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
+</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
+</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
+</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
+</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
+</a><a href=/tags/api><span class=tag-pill>api</span>
+</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
+</a><a href=/tags/autovacuum><span class=tag-pill>autovacuum</span>
+</a><a href=/tags/b-tree><span class=tag-pill>b-tree</span>
+</a><a href=/tags/background-processes><span class=tag-pill>background-processes</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (16)</span>
+</a><a href=/post/javascript/><span class=tag-pill>JavaScript (71)</span>
+</a><a href=/post/django/><span class=tag-pill>Django (33)</span>
+</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
+</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
+</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
+</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
+</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/django/033-django-celery-basics/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django + Celery 非同步任務佇列入門 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/22</p></a><a href=/post/javascript/data-structures--algorithms/009-binary-tree/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">二元樹 — 四種遍歷方式與遞迴/迭代實作完整教學 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/22</p></a><a href=/post/postgresql/016-query-planner/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">查詢規劃器與執行計畫：PostgreSQL 如何選擇最優路徑 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/22</p></a><a href=/post/django/032-django-caching/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Caching 快取策略完全指南 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/21</p></a><a href=/post/javascript/data-structures--algorithms/008-binary-search/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">二分搜尋 — Binary Search 三種模板與二分答案技巧 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/21</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>
