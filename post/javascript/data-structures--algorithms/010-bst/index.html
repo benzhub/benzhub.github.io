@@ -1,0 +1,806 @@
+<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>二元搜尋樹 — BST 操作、AVL 與紅黑樹自平衡機制 | 資料結構與演算法 | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="二元搜尋樹 — BST 操作、AVL 與紅黑樹自平衡機制 | 資料結構與演算法 | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="深入解析二元搜尋樹的搜尋、插入、刪除操作與 BST 性質。涵蓋 AVL 樹旋轉機制與紅黑樹平衡策略，搭配 JavaScript/TypeScript 與 C++ 完整實作範例及 LeetCode 練習。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="深入解析二元搜尋樹的搜尋、插入、刪除操作與 BST 性質。涵蓋 AVL 樹旋轉機制與紅黑樹平衡策略，搭配 JavaScript/TypeScript 與 C++ 完整實作範例及 LeetCode 練習。"><meta property="og:url" content="https://benzhub.github.io/post/javascript/data-structures--algorithms/010-bst/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/javascript/data-structures--algorithms/010-bst/><meta name=twitter:description content="深入解析二元搜尋樹的搜尋、插入、刪除操作與 BST 性質。涵蓋 AVL 樹旋轉機制與紅黑樹平衡策略，搭配 JavaScript/TypeScript 與 C++ 完整實作範例及 LeetCode 練習。"><meta property="article:published_time" content="2026-06-23T00:00:00+00:00"><meta property="article:updated_time" content="2026-06-23T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/javascript/Data%20Structures%20&%20Algorithms/010-BST.png"><meta property="og:image:url" content="https://benzhub.github.io/img/javascript/Data%20Structures%20&%20Algorithms/010-BST.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/javascript/data-structures--algorithms/010-bst/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/javascript/data-structures--algorithms/010-bst/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"二元搜尋樹 — BST 操作、AVL 與紅黑樹自平衡機制 | 資料結構與演算法\"","description":"\"深入解析二元搜尋樹的搜尋、插入、刪除操作與 BST 性質。涵蓋 AVL 樹旋轉機制與紅黑樹平衡策略，搭配 JavaScript/TypeScript 與 C++ 完整實作範例及 LeetCode 練習。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-06-23T00:00:00\u002b00:00","dateModified":"2026-06-23T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/javascript\/Data%20Structures%20\u0026%20Algorithms\/010-BST.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/javascript\/data-structures--algorithms\/010-bst\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/javascript\/"},{"@type":"ListItem","position":3,"name":"\"二元搜尋樹 — BST 操作、AVL 與紅黑樹自平衡機制 | 資料結構與演算法\""}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"\"BST 的中序遍歷為什麼是有序的？\"","acceptedAnswer":{"@type":"Answer","text":"\"BST 的性質保證左子樹所有值 \\u003c 根 \\u003c 右子樹所有值。中序遍歷順序是左→根→右，因此會按從小到大的順序訪問所有節點，產生一個有序序列。\""}},{"@type":"Question","name":"\"AVL 樹和紅黑樹哪個比較好？\"","acceptedAnswer":{"@type":"Answer","text":"\"AVL 樹嚴格平衡（高度差 ≤ 1），搜尋更快但插入刪除需要更多旋轉；紅黑樹較寬鬆（最長路徑 ≤ 2 倍最短路徑），插入刪除效率更高。讀多寫少用 AVL，讀寫均衡用紅黑樹。Java TreeMap、C++ std::map 都用紅黑樹。\""}},{"@type":"Question","name":"\"BST 最壞情況下會退化成什麼？\"","acceptedAnswer":{"@type":"Answer","text":"\"當插入的元素是有序的（遞增或遞減），BST 會退化成鏈結串列，所有操作從 O(log n) 退化為 O(n)。這就是為什麼需要 AVL 或紅黑樹等自平衡 BST 來保證 O(log n) 的效能。\""}}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">二元搜尋樹 — BST 操作、AVL 與紅黑樹自平衡機制 | 資料結構與演算法</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/23</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/javascript class="tag-pill no-underline">javascript</a>
+<a href=/tags/%E8%B3%87%E6%96%99%E7%B5%90%E6%A7%8B%E6%BC%94%E7%AE%97%E6%B3%95 class="tag-pill no-underline">資料結構&演算法</a>
+<a href=/tags/bst class="tag-pill no-underline">BST</a>
+<a href=/tags/%E4%BA%8C%E5%85%83%E6%90%9C%E5%B0%8B%E6%A8%B9 class="tag-pill no-underline">二元搜尋樹</a>
+<a href=/tags/avl class="tag-pill no-underline">AVL</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/javascript/Data%20Structures%20&%20Algorithms/010-BST.png alt="二元搜尋樹 — BST 操作、AVL 與紅黑樹自平衡機制 | 資料結構與演算法"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p><strong>二元搜尋樹（Binary Search Tree，BST）</strong> 是在二元樹的基礎上加了「左子樹所有值 &lt; 根 &lt; 右子樹所有值」這一條有序約束，讓搜尋效率從 O(n) 提升至 O(log n)。理解 BST 的搜尋、插入、刪除三大操作，以及 <strong>AVL 樹</strong>與<strong>紅黑樹</strong>如何自動維持平衡，是資料結構與演算法的重要里程碑。</p></blockquote><h3 id=前言>前言</h3><p>想像你在查一本字典——你不會從第一頁翻到最後，而是先翻到中間，根據字母判斷要查的字在左邊還是右邊，然後再對半查找。這個「對折再對折」的直覺，就是 BST 的核心思想。</p><p><strong>BST 讓每次比較都能排除一半的可能</strong>，在平衡狀態下，搜尋一個 n 個元素的 BST 只需要 O(log n) 步。但如果插入順序不當，BST 可能退化成一條鏈結串列，效能驟降至 O(n)——這也是為什麼我們需要 AVL 樹和紅黑樹。</p><p><strong>本文學習要點：</strong></p><ul><li>BST 性質與中序有序性</li><li>搜尋、插入、刪除三大操作（含刪除的三種情況）</li><li>TypeScript 完整 BST 實作（驗證 BST、第 K 小、LCA）</li><li>AVL 樹四種旋轉：LL、RR、LR、RL</li><li>紅黑樹五條性質與核心策略</li><li>C++ STL <code>std::set</code>、<code>std::map</code> 使用與 AVL 實作</li><li>複雜度分析與 Splay Tree、Treap 延伸</li><li>五道 LeetCode 練習題解析</li></ul><hr><h3 id=核心概念>核心概念</h3><h4 id=bst-性質bst-property>BST 性質（BST Property）</h4><p>BST 的本質是一個遞迴定義的有序約束：</p><pre tabindex=0><code>對任意節點 N：
+  - N.left  所有節點的值 &lt; N.val
+  - N.right 所有節點的值 &gt; N.val
+  - 左右子樹也各自是 BST（遞迴定義）
+  - 中序遍歷（左→根→右）= 升序排列
+</code></pre><p>以一棵具體的 BST 為例，搜尋值 <code>6</code> 的路徑：</p><pre tabindex=0><code>         8
+        / \
+       3   10
+      / \    \
+     1   6    14
+        / \   /
+       4   7 13
+
+搜尋 6：
+  訪問 8  → 6 &lt; 8，往左
+  訪問 3  → 6 &gt; 3，往右
+  訪問 6  → 6 == 6，找到！
+
+搜尋路徑：8 → 3 → 6（只需 3 步，而非暴力搜尋的 9 步）
+</code></pre><h4 id=bst-退化問題>BST 退化問題</h4><p>按升序插入 <code>1, 2, 3, 4, 5</code>，BST 會退化成右傾鏈結串列：</p><pre tabindex=0><code>理想 BST（balanced）:     退化 BST（degenerate）:
+        3                   1
+       / \                   \
+      2   4                   2
+     /     \                   \
+    1       5                   3
+                                 \
+   樹高 = 2                       4
+   搜尋 = O(log n)                  \
+                                     5
+                               樹高 = n-1
+                               搜尋 = O(n)
+</code></pre><p>這就是為什麼需要 AVL 樹和紅黑樹——它們在每次插入、刪除後自動重新平衡，保證樹高始終在 O(log n)。</p><h4 id=刪除操作的三種情況>刪除操作的三種情況</h4><p>刪除是 BST 中最複雜的操作，需要分三種情況處理：</p><pre tabindex=0><code>情況 1：目標是葉節點 → 直接刪除（返回 null）
+
+情況 2：目標只有一個子節點 → 用子節點替代
+
+   刪除 3：              結果：
+       5                   5
+      / \                 / \
+     3   7       →       4   7
+      \
+       4
+
+情況 3：目標有兩個子節點 → 找右子樹最小值（中序後繼）替代
+
+   刪除 5：              找到後繼 6，複製值後刪除 6：
+       5                   6
+      / \                 / \
+     3   8       →       3   8
+        / \                 / \
+       6   9               7   9
+        \
+         7
+</code></pre><p>右子樹最小值（中序後繼）保證大於左子樹所有值、小於右子樹其他所有值，完美維持 BST 性質。</p><hr><h3 id=javascript--typescript-實作>JavaScript / TypeScript 實作</h3><h4 id=基礎-bst-類別搜尋插入刪除中序>基礎 BST 類別（搜尋、插入、刪除、中序）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>BSTNode</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>val</span>: <span style=color:#66d9ef>number</span>;
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>left</span>: <span style=color:#66d9ef>BSTNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>null</span>;
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>right</span>: <span style=color:#66d9ef>BSTNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>null</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>constructor</span>(<span style=color:#a6e22e>val</span>: <span style=color:#66d9ef>number</span>) { <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>val</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>val</span>; }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>BST</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>root</span>: <span style=color:#66d9ef>BSTNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>null</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// ─── 插入（遞迴）：O(h) ────────────────────────────────────────────────────
+</span></span></span><span style=display:flex><span>  <span style=color:#a6e22e>insert</span>(<span style=color:#a6e22e>val</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>void</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>root</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>_insert</span>(<span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>root</span>, <span style=color:#a6e22e>val</span>);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>_insert</span>(<span style=color:#a6e22e>node</span>: <span style=color:#66d9ef>BSTNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span>, <span style=color:#a6e22e>val</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#a6e22e>BSTNode</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span><span style=color:#a6e22e>node</span>) <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>BSTNode</span>(<span style=color:#a6e22e>val</span>);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>val</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>val</span>)      <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>left</span>  <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>_insert</span>(<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>left</span>,  <span style=color:#a6e22e>val</span>);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>else</span> <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>val</span> <span style=color:#f92672>&gt;</span> <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>val</span>) <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>right</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>_insert</span>(<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>right</span>, <span style=color:#a6e22e>val</span>);
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// val == node.val：BST 通常不儲存重複值，忽略
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>node</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// ─── 搜尋（迭代）：O(h) ────────────────────────────────────────────────────
+</span></span></span><span style=display:flex><span>  <span style=color:#a6e22e>search</span>(<span style=color:#a6e22e>val</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>boolean</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>curr</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>root</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>while</span> (<span style=color:#a6e22e>curr</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>val</span> <span style=color:#f92672>===</span> <span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>val</span>) <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>true</span>;
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>curr</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>val</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>val</span> <span style=color:#f92672>?</span> <span style=color:#a6e22e>curr.left</span> : <span style=color:#66d9ef>curr.right</span>;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>false</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// ─── 刪除：O(h) ────────────────────────────────────────────────────────────
+</span></span></span><span style=display:flex><span>  <span style=color:#75715e>// 三種情況：
+</span></span></span><span style=display:flex><span>  <span style=color:#75715e>//   1. 葉節點       → 直接刪除
+</span></span></span><span style=display:flex><span>  <span style=color:#75715e>//   2. 單子節點     → 子節點替代
+</span></span></span><span style=display:flex><span>  <span style=color:#75715e>//   3. 雙子節點     → 右子樹最小值（中序後繼）替代，再刪後繼
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>delete</span>(<span style=color:#a6e22e>val</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>void</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>root</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>_delete</span>(<span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>root</span>, <span style=color:#a6e22e>val</span>);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>_delete</span>(<span style=color:#a6e22e>node</span>: <span style=color:#66d9ef>BSTNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span>, <span style=color:#a6e22e>val</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#a6e22e>BSTNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span><span style=color:#a6e22e>node</span>) <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>null</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>val</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>val</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>left</span>  <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>_delete</span>(<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>left</span>,  <span style=color:#a6e22e>val</span>);
+</span></span><span style=display:flex><span>    } <span style=color:#66d9ef>else</span> <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>val</span> <span style=color:#f92672>&gt;</span> <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>val</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>right</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>_delete</span>(<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>right</span>, <span style=color:#a6e22e>val</span>);
+</span></span><span style=display:flex><span>    } <span style=color:#66d9ef>else</span> {
+</span></span><span style=display:flex><span>      <span style=color:#75715e>// 找到目標節點
+</span></span></span><span style=display:flex><span>      <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span><span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>left</span>)  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>right</span>; <span style=color:#75715e>// 情況 1 &amp; 2
+</span></span></span><span style=display:flex><span>      <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span><span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>right</span>) <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>left</span>;  <span style=color:#75715e>// 情況 2
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>      <span style=color:#75715e>// 情況 3：找右子樹最小值（一路向左）
+</span></span></span><span style=display:flex><span>      <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>successor</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>_findMin</span>(<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>right</span>);
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>val</span>   <span style=color:#f92672>=</span> <span style=color:#a6e22e>successor</span>.<span style=color:#a6e22e>val</span>;                        <span style=color:#75715e>// 值替換
+</span></span></span><span style=display:flex><span>      <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>right</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>_delete</span>(<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>right</span>, <span style=color:#a6e22e>successor</span>.<span style=color:#a6e22e>val</span>); <span style=color:#75715e>// 刪除後繼
+</span></span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>node</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>_findMin</span>(<span style=color:#a6e22e>node</span>: <span style=color:#66d9ef>BSTNode</span>)<span style=color:#f92672>:</span> <span style=color:#a6e22e>BSTNode</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>while</span> (<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>left</span>) <span style=color:#a6e22e>node</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>left</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>node</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// ─── 中序遍歷（得到升序序列）───────────────────────────────────────────────
+</span></span></span><span style=display:flex><span>  <span style=color:#a6e22e>inorder</span>()<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span>[] {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>result</span>: <span style=color:#66d9ef>number</span>[] <span style=color:#f92672>=</span> [];
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>traverse</span> <span style=color:#f92672>=</span> (<span style=color:#a6e22e>node</span>: <span style=color:#66d9ef>BSTNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>void</span> <span style=color:#f92672>=&gt;</span> {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span><span style=color:#a6e22e>node</span>) <span style=color:#66d9ef>return</span>;
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>traverse</span>(<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>left</span>);
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>result</span>.<span style=color:#a6e22e>push</span>(<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>val</span>);
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>traverse</span>(<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>right</span>);
+</span></span><span style=display:flex><span>    };
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>traverse</span>(<span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>root</span>);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>result</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 測試
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>bst</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>BST</span>();
+</span></span><span style=display:flex><span>[<span style=color:#ae81ff>5</span>, <span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>7</span>, <span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>4</span>, <span style=color:#ae81ff>6</span>, <span style=color:#ae81ff>8</span>].<span style=color:#a6e22e>forEach</span>(<span style=color:#a6e22e>v</span> <span style=color:#f92672>=&gt;</span> <span style=color:#a6e22e>bst</span>.<span style=color:#a6e22e>insert</span>(<span style=color:#a6e22e>v</span>));
+</span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>bst</span>.<span style=color:#a6e22e>inorder</span>());  <span style=color:#75715e>// [1, 3, 4, 5, 6, 7, 8]（升序）
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>bst</span>.<span style=color:#66d9ef>delete</span>(<span style=color:#ae81ff>5</span>);
+</span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>bst</span>.<span style=color:#a6e22e>inorder</span>());  <span style=color:#75715e>// [1, 3, 4, 6, 7, 8]
+</span></span></span></code></pre></div><h4 id=驗證-bstleetcode-98>驗證 BST（LeetCode 98）</h4><p>這是 BST 題目中最常見的陷阱——不能只比較父子節點，必須傳遞全局上下界：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// 方法一：上下界傳遞（推薦）
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 根節點值域為 (-∞, +∞)
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 往左走：上界縮小為 node.val（所有左子樹節點必須 &lt; node.val）
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 往右走：下界縮小為 node.val（所有右子樹節點必須 &gt; node.val）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>isValidBST</span>(<span style=color:#a6e22e>root</span>: <span style=color:#66d9ef>TreeNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>boolean</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>function</span> <span style=color:#a6e22e>validate</span>(
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>node</span>: <span style=color:#66d9ef>TreeNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span>,
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>min</span>: <span style=color:#66d9ef>number</span>,
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>max</span>: <span style=color:#66d9ef>number</span>
+</span></span><span style=display:flex><span>  )<span style=color:#f92672>:</span> <span style=color:#66d9ef>boolean</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span><span style=color:#a6e22e>node</span>) <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>true</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 必須嚴格大於 min、嚴格小於 max（BST 不含重複值）
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>val</span> <span style=color:#f92672>&lt;=</span> <span style=color:#a6e22e>min</span> <span style=color:#f92672>||</span> <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>val</span> <span style=color:#f92672>&gt;=</span> <span style=color:#a6e22e>max</span>) <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>false</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>validate</span>(<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>left</span>,  <span style=color:#a6e22e>min</span>,      <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>val</span>) <span style=color:#f92672>&amp;&amp;</span>
+</span></span><span style=display:flex><span>           <span style=color:#a6e22e>validate</span>(<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>right</span>, <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>val</span>, <span style=color:#a6e22e>max</span>);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>validate</span>(<span style=color:#a6e22e>root</span>, <span style=color:#f92672>-</span><span style=color:#66d9ef>Infinity</span>, <span style=color:#66d9ef>Infinity</span>);
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 陷阱：不能只看 node.left.val &lt; node.val &lt; node.right.val
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 反例（錯誤通過但不是 BST）：
+</span></span></span><span style=display:flex><span><span style=color:#75715e>//     5
+</span></span></span><span style=display:flex><span><span style=color:#75715e>//    / \
+</span></span></span><span style=display:flex><span><span style=color:#75715e>//   1   4
+</span></span></span><span style=display:flex><span><span style=color:#75715e>//      / \
+</span></span></span><span style=display:flex><span><span style=color:#75715e>//     3   6
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 4.left=3 &lt; 4 看起來合法，但 3 &lt; 5（根），違反右子樹所有值 &gt; 5 的約束
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 方法二：中序遍歷，確認序列嚴格遞增
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>isValidBSTInorder</span>(<span style=color:#a6e22e>root</span>: <span style=color:#66d9ef>TreeNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>boolean</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>prev</span> <span style=color:#f92672>=</span> <span style=color:#f92672>-</span><span style=color:#66d9ef>Infinity</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>function</span> <span style=color:#a6e22e>inorder</span>(<span style=color:#a6e22e>node</span>: <span style=color:#66d9ef>TreeNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>boolean</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span><span style=color:#a6e22e>node</span>) <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>true</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span><span style=color:#a6e22e>inorder</span>(<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>left</span>)) <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>false</span>;  <span style=color:#75715e>// 左子樹不合法
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>val</span> <span style=color:#f92672>&lt;=</span> <span style=color:#a6e22e>prev</span>)    <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>false</span>;  <span style=color:#75715e>// 當前值不嚴格大於前值
+</span></span></span><span style=display:flex><span>    <span style=color:#a6e22e>prev</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>val</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>inorder</span>(<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>right</span>);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>inorder</span>(<span style=color:#a6e22e>root</span>);
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#75715e>// 時間 O(n)，空間 O(h)
+</span></span></span></code></pre></div><h4 id=bst-第-k-小元素leetcode-230>BST 第 K 小元素（LeetCode 230）</h4><p>BST 中序遍歷 = 升序序列，第 k 個中序元素即第 k 小：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// 迭代中序遍歷：找到第 k 個立即停止，不需要遍歷全部
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 時間 O(h + k)，空間 O(h)
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>kthSmallest</span>(<span style=color:#a6e22e>root</span>: <span style=color:#66d9ef>TreeNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span>, <span style=color:#a6e22e>k</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>stack</span>: <span style=color:#66d9ef>TreeNode</span>[] <span style=color:#f92672>=</span> [];
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>curr</span>: <span style=color:#66d9ef>TreeNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>root</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>count</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>while</span> (<span style=color:#a6e22e>curr</span> <span style=color:#f92672>!==</span> <span style=color:#66d9ef>null</span> <span style=color:#f92672>||</span> <span style=color:#a6e22e>stack</span>.<span style=color:#a6e22e>length</span> <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 一路向左（往最小值方向）
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>while</span> (<span style=color:#a6e22e>curr</span> <span style=color:#f92672>!==</span> <span style=color:#66d9ef>null</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>stack</span>.<span style=color:#a6e22e>push</span>(<span style=color:#a6e22e>curr</span>);
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>curr</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>left</span>;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>curr</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>stack</span>.<span style=color:#a6e22e>pop</span>()<span style=color:#f92672>!</span>;
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>count</span><span style=color:#f92672>++</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>count</span> <span style=color:#f92672>===</span> <span style=color:#a6e22e>k</span>) <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>val</span>; <span style=color:#75715e>// 找到第 k 小，立即返回
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>curr</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>right</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>; <span style=color:#75715e>// 不應到達此處（k 合法時）
+</span></span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 進階：若頻繁調用且有大量插入刪除，可在每個節點額外儲存左子樹節點數
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// （leftCount），將查詢降至 O(h) 而不需遍歷
+</span></span></span></code></pre></div><h4 id=bst-最低公共祖先leetcode-235>BST 最低公共祖先（LeetCode 235）</h4><p>BST 的 LCA（Lowest Common Ancestor）可以利用 BST 性質直接定位，不需要像普通二元樹那樣完整 DFS：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// 思路：若 p 和 q 都小於 root，LCA 在左子樹
+</span></span></span><span style=display:flex><span><span style=color:#75715e>//        若 p 和 q 都大於 root，LCA 在右子樹
+</span></span></span><span style=display:flex><span><span style=color:#75715e>//        否則 root 本身就是 LCA（p 和 q 分屬兩側，或其中一個就是 root）
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 時間 O(h)，空間 O(1)（迭代版本）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>lowestCommonAncestor</span>(
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>root</span>: <span style=color:#66d9ef>TreeNode</span>,
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>p</span>: <span style=color:#66d9ef>TreeNode</span>,
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>q</span>: <span style=color:#66d9ef>TreeNode</span>
+</span></span><span style=display:flex><span>)<span style=color:#f92672>:</span> <span style=color:#a6e22e>TreeNode</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>curr</span>: <span style=color:#66d9ef>TreeNode</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>root</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>while</span> (<span style=color:#66d9ef>true</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>p</span>.<span style=color:#a6e22e>val</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>val</span> <span style=color:#f92672>&amp;&amp;</span> <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>val</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>val</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>curr</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>left</span><span style=color:#f92672>!</span>;  <span style=color:#75715e>// p, q 都在左子樹
+</span></span></span><span style=display:flex><span>    } <span style=color:#66d9ef>else</span> <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>p</span>.<span style=color:#a6e22e>val</span> <span style=color:#f92672>&gt;</span> <span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>val</span> <span style=color:#f92672>&amp;&amp;</span> <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>val</span> <span style=color:#f92672>&gt;</span> <span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>val</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>curr</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>right</span><span style=color:#f92672>!</span>; <span style=color:#75715e>// p, q 都在右子樹
+</span></span></span><span style=display:flex><span>    } <span style=color:#66d9ef>else</span> {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>curr</span>;        <span style=color:#75715e>// 分屬兩側，curr 即為 LCA
+</span></span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h4 id=刪除-bst-節點leetcode-450>刪除 BST 節點（LeetCode 450）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// 三種情況分類：葉節點 / 單子節點 / 雙子節點
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 時間 O(h)，空間 O(h)（遞迴棧）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>deleteNode</span>(<span style=color:#a6e22e>root</span>: <span style=color:#66d9ef>TreeNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span>, <span style=color:#a6e22e>key</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#a6e22e>TreeNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span><span style=color:#a6e22e>root</span>) <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>null</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>key</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>val</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// key 在左子樹
+</span></span></span><span style=display:flex><span>    <span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>left</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>deleteNode</span>(<span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>left</span>, <span style=color:#a6e22e>key</span>);
+</span></span><span style=display:flex><span>  } <span style=color:#66d9ef>else</span> <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>key</span> <span style=color:#f92672>&gt;</span> <span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>val</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// key 在右子樹
+</span></span></span><span style=display:flex><span>    <span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>right</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>deleteNode</span>(<span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>right</span>, <span style=color:#a6e22e>key</span>);
+</span></span><span style=display:flex><span>  } <span style=color:#66d9ef>else</span> {
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 找到目標節點
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span><span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>left</span>)  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>right</span>; <span style=color:#75715e>// 情況 1 &amp; 2
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span><span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>right</span>) <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>left</span>;  <span style=color:#75715e>// 情況 2
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 情況 3：找右子樹最小值（一路向左）
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>successor</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>right</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>while</span> (<span style=color:#a6e22e>successor</span>.<span style=color:#a6e22e>left</span>) <span style=color:#a6e22e>successor</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>successor</span>.<span style=color:#a6e22e>left</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 將後繼值複製過來，再從右子樹刪除後繼
+</span></span></span><span style=display:flex><span>    <span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>val</span>   <span style=color:#f92672>=</span> <span style=color:#a6e22e>successor</span>.<span style=color:#a6e22e>val</span>;
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>right</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>deleteNode</span>(<span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>right</span>, <span style=color:#a6e22e>successor</span>.<span style=color:#a6e22e>val</span>);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>root</span>;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><hr><h3 id=自平衡-bst>自平衡 BST</h3><h4 id=avl-樹>AVL 樹</h4><p>AVL 樹（Adelson-Velsky and Landis Tree）要求每個節點的平衡因子（Balance Factor）= 左高 - 右高 ∈ {-1, 0, 1}，違反時透過旋轉修正。</p><p><strong>四種失衡類型與對應旋轉：</strong></p><pre tabindex=0><code>─── LL 型（左左失衡）：右旋（Right Rotation）───────────────────────────
+失衡：                    修正後：
+    z [BF=+2]                y
+   /                        / \
+  y [BF=+1]               x   z
+ /
+x
+操作：z.left = y.right; y.right = z; 更新高度
+
+─── RR 型（右右失衡）：左旋（Left Rotation）───────────────────────────
+失衡：                    修正後：
+z [BF=-2]                    y
+  \                          / \
+   y [BF=-1]               z   x
+     \
+      x
+操作：z.right = y.left; y.left = z; 更新高度
+
+─── LR 型（左右失衡）：先左旋再右旋──────────────────────────────────────
+失衡：                中間步：          修正後：
+    z [BF=+2]              z                x
+   /                      /               / \
+  y [BF=-1]             x               y   z
+   \                   /
+    x                 y
+操作：先對 y 做左旋（RR），再對 z 做右旋（LL）
+
+─── RL 型（右左失衡）：先右旋再左旋──────────────────────────────────────
+失衡：                中間步：          修正後：
+z [BF=-2]                z                x
+  \                        \             / \
+   y [BF=+1]               x           z   y
+  /                          \
+ x                             y
+操作：先對 y 做右旋（LL），再對 z 做左旋（RR）
+</code></pre><p><strong>AVL 樹 TypeScript 完整實作：</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>AVLNode</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>val</span>: <span style=color:#66d9ef>number</span>;
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>left</span>: <span style=color:#66d9ef>AVLNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>null</span>;
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>right</span>: <span style=color:#66d9ef>AVLNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>null</span>;
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>height</span>: <span style=color:#66d9ef>number</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>; <span style=color:#75715e>// 新節點高度為 1
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>constructor</span>(<span style=color:#a6e22e>val</span>: <span style=color:#66d9ef>number</span>) { <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>val</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>val</span>; }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>AVLTree</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>root</span>: <span style=color:#66d9ef>AVLNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>null</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// ─── 輔助：高度與平衡因子 ──────────────────────────────────────────────────
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>height</span>(<span style=color:#a6e22e>node</span>: <span style=color:#66d9ef>AVLNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>node</span><span style=color:#f92672>?</span>.<span style=color:#a6e22e>height</span> <span style=color:#f92672>??</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>updateHeight</span>(<span style=color:#a6e22e>node</span>: <span style=color:#66d9ef>AVLNode</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>void</span> {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>height</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> <span style=color:#f92672>+</span> Math.<span style=color:#a6e22e>max</span>(<span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>height</span>(<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>left</span>), <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>height</span>(<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>right</span>));
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>balanceFactor</span>(<span style=color:#a6e22e>node</span>: <span style=color:#66d9ef>AVLNode</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>height</span>(<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>left</span>) <span style=color:#f92672>-</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>height</span>(<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>right</span>);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// ─── 旋轉操作 ──────────────────────────────────────────────────────────────
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 右旋（Right Rotation）：處理 LL 型失衡
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>rotateRight</span>(<span style=color:#a6e22e>z</span>: <span style=color:#66d9ef>AVLNode</span>)<span style=color:#f92672>:</span> <span style=color:#a6e22e>AVLNode</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>y</span>  <span style=color:#f92672>=</span> <span style=color:#a6e22e>z</span>.<span style=color:#a6e22e>left</span><span style=color:#f92672>!</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>T3</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>y</span>.<span style=color:#a6e22e>right</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>y</span>.<span style=color:#a6e22e>right</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>z</span>;
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>z</span>.<span style=color:#a6e22e>left</span>  <span style=color:#f92672>=</span> <span style=color:#a6e22e>T3</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>updateHeight</span>(<span style=color:#a6e22e>z</span>); <span style=color:#75715e>// z 先更新（z 現在是 y 的子節點）
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>updateHeight</span>(<span style=color:#a6e22e>y</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>y</span>; <span style=color:#75715e>// y 成為新的子樹根
+</span></span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 左旋（Left Rotation）：處理 RR 型失衡
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>rotateLeft</span>(<span style=color:#a6e22e>z</span>: <span style=color:#66d9ef>AVLNode</span>)<span style=color:#f92672>:</span> <span style=color:#a6e22e>AVLNode</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>y</span>  <span style=color:#f92672>=</span> <span style=color:#a6e22e>z</span>.<span style=color:#a6e22e>right</span><span style=color:#f92672>!</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>T2</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>y</span>.<span style=color:#a6e22e>left</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>y</span>.<span style=color:#a6e22e>left</span>  <span style=color:#f92672>=</span> <span style=color:#a6e22e>z</span>;
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>z</span>.<span style=color:#a6e22e>right</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>T2</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>updateHeight</span>(<span style=color:#a6e22e>z</span>);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>updateHeight</span>(<span style=color:#a6e22e>y</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>y</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// ─── 平衡修正（插入/刪除後自底向上調用）─────────────────────────────────────
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>balance</span>(<span style=color:#a6e22e>node</span>: <span style=color:#66d9ef>AVLNode</span>)<span style=color:#f92672>:</span> <span style=color:#a6e22e>AVLNode</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>updateHeight</span>(<span style=color:#a6e22e>node</span>);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>bf</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>balanceFactor</span>(<span style=color:#a6e22e>node</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// LL 型
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>bf</span> <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>1</span>  <span style=color:#f92672>&amp;&amp;</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>balanceFactor</span>(<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>left</span><span style=color:#f92672>!</span>)  <span style=color:#f92672>&gt;=</span> <span style=color:#ae81ff>0</span>)
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>rotateRight</span>(<span style=color:#a6e22e>node</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// LR 型：先左旋 node.left，再右旋 node
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>bf</span> <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>1</span>  <span style=color:#f92672>&amp;&amp;</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>balanceFactor</span>(<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>left</span><span style=color:#f92672>!</span>)  <span style=color:#f92672>&lt;</span>  <span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>left</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>rotateLeft</span>(<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>left</span><span style=color:#f92672>!</span>);
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>rotateRight</span>(<span style=color:#a6e22e>node</span>);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// RR 型
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>bf</span> <span style=color:#f92672>&lt;</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span> <span style=color:#f92672>&amp;&amp;</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>balanceFactor</span>(<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>right</span><span style=color:#f92672>!</span>) <span style=color:#f92672>&lt;=</span> <span style=color:#ae81ff>0</span>)
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>rotateLeft</span>(<span style=color:#a6e22e>node</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// RL 型：先右旋 node.right，再左旋 node
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>bf</span> <span style=color:#f92672>&lt;</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span> <span style=color:#f92672>&amp;&amp;</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>balanceFactor</span>(<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>right</span><span style=color:#f92672>!</span>) <span style=color:#f92672>&gt;</span>  <span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>right</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>rotateRight</span>(<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>right</span><span style=color:#f92672>!</span>);
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>rotateLeft</span>(<span style=color:#a6e22e>node</span>);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>node</span>; <span style=color:#75715e>// 已平衡，無需旋轉
+</span></span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// ─── 插入 ──────────────────────────────────────────────────────────────────
+</span></span></span><span style=display:flex><span>  <span style=color:#a6e22e>insert</span>(<span style=color:#a6e22e>val</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>void</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>root</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>_insert</span>(<span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>root</span>, <span style=color:#a6e22e>val</span>);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>_insert</span>(<span style=color:#a6e22e>node</span>: <span style=color:#66d9ef>AVLNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span>, <span style=color:#a6e22e>val</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#a6e22e>AVLNode</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span><span style=color:#a6e22e>node</span>) <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>AVLNode</span>(<span style=color:#a6e22e>val</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>val</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>val</span>)      <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>left</span>  <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>_insert</span>(<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>left</span>,  <span style=color:#a6e22e>val</span>);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>else</span> <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>val</span> <span style=color:#f92672>&gt;</span> <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>val</span>) <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>right</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>_insert</span>(<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>right</span>, <span style=color:#a6e22e>val</span>);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>else</span> <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>node</span>; <span style=color:#75715e>// 不儲存重複值
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>balance</span>(<span style=color:#a6e22e>node</span>); <span style=color:#75715e>// 插入後自底向上修正平衡
+</span></span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// ─── 刪除 ──────────────────────────────────────────────────────────────────
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>delete</span>(<span style=color:#a6e22e>val</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>void</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>root</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>_delete</span>(<span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>root</span>, <span style=color:#a6e22e>val</span>);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>_delete</span>(<span style=color:#a6e22e>node</span>: <span style=color:#66d9ef>AVLNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span>, <span style=color:#a6e22e>val</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#a6e22e>AVLNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span><span style=color:#a6e22e>node</span>) <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>null</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>val</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>val</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>left</span>  <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>_delete</span>(<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>left</span>,  <span style=color:#a6e22e>val</span>);
+</span></span><span style=display:flex><span>    } <span style=color:#66d9ef>else</span> <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>val</span> <span style=color:#f92672>&gt;</span> <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>val</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>right</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>_delete</span>(<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>right</span>, <span style=color:#a6e22e>val</span>);
+</span></span><span style=display:flex><span>    } <span style=color:#66d9ef>else</span> {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span><span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>left</span>)  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>right</span>;
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span><span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>right</span>) <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>left</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>      <span style=color:#75715e>// 找右子樹最小值替換
+</span></span></span><span style=display:flex><span>      <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>minRight</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>right</span>;
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>while</span> (<span style=color:#a6e22e>minRight</span>.<span style=color:#a6e22e>left</span>) <span style=color:#a6e22e>minRight</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>minRight</span>.<span style=color:#a6e22e>left</span>;
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>val</span>   <span style=color:#f92672>=</span> <span style=color:#a6e22e>minRight</span>.<span style=color:#a6e22e>val</span>;
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>right</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>_delete</span>(<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>right</span>, <span style=color:#a6e22e>minRight</span>.<span style=color:#a6e22e>val</span>);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>balance</span>(<span style=color:#a6e22e>node</span>); <span style=color:#75715e>// 刪除後修正平衡
+</span></span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>inorder</span>()<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span>[] {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>result</span>: <span style=color:#66d9ef>number</span>[] <span style=color:#f92672>=</span> [];
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>traverse</span> <span style=color:#f92672>=</span> (<span style=color:#a6e22e>n</span>: <span style=color:#66d9ef>AVLNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>void</span> <span style=color:#f92672>=&gt;</span> {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span><span style=color:#a6e22e>n</span>) <span style=color:#66d9ef>return</span>;
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>traverse</span>(<span style=color:#a6e22e>n</span>.<span style=color:#a6e22e>left</span>);
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>result</span>.<span style=color:#a6e22e>push</span>(<span style=color:#a6e22e>n</span>.<span style=color:#a6e22e>val</span>);
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>traverse</span>(<span style=color:#a6e22e>n</span>.<span style=color:#a6e22e>right</span>);
+</span></span><span style=display:flex><span>    };
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>traverse</span>(<span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>root</span>);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>result</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 測試：按升序插入（普通 BST 會退化，AVL 不會）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>avl</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>AVLTree</span>();
+</span></span><span style=display:flex><span>[<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>4</span>, <span style=color:#ae81ff>5</span>].<span style=color:#a6e22e>forEach</span>(<span style=color:#a6e22e>v</span> <span style=color:#f92672>=&gt;</span> <span style=color:#a6e22e>avl</span>.<span style=color:#a6e22e>insert</span>(<span style=color:#a6e22e>v</span>));
+</span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>avl</span>.<span style=color:#a6e22e>inorder</span>()); <span style=color:#75715e>// [1, 2, 3, 4, 5]（平衡後仍是 O(log n) 高度）
+</span></span></span></code></pre></div><h4 id=紅黑樹red-black-tree>紅黑樹（Red-Black Tree）</h4><p>紅黑樹是另一種自平衡 BST，用顏色標記代替精確的高度控制。相較於 AVL 樹的嚴格平衡，紅黑樹的規則更寬鬆，插入刪除效率更高，因此 Java <code>TreeMap</code>、C++ <code>std::map</code>、<code>std::set</code> 均採用紅黑樹實作。</p><p><strong>五條性質（缺一不可）：</strong></p><ol><li>每個節點是<strong>紅色</strong>或<strong>黑色</strong></li><li><strong>根節點是黑色</strong></li><li><strong>葉節點（NIL 節點）是黑色</strong></li><li><strong>紅色節點的子節點必須是黑色</strong>（不能有兩個連續紅節點）</li><li>從任意節點到其所有後代葉節點的路徑上，<strong>黑色節點數量相同</strong>（黑高度相同）</li></ol><p><strong>為什麼這五條能保證 O(log n)？</strong></p><p>由性質 4（紅不連續）和性質 5（黑高度相同），可以推導出：最長路徑（紅黑交替）不超過最短路徑（全黑）的 2 倍。設黑高度為 bh，則樹高 h ≤ 2 * bh = O(log n)。</p><p><strong>紅黑樹 vs. AVL 樹的選擇：</strong></p><table><thead><tr><th>比較項目</th><th>AVL 樹</th><th>紅黑樹</th></tr></thead><tbody><tr><td>平衡嚴格度</td><td>嚴格（高度差 ≤ 1）</td><td>較寬鬆（最長路徑 ≤ 2 倍最短）</td></tr><tr><td>搜尋效能</td><td>稍快（樹更矮）</td><td>稍慢</td></tr><tr><td>插入旋轉次數</td><td>O(log n) 次旋轉</td><td>O(1) 次旋轉（均攤）</td></tr><tr><td>刪除旋轉次數</td><td>O(log n) 次旋轉</td><td>O(1) 次旋轉（均攤）</td></tr><tr><td>適合場景</td><td>讀多寫少</td><td>讀寫均衡</td></tr><tr><td>實際應用</td><td>—</td><td>Java TreeMap、C++ std::map</td></tr></tbody></table><hr><h3 id=c-對照>C++ 對照</h3><h4 id=stl-有序容器底層為紅黑樹>STL 有序容器（底層為紅黑樹）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-cpp data-lang=cpp><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;map&gt;</span><span style=color:#75715e>
+</span></span></span><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;set&gt;</span><span style=color:#75715e>
+</span></span></span><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>void</span> <span style=color:#a6e22e>stdSetExample</span>() {
+</span></span><span style=display:flex><span>  std<span style=color:#f92672>::</span>set<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;</span> s <span style=color:#f92672>=</span> {<span style=color:#ae81ff>5</span>, <span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>8</span>, <span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>4</span>, <span style=color:#ae81ff>7</span>, <span style=color:#ae81ff>9</span>};
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// lower_bound：第一個 &gt;= key 的迭代器（閉）
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>auto</span> it <span style=color:#f92672>=</span> s.lower_bound(<span style=color:#ae81ff>4</span>);
+</span></span><span style=display:flex><span>  std<span style=color:#f92672>::</span>cout <span style=color:#f92672>&lt;&lt;</span> <span style=color:#f92672>*</span>it <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>;   <span style=color:#75715e>// 4
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// upper_bound：第一個 &gt; key 的迭代器（開）
+</span></span></span><span style=display:flex><span>  it <span style=color:#f92672>=</span> s.upper_bound(<span style=color:#ae81ff>4</span>);
+</span></span><span style=display:flex><span>  std<span style=color:#f92672>::</span>cout <span style=color:#f92672>&lt;&lt;</span> <span style=color:#f92672>*</span>it <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>;   <span style=color:#75715e>// 5
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 範圍查詢：[3, 7] 之間的所有元素
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>auto</span> lo <span style=color:#f92672>=</span> s.lower_bound(<span style=color:#ae81ff>3</span>);
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>auto</span> hi <span style=color:#f92672>=</span> s.upper_bound(<span style=color:#ae81ff>7</span>);
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>auto</span> i <span style=color:#f92672>=</span> lo; i <span style=color:#f92672>!=</span> hi; <span style=color:#f92672>++</span>i) {
+</span></span><span style=display:flex><span>    std<span style=color:#f92672>::</span>cout <span style=color:#f92672>&lt;&lt;</span> <span style=color:#f92672>*</span>i <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34; &#34;</span>; <span style=color:#75715e>// 3 4 5 7
+</span></span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>void</span> <span style=color:#a6e22e>stdMapExample</span>() {
+</span></span><span style=display:flex><span>  std<span style=color:#f92672>::</span>map<span style=color:#f92672>&lt;</span>std<span style=color:#f92672>::</span>string, <span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;</span> freq;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 插入/更新：O(log n)
+</span></span></span><span style=display:flex><span>  freq[<span style=color:#e6db74>&#34;apple&#34;</span>]<span style=color:#f92672>++</span>;
+</span></span><span style=display:flex><span>  freq[<span style=color:#e6db74>&#34;banana&#34;</span>] <span style=color:#f92672>+=</span> <span style=color:#ae81ff>2</span>;
+</span></span><span style=display:flex><span>  freq[<span style=color:#e6db74>&#34;apple&#34;</span>] <span style=color:#f92672>+=</span> <span style=color:#ae81ff>3</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 有序迭代（按 key 的字典序升序）
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>const</span> <span style=color:#66d9ef>auto</span><span style=color:#f92672>&amp;</span> [word, count] <span style=color:#f92672>:</span> freq) {
+</span></span><span style=display:flex><span>    std<span style=color:#f92672>::</span>cout <span style=color:#f92672>&lt;&lt;</span> word <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34;: &#34;</span> <span style=color:#f92672>&lt;&lt;</span> count <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>;
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// apple: 4
+</span></span></span><span style=display:flex><span>    <span style=color:#75715e>// banana: 2
+</span></span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// lower_bound 在 map 中使用
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>auto</span> it <span style=color:#f92672>=</span> freq.lower_bound(<span style=color:#e6db74>&#34;b&#34;</span>); <span style=color:#75715e>// 指向 &#34;banana&#34;
+</span></span></span><span style=display:flex><span>  std<span style=color:#f92672>::</span>cout <span style=color:#f92672>&lt;&lt;</span> it<span style=color:#f92672>-&gt;</span>first <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>;   <span style=color:#75715e>// banana
+</span></span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h4 id=裸指標-bst-與-leetcode-題目>裸指標 BST 與 LeetCode 題目</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-cpp data-lang=cpp><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;algorithm&gt;</span><span style=color:#75715e>
+</span></span></span><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;optional&gt;</span><span style=color:#75715e>
+</span></span></span><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;stack&gt;</span><span style=color:#75715e>
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── 裸指標 BST（對應 LeetCode 介面）────────────────────────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>struct</span> <span style=color:#a6e22e>TreeNode</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>int</span> val;
+</span></span><span style=display:flex><span>  TreeNode<span style=color:#f92672>*</span> left;
+</span></span><span style=display:flex><span>  TreeNode<span style=color:#f92672>*</span> right;
+</span></span><span style=display:flex><span>  TreeNode(<span style=color:#66d9ef>int</span> v <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>, TreeNode<span style=color:#f92672>*</span> l <span style=color:#f92672>=</span> <span style=color:#66d9ef>nullptr</span>, TreeNode<span style=color:#f92672>*</span> r <span style=color:#f92672>=</span> <span style=color:#66d9ef>nullptr</span>)
+</span></span><span style=display:flex><span>      <span style=color:#f92672>:</span> val(v), left(l), right(r) {}
+</span></span><span style=display:flex><span>};
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── BST 插入、搜尋、刪除 ─────────────────────────────────────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>BST</span> {
+</span></span><span style=display:flex><span> <span style=color:#66d9ef>public</span><span style=color:#f92672>:</span>
+</span></span><span style=display:flex><span>  TreeNode<span style=color:#f92672>*</span> insert(TreeNode<span style=color:#f92672>*</span> root, <span style=color:#66d9ef>int</span> val) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span>root) <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>new</span> TreeNode(val);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (val <span style=color:#f92672>&lt;</span> root<span style=color:#f92672>-&gt;</span>val)       root<span style=color:#f92672>-&gt;</span>left  <span style=color:#f92672>=</span> insert(root<span style=color:#f92672>-&gt;</span>left,  val);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>else</span> <span style=color:#a6e22e>if</span> (val <span style=color:#f92672>&gt;</span> root<span style=color:#f92672>-&gt;</span>val)  root<span style=color:#f92672>-&gt;</span>right <span style=color:#f92672>=</span> insert(root<span style=color:#f92672>-&gt;</span>right, val);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> root;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>bool</span> <span style=color:#a6e22e>search</span>(TreeNode<span style=color:#f92672>*</span> root, <span style=color:#66d9ef>int</span> val) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>while</span> (root) {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>if</span> (val <span style=color:#f92672>==</span> root<span style=color:#f92672>-&gt;</span>val) <span style=color:#66d9ef>return</span> true;
+</span></span><span style=display:flex><span>      root <span style=color:#f92672>=</span> (val <span style=color:#f92672>&lt;</span> root<span style=color:#f92672>-&gt;</span>val) <span style=color:#f92672>?</span> root<span style=color:#f92672>-&gt;</span>left : root<span style=color:#f92672>-&gt;</span>right;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> false;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  TreeNode<span style=color:#f92672>*</span> <span style=color:#a6e22e>deleteNode</span>(TreeNode<span style=color:#f92672>*</span> root, <span style=color:#66d9ef>int</span> val) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span>root) <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>nullptr</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (val <span style=color:#f92672>&lt;</span> root<span style=color:#f92672>-&gt;</span>val) {
+</span></span><span style=display:flex><span>      root<span style=color:#f92672>-&gt;</span>left  <span style=color:#f92672>=</span> deleteNode(root<span style=color:#f92672>-&gt;</span>left,  val);
+</span></span><span style=display:flex><span>    } <span style=color:#66d9ef>else</span> <span style=color:#66d9ef>if</span> (val <span style=color:#f92672>&gt;</span> root<span style=color:#f92672>-&gt;</span>val) {
+</span></span><span style=display:flex><span>      root<span style=color:#f92672>-&gt;</span>right <span style=color:#f92672>=</span> deleteNode(root<span style=color:#f92672>-&gt;</span>right, val);
+</span></span><span style=display:flex><span>    } <span style=color:#66d9ef>else</span> {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span>root<span style=color:#f92672>-&gt;</span>left)  <span style=color:#66d9ef>return</span> root<span style=color:#f92672>-&gt;</span>right;
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span>root<span style=color:#f92672>-&gt;</span>right) <span style=color:#66d9ef>return</span> root<span style=color:#f92672>-&gt;</span>left;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>      <span style=color:#75715e>// 找右子樹最小值（中序後繼）
+</span></span></span><span style=display:flex><span>      TreeNode<span style=color:#f92672>*</span> succ <span style=color:#f92672>=</span> root<span style=color:#f92672>-&gt;</span>right;
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>while</span> (succ<span style=color:#f92672>-&gt;</span>left) succ <span style=color:#f92672>=</span> succ<span style=color:#f92672>-&gt;</span>left;
+</span></span><span style=display:flex><span>      root<span style=color:#f92672>-&gt;</span>val   <span style=color:#f92672>=</span> succ<span style=color:#f92672>-&gt;</span>val;
+</span></span><span style=display:flex><span>      root<span style=color:#f92672>-&gt;</span>right <span style=color:#f92672>=</span> deleteNode(root<span style=color:#f92672>-&gt;</span>right, succ<span style=color:#f92672>-&gt;</span>val);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> root;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>};
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── 驗證 BST（LeetCode 98）───────────────────────────────────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Solution98</span> {
+</span></span><span style=display:flex><span> <span style=color:#66d9ef>public</span><span style=color:#f92672>:</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>bool</span> isValidBST(TreeNode<span style=color:#f92672>*</span> root) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>check</span>(root, std<span style=color:#f92672>::</span>nullopt, std<span style=color:#f92672>::</span>nullopt);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span> <span style=color:#66d9ef>private</span><span style=color:#f92672>:</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>bool</span> check(TreeNode<span style=color:#f92672>*</span> node,
+</span></span><span style=display:flex><span>             std<span style=color:#f92672>::</span>optional<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>long</span><span style=color:#f92672>&gt;</span> minVal,
+</span></span><span style=display:flex><span>             std<span style=color:#f92672>::</span>optional<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>long</span><span style=color:#f92672>&gt;</span> maxVal) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span>node) <span style=color:#66d9ef>return</span> true;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (minVal.has_value() <span style=color:#f92672>&amp;&amp;</span> node<span style=color:#f92672>-&gt;</span>val <span style=color:#f92672>&lt;=</span> minVal.value()) <span style=color:#66d9ef>return</span> false;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (maxVal.has_value() <span style=color:#f92672>&amp;&amp;</span> node<span style=color:#f92672>-&gt;</span>val <span style=color:#f92672>&gt;=</span> maxVal.value()) <span style=color:#66d9ef>return</span> false;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>check</span>(node<span style=color:#f92672>-&gt;</span>left,  minVal, node<span style=color:#f92672>-&gt;</span>val) <span style=color:#f92672>&amp;&amp;</span>
+</span></span><span style=display:flex><span>           check(node<span style=color:#f92672>-&gt;</span>right, node<span style=color:#f92672>-&gt;</span>val, maxVal);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>};
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── 第 K 小元素（LeetCode 230）──────────────────────────────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Solution230</span> {
+</span></span><span style=display:flex><span> <span style=color:#66d9ef>public</span><span style=color:#f92672>:</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>int</span> kthSmallest(TreeNode<span style=color:#f92672>*</span> root, <span style=color:#66d9ef>int</span> k) {
+</span></span><span style=display:flex><span>    std<span style=color:#f92672>::</span>stack<span style=color:#f92672>&lt;</span>TreeNode<span style=color:#f92672>*&gt;</span> stk;
+</span></span><span style=display:flex><span>    TreeNode<span style=color:#f92672>*</span> curr <span style=color:#f92672>=</span> root;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>int</span> count <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>while</span> (curr <span style=color:#f92672>||</span> <span style=color:#f92672>!</span>stk.empty()) {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>while</span> (curr) {
+</span></span><span style=display:flex><span>        stk.push(curr);
+</span></span><span style=display:flex><span>        curr <span style=color:#f92672>=</span> curr<span style=color:#f92672>-&gt;</span>left;
+</span></span><span style=display:flex><span>      }
+</span></span><span style=display:flex><span>      curr <span style=color:#f92672>=</span> stk.top(); stk.pop();
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>if</span> (<span style=color:#f92672>++</span>count <span style=color:#f92672>==</span> k) <span style=color:#66d9ef>return</span> curr<span style=color:#f92672>-&gt;</span>val;
+</span></span><span style=display:flex><span>      curr <span style=color:#f92672>=</span> curr<span style=color:#f92672>-&gt;</span>right;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>};
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── AVL Tree C++ 實作 ────────────────────────────────────────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>struct</span> <span style=color:#a6e22e>AVLNode</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>int</span> val, height;
+</span></span><span style=display:flex><span>  AVLNode<span style=color:#f92672>*</span> left;
+</span></span><span style=display:flex><span>  AVLNode<span style=color:#f92672>*</span> right;
+</span></span><span style=display:flex><span>  AVLNode(<span style=color:#66d9ef>int</span> v) <span style=color:#f92672>:</span> val(v), height(<span style=color:#ae81ff>1</span>), left(<span style=color:#66d9ef>nullptr</span>), right(<span style=color:#66d9ef>nullptr</span>) {}
+</span></span><span style=display:flex><span>};
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>AVLTree</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>height</span>(AVLNode<span style=color:#f92672>*</span> n) { <span style=color:#66d9ef>return</span> n <span style=color:#f92672>?</span> n<span style=color:#f92672>-&gt;</span>height : <span style=color:#ae81ff>0</span>; }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>updateHeight</span>(AVLNode<span style=color:#f92672>*</span> n) {
+</span></span><span style=display:flex><span>    n<span style=color:#f92672>-&gt;</span>height <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> <span style=color:#f92672>+</span> std<span style=color:#f92672>::</span>max(height(n<span style=color:#f92672>-&gt;</span>left), height(n<span style=color:#f92672>-&gt;</span>right));
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>bf</span>(AVLNode<span style=color:#f92672>*</span> n) { <span style=color:#66d9ef>return</span> height(n<span style=color:#f92672>-&gt;</span>left) <span style=color:#f92672>-</span> height(n<span style=color:#f92672>-&gt;</span>right); }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  AVLNode<span style=color:#f92672>*</span> <span style=color:#a6e22e>rotateRight</span>(AVLNode<span style=color:#f92672>*</span> z) {
+</span></span><span style=display:flex><span>    AVLNode<span style=color:#f92672>*</span> y  <span style=color:#f92672>=</span> z<span style=color:#f92672>-&gt;</span>left;
+</span></span><span style=display:flex><span>    AVLNode<span style=color:#f92672>*</span> T3 <span style=color:#f92672>=</span> y<span style=color:#f92672>-&gt;</span>right;
+</span></span><span style=display:flex><span>    y<span style=color:#f92672>-&gt;</span>right <span style=color:#f92672>=</span> z; z<span style=color:#f92672>-&gt;</span>left <span style=color:#f92672>=</span> T3;
+</span></span><span style=display:flex><span>    updateHeight(z); updateHeight(y);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> y;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  AVLNode<span style=color:#f92672>*</span> <span style=color:#a6e22e>rotateLeft</span>(AVLNode<span style=color:#f92672>*</span> z) {
+</span></span><span style=display:flex><span>    AVLNode<span style=color:#f92672>*</span> y  <span style=color:#f92672>=</span> z<span style=color:#f92672>-&gt;</span>right;
+</span></span><span style=display:flex><span>    AVLNode<span style=color:#f92672>*</span> T2 <span style=color:#f92672>=</span> y<span style=color:#f92672>-&gt;</span>left;
+</span></span><span style=display:flex><span>    y<span style=color:#f92672>-&gt;</span>left <span style=color:#f92672>=</span> z; z<span style=color:#f92672>-&gt;</span>right <span style=color:#f92672>=</span> T2;
+</span></span><span style=display:flex><span>    updateHeight(z); updateHeight(y);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> y;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  AVLNode<span style=color:#f92672>*</span> <span style=color:#a6e22e>balance</span>(AVLNode<span style=color:#f92672>*</span> n) {
+</span></span><span style=display:flex><span>    updateHeight(n);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>int</span> b <span style=color:#f92672>=</span> bf(n);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (b <span style=color:#f92672>&gt;</span>  <span style=color:#ae81ff>1</span> <span style=color:#f92672>&amp;&amp;</span> bf(n<span style=color:#f92672>-&gt;</span>left)  <span style=color:#f92672>&gt;=</span> <span style=color:#ae81ff>0</span>) <span style=color:#66d9ef>return</span> rotateRight(n);  <span style=color:#75715e>// LL
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (b <span style=color:#f92672>&gt;</span>  <span style=color:#ae81ff>1</span> <span style=color:#f92672>&amp;&amp;</span> bf(n<span style=color:#f92672>-&gt;</span>left)  <span style=color:#f92672>&lt;</span>  <span style=color:#ae81ff>0</span>) {                        <span style=color:#75715e>// LR
+</span></span></span><span style=display:flex><span>      n<span style=color:#f92672>-&gt;</span>left <span style=color:#f92672>=</span> rotateLeft(n<span style=color:#f92672>-&gt;</span>left);
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>return</span> rotateRight(n);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (b <span style=color:#f92672>&lt;</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span> <span style=color:#f92672>&amp;&amp;</span> bf(n<span style=color:#f92672>-&gt;</span>right) <span style=color:#f92672>&lt;=</span> <span style=color:#ae81ff>0</span>) <span style=color:#66d9ef>return</span> rotateLeft(n);   <span style=color:#75715e>// RR
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (b <span style=color:#f92672>&lt;</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span> <span style=color:#f92672>&amp;&amp;</span> bf(n<span style=color:#f92672>-&gt;</span>right) <span style=color:#f92672>&gt;</span>  <span style=color:#ae81ff>0</span>) {                        <span style=color:#75715e>// RL
+</span></span></span><span style=display:flex><span>      n<span style=color:#f92672>-&gt;</span>right <span style=color:#f92672>=</span> rotateRight(n<span style=color:#f92672>-&gt;</span>right);
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>return</span> rotateLeft(n);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> n;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  AVLNode<span style=color:#f92672>*</span> <span style=color:#a6e22e>_insert</span>(AVLNode<span style=color:#f92672>*</span> n, <span style=color:#66d9ef>int</span> val) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span>n) <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>new</span> AVLNode(val);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (val <span style=color:#f92672>&lt;</span> n<span style=color:#f92672>-&gt;</span>val)      n<span style=color:#f92672>-&gt;</span>left  <span style=color:#f92672>=</span> _insert(n<span style=color:#f92672>-&gt;</span>left,  val);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>else</span> <span style=color:#66d9ef>if</span> (val <span style=color:#f92672>&gt;</span> n<span style=color:#f92672>-&gt;</span>val) n<span style=color:#f92672>-&gt;</span>right <span style=color:#f92672>=</span> _insert(n<span style=color:#f92672>-&gt;</span>right, val);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>else</span> <span style=color:#66d9ef>return</span> n;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> balance(n);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span> <span style=color:#66d9ef>public</span><span style=color:#f92672>:</span>
+</span></span><span style=display:flex><span>  AVLNode<span style=color:#f92672>*</span> root <span style=color:#f92672>=</span> <span style=color:#66d9ef>nullptr</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>insert</span>(<span style=color:#66d9ef>int</span> val) { root <span style=color:#f92672>=</span> _insert(root, val); }
+</span></span><span style=display:flex><span>};
+</span></span></code></pre></div><hr><h3 id=複雜度分析>複雜度分析</h3><table><thead><tr><th>操作</th><th>BST（平均）</th><th>BST（最壞，退化）</th><th>AVL Tree</th><th>紅黑樹</th></tr></thead><tbody><tr><td>Search</td><td>O(log n)</td><td>O(n)</td><td>O(log n)</td><td>O(log n)</td></tr><tr><td>Insert</td><td>O(log n)</td><td>O(n)</td><td>O(log n)</td><td>O(log n)</td></tr><tr><td>Delete</td><td>O(log n)</td><td>O(n)</td><td>O(log n)</td><td>O(log n)</td></tr><tr><td>中序遍歷</td><td>O(n)</td><td>O(n)</td><td>O(n)</td><td>O(n)</td></tr><tr><td>空間</td><td>O(n)</td><td>O(n)</td><td>O(n)</td><td>O(n)</td></tr><tr><td>旋轉次數（插入）</td><td>—</td><td>—</td><td>O(log n)</td><td>O(1) 均攤</td></tr><tr><td>旋轉次數（刪除）</td><td>—</td><td>—</td><td>O(log n)</td><td>O(1) 均攤</td></tr></tbody></table><blockquote><p><strong>h 為樹高</strong>。普通 BST 的 h 介於 O(log n)（平衡）與 O(n)（退化）之間；AVL 樹嚴格保證 h = O(log n)；紅黑樹保證 h ≤ 2 * log₂(n+1)，實際上也是 O(log n)。</p></blockquote><hr><h3 id=變體與延伸>變體與延伸</h3><h4 id=splay-tree伸展樹>Splay Tree（伸展樹）</h4><p>Splay Tree 是一種自調整 BST（Self-Adjusting BST）。每次存取（搜尋、插入、刪除）都會把目標節點「伸展（Splaying）」到根節點——通過一系列旋轉。</p><p><strong>核心優勢：</strong></p><ul><li>均攤時間 O(log n)（單次操作最壞 O(n)，但連續 m 次操作總共 O(m log n)）</li><li>對快取友好（最近存取的節點在根附近，下次存取更快）</li><li>實作比 AVL 和紅黑樹簡單</li></ul><p><strong>適合場景</strong>：快取置換、局部性強的存取模式（少數熱點資料被頻繁存取）。</p><h4 id=treap樹--堆>Treap（樹 + 堆）</h4><p>Treap 是 BST 與最大堆積的結合：每個節點有一個鍵值（key）和一個隨機優先值（priority）。對 key 滿足 BST 性質，對 priority 滿足 Heap 性質。</p><p><strong>為什麼有效？</strong> 隨機 priority 使 Treap 的期望形狀接近隨機二元搜尋樹（Random BST），期望樹高為 O(log n)，且不需要複雜的旋轉邏輯——只要維持 heap 性質，旋轉自然而然發生。</p><p><strong>適合場景</strong>：競程題目、需要簡單實作但又想要期望 O(log n) 效能的場景。</p><hr><h3 id=面試考點>面試考點</h3><h4 id=驗證-bst-的常見陷阱>驗證 BST 的常見陷阱</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// 錯誤做法：只看父子節點關係
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>isValidBSTWrong</span>(<span style=color:#a6e22e>root</span>: <span style=color:#66d9ef>TreeNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>boolean</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span><span style=color:#a6e22e>root</span>) <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>true</span>;
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 這樣無法偵測到「右子樹的左後代比根節點還小」的情況
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>leftOk</span>  <span style=color:#f92672>=</span> <span style=color:#f92672>!</span><span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>left</span>  <span style=color:#f92672>||</span> <span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>left</span>.<span style=color:#a6e22e>val</span>  <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>val</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>rightOk</span> <span style=color:#f92672>=</span> <span style=color:#f92672>!</span><span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>right</span> <span style=color:#f92672>||</span> <span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>right</span>.<span style=color:#a6e22e>val</span> <span style=color:#f92672>&gt;</span> <span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>val</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>leftOk</span> <span style=color:#f92672>&amp;&amp;</span> <span style=color:#a6e22e>rightOk</span> <span style=color:#f92672>&amp;&amp;</span>
+</span></span><span style=display:flex><span>         <span style=color:#a6e22e>isValidBSTWrong</span>(<span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>left</span>) <span style=color:#f92672>&amp;&amp;</span> <span style=color:#a6e22e>isValidBSTWrong</span>(<span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>right</span>);
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#75715e>// 對以下輸入錯誤通過：[5, 1, 4, null, null, 3, 6]
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 4 的左子節點 3 &lt; 4 符合局部條件，但 3 &lt; 5（根），違反整棵樹的 BST 性質
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 正確做法：傳遞全局上下界
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>isValidBSTCorrect</span>(<span style=color:#a6e22e>root</span>: <span style=color:#66d9ef>TreeNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>boolean</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>function</span> <span style=color:#a6e22e>check</span>(<span style=color:#a6e22e>node</span>: <span style=color:#66d9ef>TreeNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span>, <span style=color:#a6e22e>min</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>max</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>boolean</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span><span style=color:#a6e22e>node</span>) <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>true</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>val</span> <span style=color:#f92672>&lt;=</span> <span style=color:#a6e22e>min</span> <span style=color:#f92672>||</span> <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>val</span> <span style=color:#f92672>&gt;=</span> <span style=color:#a6e22e>max</span>) <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>false</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>check</span>(<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>left</span>, <span style=color:#a6e22e>min</span>, <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>val</span>) <span style=color:#f92672>&amp;&amp;</span> <span style=color:#a6e22e>check</span>(<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>right</span>, <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>val</span>, <span style=color:#a6e22e>max</span>);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>check</span>(<span style=color:#a6e22e>root</span>, <span style=color:#f92672>-</span><span style=color:#66d9ef>Infinity</span>, <span style=color:#66d9ef>Infinity</span>);
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h4 id=整數溢位防護>整數溢位防護</h4><p>LeetCode 98 的節點值可以是 <code>INT_MIN</code> 或 <code>INT_MAX</code>，若用 <code>number</code> 類型（JavaScript 的雙精度浮點數）作為邊界：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// TypeScript 中 -Infinity 和 Infinity 安全處理整數邊界
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 不會有溢位問題（JavaScript number 範圍為 -(2^53-1) 到 2^53-1）
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// C++ 版本需要特別注意：
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 錯誤：用 INT_MIN / INT_MAX 作邊界 → 比較時 node-&gt;val &lt;= INT_MIN 可能溢位
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 正確：用 std::optional&lt;long&gt; 或 LLONG_MIN / LLONG_MAX
+</span></span></span></code></pre></div><h4 id=刪除後繼時忘記遞迴刪除>刪除後繼時忘記遞迴刪除</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// 常見錯誤：複製後繼值後忘記從右子樹刪除後繼
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>private</span> <span style=color:#a6e22e>_deleteWrong</span>(<span style=color:#a6e22e>node</span>: <span style=color:#66d9ef>BSTNode</span>, <span style=color:#a6e22e>val</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#a6e22e>BSTNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span> {
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// ... 找到後繼 ...
+</span></span></span><span style=display:flex><span>  <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>val</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>successor</span>.<span style=color:#a6e22e>val</span>; <span style=color:#75715e>// 值複製
+</span></span></span><span style=display:flex><span>  <span style=color:#75715e>// 忘記這一行！樹中出現重複值！
+</span></span></span><span style=display:flex><span>  <span style=color:#75715e>// node.right = this._delete(node.right, successor.val);
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>node</span>;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><hr><h3 id=leetcode-練習>LeetCode 練習</h3><h4 id=leetcode-98--validate-binary-search-treemedium>LeetCode 98 — Validate Binary Search Tree（Medium）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>isValidBST</span>(<span style=color:#a6e22e>root</span>: <span style=color:#66d9ef>TreeNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>boolean</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>function</span> <span style=color:#a6e22e>validate</span>(<span style=color:#a6e22e>node</span>: <span style=color:#66d9ef>TreeNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span>, <span style=color:#a6e22e>min</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>max</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>boolean</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span><span style=color:#a6e22e>node</span>) <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>true</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>val</span> <span style=color:#f92672>&lt;=</span> <span style=color:#a6e22e>min</span> <span style=color:#f92672>||</span> <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>val</span> <span style=color:#f92672>&gt;=</span> <span style=color:#a6e22e>max</span>) <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>false</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>validate</span>(<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>left</span>,  <span style=color:#a6e22e>min</span>,      <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>val</span>) <span style=color:#f92672>&amp;&amp;</span>
+</span></span><span style=display:flex><span>           <span style=color:#a6e22e>validate</span>(<span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>right</span>, <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>val</span>, <span style=color:#a6e22e>max</span>);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>validate</span>(<span style=color:#a6e22e>root</span>, <span style=color:#f92672>-</span><span style=color:#66d9ef>Infinity</span>, <span style=color:#66d9ef>Infinity</span>);
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#75715e>// 時間 O(n)，空間 O(h)
+</span></span></span></code></pre></div><h4 id=leetcode-230--kth-smallest-element-in-a-bstmedium>LeetCode 230 — Kth Smallest Element in a BST（Medium）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>kthSmallest</span>(<span style=color:#a6e22e>root</span>: <span style=color:#66d9ef>TreeNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span>, <span style=color:#a6e22e>k</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>stack</span>: <span style=color:#66d9ef>TreeNode</span>[] <span style=color:#f92672>=</span> [];
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>curr</span>: <span style=color:#66d9ef>TreeNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>root</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>count</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>while</span> (<span style=color:#a6e22e>curr</span> <span style=color:#f92672>!==</span> <span style=color:#66d9ef>null</span> <span style=color:#f92672>||</span> <span style=color:#a6e22e>stack</span>.<span style=color:#a6e22e>length</span> <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>while</span> (<span style=color:#a6e22e>curr</span> <span style=color:#f92672>!==</span> <span style=color:#66d9ef>null</span>) { <span style=color:#a6e22e>stack</span>.<span style=color:#a6e22e>push</span>(<span style=color:#a6e22e>curr</span>); <span style=color:#a6e22e>curr</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>left</span>; }
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>curr</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>stack</span>.<span style=color:#a6e22e>pop</span>()<span style=color:#f92672>!</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#f92672>++</span><span style=color:#a6e22e>count</span> <span style=color:#f92672>===</span> <span style=color:#a6e22e>k</span>) <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>val</span>;
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>curr</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>right</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#75715e>// 時間 O(h + k)，空間 O(h)
+</span></span></span></code></pre></div><h4 id=leetcode-235--lowest-common-ancestor-of-bstmedium>LeetCode 235 — Lowest Common Ancestor of BST（Medium）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>lowestCommonAncestor</span>(
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>root</span>: <span style=color:#66d9ef>TreeNode</span>, <span style=color:#a6e22e>p</span>: <span style=color:#66d9ef>TreeNode</span>, <span style=color:#a6e22e>q</span>: <span style=color:#66d9ef>TreeNode</span>
+</span></span><span style=display:flex><span>)<span style=color:#f92672>:</span> <span style=color:#a6e22e>TreeNode</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>curr</span>: <span style=color:#66d9ef>TreeNode</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>root</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>while</span> (<span style=color:#66d9ef>true</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>p</span>.<span style=color:#a6e22e>val</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>val</span> <span style=color:#f92672>&amp;&amp;</span> <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>val</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>val</span>)      <span style=color:#a6e22e>curr</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>left</span><span style=color:#f92672>!</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>else</span> <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>p</span>.<span style=color:#a6e22e>val</span> <span style=color:#f92672>&gt;</span> <span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>val</span> <span style=color:#f92672>&amp;&amp;</span> <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>val</span> <span style=color:#f92672>&gt;</span> <span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>val</span>) <span style=color:#a6e22e>curr</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>right</span><span style=color:#f92672>!</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>else</span> <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>curr</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#75715e>// 時間 O(h)，空間 O(1)
+</span></span></span></code></pre></div><h4 id=leetcode-108--convert-sorted-array-to-bsteasy>LeetCode 108 — Convert Sorted Array to BST（Easy）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// 中間元素作為根，分治建構高度平衡的 BST
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>sortedArrayToBST</span>(<span style=color:#a6e22e>nums</span>: <span style=color:#66d9ef>number</span>[])<span style=color:#f92672>:</span> <span style=color:#a6e22e>TreeNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>function</span> <span style=color:#a6e22e>build</span>(<span style=color:#a6e22e>left</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>right</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#a6e22e>TreeNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>left</span> <span style=color:#f92672>&gt;</span> <span style=color:#a6e22e>right</span>) <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>null</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>mid</span> <span style=color:#f92672>=</span> Math.<span style=color:#a6e22e>floor</span>((<span style=color:#a6e22e>left</span> <span style=color:#f92672>+</span> <span style=color:#a6e22e>right</span>) <span style=color:#f92672>/</span> <span style=color:#ae81ff>2</span>);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>node</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>TreeNode</span>(<span style=color:#a6e22e>nums</span>[<span style=color:#a6e22e>mid</span>]);
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>left</span>  <span style=color:#f92672>=</span> <span style=color:#a6e22e>build</span>(<span style=color:#a6e22e>left</span>, <span style=color:#a6e22e>mid</span> <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>);
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>node</span>.<span style=color:#a6e22e>right</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>build</span>(<span style=color:#a6e22e>mid</span> <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>, <span style=color:#a6e22e>right</span>);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>node</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>build</span>(<span style=color:#ae81ff>0</span>, <span style=color:#a6e22e>nums</span>.<span style=color:#a6e22e>length</span> <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>);
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#75715e>// 時間 O(n)，空間 O(log n)（遞迴棧深度 = 樹高）
+</span></span></span></code></pre></div><h4 id=leetcode-450--delete-node-in-a-bstmedium>LeetCode 450 — Delete Node in a BST（Medium）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>deleteNode</span>(<span style=color:#a6e22e>root</span>: <span style=color:#66d9ef>TreeNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span>, <span style=color:#a6e22e>key</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#a6e22e>TreeNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span><span style=color:#a6e22e>root</span>) <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>null</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>key</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>val</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>left</span>  <span style=color:#f92672>=</span> <span style=color:#a6e22e>deleteNode</span>(<span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>left</span>,  <span style=color:#a6e22e>key</span>);
+</span></span><span style=display:flex><span>  } <span style=color:#66d9ef>else</span> <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>key</span> <span style=color:#f92672>&gt;</span> <span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>val</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>right</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>deleteNode</span>(<span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>right</span>, <span style=color:#a6e22e>key</span>);
+</span></span><span style=display:flex><span>  } <span style=color:#66d9ef>else</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span><span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>left</span>)  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>right</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span><span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>right</span>) <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>left</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>succ</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>right</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>while</span> (<span style=color:#a6e22e>succ</span>.<span style=color:#a6e22e>left</span>) <span style=color:#a6e22e>succ</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>succ</span>.<span style=color:#a6e22e>left</span>;
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>val</span>   <span style=color:#f92672>=</span> <span style=color:#a6e22e>succ</span>.<span style=color:#a6e22e>val</span>;
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>right</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>deleteNode</span>(<span style=color:#a6e22e>root</span>.<span style=color:#a6e22e>right</span>, <span style=color:#a6e22e>succ</span>.<span style=color:#a6e22e>val</span>);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>root</span>;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#75715e>// 時間 O(h)，空間 O(h)
+</span></span></span></code></pre></div><hr><h3 id=總結>總結</h3><p>二元搜尋樹是「有序」與「樹」的完美結合，讓字典查詢、範圍查詢、有序統計等問題都能在 O(log n) 內解決。回顧本文的核心知識點：</p><ol><li><p><strong>BST 三大操作</strong>：搜尋（利用有序性逐層縮小範圍）、插入（找到正確位置插入）、刪除（三種情況，雙子節點用中序後繼替換）。</p></li><li><p><strong>中序有序性</strong>：BST 的中序遍歷恆為升序，這讓第 K 小、驗證 BST 等問題有了優雅的解法。</p></li><li><p><strong>退化問題與自平衡</strong>：有序插入會讓 BST 退化為 O(n)，AVL 樹（嚴格高度差 ≤ 1）和紅黑樹（黑高度相同+紅不連續）各自用不同策略保證 O(log n)。</p></li><li><p><strong>選擇依據</strong>：讀多寫少選 AVL（搜尋更快）；讀寫均衡選紅黑樹（插入刪除旋轉少）；工業實際幾乎都用紅黑樹（C++ STL、Java TreeMap）。</p></li><li><p><strong>四大面試陷阱</strong>：驗證 BST 必須傳全局上下界、刪除後繼後要遞迴刪除、AVL 旋轉後先更新子節點再更新父節點高度、整數邊界溢位問題。</p></li></ol><p>掌握 BST 及其自平衡變體，是攻克更進階資料結構（Segment Tree、B+ Tree 資料庫索引）的重要基石。希望這篇文章能幫助你建立清晰的 BST 思維，在面試中自信地處理各種樹題。如果有任何問題或疑惑，歡迎至
+<a class="text-blue-500 font-bold no-underline" href=/contact/ target=_blank>聯絡頁面</a>
+留言交流。</p><p><strong>下一篇預告</strong>：我們將進入 <strong>字典樹（Trie）</strong> 的世界，探討如何用多叉樹高效解決字串前綴搜尋、自動補全與單詞過濾等問題。</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
+</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/javascript/data-structures--algorithms/009-binary-tree/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">二元樹 — 四種遍歷方式與遞迴/迭代實作完整教學 | 資料結構與演算法</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/22</span>
+</a><a href=https://benzhub.github.io/post/javascript/data-structures--algorithms/008-binary-search/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">二分搜尋 — Binary Search 三種模板與二分答案技巧 | 資料結構與演算法</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/21</span>
+</a><a href=https://benzhub.github.io/post/javascript/data-structures--algorithms/007-sorting/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">排序演算法 — Bubble、Merge、Quick Sort 等十大排序完整比較 | 資料結構與演算法</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/20</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/javascript/data-structures--algorithms/009-binary-tree/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+<span class="text-sm font-medium">二元樹 — 四種遍歷方式與遞迴/迭代實作完整教學 | 資料結構與演算法</span></a></div><div></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
+</a><a href=/tags/acid><span class=tag-pill>acid</span>
+</a><a href=/tags/ai><span class=tag-pill>ai</span>
+</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
+</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
+</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
+</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
+</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
+</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
+</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
+</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
+</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
+</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
+</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
+</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
+</a><a href=/tags/analytics><span class=tag-pill>analytics</span>
+</a><a href=/tags/api><span class=tag-pill>api</span>
+</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
+</a><a href=/tags/autovacuum><span class=tag-pill>autovacuum</span>
+</a><a href=/tags/avl><span class=tag-pill>avl</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (17)</span>
+</a><a href=/post/javascript/><span class=tag-pill>JavaScript (72)</span>
+</a><a href=/post/django/><span class=tag-pill>Django (34)</span>
+</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
+</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
+</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
+</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
+</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/django/034-django-celery-advanced/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django + Celery 進階：排程任務、重試與監控 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/23</p></a><a href=/post/javascript/data-structures--algorithms/010-bst/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">二元搜尋樹 — BST 操作、AVL 與紅黑樹自平衡機制 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/23</p></a><a href=/post/postgresql/017-window-functions/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">窗口函式：PostgreSQL 強大的分析型查詢能力 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/23</p></a><a href=/post/django/033-django-celery-basics/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django + Celery 非同步任務佇列入門 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/22</p></a><a href=/post/javascript/data-structures--algorithms/009-binary-tree/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">二元樹 — 四種遍歷方式與遞迴/迭代實作完整教學 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/22</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>
