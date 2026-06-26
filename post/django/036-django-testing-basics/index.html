@@ -1,0 +1,491 @@
+<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>Django Testing 單元測試與整合測試入門 | Django 教學 | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="Django Testing 單元測試與整合測試入門 | Django 教學 | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="Django Testing 完整入門教學！從 Django 測試框架的運作機制、TestCase 與 SimpleTestCase 的選擇，到 Model 測試、View 測試、Form 測試的實戰寫法，搭配 setUp、assert 方法與 manage.py test 執行技巧，一篇掌握 Django 單元測試與整合測試基礎。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="Django Testing 完整入門教學！從 Django 測試框架的運作機制、TestCase 與 SimpleTestCase 的選擇，到 Model 測試、View 測試、Form 測試的實戰寫法，搭配 setUp、assert 方法與 manage.py test 執行技巧，一篇掌握 Django 單元測試與整合測試基礎。"><meta property="og:url" content="https://benzhub.github.io/post/django/036-django-testing-basics/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/django/036-django-testing-basics/><meta name=twitter:description content="Django Testing 完整入門教學！從 Django 測試框架的運作機制、TestCase 與 SimpleTestCase 的選擇，到 Model 測試、View 測試、Form 測試的實戰寫法，搭配 setUp、assert 方法與 manage.py test 執行技巧，一篇掌握 Django 單元測試與整合測試基礎。"><meta property="article:published_time" content="2026-06-25T00:00:00+00:00"><meta property="article:updated_time" content="2026-05-27T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/django/036-Django-Testing-Basics.png"><meta property="og:image:url" content="https://benzhub.github.io/img/django/036-Django-Testing-Basics.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/django/036-django-testing-basics/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/django/036-django-testing-basics/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"Django Testing 單元測試與整合測試入門 | Django 教學\"","description":"\"Django Testing 完整入門教學！從 Django 測試框架的運作機制、TestCase 與 SimpleTestCase 的選擇，到 Model 測試、View 測試、Form 測試的實戰寫法，搭配 setUp、assert 方法與 manage.py test 執行技巧，一篇掌握 Django 單元測試與整合測試基礎。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-06-25T00:00:00\u002b00:00","dateModified":"2026-05-27T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/django\/036-Django-Testing-Basics.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/django\/036-django-testing-basics\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/django\/"},{"@type":"ListItem","position":3,"name":"\"Django Testing 單元測試與整合測試入門 | Django 教學\""}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"\"Django 的測試框架是基於什麼？跟 pytest 有什麼關係？\"","acceptedAnswer":{"@type":"Answer","text":"\"Django 的測試框架是基於 Python 標準函式庫的 unittest 模組建構而成。Django 在 unittest.TestCase 的基礎上擴展了 TestCase、SimpleTestCase、TransactionTestCase 等類別，加入了資料庫管理、HTTP 客戶端模擬等 Web 開發所需的功能。pytest 則是 Python 生態系中另一個流行的測試框架，透過 pytest-django 套件可以無縫整合 Django 的測試工具。\""}},{"@type":"Question","name":"\"TestCase 和 SimpleTestCase 該怎麼選擇？\"","acceptedAnswer":{"@type":"Answer","text":"\"如果測試需要存取資料庫（建立、查詢、修改、刪除 Model 資料），使用 TestCase，它會在每個測試方法前後自動管理 Transaction 並 rollback，確保測試之間互不影響。如果測試不涉及資料庫操作（如測試純函式、URL 解析、Template 渲染），使用 SimpleTestCase，執行速度更快。\""}},{"@type":"Question","name":"\"setUp 和 setUpTestData 有什麼差別？該用哪個？\"","acceptedAnswer":{"@type":"Answer","text":"\"setUp() 在每個測試方法執行前都會呼叫一次，適合建立每次測試都需要獨立副本的資料。setUpTestData() 是類別方法，在整個 TestCase 類別中只執行一次，建立的資料在所有測試方法間共享，執行效率更高。如果測試資料是唯讀的（不會在測試中修改），優先使用 setUpTestData() 來加速測試。\""}}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Django Testing 單元測試與整合測試入門 | Django 教學</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/25
+</span><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001.0 004.582 9m0 0H9m11 11v-5h-.581m0 0A8.003 8.003.0 014.062 13m15.357 2H15"/></svg>
+2026/05/27</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/python class="tag-pill no-underline">python</a>
+<a href=/tags/django class="tag-pill no-underline">django</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/django/036-Django-Testing-Basics.png alt="Django Testing 單元測試與整合測試入門 | Django 教學"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p><strong>Django Testing</strong> 是 Django 內建的完整測試基礎設施，基於 Python 標準函式庫的 <strong>unittest</strong> 模組建構，提供 <strong>TestCase</strong>、<strong>SimpleTestCase</strong>、<strong>TransactionTestCase</strong> 等測試類別，搭配內建的 <strong>Test Client</strong>（測試客戶端）可以模擬 HTTP 請求，無需啟動伺服器就能測試 View、Model、Form 等所有元件。本文將從 Django 測試框架的運作機制開始，帶你掌握 Model 測試、View 測試、Form 測試的基礎寫法，以及各種 <strong>assert</strong> 斷言方法與測試執行技巧。</p></blockquote><h3 id=為什麼要寫測試>為什麼要寫測試？</h3><p>在專案規模逐漸增長的過程中，每次新增功能或修改程式碼都可能不小心影響到已有的功能。手動測試耗時且容易遺漏，自動化測試（Automated Testing）則能幫你：</p><ul><li><strong>防止回歸錯誤（Regression）</strong>：確保修改程式碼後不會破壞現有功能</li><li><strong>作為活文件（Living Documentation）</strong>：測試案例清楚描述了每個功能的預期行為</li><li><strong>支撐重構</strong>：有完善的測試覆蓋，你才能放心地重構程式碼</li><li><strong>加速開發</strong>：看似多花時間寫測試，實際上大幅減少了除錯的時間</li></ul><p>Django 的測試框架讓你能夠以最小的設定成本開始撰寫測試，而不需要額外安裝任何套件。</p><hr><h3 id=django-測試框架概覽>Django 測試框架概覽</h3><p>Django 的測試框架建構於 Python 標準函式庫的 <code>unittest</code> 模組之上。當你執行 <code>python manage.py test</code> 時，Django 會：</p><ol><li>建立一個獨立的測試資料庫（在原資料庫名稱前加上 <code>test_</code> 前綴）</li><li>執行所有的 Migration（遷移）來建立資料表結構</li><li>依序執行所有找到的測試方法</li><li>測試完成後銷毀測試資料庫</li></ol><p>這表示你的測試永遠不會影響到正式的資料庫，完全隔離且安全。</p><h4 id=測試金字塔>測試金字塔</h4><p>軟體測試一般遵循「測試金字塔（Testing Pyramid）」的原則，從底層到頂層分為三類：</p><pre tabindex=0><code>          /\
+         /  \
+        / E2E \       最少（Selenium、Playwright）
+       /  Tests \
+      /----------\
+     /  Integration \  中量（View + Model 互動）
+    /    Tests       \
+   /------------------\
+  /    Unit Tests      \  最多（Model 方法、工具函式）
+ /______________________\
+</code></pre><ul><li><strong>Unit Tests（單元測試）</strong>：測試最小單元，如 Model 的方法、工具函式、Serializer。執行速度最快，數量最多</li><li><strong>Integration Tests（整合測試）</strong>：測試元件間的互動，如 View 與 Model 的配合、表單驗證流程。允許資料庫操作</li><li><strong>E2E Tests（端到端測試）</strong>：模擬真實使用者操作（需要瀏覽器驅動），速度最慢，數量最少</li></ul><hr><h3 id=testcase-類別選擇>TestCase 類別選擇</h3><p>Django 提供了多種測試基礎類別，根據你的測試需求選擇最適合的：</p><table><thead><tr><th>類別</th><th>資料庫操作</th><th>Transaction 行為</th><th>適用場景</th></tr></thead><tbody><tr><td><code>SimpleTestCase</code></td><td>不允許</td><td>無</td><td>純函式、URL 配置、Template 渲染</td></tr><tr><td><code>TestCase</code></td><td>允許</td><td>每個 test 在 Transaction 中，結束後 rollback</td><td>最常用：Model CRUD、View 測試</td></tr><tr><td><code>TransactionTestCase</code></td><td>允許</td><td>真實 Transaction（不自動 rollback）</td><td><code>on_commit()</code> 鉤子、Transaction 相關邏輯</td></tr><tr><td><code>LiveServerTestCase</code></td><td>允許</td><td>同 TransactionTestCase</td><td>啟動真實 HTTP 伺服器，配合 Selenium</td></tr></tbody></table><p><strong>最常用的是 <code>TestCase</code></strong>，它用資料庫的 <code>SAVEPOINT</code> 包裹每個測試方法，測試結束後自動 rollback，既能存取資料庫又不會殘留測試資料，速度也最快。</p><p><code>TransactionTestCase</code> 使用真實的 Transaction commit/rollback，速度較慢，只在你需要測試 <code>transaction.on_commit()</code> 或手動管理 Transaction 時才使用。</p><hr><h3 id=model-測試>Model 測試</h3><p>Model 測試是最基礎也最重要的測試類型，確保你的資料模型（Model）行為正確。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># articles/tests/test_models.py</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.test <span style=color:#f92672>import</span> TestCase
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.core.exceptions <span style=color:#f92672>import</span> ValidationError
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.contrib.auth.models <span style=color:#f92672>import</span> User
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> articles.models <span style=color:#f92672>import</span> Article
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ArticleModelTest</span>(TestCase):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;測試 Article Model 的欄位驗證與方法。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>@classmethod</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>setUpTestData</span>(cls):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;在整個 TestCase 中只執行一次，建立共用的唯讀測試資料。
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>        比 setUp() 更快，因為不需要每個測試方法都重新建立。
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>        &#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        cls<span style=color:#f92672>.</span>user <span style=color:#f92672>=</span> User<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>create_user(
+</span></span><span style=display:flex><span>            username<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;testauthor&#39;</span>,
+</span></span><span style=display:flex><span>            email<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;author@example.com&#39;</span>,
+</span></span><span style=display:flex><span>            password<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;testpass123&#39;</span>,
+</span></span><span style=display:flex><span>        )
+</span></span><span style=display:flex><span>        cls<span style=color:#f92672>.</span>article <span style=color:#f92672>=</span> Article<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>create(
+</span></span><span style=display:flex><span>            title<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;測試文章&#39;</span>,
+</span></span><span style=display:flex><span>            content<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;這是測試文章的內容&#39;</span>,
+</span></span><span style=display:flex><span>            author<span style=color:#f92672>=</span>cls<span style=color:#f92672>.</span>user,
+</span></span><span style=display:flex><span>        )
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>test_article_str_method</span>(self):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;測試 __str__ 方法回傳文章標題。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>assertEqual(str(self<span style=color:#f92672>.</span>article), <span style=color:#e6db74>&#39;測試文章&#39;</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>test_article_default_ordering</span>(self):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;測試 Model 的預設排序。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        Article<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>create(
+</span></span><span style=display:flex><span>            title<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;第二篇文章&#39;</span>,
+</span></span><span style=display:flex><span>            content<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;內容&#39;</span>,
+</span></span><span style=display:flex><span>            author<span style=color:#f92672>=</span>self<span style=color:#f92672>.</span>user,
+</span></span><span style=display:flex><span>        )
+</span></span><span style=display:flex><span>        articles <span style=color:#f92672>=</span> Article<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>all()
+</span></span><span style=display:flex><span>        <span style=color:#75715e># 假設 Meta.ordering = [&#39;-created_at&#39;]</span>
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>assertEqual(articles[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>.</span>title, <span style=color:#e6db74>&#39;第二篇文章&#39;</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>test_title_max_length</span>(self):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;測試欄位的最大長度限制。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>article<span style=color:#f92672>.</span>title <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;x&#39;</span> <span style=color:#f92672>*</span> <span style=color:#ae81ff>201</span>  <span style=color:#75715e># 假設 max_length=200</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>with</span> self<span style=color:#f92672>.</span>assertRaises(ValidationError):
+</span></span><span style=display:flex><span>            self<span style=color:#f92672>.</span>article<span style=color:#f92672>.</span>full_clean()  <span style=color:#75715e># 觸發 Model 層級的驗證</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>test_article_creation_sets_timestamps</span>(self):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;測試建立文章時自動設定時間戳記。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>assertIsNotNone(self<span style=color:#f92672>.</span>article<span style=color:#f92672>.</span>created_at)
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>assertIsNotNone(self<span style=color:#f92672>.</span>article<span style=color:#f92672>.</span>updated_at)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>test_article_absolute_url</span>(self):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;測試 get_absolute_url 方法。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        expected_url <span style=color:#f92672>=</span> <span style=color:#e6db74>f</span><span style=color:#e6db74>&#39;/articles/</span><span style=color:#e6db74>{</span>self<span style=color:#f92672>.</span>article<span style=color:#f92672>.</span>pk<span style=color:#e6db74>}</span><span style=color:#e6db74>/&#39;</span>
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>assertEqual(self<span style=color:#f92672>.</span>article<span style=color:#f92672>.</span>get_absolute_url(), expected_url)
+</span></span></code></pre></div><h4 id=setup-vs-setuptestdata>setUp vs setUpTestData</h4><ul><li><strong><code>setUp(self)</code></strong>：實例方法，在 <strong>每個</strong> 測試方法前都會執行一次。適合建立每次測試都需要獨立修改的資料</li><li><strong><code>setUpTestData(cls)</code></strong>：類別方法（<code>@classmethod</code>），在整個 TestCase 類別中 <strong>只執行一次</strong>。建立的資料在所有測試方法間共享，但不應該在測試中修改它。執行效率更高</li></ul><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ExampleTest</span>(TestCase):
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>@classmethod</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>setUpTestData</span>(cls):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;只執行一次，建立唯讀的共用資料。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        cls<span style=color:#f92672>.</span>user <span style=color:#f92672>=</span> User<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>create_user(<span style=color:#e6db74>&#39;shared_user&#39;</span>, password<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;pass&#39;</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>setUp</span>(self):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;每個測試方法前都執行，建立需要獨立修改的資料。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>article <span style=color:#f92672>=</span> Article<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>create(
+</span></span><span style=display:flex><span>            title<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;每次測試的獨立文章&#39;</span>,
+</span></span><span style=display:flex><span>            content<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;...&#39;</span>,
+</span></span><span style=display:flex><span>            author<span style=color:#f92672>=</span>self<span style=color:#f92672>.</span>user,
+</span></span><span style=display:flex><span>        )
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>tearDown</span>(self):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;每個測試方法後都執行（通常不需要，TestCase 會自動 rollback）。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>pass</span>
+</span></span></code></pre></div><hr><h3 id=view-測試>View 測試</h3><p>Django 內建的 <strong>Test Client</strong>（<code>django.test.Client</code>）可以模擬 HTTP 請求，不需要啟動真實的伺服器。它直接呼叫 Django 的 URL resolver 和 View，回傳 <code>Response</code> 物件供你檢驗。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># articles/tests/test_views.py</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.test <span style=color:#f92672>import</span> TestCase, Client
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.urls <span style=color:#f92672>import</span> reverse
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.contrib.auth.models <span style=color:#f92672>import</span> User
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> articles.models <span style=color:#f92672>import</span> Article
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ArticleListViewTest</span>(TestCase):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;測試文章列表 View。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>setUp</span>(self):
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>client <span style=color:#f92672>=</span> Client()
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>user <span style=color:#f92672>=</span> User<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>create_user(<span style=color:#e6db74>&#39;author&#39;</span>, password<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;pass&#39;</span>)
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>article <span style=color:#f92672>=</span> Article<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>create(
+</span></span><span style=display:flex><span>            title<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;測試文章&#39;</span>,
+</span></span><span style=display:flex><span>            content<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;內容&#39;</span>,
+</span></span><span style=display:flex><span>            author<span style=color:#f92672>=</span>self<span style=color:#f92672>.</span>user,
+</span></span><span style=display:flex><span>        )
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>test_list_view_returns_200</span>(self):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;測試列表頁回傳 HTTP 200。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        url <span style=color:#f92672>=</span> reverse(<span style=color:#e6db74>&#39;articles:list&#39;</span>)  <span style=color:#75715e># 使用 URL name 避免硬編碼</span>
+</span></span><span style=display:flex><span>        response <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>client<span style=color:#f92672>.</span>get(url)
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>assertEqual(response<span style=color:#f92672>.</span>status_code, <span style=color:#ae81ff>200</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>test_list_view_uses_correct_template</span>(self):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;測試使用正確的 Template。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        url <span style=color:#f92672>=</span> reverse(<span style=color:#e6db74>&#39;articles:list&#39;</span>)
+</span></span><span style=display:flex><span>        response <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>client<span style=color:#f92672>.</span>get(url)
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>assertTemplateUsed(response, <span style=color:#e6db74>&#39;articles/list.html&#39;</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>test_list_view_contains_article_title</span>(self):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;測試列表頁包含文章標題。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        url <span style=color:#f92672>=</span> reverse(<span style=color:#e6db74>&#39;articles:list&#39;</span>)
+</span></span><span style=display:flex><span>        response <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>client<span style=color:#f92672>.</span>get(url)
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>assertContains(response, <span style=color:#e6db74>&#39;測試文章&#39;</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>test_list_view_context_has_articles</span>(self):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;測試 Context 中包含文章資料。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        url <span style=color:#f92672>=</span> reverse(<span style=color:#e6db74>&#39;articles:list&#39;</span>)
+</span></span><span style=display:flex><span>        response <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>client<span style=color:#f92672>.</span>get(url)
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>assertIn(<span style=color:#e6db74>&#39;articles&#39;</span>, response<span style=color:#f92672>.</span>context)
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>assertEqual(len(response<span style=color:#f92672>.</span>context[<span style=color:#e6db74>&#39;articles&#39;</span>]), <span style=color:#ae81ff>1</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ArticleCreateViewTest</span>(TestCase):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;測試文章建立 View。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>setUp</span>(self):
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>client <span style=color:#f92672>=</span> Client()
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>user <span style=color:#f92672>=</span> User<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>create_user(<span style=color:#e6db74>&#39;author&#39;</span>, password<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;pass&#39;</span>)
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>create_url <span style=color:#f92672>=</span> reverse(<span style=color:#e6db74>&#39;articles:create&#39;</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>test_create_requires_login</span>(self):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;測試未登入時被重新導向到登入頁面。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        response <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>client<span style=color:#f92672>.</span>post(
+</span></span><span style=display:flex><span>            self<span style=color:#f92672>.</span>create_url,
+</span></span><span style=display:flex><span>            {<span style=color:#e6db74>&#39;title&#39;</span>: <span style=color:#e6db74>&#39;新文章&#39;</span>, <span style=color:#e6db74>&#39;content&#39;</span>: <span style=color:#e6db74>&#39;內容&#39;</span>},
+</span></span><span style=display:flex><span>        )
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>assertRedirects(
+</span></span><span style=display:flex><span>            response,
+</span></span><span style=display:flex><span>            <span style=color:#e6db74>f</span><span style=color:#e6db74>&#39;/accounts/login/?next=</span><span style=color:#e6db74>{</span>self<span style=color:#f92672>.</span>create_url<span style=color:#e6db74>}</span><span style=color:#e6db74>&#39;</span>,
+</span></span><span style=display:flex><span>        )
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>test_create_article_success</span>(self):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;測試登入後可成功建立文章。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>client<span style=color:#f92672>.</span>login(username<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;author&#39;</span>, password<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;pass&#39;</span>)
+</span></span><span style=display:flex><span>        response <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>client<span style=color:#f92672>.</span>post(self<span style=color:#f92672>.</span>create_url, {
+</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;title&#39;</span>: <span style=color:#e6db74>&#39;新文章&#39;</span>,
+</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;content&#39;</span>: <span style=color:#e6db74>&#39;這是透過表單建立的文章&#39;</span>,
+</span></span><span style=display:flex><span>        })
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>assertEqual(Article<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>count(), <span style=color:#ae81ff>1</span>)
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>assertRedirects(response, reverse(<span style=color:#e6db74>&#39;articles:list&#39;</span>))
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>test_create_article_invalid_data</span>(self):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;測試提交無效資料時顯示錯誤。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>client<span style=color:#f92672>.</span>login(username<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;author&#39;</span>, password<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;pass&#39;</span>)
+</span></span><span style=display:flex><span>        response <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>client<span style=color:#f92672>.</span>post(self<span style=color:#f92672>.</span>create_url, {
+</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;title&#39;</span>: <span style=color:#e6db74>&#39;&#39;</span>,  <span style=color:#75715e># 標題為空，應該驗證失敗</span>
+</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;content&#39;</span>: <span style=color:#e6db74>&#39;內容&#39;</span>,
+</span></span><span style=display:flex><span>        })
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>assertEqual(response<span style=color:#f92672>.</span>status_code, <span style=color:#ae81ff>200</span>)  <span style=color:#75715e># 表單重新顯示</span>
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>assertEqual(Article<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>count(), <span style=color:#ae81ff>0</span>)  <span style=color:#75715e># 文章未建立</span>
+</span></span></code></pre></div><h4 id=test-client-常用方法>Test Client 常用方法</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># GET 請求</span>
+</span></span><span style=display:flex><span>response <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>client<span style=color:#f92672>.</span>get(<span style=color:#e6db74>&#39;/articles/&#39;</span>)
+</span></span><span style=display:flex><span>response <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>client<span style=color:#f92672>.</span>get(<span style=color:#e6db74>&#39;/articles/&#39;</span>, {<span style=color:#e6db74>&#39;page&#39;</span>: <span style=color:#ae81ff>2</span>})  <span style=color:#75715e># 帶查詢參數</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># POST 請求</span>
+</span></span><span style=display:flex><span>response <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>client<span style=color:#f92672>.</span>post(<span style=color:#e6db74>&#39;/articles/create/&#39;</span>, {<span style=color:#e6db74>&#39;title&#39;</span>: <span style=color:#e6db74>&#39;Test&#39;</span>})
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 帶 JSON 資料的 POST</span>
+</span></span><span style=display:flex><span>response <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>client<span style=color:#f92672>.</span>post(
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;/api/articles/&#39;</span>,
+</span></span><span style=display:flex><span>    data<span style=color:#f92672>=</span>{<span style=color:#e6db74>&#39;title&#39;</span>: <span style=color:#e6db74>&#39;Test&#39;</span>},
+</span></span><span style=display:flex><span>    content_type<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;application/json&#39;</span>,
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 登入與登出</span>
+</span></span><span style=display:flex><span>self<span style=color:#f92672>.</span>client<span style=color:#f92672>.</span>login(username<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;user&#39;</span>, password<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;pass&#39;</span>)
+</span></span><span style=display:flex><span>self<span style=color:#f92672>.</span>client<span style=color:#f92672>.</span>logout()
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 強制登入（跳過密碼驗證，更簡潔）</span>
+</span></span><span style=display:flex><span>self<span style=color:#f92672>.</span>client<span style=color:#f92672>.</span>force_login(self<span style=color:#f92672>.</span>user)
+</span></span></code></pre></div><hr><h3 id=form-測試>Form 測試</h3><p>表單（Form）是 Django 中使用者輸入的第一道關卡，測試 Form 可以確保驗證邏輯正確運作。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># articles/tests/test_forms.py</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.test <span style=color:#f92672>import</span> TestCase
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> articles.forms <span style=color:#f92672>import</span> ArticleForm
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ArticleFormTest</span>(TestCase):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;測試文章表單的驗證邏輯。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>test_valid_form</span>(self):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;測試有效的表單資料。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        form <span style=color:#f92672>=</span> ArticleForm(data<span style=color:#f92672>=</span>{
+</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;title&#39;</span>: <span style=color:#e6db74>&#39;有效的文章標題&#39;</span>,
+</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;content&#39;</span>: <span style=color:#e6db74>&#39;這是文章的內容&#39;</span>,
+</span></span><span style=display:flex><span>        })
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>assertTrue(form<span style=color:#f92672>.</span>is_valid())
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>test_empty_title_is_invalid</span>(self):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;測試空白標題應驗證失敗。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        form <span style=color:#f92672>=</span> ArticleForm(data<span style=color:#f92672>=</span>{
+</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;title&#39;</span>: <span style=color:#e6db74>&#39;&#39;</span>,
+</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;content&#39;</span>: <span style=color:#e6db74>&#39;內容&#39;</span>,
+</span></span><span style=display:flex><span>        })
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>assertFalse(form<span style=color:#f92672>.</span>is_valid())
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>assertIn(<span style=color:#e6db74>&#39;title&#39;</span>, form<span style=color:#f92672>.</span>errors)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>test_title_too_long_is_invalid</span>(self):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;測試超過最大長度的標題。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        form <span style=color:#f92672>=</span> ArticleForm(data<span style=color:#f92672>=</span>{
+</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;title&#39;</span>: <span style=color:#e6db74>&#39;x&#39;</span> <span style=color:#f92672>*</span> <span style=color:#ae81ff>201</span>,
+</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;content&#39;</span>: <span style=color:#e6db74>&#39;內容&#39;</span>,
+</span></span><span style=display:flex><span>        })
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>assertFalse(form<span style=color:#f92672>.</span>is_valid())
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>assertIn(<span style=color:#e6db74>&#39;title&#39;</span>, form<span style=color:#f92672>.</span>errors)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>test_form_error_messages</span>(self):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;測試錯誤訊息的內容。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        form <span style=color:#f92672>=</span> ArticleForm(data<span style=color:#f92672>=</span>{<span style=color:#e6db74>&#39;title&#39;</span>: <span style=color:#e6db74>&#39;&#39;</span>, <span style=color:#e6db74>&#39;content&#39;</span>: <span style=color:#e6db74>&#39;&#39;</span>})
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>assertFalse(form<span style=color:#f92672>.</span>is_valid())
+</span></span><span style=display:flex><span>        <span style=color:#75715e># 檢查錯誤訊息是否包含預期的文字</span>
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>assertIn(<span style=color:#e6db74>&#39;這個欄位是必須的&#39;</span>, str(form<span style=color:#f92672>.</span>errors[<span style=color:#e6db74>&#39;title&#39;</span>]))
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>test_form_save</span>(self):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;測試表單儲存功能。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        user <span style=color:#f92672>=</span> User<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>create_user(<span style=color:#e6db74>&#39;author&#39;</span>, password<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;pass&#39;</span>)
+</span></span><span style=display:flex><span>        form <span style=color:#f92672>=</span> ArticleForm(data<span style=color:#f92672>=</span>{
+</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;title&#39;</span>: <span style=color:#e6db74>&#39;表單建立的文章&#39;</span>,
+</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;content&#39;</span>: <span style=color:#e6db74>&#39;內容&#39;</span>,
+</span></span><span style=display:flex><span>        })
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>assertTrue(form<span style=color:#f92672>.</span>is_valid())
+</span></span><span style=display:flex><span>        article <span style=color:#f92672>=</span> form<span style=color:#f92672>.</span>save(commit<span style=color:#f92672>=</span><span style=color:#66d9ef>False</span>)
+</span></span><span style=display:flex><span>        article<span style=color:#f92672>.</span>author <span style=color:#f92672>=</span> user
+</span></span><span style=display:flex><span>        article<span style=color:#f92672>.</span>save()
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>assertEqual(Article<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>count(), <span style=color:#ae81ff>1</span>)
+</span></span></code></pre></div><p>你也可以在 View 測試中使用 <code>assertFormError</code> 來驗證 View 回傳的表單錯誤：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>test_create_view_shows_form_error</span>(self):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;測試 View 中的表單錯誤訊息。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>    self<span style=color:#f92672>.</span>client<span style=color:#f92672>.</span>force_login(self<span style=color:#f92672>.</span>user)
+</span></span><span style=display:flex><span>    response <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>client<span style=color:#f92672>.</span>post(reverse(<span style=color:#e6db74>&#39;articles:create&#39;</span>), {
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;title&#39;</span>: <span style=color:#e6db74>&#39;&#39;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;content&#39;</span>: <span style=color:#e6db74>&#39;&#39;</span>,
+</span></span><span style=display:flex><span>    })
+</span></span><span style=display:flex><span>    self<span style=color:#f92672>.</span>assertFormError(response<span style=color:#f92672>.</span>context[<span style=color:#e6db74>&#39;form&#39;</span>], <span style=color:#e6db74>&#39;title&#39;</span>, <span style=color:#e6db74>&#39;這個欄位是必須的。&#39;</span>)
+</span></span></code></pre></div><hr><h3 id=測試資料準備fixtures>測試資料準備：Fixtures</h3><p>除了在 <code>setUp</code> 中手動建立測試資料外，Django 還支援使用 <strong>Fixtures</strong>（固定資料檔）來載入預先準備好的測試資料。Fixtures 是 JSON 或 YAML 格式的檔案，包含要載入資料庫的資料：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># 匯出目前資料庫的資料為 Fixture</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># python manage.py dumpdata articles --indent 2 &gt; articles/fixtures/test_articles.json</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-json data-lang=json><span style=display:flex><span>[
+</span></span><span style=display:flex><span>  {
+</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;model&#34;</span>: <span style=color:#e6db74>&#34;articles.article&#34;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;pk&#34;</span>: <span style=color:#ae81ff>1</span>,
+</span></span><span style=display:flex><span>    <span style=color:#f92672>&#34;fields&#34;</span>: {
+</span></span><span style=display:flex><span>      <span style=color:#f92672>&#34;title&#34;</span>: <span style=color:#e6db74>&#34;Fixture 文章&#34;</span>,
+</span></span><span style=display:flex><span>      <span style=color:#f92672>&#34;content&#34;</span>: <span style=color:#e6db74>&#34;透過 Fixture 載入的測試資料&#34;</span>,
+</span></span><span style=display:flex><span>      <span style=color:#f92672>&#34;author&#34;</span>: <span style=color:#ae81ff>1</span>,
+</span></span><span style=display:flex><span>      <span style=color:#f92672>&#34;created_at&#34;</span>: <span style=color:#e6db74>&#34;2026-06-25T10:00:00Z&#34;</span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><p>在測試中使用 Fixtures：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ArticleWithFixtureTest</span>(TestCase):
+</span></span><span style=display:flex><span>    fixtures <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#39;test_users.json&#39;</span>, <span style=color:#e6db74>&#39;test_articles.json&#39;</span>]
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>test_fixture_data_loaded</span>(self):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;測試 Fixture 資料已成功載入。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>assertEqual(Article<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>count(), <span style=color:#ae81ff>1</span>)
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>assertEqual(Article<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>first()<span style=color:#f92672>.</span>title, <span style=color:#e6db74>&#39;Fixture 文章&#39;</span>)
+</span></span></code></pre></div><p>Fixtures 適合靜態的參考資料（如分類表、城市清單），但對於動態的測試資料，手動在 <code>setUp</code> 中建立或使用 <strong>Factory Boy</strong>（進階篇會介紹）是更好的選擇。</p><hr><h3 id=常用的-assert-斷言方法>常用的 assert 斷言方法</h3><p>Django 的 <code>TestCase</code> 繼承了 <code>unittest.TestCase</code> 的所有斷言方法，並額外提供了許多 Web 開發相關的斷言：</p><h4 id=基本斷言繼承自-unittest>基本斷言（繼承自 unittest）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># 相等性檢查</span>
+</span></span><span style=display:flex><span>self<span style=color:#f92672>.</span>assertEqual(a, b)        <span style=color:#75715e># a == b</span>
+</span></span><span style=display:flex><span>self<span style=color:#f92672>.</span>assertNotEqual(a, b)     <span style=color:#75715e># a != b</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 真值檢查</span>
+</span></span><span style=display:flex><span>self<span style=color:#f92672>.</span>assertTrue(expr)         <span style=color:#75715e># expr is True</span>
+</span></span><span style=display:flex><span>self<span style=color:#f92672>.</span>assertFalse(expr)        <span style=color:#75715e># expr is False</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># None 檢查</span>
+</span></span><span style=display:flex><span>self<span style=color:#f92672>.</span>assertIsNone(obj)        <span style=color:#75715e># obj is None</span>
+</span></span><span style=display:flex><span>self<span style=color:#f92672>.</span>assertIsNotNone(obj)     <span style=color:#75715e># obj is not None</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 型別檢查</span>
+</span></span><span style=display:flex><span>self<span style=color:#f92672>.</span>assertIsInstance(obj, cls)   <span style=color:#75715e># isinstance(obj, cls)</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 包含關係</span>
+</span></span><span style=display:flex><span>self<span style=color:#f92672>.</span>assertIn(item, container)     <span style=color:#75715e># item in container</span>
+</span></span><span style=display:flex><span>self<span style=color:#f92672>.</span>assertNotIn(item, container)  <span style=color:#75715e># item not in container</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 例外檢查</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>with</span> self<span style=color:#f92672>.</span>assertRaises(ValidationError):
+</span></span><span style=display:flex><span>    some_function()
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 數值比較</span>
+</span></span><span style=display:flex><span>self<span style=color:#f92672>.</span>assertGreater(a, b)       <span style=color:#75715e># a &gt; b</span>
+</span></span><span style=display:flex><span>self<span style=color:#f92672>.</span>assertLessEqual(a, b)     <span style=color:#75715e># a &lt;= b</span>
+</span></span></code></pre></div><h4 id=django-專屬斷言>Django 專屬斷言</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># 回應狀態碼與內容</span>
+</span></span><span style=display:flex><span>self<span style=color:#f92672>.</span>assertContains(response, <span style=color:#e6db74>&#39;預期文字&#39;</span>)        <span style=color:#75715e># 回應包含指定文字，且狀態碼為 200</span>
+</span></span><span style=display:flex><span>self<span style=color:#f92672>.</span>assertContains(response, <span style=color:#e6db74>&#39;文字&#39;</span>, count<span style=color:#f92672>=</span><span style=color:#ae81ff>2</span>)   <span style=color:#75715e># 指定出現次數</span>
+</span></span><span style=display:flex><span>self<span style=color:#f92672>.</span>assertNotContains(response, <span style=color:#e6db74>&#39;不該出現的文字&#39;</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 重新導向</span>
+</span></span><span style=display:flex><span>self<span style=color:#f92672>.</span>assertRedirects(response, <span style=color:#e6db74>&#39;/expected/url/&#39;</span>)
+</span></span><span style=display:flex><span>self<span style=color:#f92672>.</span>assertRedirects(
+</span></span><span style=display:flex><span>    response, <span style=color:#e6db74>&#39;/expected/url/&#39;</span>,
+</span></span><span style=display:flex><span>    status_code<span style=color:#f92672>=</span><span style=color:#ae81ff>302</span>,           <span style=color:#75715e># 重新導向的狀態碼</span>
+</span></span><span style=display:flex><span>    target_status_code<span style=color:#f92672>=</span><span style=color:#ae81ff>200</span>,    <span style=color:#75715e># 目標頁面的狀態碼</span>
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Template 相關</span>
+</span></span><span style=display:flex><span>self<span style=color:#f92672>.</span>assertTemplateUsed(response, <span style=color:#e6db74>&#39;articles/list.html&#39;</span>)
+</span></span><span style=display:flex><span>self<span style=color:#f92672>.</span>assertTemplateNotUsed(response, <span style=color:#e6db74>&#39;articles/other.html&#39;</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Form 錯誤</span>
+</span></span><span style=display:flex><span>self<span style=color:#f92672>.</span>assertFormError(response<span style=color:#f92672>.</span>context[<span style=color:#e6db74>&#39;form&#39;</span>], <span style=color:#e6db74>&#39;title&#39;</span>, <span style=color:#e6db74>&#39;錯誤訊息&#39;</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 資料庫查詢數量（效能測試）</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>with</span> self<span style=color:#f92672>.</span>assertNumQueries(<span style=color:#ae81ff>3</span>):
+</span></span><span style=display:flex><span>    Article<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>select_related(<span style=color:#e6db74>&#39;author&#39;</span>)<span style=color:#f92672>.</span>all()
+</span></span></code></pre></div><hr><h3 id=執行測試>執行測試</h3><p>Django 使用 <code>manage.py test</code> 指令來發現並執行測試：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 執行專案中所有測試</span>
+</span></span><span style=display:flex><span>python manage.py test
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 執行特定 App 的測試</span>
+</span></span><span style=display:flex><span>python manage.py test articles
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 執行特定測試模組</span>
+</span></span><span style=display:flex><span>python manage.py test articles.tests.test_models
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 執行特定 TestCase 類別</span>
+</span></span><span style=display:flex><span>python manage.py test articles.tests.test_models.ArticleModelTest
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 執行特定測試方法</span>
+</span></span><span style=display:flex><span>python manage.py test articles.tests.test_models.ArticleModelTest.test_article_str_method
+</span></span></code></pre></div><h4 id=常用的命令列選項>常用的命令列選項</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 詳細輸出模式（顯示每個測試方法的名稱與結果）</span>
+</span></span><span style=display:flex><span>python manage.py test -v <span style=color:#ae81ff>2</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 平行執行測試（利用多核心加速）</span>
+</span></span><span style=display:flex><span>python manage.py test --parallel
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 保留測試資料庫（跳過建立/銷毀步驟，加速重複執行）</span>
+</span></span><span style=display:flex><span>python manage.py test --keepdb
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 遇到第一個失敗就停止</span>
+</span></span><span style=display:flex><span>python manage.py test --failfast
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 顯示 SQL 查詢（除錯用）</span>
+</span></span><span style=display:flex><span>python manage.py test --debug-sql
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 反轉測試執行順序（偵測測試之間的依賴問題）</span>
+</span></span><span style=display:flex><span>python manage.py test --reverse
+</span></span></code></pre></div><h4 id=測試檔案的組織方式>測試檔案的組織方式</h4><p>Django 預設在每個 App 下尋找 <code>tests.py</code> 或 <code>tests/</code> 目錄中的測試。隨著測試數量增加，建議將 <code>tests.py</code> 拆分為 <code>tests/</code> 目錄結構：</p><pre tabindex=0><code>articles/
+    tests/
+        __init__.py
+        test_models.py
+        test_views.py
+        test_forms.py
+        test_urls.py
+</code></pre><p>確保 <code>tests/</code> 目錄下有 <code>__init__.py</code>，Django 才能正確發現測試模組。</p><hr><h3 id=測試-url-配置>測試 URL 配置</h3><p>除了 Model、View、Form 之外，URL 配置也值得測試，確保 URL 解析正確：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># articles/tests/test_urls.py</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.test <span style=color:#f92672>import</span> SimpleTestCase
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.urls <span style=color:#f92672>import</span> reverse, resolve
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> articles.views <span style=color:#f92672>import</span> article_list, article_detail
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ArticleURLTest</span>(SimpleTestCase):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;測試 URL 配置是否正確對應到 View。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>test_list_url_resolves</span>(self):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;測試列表 URL 對應正確的 View。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        url <span style=color:#f92672>=</span> reverse(<span style=color:#e6db74>&#39;articles:list&#39;</span>)
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>assertEqual(resolve(url)<span style=color:#f92672>.</span>func, article_list)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>test_detail_url_resolves</span>(self):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;測試詳情 URL 對應正確的 View。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        url <span style=color:#f92672>=</span> reverse(<span style=color:#e6db74>&#39;articles:detail&#39;</span>, kwargs<span style=color:#f92672>=</span>{<span style=color:#e6db74>&#39;pk&#39;</span>: <span style=color:#ae81ff>1</span>})
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>assertEqual(resolve(url)<span style=color:#f92672>.</span>func, article_detail)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>test_list_url_path</span>(self):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;測試 URL name 對應正確的路徑。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        url <span style=color:#f92672>=</span> reverse(<span style=color:#e6db74>&#39;articles:list&#39;</span>)
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>assertEqual(url, <span style=color:#e6db74>&#39;/articles/&#39;</span>)
+</span></span></code></pre></div><p>由於 URL 測試不需要存取資料庫，使用 <code>SimpleTestCase</code> 即可，執行速度更快。</p><hr><h3 id=加速測試的實用技巧>加速測試的實用技巧</h3><p>當專案的測試數量增加後，測試執行時間可能會變得很長。以下是幾個常見的加速技巧：</p><h4 id=使用較快的密碼雜湊演算法>使用較快的密碼雜湊演算法</h4><p>Django 預設使用 PBKDF2 密碼雜湊，安全但速度慢。測試環境中可以切換為較快的演算法：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># settings/test.py</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>PASSWORD_HASHERS <span style=color:#f92672>=</span> [
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.auth.hashers.MD5PasswordHasher&#39;</span>,
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><h4 id=使用-setuptestdata-取代-setup>使用 setUpTestData 取代 setUp</h4><p>如前所述，<code>setUpTestData</code> 只在整個 TestCase 類別中執行一次，而 <code>setUp</code> 每個測試方法都會執行。對於唯讀的共用資料，優先使用 <code>setUpTestData</code>。</p><h4 id=善用-keepdb-與-parallel>善用 &ndash;keepdb 與 &ndash;parallel</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 保留測試資料庫，下次執行時跳過建立/銷毀</span>
+</span></span><span style=display:flex><span>python manage.py test --keepdb
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 平行執行，利用多核心 CPU</span>
+</span></span><span style=display:flex><span>python manage.py test --parallel
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 兩者結合</span>
+</span></span><span style=display:flex><span>python manage.py test --keepdb --parallel
+</span></span></code></pre></div><h4 id=建立專用的測試設定檔>建立專用的測試設定檔</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># settings/test.py — 繼承基礎設定並覆寫測試相關選項</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> .base <span style=color:#f92672>import</span> <span style=color:#f92672>*</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 使用較快的密碼雜湊</span>
+</span></span><span style=display:flex><span>PASSWORD_HASHERS <span style=color:#f92672>=</span> [<span style=color:#e6db74>&#39;django.contrib.auth.hashers.MD5PasswordHasher&#39;</span>]
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 關閉除錯模式</span>
+</span></span><span style=display:flex><span>DEBUG <span style=color:#f92672>=</span> <span style=color:#66d9ef>False</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 停用 Celery 非同步（同步執行 Task）</span>
+</span></span><span style=display:flex><span>CELERY_TASK_ALWAYS_EAGER <span style=color:#f92672>=</span> <span style=color:#66d9ef>True</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 使用 in-memory Channel Layer</span>
+</span></span><span style=display:flex><span>CHANNEL_LAYERS <span style=color:#f92672>=</span> {
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;default&#39;</span>: {
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;BACKEND&#39;</span>: <span style=color:#e6db74>&#39;channels.layers.InMemoryChannelLayer&#39;</span>,
+</span></span><span style=display:flex><span>    },
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>執行測試時指定設定檔：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>python manage.py test --settings<span style=color:#f92672>=</span>myproject.settings.test
+</span></span></code></pre></div><hr><h3 id=總結>總結</h3><p>本文介紹了 Django 測試框架的基礎知識與實作方式：</p><ol><li><strong>測試框架概覽</strong>：基於 Python <code>unittest</code> 建構，<code>manage.py test</code> 會自動建立與銷毀測試資料庫</li><li><strong>TestCase 類別選擇</strong>：<code>SimpleTestCase</code>（無資料庫）、<code>TestCase</code>（最常用，自動 rollback）、<code>TransactionTestCase</code>（真實 Transaction）</li><li><strong>Model 測試</strong>：驗證欄位規則、<code>__str__</code> 方法、預設排序等 Model 行為</li><li><strong>View 測試</strong>：使用 Test Client 模擬 GET/POST 請求，檢查狀態碼、Template、Context 與重新導向</li><li><strong>Form 測試</strong>：驗證 <code>is_valid()</code>、錯誤訊息、表單儲存邏輯</li><li><strong>測試資料準備</strong>：<code>setUp</code> / <code>setUpTestData</code> / Fixtures 三種方式各有適用場景</li><li><strong>assert 方法</strong>：基本的 <code>assertEqual</code>、<code>assertTrue</code> 加上 Django 專屬的 <code>assertContains</code>、<code>assertRedirects</code>、<code>assertFormError</code> 等</li><li><strong>執行技巧</strong>：<code>--parallel</code>、<code>--keepdb</code>、<code>--failfast</code> 等選項提升開發效率</li></ol><p>良好的測試習慣是專業 Django 開發的基石。在下一篇中，我們將進入進階測試領域，學習 Mock、Factory Boy、Coverage 覆蓋率報告，以及如何將測試整合到 CI/CD 流程中。</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
+</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/django/035-django-channels-websocket/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django Channels 與 WebSocket 即時通訊實戰 | Django 教學</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/24</span>
+</a><a href=https://benzhub.github.io/post/django/034-django-celery-advanced/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django + Celery 進階：排程任務、重試與監控 | Django 教學</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/23</span>
+</a><a href=https://benzhub.github.io/post/django/033-django-celery-basics/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django + Celery 非同步任務佇列入門 | Django 教學</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/22</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/django/035-django-channels-websocket/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+<span class="text-sm font-medium">Django Channels 與 WebSocket 即時通訊實戰 | Django 教學</span></a></div><div><a href=https://benzhub.github.io/post/django/037-django-testing-advanced/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+<span class="text-sm font-medium">Django Testing 進階：Mock、Factory Boy 與 Coverage | Django 教學</span></a></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
+</a><a href=/tags/acid><span class=tag-pill>acid</span>
+</a><a href=/tags/aggregate><span class=tag-pill>aggregate</span>
+</a><a href=/tags/ai><span class=tag-pill>ai</span>
+</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
+</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
+</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
+</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
+</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
+</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
+</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
+</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
+</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
+</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
+</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
+</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
+</a><a href=/tags/analytics><span class=tag-pill>analytics</span>
+</a><a href=/tags/api><span class=tag-pill>api</span>
+</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
+</a><a href=/tags/autovacuum><span class=tag-pill>autovacuum</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (20)</span>
+</a><a href=/post/javascript/><span class=tag-pill>JavaScript (75)</span>
+</a><a href=/post/django/><span class=tag-pill>Django (37)</span>
+</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
+</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
+</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
+</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
+</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/django/037-django-testing-advanced/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Testing 進階：Mock、Factory Boy 與 Coverage | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/26</p></a><a href=/post/postgresql/020-json-jsonb/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">JSON 與 JSONB 操作：PostgreSQL 的半結構化資料處理 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/26</p></a><a href=/post/javascript/data-structures--algorithms/013-segment-tree/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">線段樹 — Lazy Propagation 與區間查詢完整實作 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/26</p></a><a href=/post/postgresql/019-cte-subquery/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">CTE 與子查詢：PostgreSQL 的查詢組合與遞迴能力 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/25</p></a><a href=/post/django/036-django-testing-basics/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Testing 單元測試與整合測試入門 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/25</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>

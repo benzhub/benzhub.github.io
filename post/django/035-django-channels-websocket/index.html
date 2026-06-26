@@ -1,0 +1,516 @@
+<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>Django Channels 與 WebSocket 即時通訊實戰 | Django 教學 | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="Django Channels 與 WebSocket 即時通訊實戰 | Django 教學 | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="Django Channels 與 WebSocket 即時通訊完整教學！從 WebSocket 與 HTTP 的差異、ASGI 與 WSGI 比較，到安裝 Django Channels 與 channels_redis、設定 ASGI application、撰寫 Consumer 處理連線，搭配 Channel Layers 與 Groups 實作完整聊天室範例。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="Django Channels 與 WebSocket 即時通訊完整教學！從 WebSocket 與 HTTP 的差異、ASGI 與 WSGI 比較，到安裝 Django Channels 與 channels_redis、設定 ASGI application、撰寫 Consumer 處理連線，搭配 Channel Layers 與 Groups 實作完整聊天室範例。"><meta property="og:url" content="https://benzhub.github.io/post/django/035-django-channels-websocket/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/django/035-django-channels-websocket/><meta name=twitter:description content="Django Channels 與 WebSocket 即時通訊完整教學！從 WebSocket 與 HTTP 的差異、ASGI 與 WSGI 比較，到安裝 Django Channels 與 channels_redis、設定 ASGI application、撰寫 Consumer 處理連線，搭配 Channel Layers 與 Groups 實作完整聊天室範例。"><meta property="article:published_time" content="2026-06-24T00:00:00+00:00"><meta property="article:updated_time" content="2026-05-25T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/django/035-Django-Channels-WebSocket.png"><meta property="og:image:url" content="https://benzhub.github.io/img/django/035-Django-Channels-WebSocket.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/django/035-django-channels-websocket/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/django/035-django-channels-websocket/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"Django Channels 與 WebSocket 即時通訊實戰 | Django 教學\"","description":"\"Django Channels 與 WebSocket 即時通訊完整教學！從 WebSocket 與 HTTP 的差異、ASGI 與 WSGI 比較，到安裝 Django Channels 與 channels_redis、設定 ASGI application、撰寫 Consumer 處理連線，搭配 Channel Layers 與 Groups 實作完整聊天室範例。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-06-24T00:00:00\u002b00:00","dateModified":"2026-05-25T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/django\/035-Django-Channels-WebSocket.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/django\/035-django-channels-websocket\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/django\/"},{"@type":"ListItem","position":3,"name":"\"Django Channels 與 WebSocket 即時通訊實戰 | Django 教學\""}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"\"Django Channels 是什麼？跟 Django 原生的 ASGI 支援有什麼不同？\"","acceptedAnswer":{"@type":"Answer","text":"\"Django Channels 是 Django 的官方擴充套件，由 Django Migrations 的作者 Andrew Godwin 開發，讓 Django 能處理 WebSocket、長連接等非同步協定。雖然 Django 3.0+ 原生支援 ASGI，但僅提供基礎的非同步 HTTP 處理；Django Channels 在此基礎上加入了 Consumer、Channel Layers、Groups 等完整的 WebSocket 處理架構，是 Django 實作即時通訊的標準方案。\""}},{"@type":"Question","name":"\"WebSocket 和 HTTP 有什麼差別？為什麼需要 WebSocket？\"","acceptedAnswer":{"@type":"Answer","text":"\"HTTP 是單向的請求/回應模式，客戶端發送請求後伺服器才能回應，無法主動推送資料。WebSocket 則是全雙工（Full-Duplex）的持久連線協定，連線建立後客戶端與伺服器可以隨時互相傳送資料，非常適合聊天室、即時通知、即時儀表板等需要即時雙向通訊的場景。\""}},{"@type":"Question","name":"\"Channel Layers 一定要用 Redis 嗎？開發環境可以用什麼替代？\"","acceptedAnswer":{"@type":"Answer","text":"\"生產環境強烈建議使用 Redis 作為 Channel Layer 的後端（channels_redis），因為它支援跨進程、跨伺服器的訊息傳遞。開發環境中可以使用 InMemoryChannelLayer，但它僅支援單一進程，不適合生產使用。如果不需要 Group 廣播功能（例如只做一對一的 WebSocket 回應），甚至可以不設定 Channel Layer。\""}}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Django Channels 與 WebSocket 即時通訊實戰 | Django 教學</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/24
+</span><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001.0 004.582 9m0 0H9m11 11v-5h-.581m0 0A8.003 8.003.0 014.062 13m15.357 2H15"/></svg>
+2026/05/25</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/python class="tag-pill no-underline">python</a>
+<a href=/tags/django class="tag-pill no-underline">django</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/django/035-Django-Channels-WebSocket.png alt="Django Channels 與 WebSocket 即時通訊實戰 | Django 教學"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p><strong>Django Channels</strong> 是讓 <strong>Django</strong> 從傳統的 <strong>HTTP</strong> 請求/回應模式擴展到 <strong>WebSocket</strong> 即時雙向通訊的官方解決方案。它基於 <strong>ASGI</strong>（Asynchronous Server Gateway Interface，非同步伺服器閘道介面）標準，提供 <strong>Consumer</strong>、<strong>Channel Layers</strong>、<strong>Groups</strong> 等核心元件，讓你在 Django 的完整生態系內就能實作聊天室、即時通知、協作編輯等即時功能。本文將從 WebSocket 與 HTTP 的差異出發，帶你完成 Django Channels 的安裝設定，並實作一個完整的即時聊天室範例。</p></blockquote><h3 id=websocket-vs-http為什麼需要即時通訊>WebSocket vs HTTP：為什麼需要即時通訊？</h3><p>傳統的 <strong>HTTP</strong> 協定採用「請求/回應」模式——客戶端發送請求，伺服器處理後回傳回應，一次交互就結束了。這種模式對於網頁瀏覽、表單提交等場景完全足夠，但當你需要即時推送資料時就會遇到瓶頸。</p><p>想像一個聊天室場景：使用者 A 發送了一則訊息，使用者 B 要怎麼即時收到？在純 HTTP 的世界裡，通常有這幾種方案：</p><ul><li><strong>輪詢（Polling）</strong>：客戶端每隔幾秒向伺服器發送 GET 請求，詢問「有沒有新訊息」。缺點是浪費頻寬與伺服器資源</li><li><strong>長輪詢（Long Polling）</strong>：客戶端發送請求後，伺服器「掛住」直到有新資料才回應。比輪詢好一些，但連線管理複雜</li><li><strong>Server-Sent Events（SSE）</strong>：伺服器可以主動推送資料給客戶端，但只能單向（伺服器 -> 客戶端）</li></ul><p><strong>WebSocket</strong> 協定徹底解決了這個問題。它在 HTTP 握手後升級為持久的 <strong>全雙工（Full-Duplex）</strong> 連線，讓客戶端和伺服器可以隨時互相傳送資料：</p><table><thead><tr><th>特性</th><th>HTTP</th><th>WebSocket</th></tr></thead><tbody><tr><td>通訊模式</td><td>單向（請求/回應）</td><td>雙向（全雙工）</td></tr><tr><td>連線方式</td><td>每次請求建立新連線</td><td>一次握手，持久連線</td></tr><tr><td>伺服器推送</td><td>不支援（需輪詢）</td><td>原生支援</td></tr><tr><td>協定標頭</td><td>每次請求都帶完整 Header</td><td>握手後無額外 Header 開銷</td></tr><tr><td>適用場景</td><td>網頁瀏覽、API 呼叫</td><td>聊天室、即時通知、遊戲</td></tr><tr><td>URL Scheme</td><td><code>http://</code> / <code>https://</code></td><td><code>ws://</code> / <code>wss://</code></td></tr></tbody></table><hr><h3 id=asgi-vs-wsgidjango-的協定演進>ASGI vs WSGI：Django 的協定演進</h3><p>Django 傳統上使用 <strong>WSGI</strong>（Web Server Gateway Interface，網頁伺服器閘道介面）作為應用伺服器的標準介面。WSGI 是同步的，每個請求佔用一個執行緒，處理完畢後連線就結束，天生不支援長連接。</p><p><strong>ASGI</strong>（Asynchronous Server Gateway Interface）是 WSGI 的非同步繼任者，專門為支援長連接和非同步處理而設計：</p><table><thead><tr><th>特性</th><th>WSGI</th><th>ASGI</th></tr></thead><tbody><tr><td>協定支援</td><td>僅 HTTP</td><td>HTTP、WebSocket、HTTP/2、SSE</td></tr><tr><td>執行模型</td><td>同步（一請求一執行緒）</td><td>非同步（事件迴圈）</td></tr><tr><td>長連接支援</td><td>不支援</td><td>原生支援</td></tr><tr><td>Django 支援</td><td>Django 1.0+</td><td>Django 3.0+（原生）+ Channels</td></tr><tr><td>部署伺服器</td><td>Gunicorn、uWSGI</td><td>Daphne、Uvicorn、Hypercorn</td></tr></tbody></table><p>Django 3.0 開始內建 ASGI 支援，但僅提供基礎的非同步 HTTP 處理。要支援 WebSocket，需要安裝 <strong>Django Channels</strong>，它在 ASGI 之上建構了完整的 WebSocket 處理架構。</p><hr><h3 id=安裝-django-channels-與相關套件>安裝 Django Channels 與相關套件</h3><p>首先安裝 Django Channels 和 Redis Channel Layer 後端：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 安裝 Django Channels 與 Redis Channel Layer</span>
+</span></span><span style=display:flex><span>pip install channels channels-redis
+</span></span></code></pre></div><p>接著在 <code>settings.py</code> 中註冊 Channels：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># settings.py</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>INSTALLED_APPS <span style=color:#f92672>=</span> [
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;daphne&#39;</span>,  <span style=color:#75715e># ASGI 伺服器（Channels 4.x 推薦）</span>
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.admin&#39;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.auth&#39;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.contenttypes&#39;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.sessions&#39;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.messages&#39;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;django.contrib.staticfiles&#39;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 第三方套件</span>
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;channels&#39;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 你的 App</span>
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;chat&#39;</span>,
+</span></span><span style=display:flex><span>]
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 指定 ASGI 應用程式的路徑</span>
+</span></span><span style=display:flex><span>ASGI_APPLICATION <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;myproject.asgi.application&#39;</span>
+</span></span></code></pre></div><blockquote><p><code>daphne</code> 放在 <code>INSTALLED_APPS</code> 的第一個位置，是因為 Channels 4.x 版本使用 Daphne 作為預設的 ASGI 開發伺服器，會自動取代 Django 的 <code>runserver</code> 指令。</p></blockquote><hr><h3 id=設定-asgi-application>設定 ASGI Application</h3><p>Django 專案建立時會自動產生 <code>asgi.py</code>，我們需要修改它來整合 Channels 的路由系統：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># myproject/asgi.py</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> os
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.core.asgi <span style=color:#f92672>import</span> get_asgi_application
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> channels.routing <span style=color:#f92672>import</span> ProtocolTypeRouter, URLRouter
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> channels.auth <span style=color:#f92672>import</span> AuthMiddlewareStack
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>os<span style=color:#f92672>.</span>environ<span style=color:#f92672>.</span>setdefault(<span style=color:#e6db74>&#39;DJANGO_SETTINGS_MODULE&#39;</span>, <span style=color:#e6db74>&#39;myproject.settings&#39;</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 必須在 import routing 之前呼叫 django.setup()</span>
+</span></span><span style=display:flex><span>django_asgi_app <span style=color:#f92672>=</span> get_asgi_application()
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> chat.routing <span style=color:#f92672>import</span> websocket_urlpatterns  <span style=color:#75715e># noqa: E402</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>application <span style=color:#f92672>=</span> ProtocolTypeRouter({
+</span></span><span style=display:flex><span>    <span style=color:#75715e># HTTP 請求仍走傳統 Django View</span>
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;http&#39;</span>: django_asgi_app,
+</span></span><span style=display:flex><span>    <span style=color:#75715e># WebSocket 請求走 Channels Consumer</span>
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;websocket&#39;</span>: AuthMiddlewareStack(
+</span></span><span style=display:flex><span>        URLRouter(websocket_urlpatterns)
+</span></span><span style=display:flex><span>    ),
+</span></span><span style=display:flex><span>})
+</span></span></code></pre></div><p>這裡有幾個關鍵元件：</p><ul><li><strong>ProtocolTypeRouter</strong>：根據協定類型（HTTP 或 WebSocket）分派到不同的處理程式</li><li><strong>URLRouter</strong>：類似 Django 的 <code>urls.py</code>，將 WebSocket URL 路徑對應到特定的 Consumer</li><li><strong>AuthMiddlewareStack</strong>：自動將 Django 的認證資訊注入到 <code>scope['user']</code>，讓 Consumer 能取得登入使用者</li></ul><hr><h3 id=consumerwebsocket-的-view>Consumer：WebSocket 的 View</h3><p><strong>Consumer</strong> 是 Django Channels 處理 WebSocket 連線的核心元件，你可以把它理解為 WebSocket 版本的 Django View。每個 WebSocket 連線都會建立一個 Consumer 實例，透過三個主要方法處理連線的生命週期：</p><table><thead><tr><th>Django View</th><th>Channels Consumer</th></tr></thead><tbody><tr><td><code>def view(request)</code></td><td><code>class ChatConsumer(WebsocketConsumer)</code></td></tr><tr><td><code>request.GET</code></td><td><code>self.scope['query_string']</code></td></tr><tr><td><code>request.user</code></td><td><code>self.scope['user']</code></td></tr><tr><td>請求/回應後結束</td><td>持久連線（connect / disconnect / receive）</td></tr></tbody></table><p>Django Channels 提供三種主要的 Consumer 類型：</p><ul><li><strong>WebsocketConsumer</strong>：同步版本，適合簡單場景，內部使用執行緒處理</li><li><strong>AsyncWebsocketConsumer</strong>：非同步版本，效能更佳，推薦在大多數場景使用</li><li><strong>JsonWebsocketConsumer</strong>：自動處理 JSON 的序列化與反序列化</li></ul><h4 id=同步-consumer-範例>同步 Consumer 範例</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># chat/consumers.py</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> json
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> channels.generic.websocket <span style=color:#f92672>import</span> WebsocketConsumer
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>EchoConsumer</span>(WebsocketConsumer):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;同步 WebSocket Consumer，收到什麼就回傳什麼。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>connect</span>(self):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;客戶端發起 WebSocket 連線時觸發。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>accept()  <span style=color:#75715e># 接受連線，若不呼叫則連線被拒絕</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>disconnect</span>(self, close_code):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;客戶端斷開連線時觸發。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>pass</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>receive</span>(self, text_data):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;收到客戶端傳來的訊息時觸發。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        data <span style=color:#f92672>=</span> json<span style=color:#f92672>.</span>loads(text_data)
+</span></span><span style=display:flex><span>        message <span style=color:#f92672>=</span> data[<span style=color:#e6db74>&#39;message&#39;</span>]
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#75715e># 將訊息原封不動回傳給客戶端</span>
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>send(text_data<span style=color:#f92672>=</span>json<span style=color:#f92672>.</span>dumps({
+</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;message&#39;</span>: <span style=color:#e6db74>f</span><span style=color:#e6db74>&#39;Echo: </span><span style=color:#e6db74>{</span>message<span style=color:#e6db74>}</span><span style=color:#e6db74>&#39;</span>
+</span></span><span style=display:flex><span>        }))
+</span></span></code></pre></div><h4 id=非同步-consumer-範例>非同步 Consumer 範例</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># chat/consumers.py</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> json
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> channels.generic.websocket <span style=color:#f92672>import</span> AsyncWebsocketConsumer
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>AsyncEchoConsumer</span>(AsyncWebsocketConsumer):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;非同步 WebSocket Consumer，效能更佳的版本。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>async</span> <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>connect</span>(self):
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>await</span> self<span style=color:#f92672>.</span>accept()
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>async</span> <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>disconnect</span>(self, close_code):
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>pass</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>async</span> <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>receive</span>(self, text_data):
+</span></span><span style=display:flex><span>        data <span style=color:#f92672>=</span> json<span style=color:#f92672>.</span>loads(text_data)
+</span></span><span style=display:flex><span>        message <span style=color:#f92672>=</span> data[<span style=color:#e6db74>&#39;message&#39;</span>]
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>await</span> self<span style=color:#f92672>.</span>send(text_data<span style=color:#f92672>=</span>json<span style=color:#f92672>.</span>dumps({
+</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;message&#39;</span>: <span style=color:#e6db74>f</span><span style=color:#e6db74>&#39;Echo: </span><span style=color:#e6db74>{</span>message<span style=color:#e6db74>}</span><span style=color:#e6db74>&#39;</span>
+</span></span><span style=display:flex><span>        }))
+</span></span></code></pre></div><p>非同步版本使用 <code>async/await</code> 語法，在處理大量並發連線時不會阻塞事件迴圈，效能遠優於同步版本。</p><hr><h3 id=routingwebsocket-的-urlconf>Routing：WebSocket 的 URLconf</h3><p>Consumer 寫好後，需要設定路由來告訴 Channels 哪個 URL 要交給哪個 Consumer 處理：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># chat/routing.py</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.urls <span style=color:#f92672>import</span> re_path
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> . <span style=color:#f92672>import</span> consumers
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>websocket_urlpatterns <span style=color:#f92672>=</span> [
+</span></span><span style=display:flex><span>    re_path(<span style=color:#e6db74>r</span><span style=color:#e6db74>&#39;ws/chat/(?P&lt;room_name&gt;\w+)/$&#39;</span>, consumers<span style=color:#f92672>.</span>ChatConsumer<span style=color:#f92672>.</span>as_asgi()),
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><p>注意幾個重點：</p><ul><li>WebSocket URL 慣例以 <code>ws/</code> 作為前綴，方便在反向代理（如 Nginx）中區分 HTTP 與 WebSocket 請求</li><li>使用 <code>re_path</code> 搭配正規表達式（Regular Expression）擷取 URL 參數（如聊天室名稱）</li><li>Consumer 必須呼叫 <code>.as_asgi()</code> 方法，類似 Django CBV 的 <code>.as_view()</code></li></ul><hr><h3 id=channel-layers-與-redis>Channel Layers 與 Redis</h3><p>到目前為止，每個 Consumer 實例都是獨立的，無法互相溝通。如果使用者 A 發送訊息，使用者 B 的 Consumer 不會收到通知。這就是 <strong>Channel Layers</strong>（頻道層）要解決的問題。</p><p>Channel Layer 是 Consumer 之間的通訊層，讓不同的 Consumer 實例（甚至不同的 Worker 進程）能互相傳遞訊息。它的核心概念包含：</p><ul><li><strong>Channel</strong>：每個 Consumer 實例都有一個唯一的 <code>channel_name</code>，就像信箱地址</li><li><strong>Group</strong>：一組 Channel 的集合，用於廣播訊息（如聊天室中的所有成員）</li></ul><h4 id=設定-redis-channel-layer>設定 Redis Channel Layer</h4><p>生產環境建議使用 Redis 作為 Channel Layer 的後端：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># settings.py</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>CHANNEL_LAYERS <span style=color:#f92672>=</span> {
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;default&#39;</span>: {
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;BACKEND&#39;</span>: <span style=color:#e6db74>&#39;channels_redis.core.RedisChannelLayer&#39;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;CONFIG&#39;</span>: {
+</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;hosts&#39;</span>: [(<span style=color:#e6db74>&#39;127.0.0.1&#39;</span>, <span style=color:#ae81ff>6379</span>)],
+</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;capacity&#39;</span>: <span style=color:#ae81ff>1500</span>,    <span style=color:#75715e># 每個 Channel 的訊息緩衝上限</span>
+</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;expiry&#39;</span>: <span style=color:#ae81ff>10</span>,        <span style=color:#75715e># 訊息過期時間（秒）</span>
+</span></span><span style=display:flex><span>        },
+</span></span><span style=display:flex><span>    },
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>開發環境如果不想安裝 Redis，可以使用記憶體內的 Channel Layer（僅限單一進程）：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># settings.py（開發環境）</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>CHANNEL_LAYERS <span style=color:#f92672>=</span> {
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;default&#39;</span>: {
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;BACKEND&#39;</span>: <span style=color:#e6db74>&#39;channels.layers.InMemoryChannelLayer&#39;</span>,
+</span></span><span style=display:flex><span>    },
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><hr><h3 id=groups實現群組廣播>Groups：實現群組廣播</h3><p><strong>Groups</strong>（群組）是 Channel Layer 中最常用的功能。它允許你將多個 Consumer 加入同一個群組，然後透過 <code>group_send</code> 向群組內所有成員廣播訊息。</p><p>三個核心方法：</p><ul><li><strong><code>group_add(group_name, channel_name)</code></strong>：將 Consumer 加入群組</li><li><strong><code>group_discard(group_name, channel_name)</code></strong>：將 Consumer 從群組移除</li><li><strong><code>group_send(group_name, message)</code></strong>：向群組內所有 Consumer 廣播訊息</li></ul><p><code>group_send</code> 的 <code>message</code> 字典中必須包含 <code>type</code> 鍵，其值對應 Consumer 中的處理方法名稱（點號 <code>.</code> 會自動轉換為底線 <code>_</code>）。</p><hr><h3 id=實作完整聊天室>實作完整聊天室</h3><p>現在讓我們把所有概念串在一起，實作一個完整的即時聊天室。</p><h4 id=consumer聊天室核心邏輯>Consumer：聊天室核心邏輯</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># chat/consumers.py</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> json
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> channels.generic.websocket <span style=color:#f92672>import</span> AsyncWebsocketConsumer
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ChatConsumer</span>(AsyncWebsocketConsumer):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;非同步 WebSocket Consumer，實作群組聊天功能。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>async</span> <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>connect</span>(self):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;客戶端發起 WebSocket 連線時觸發。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        <span style=color:#75715e># 從 URL 路徑中取得聊天室名稱</span>
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>room_name <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>scope[<span style=color:#e6db74>&#39;url_route&#39;</span>][<span style=color:#e6db74>&#39;kwargs&#39;</span>][<span style=color:#e6db74>&#39;room_name&#39;</span>]
+</span></span><span style=display:flex><span>        self<span style=color:#f92672>.</span>room_group_name <span style=color:#f92672>=</span> <span style=color:#e6db74>f</span><span style=color:#e6db74>&#39;chat_</span><span style=color:#e6db74>{</span>self<span style=color:#f92672>.</span>room_name<span style=color:#e6db74>}</span><span style=color:#e6db74>&#39;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#75715e># 將此 Consumer 加入聊天室 Group</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>await</span> self<span style=color:#f92672>.</span>channel_layer<span style=color:#f92672>.</span>group_add(
+</span></span><span style=display:flex><span>            self<span style=color:#f92672>.</span>room_group_name,
+</span></span><span style=display:flex><span>            self<span style=color:#f92672>.</span>channel_name,  <span style=color:#75715e># 此連線的唯一識別</span>
+</span></span><span style=display:flex><span>        )
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#75715e># 接受 WebSocket 連線</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>await</span> self<span style=color:#f92672>.</span>accept()
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>async</span> <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>disconnect</span>(self, close_code):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;客戶端斷開連線時觸發。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        <span style=color:#75715e># 將此 Consumer 從聊天室 Group 移除</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>await</span> self<span style=color:#f92672>.</span>channel_layer<span style=color:#f92672>.</span>group_discard(
+</span></span><span style=display:flex><span>            self<span style=color:#f92672>.</span>room_group_name,
+</span></span><span style=display:flex><span>            self<span style=color:#f92672>.</span>channel_name,
+</span></span><span style=display:flex><span>        )
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>async</span> <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>receive</span>(self, text_data):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;收到客戶端訊息時觸發。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        data <span style=color:#f92672>=</span> json<span style=color:#f92672>.</span>loads(text_data)
+</span></span><span style=display:flex><span>        message <span style=color:#f92672>=</span> data[<span style=color:#e6db74>&#39;message&#39;</span>]
+</span></span><span style=display:flex><span>        username <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>scope[<span style=color:#e6db74>&#39;user&#39;</span>]<span style=color:#f92672>.</span>username
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#75715e># 透過 Channel Layer 廣播訊息給聊天室所有成員</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>await</span> self<span style=color:#f92672>.</span>channel_layer<span style=color:#f92672>.</span>group_send(
+</span></span><span style=display:flex><span>            self<span style=color:#f92672>.</span>room_group_name,
+</span></span><span style=display:flex><span>            {
+</span></span><span style=display:flex><span>                <span style=color:#e6db74>&#39;type&#39;</span>: <span style=color:#e6db74>&#39;chat_message&#39;</span>,  <span style=color:#75715e># 對應下方的 chat_message() 方法</span>
+</span></span><span style=display:flex><span>                <span style=color:#e6db74>&#39;message&#39;</span>: message,
+</span></span><span style=display:flex><span>                <span style=color:#e6db74>&#39;username&#39;</span>: username,
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        )
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>async</span> <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>chat_message</span>(self, event):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;處理從 group_send 收到的訊息，傳送給 WebSocket 客戶端。
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>        方法名稱必須與 group_send 中的 type 值一致（點號轉底線）。
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>        &#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>await</span> self<span style=color:#f92672>.</span>send(text_data<span style=color:#f92672>=</span>json<span style=color:#f92672>.</span>dumps({
+</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;message&#39;</span>: event[<span style=color:#e6db74>&#39;message&#39;</span>],
+</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;username&#39;</span>: event[<span style=color:#e6db74>&#39;username&#39;</span>],
+</span></span><span style=display:flex><span>        }))
+</span></span></code></pre></div><h4 id=routingwebsocket-url-配置>Routing：WebSocket URL 配置</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># chat/routing.py</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.urls <span style=color:#f92672>import</span> re_path
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> . <span style=color:#f92672>import</span> consumers
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>websocket_urlpatterns <span style=color:#f92672>=</span> [
+</span></span><span style=display:flex><span>    re_path(<span style=color:#e6db74>r</span><span style=color:#e6db74>&#39;ws/chat/(?P&lt;room_name&gt;\w+)/$&#39;</span>, consumers<span style=color:#f92672>.</span>ChatConsumer<span style=color:#f92672>.</span>as_asgi()),
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><h4 id=asgi-設定>ASGI 設定</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># myproject/asgi.py</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> os
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.core.asgi <span style=color:#f92672>import</span> get_asgi_application
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> channels.routing <span style=color:#f92672>import</span> ProtocolTypeRouter, URLRouter
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> channels.auth <span style=color:#f92672>import</span> AuthMiddlewareStack
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>os<span style=color:#f92672>.</span>environ<span style=color:#f92672>.</span>setdefault(<span style=color:#e6db74>&#39;DJANGO_SETTINGS_MODULE&#39;</span>, <span style=color:#e6db74>&#39;myproject.settings&#39;</span>)
+</span></span><span style=display:flex><span>django_asgi_app <span style=color:#f92672>=</span> get_asgi_application()
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> chat.routing <span style=color:#f92672>import</span> websocket_urlpatterns  <span style=color:#75715e># noqa: E402</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>application <span style=color:#f92672>=</span> ProtocolTypeRouter({
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;http&#39;</span>: django_asgi_app,
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;websocket&#39;</span>: AuthMiddlewareStack(
+</span></span><span style=display:flex><span>        URLRouter(websocket_urlpatterns)
+</span></span><span style=display:flex><span>    ),
+</span></span><span style=display:flex><span>})
+</span></span></code></pre></div><h4 id=前端-javascript-客戶端>前端 JavaScript 客戶端</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-javascript data-lang=javascript><span style=display:flex><span><span style=color:#75715e>// 取得聊天室名稱（假設從 URL 或頁面變數取得）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>roomName</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;general&#39;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 建立 WebSocket 連線（使用 wss:// 對應 HTTPS，ws:// 對應 HTTP）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>wsScheme</span> <span style=color:#f92672>=</span> window.<span style=color:#a6e22e>location</span>.<span style=color:#a6e22e>protocol</span> <span style=color:#f92672>===</span> <span style=color:#e6db74>&#39;https:&#39;</span> <span style=color:#f92672>?</span> <span style=color:#e6db74>&#39;wss&#39;</span> <span style=color:#f92672>:</span> <span style=color:#e6db74>&#39;ws&#39;</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>ws</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>WebSocket</span>(
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>`</span><span style=color:#e6db74>${</span><span style=color:#a6e22e>wsScheme</span><span style=color:#e6db74>}</span><span style=color:#e6db74>://</span><span style=color:#e6db74>${</span>window.<span style=color:#a6e22e>location</span>.<span style=color:#a6e22e>host</span><span style=color:#e6db74>}</span><span style=color:#e6db74>/ws/chat/</span><span style=color:#e6db74>${</span><span style=color:#a6e22e>roomName</span><span style=color:#e6db74>}</span><span style=color:#e6db74>/`</span>
+</span></span><span style=display:flex><span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 連線建立成功
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>ws</span>.<span style=color:#a6e22e>onopen</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>function</span>(<span style=color:#a6e22e>event</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#e6db74>&#39;WebSocket 連線成功&#39;</span>);
+</span></span><span style=display:flex><span>};
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 收到伺服器推送的訊息
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>ws</span>.<span style=color:#a6e22e>onmessage</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>function</span>(<span style=color:#a6e22e>event</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>data</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>JSON</span>.<span style=color:#a6e22e>parse</span>(<span style=color:#a6e22e>event</span>.<span style=color:#a6e22e>data</span>);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>chatLog</span> <span style=color:#f92672>=</span> document.<span style=color:#a6e22e>getElementById</span>(<span style=color:#e6db74>&#39;chat-log&#39;</span>);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>messageEl</span> <span style=color:#f92672>=</span> document.<span style=color:#a6e22e>createElement</span>(<span style=color:#e6db74>&#39;div&#39;</span>);
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>messageEl</span>.<span style=color:#a6e22e>textContent</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>`</span><span style=color:#e6db74>${</span><span style=color:#a6e22e>data</span>.<span style=color:#a6e22e>username</span><span style=color:#e6db74>}</span><span style=color:#e6db74>: </span><span style=color:#e6db74>${</span><span style=color:#a6e22e>data</span>.<span style=color:#a6e22e>message</span><span style=color:#e6db74>}</span><span style=color:#e6db74>`</span>;
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>chatLog</span>.<span style=color:#a6e22e>appendChild</span>(<span style=color:#a6e22e>messageEl</span>);
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 自動捲動到最新訊息
+</span></span></span><span style=display:flex><span>    <span style=color:#a6e22e>chatLog</span>.<span style=color:#a6e22e>scrollTop</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>chatLog</span>.<span style=color:#a6e22e>scrollHeight</span>;
+</span></span><span style=display:flex><span>};
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 連線關閉
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>ws</span>.<span style=color:#a6e22e>onclose</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>function</span>(<span style=color:#a6e22e>event</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>warn</span>(<span style=color:#e6db74>&#39;WebSocket 連線已關閉，代碼：&#39;</span>, <span style=color:#a6e22e>event</span>.<span style=color:#a6e22e>code</span>);
+</span></span><span style=display:flex><span>};
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 連線錯誤
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>ws</span>.<span style=color:#a6e22e>onerror</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>function</span>(<span style=color:#a6e22e>event</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>error</span>(<span style=color:#e6db74>&#39;WebSocket 發生錯誤&#39;</span>);
+</span></span><span style=display:flex><span>};
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 發送訊息
+</span></span></span><span style=display:flex><span>document.<span style=color:#a6e22e>getElementById</span>(<span style=color:#e6db74>&#39;send-btn&#39;</span>).<span style=color:#a6e22e>addEventListener</span>(<span style=color:#e6db74>&#39;click&#39;</span>, <span style=color:#66d9ef>function</span>() {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>input</span> <span style=color:#f92672>=</span> document.<span style=color:#a6e22e>getElementById</span>(<span style=color:#e6db74>&#39;message-input&#39;</span>);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>message</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>input</span>.<span style=color:#a6e22e>value</span>.<span style=color:#a6e22e>trim</span>();
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>message</span>) {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>ws</span>.<span style=color:#a6e22e>send</span>(<span style=color:#a6e22e>JSON</span>.<span style=color:#a6e22e>stringify</span>({ <span style=color:#a6e22e>message</span><span style=color:#f92672>:</span> <span style=color:#a6e22e>message</span> }));
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>input</span>.<span style=color:#a6e22e>value</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;&#39;</span>;  <span style=color:#75715e>// 清空輸入框
+</span></span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>});
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 按 Enter 發送訊息
+</span></span></span><span style=display:flex><span>document.<span style=color:#a6e22e>getElementById</span>(<span style=color:#e6db74>&#39;message-input&#39;</span>).<span style=color:#a6e22e>addEventListener</span>(<span style=color:#e6db74>&#39;keypress&#39;</span>, <span style=color:#66d9ef>function</span>(<span style=color:#a6e22e>e</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>e</span>.<span style=color:#a6e22e>key</span> <span style=color:#f92672>===</span> <span style=color:#e6db74>&#39;Enter&#39;</span>) {
+</span></span><span style=display:flex><span>        document.<span style=color:#a6e22e>getElementById</span>(<span style=color:#e6db74>&#39;send-btn&#39;</span>).<span style=color:#a6e22e>click</span>();
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>});
+</span></span></code></pre></div><h4 id=django-template>Django Template</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-html data-lang=html><span style=display:flex><span><span style=color:#75715e>&lt;!-- chat/templates/chat/room.html --&gt;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>{% extends &#34;base.html&#34; %}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>{% block content %}
+</span></span><span style=display:flex><span>&lt;<span style=color:#f92672>h2</span>&gt;聊天室：{{ room_name }}&lt;/<span style=color:#f92672>h2</span>&gt;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>&lt;<span style=color:#f92672>div</span> <span style=color:#a6e22e>id</span><span style=color:#f92672>=</span><span style=color:#e6db74>&#34;chat-log&#34;</span> <span style=color:#a6e22e>style</span><span style=color:#f92672>=</span><span style=color:#e6db74>&#34;height: 400px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;&#34;</span>&gt;
+</span></span><span style=display:flex><span>    <span style=color:#75715e>&lt;!-- 訊息會透過 JavaScript 動態插入 --&gt;</span>
+</span></span><span style=display:flex><span>&lt;/<span style=color:#f92672>div</span>&gt;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>&lt;<span style=color:#f92672>div</span>&gt;
+</span></span><span style=display:flex><span>    &lt;<span style=color:#f92672>input</span> <span style=color:#a6e22e>id</span><span style=color:#f92672>=</span><span style=color:#e6db74>&#34;message-input&#34;</span> <span style=color:#a6e22e>type</span><span style=color:#f92672>=</span><span style=color:#e6db74>&#34;text&#34;</span> <span style=color:#a6e22e>placeholder</span><span style=color:#f92672>=</span><span style=color:#e6db74>&#34;輸入訊息...&#34;</span> <span style=color:#a6e22e>style</span><span style=color:#f92672>=</span><span style=color:#e6db74>&#34;width: 80%;&#34;</span>&gt;
+</span></span><span style=display:flex><span>    &lt;<span style=color:#f92672>button</span> <span style=color:#a6e22e>id</span><span style=color:#f92672>=</span><span style=color:#e6db74>&#34;send-btn&#34;</span>&gt;發送&lt;/<span style=color:#f92672>button</span>&gt;
+</span></span><span style=display:flex><span>&lt;/<span style=color:#f92672>div</span>&gt;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>&lt;!-- 將聊天室名稱傳給 JavaScript --&gt;</span>
+</span></span><span style=display:flex><span>{{ room_name|json_script:&#34;room-name&#34; }}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>&lt;<span style=color:#f92672>script</span>&gt;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>roomName</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>JSON</span>.<span style=color:#a6e22e>parse</span>(document.<span style=color:#a6e22e>getElementById</span>(<span style=color:#e6db74>&#39;room-name&#39;</span>).<span style=color:#a6e22e>textContent</span>);
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// ... 上方的 JavaScript 程式碼
+</span></span></span><span style=display:flex><span>&lt;/<span style=color:#f92672>script</span>&gt;
+</span></span><span style=display:flex><span>{% endblock %}
+</span></span></code></pre></div><h4 id=django-view-與-url>Django View 與 URL</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># chat/views.py</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.shortcuts <span style=color:#f92672>import</span> render
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>chat_room</span>(request, room_name):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;聊天室頁面 View。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> render(request, <span style=color:#e6db74>&#39;chat/room.html&#39;</span>, {
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;room_name&#39;</span>: room_name,
+</span></span><span style=display:flex><span>    })
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># chat/urls.py</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.urls <span style=color:#f92672>import</span> path
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> . <span style=color:#f92672>import</span> views
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>urlpatterns <span style=color:#f92672>=</span> [
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;chat/&lt;str:room_name&gt;/&#39;</span>, views<span style=color:#f92672>.</span>chat_room, name<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;chat-room&#39;</span>),
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><hr><h3 id=在非同步-consumer-中存取-django-orm>在非同步 Consumer 中存取 Django ORM</h3><p>Django ORM 是同步的，在 <code>AsyncWebsocketConsumer</code> 中直接呼叫 ORM 操作會引發錯誤。需要使用 <code>database_sync_to_async</code> 裝飾器將同步的 ORM 操作包裝為非同步函式：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># chat/consumers.py</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> channels.db <span style=color:#f92672>import</span> database_sync_to_async
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> chat.models <span style=color:#f92672>import</span> Message
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ChatConsumer</span>(AsyncWebsocketConsumer):
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>@database_sync_to_async</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>save_message</span>(self, room_name, username, message):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;在執行緒池中同步執行 ORM 操作。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> Message<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>create(
+</span></span><span style=display:flex><span>            room<span style=color:#f92672>=</span>room_name,
+</span></span><span style=display:flex><span>            author<span style=color:#f92672>=</span>username,
+</span></span><span style=display:flex><span>            content<span style=color:#f92672>=</span>message,
+</span></span><span style=display:flex><span>        )
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>async</span> <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>receive</span>(self, text_data):
+</span></span><span style=display:flex><span>        data <span style=color:#f92672>=</span> json<span style=color:#f92672>.</span>loads(text_data)
+</span></span><span style=display:flex><span>        message <span style=color:#f92672>=</span> data[<span style=color:#e6db74>&#39;message&#39;</span>]
+</span></span><span style=display:flex><span>        username <span style=color:#f92672>=</span> self<span style=color:#f92672>.</span>scope[<span style=color:#e6db74>&#39;user&#39;</span>]<span style=color:#f92672>.</span>username
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#75715e># 非同步地儲存訊息到資料庫</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>await</span> self<span style=color:#f92672>.</span>save_message(self<span style=color:#f92672>.</span>room_name, username, message)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#75715e># 廣播訊息給聊天室成員</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>await</span> self<span style=color:#f92672>.</span>channel_layer<span style=color:#f92672>.</span>group_send(
+</span></span><span style=display:flex><span>            self<span style=color:#f92672>.</span>room_group_name,
+</span></span><span style=display:flex><span>            {
+</span></span><span style=display:flex><span>                <span style=color:#e6db74>&#39;type&#39;</span>: <span style=color:#e6db74>&#39;chat_message&#39;</span>,
+</span></span><span style=display:flex><span>                <span style=color:#e6db74>&#39;message&#39;</span>: message,
+</span></span><span style=display:flex><span>                <span style=color:#e6db74>&#39;username&#39;</span>: username,
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        )
+</span></span></code></pre></div><hr><h3 id=websocket-認證處理>WebSocket 認證處理</h3><p>Django Channels 的 <code>AuthMiddlewareStack</code> 會自動從 Session Cookie 取得認證使用者並注入到 <code>scope['user']</code>。但如果你的前端使用 Token 認證（如 JWT），WebSocket 無法透過標準的 HTTP Header 傳遞 Token，需要自訂 Middleware：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># chat/middleware.py</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> channels.middleware <span style=color:#f92672>import</span> BaseMiddleware
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> channels.db <span style=color:#f92672>import</span> database_sync_to_async
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.contrib.auth.models <span style=color:#f92672>import</span> AnonymousUser
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> rest_framework.authtoken.models <span style=color:#f92672>import</span> Token
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>TokenAuthMiddleware</span>(BaseMiddleware):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;從 WebSocket URL 查詢參數中取得 Token 並認證使用者。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>async</span> <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>__call__</span>(self, scope, receive, send):
+</span></span><span style=display:flex><span>        <span style=color:#75715e># 從 query string 解析 token 參數</span>
+</span></span><span style=display:flex><span>        query_string <span style=color:#f92672>=</span> scope<span style=color:#f92672>.</span>get(<span style=color:#e6db74>&#39;query_string&#39;</span>, <span style=color:#e6db74>b</span><span style=color:#e6db74>&#39;&#39;</span>)<span style=color:#f92672>.</span>decode()
+</span></span><span style=display:flex><span>        params <span style=color:#f92672>=</span> dict(
+</span></span><span style=display:flex><span>            p<span style=color:#f92672>.</span>split(<span style=color:#e6db74>&#39;=&#39;</span>) <span style=color:#66d9ef>for</span> p <span style=color:#f92672>in</span> query_string<span style=color:#f92672>.</span>split(<span style=color:#e6db74>&#39;&amp;&#39;</span>) <span style=color:#66d9ef>if</span> <span style=color:#e6db74>&#39;=&#39;</span> <span style=color:#f92672>in</span> p
+</span></span><span style=display:flex><span>        )
+</span></span><span style=display:flex><span>        token_key <span style=color:#f92672>=</span> params<span style=color:#f92672>.</span>get(<span style=color:#e6db74>&#39;token&#39;</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> token_key:
+</span></span><span style=display:flex><span>            scope[<span style=color:#e6db74>&#39;user&#39;</span>] <span style=color:#f92672>=</span> <span style=color:#66d9ef>await</span> self<span style=color:#f92672>.</span>get_user(token_key)
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>else</span>:
+</span></span><span style=display:flex><span>            scope[<span style=color:#e6db74>&#39;user&#39;</span>] <span style=color:#f92672>=</span> AnonymousUser()
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>await</span> super()<span style=color:#f92672>.</span><span style=color:#a6e22e>__call__</span>(scope, receive, send)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>@database_sync_to_async</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>get_user</span>(self, token_key):
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;&#34;&#34;透過 Token 取得對應的使用者。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>try</span>:
+</span></span><span style=display:flex><span>            token <span style=color:#f92672>=</span> Token<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>select_related(<span style=color:#e6db74>&#39;user&#39;</span>)<span style=color:#f92672>.</span>get(key<span style=color:#f92672>=</span>token_key)
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> token<span style=color:#f92672>.</span>user
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>except</span> Token<span style=color:#f92672>.</span>DoesNotExist:
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> AnonymousUser()
+</span></span></code></pre></div><p>在 Consumer 中可以拒絕未認證的連線：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#66d9ef>async</span> <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>connect</span>(self):
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> <span style=color:#f92672>not</span> self<span style=color:#f92672>.</span>scope[<span style=color:#e6db74>&#39;user&#39;</span>]<span style=color:#f92672>.</span>is_authenticated:
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>await</span> self<span style=color:#f92672>.</span>close(code<span style=color:#f92672>=</span><span style=color:#ae81ff>4001</span>)  <span style=color:#75715e># 使用自訂關閉代碼</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># ... 正常連線邏輯</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>await</span> self<span style=color:#f92672>.</span>accept()
+</span></span></code></pre></div><p>前端連線時在 URL 中附帶 Token：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-javascript data-lang=javascript><span style=display:flex><span><span style=color:#75715e>// Token 認證方式的 WebSocket 連線
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>token</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;your-auth-token&#39;</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>ws</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>WebSocket</span>(
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>`ws://</span><span style=color:#e6db74>${</span>window.<span style=color:#a6e22e>location</span>.<span style=color:#a6e22e>host</span><span style=color:#e6db74>}</span><span style=color:#e6db74>/ws/chat/</span><span style=color:#e6db74>${</span><span style=color:#a6e22e>roomName</span><span style=color:#e6db74>}</span><span style=color:#e6db74>/?token=</span><span style=color:#e6db74>${</span><span style=color:#a6e22e>token</span><span style=color:#e6db74>}</span><span style=color:#e6db74>`</span>
+</span></span><span style=display:flex><span>);
+</span></span></code></pre></div><hr><h3 id=測試-websocket-consumer>測試 WebSocket Consumer</h3><p>Django Channels 提供 <code>WebsocketCommunicator</code> 用於測試 Consumer：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># chat/tests/test_consumers.py</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> pytest
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> channels.testing <span style=color:#f92672>import</span> WebsocketCommunicator
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> channels.layers <span style=color:#f92672>import</span> get_channel_layer
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> myproject.asgi <span style=color:#f92672>import</span> application
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>@pytest.mark.asyncio</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>async</span> <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>test_chat_consumer_connect</span>():
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;測試 WebSocket Consumer 的連線。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>    communicator <span style=color:#f92672>=</span> WebsocketCommunicator(
+</span></span><span style=display:flex><span>        application, <span style=color:#e6db74>&#39;/ws/chat/test-room/&#39;</span>
+</span></span><span style=display:flex><span>    )
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 測試連線是否成功</span>
+</span></span><span style=display:flex><span>    connected, subprotocol <span style=color:#f92672>=</span> <span style=color:#66d9ef>await</span> communicator<span style=color:#f92672>.</span>connect()
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>assert</span> connected
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 測試斷開連線</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>await</span> communicator<span style=color:#f92672>.</span>disconnect()
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>@pytest.mark.asyncio</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>async</span> <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>test_chat_consumer_send_receive</span>():
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;測試 WebSocket Consumer 的訊息傳遞。&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>    communicator <span style=color:#f92672>=</span> WebsocketCommunicator(
+</span></span><span style=display:flex><span>        application, <span style=color:#e6db74>&#39;/ws/chat/test-room/&#39;</span>
+</span></span><span style=display:flex><span>    )
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>await</span> communicator<span style=color:#f92672>.</span>connect()
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 傳送訊息</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>await</span> communicator<span style=color:#f92672>.</span>send_json_to({<span style=color:#e6db74>&#39;message&#39;</span>: <span style=color:#e6db74>&#39;Hello&#39;</span>})
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 接收並驗證回應</span>
+</span></span><span style=display:flex><span>    response <span style=color:#f92672>=</span> <span style=color:#66d9ef>await</span> communicator<span style=color:#f92672>.</span>receive_json_from()
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>assert</span> response[<span style=color:#e6db74>&#39;message&#39;</span>] <span style=color:#f92672>==</span> <span style=color:#e6db74>&#39;Hello&#39;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>await</span> communicator<span style=color:#f92672>.</span>disconnect()
+</span></span></code></pre></div><hr><h3 id=部署注意事項>部署注意事項</h3><p>部署使用 WebSocket 的 Django 專案時，需要使用支援 ASGI 的伺服器：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 使用 Daphne（Channels 官方推薦）</span>
+</span></span><span style=display:flex><span>daphne -b 0.0.0.0 -p <span style=color:#ae81ff>8000</span> myproject.asgi:application
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 使用 Uvicorn（效能更佳）</span>
+</span></span><span style=display:flex><span>uvicorn myproject.asgi:application --host 0.0.0.0 --port <span style=color:#ae81ff>8000</span> --workers <span style=color:#ae81ff>4</span>
+</span></span></code></pre></div><p>Nginx 反向代理設定需要特別支援 WebSocket 升級：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># Nginx 設定（/etc/nginx/sites-available/myproject）</span>
+</span></span><span style=display:flex><span>upstream channels-backend <span style=color:#f92672>{</span>
+</span></span><span style=display:flex><span>    server localhost:8000;
+</span></span><span style=display:flex><span><span style=color:#f92672>}</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>server <span style=color:#f92672>{</span>
+</span></span><span style=display:flex><span>    listen 80;
+</span></span><span style=display:flex><span>    server_name example.com;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    location / <span style=color:#f92672>{</span>
+</span></span><span style=display:flex><span>        proxy_pass http://channels-backend;
+</span></span><span style=display:flex><span>        proxy_set_header Host $host;
+</span></span><span style=display:flex><span>        proxy_set_header X-Real-IP $remote_addr;
+</span></span><span style=display:flex><span>    <span style=color:#f92672>}</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># WebSocket 路由需要額外的 Header 設定</span>
+</span></span><span style=display:flex><span>    location /ws/ <span style=color:#f92672>{</span>
+</span></span><span style=display:flex><span>        proxy_pass http://channels-backend;
+</span></span><span style=display:flex><span>        proxy_http_version 1.1;
+</span></span><span style=display:flex><span>        proxy_set_header Upgrade $http_upgrade;
+</span></span><span style=display:flex><span>        proxy_set_header Connection <span style=color:#e6db74>&#34;upgrade&#34;</span>;
+</span></span><span style=display:flex><span>        proxy_set_header Host $host;
+</span></span><span style=display:flex><span>        proxy_set_header X-Real-IP $remote_addr;
+</span></span><span style=display:flex><span>        proxy_read_timeout 86400;
+</span></span><span style=display:flex><span>    <span style=color:#f92672>}</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>}</span>
+</span></span></code></pre></div><p>關鍵是 <code>/ws/</code> 路徑下要加入 <code>Upgrade</code> 和 <code>Connection</code> Header，讓 Nginx 支援 WebSocket 協定升級。<code>proxy_read_timeout</code> 設為較大的值，避免長時間閒置的 WebSocket 連線被中斷。</p><hr><h3 id=總結>總結</h3><p>本文從即時通訊的需求出發，完整介紹了 Django Channels 的核心概念與實作方式：</p><ol><li><strong>WebSocket vs HTTP</strong>：WebSocket 提供全雙工的持久連線，是即時通訊的最佳選擇</li><li><strong>ASGI vs WSGI</strong>：ASGI 是支援非同步與長連接的新一代伺服器介面標準</li><li><strong>安裝與設定</strong>：安裝 <code>channels</code> 和 <code>channels_redis</code>，設定 <code>ASGI_APPLICATION</code> 與 <code>CHANNEL_LAYERS</code></li><li><strong>Consumer</strong>：WebSocket 的 View，透過 <code>connect</code>、<code>disconnect</code>、<code>receive</code> 三個方法處理連線生命週期</li><li><strong>Routing</strong>：使用 <code>ProtocolTypeRouter</code> 和 <code>URLRouter</code> 設定 WebSocket 路由</li><li><strong>Channel Layers 與 Groups</strong>：透過 Redis 實現跨 Consumer 的訊息廣播，<code>group_add</code>、<code>group_send</code>、<code>group_discard</code> 是三個核心方法</li><li><strong>完整聊天室範例</strong>：整合 Consumer、Routing、前端 JavaScript、Django Template 的端到端實作</li></ol><p>Django Channels 讓你不必離開 Django 的生態系就能實現強大的即時通訊功能。在下一篇中，我們將學習 Django 的測試框架，確保包含 WebSocket 在內的所有功能都有完善的測試覆蓋。</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
+</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/django/034-django-celery-advanced/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django + Celery 進階：排程任務、重試與監控 | Django 教學</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/23</span>
+</a><a href=https://benzhub.github.io/post/django/033-django-celery-basics/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django + Celery 非同步任務佇列入門 | Django 教學</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/22</span>
+</a><a href=https://benzhub.github.io/post/django/032-django-caching/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django Caching 快取策略完全指南 | Django 教學</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/21</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/django/034-django-celery-advanced/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+<span class="text-sm font-medium">Django + Celery 進階：排程任務、重試與監控 | Django 教學</span></a></div><div><a href=https://benzhub.github.io/post/django/036-django-testing-basics/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+<span class="text-sm font-medium">Django Testing 單元測試與整合測試入門 | Django 教學</span></a></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
+</a><a href=/tags/acid><span class=tag-pill>acid</span>
+</a><a href=/tags/aggregate><span class=tag-pill>aggregate</span>
+</a><a href=/tags/ai><span class=tag-pill>ai</span>
+</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
+</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
+</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
+</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
+</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
+</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
+</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
+</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
+</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
+</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
+</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
+</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
+</a><a href=/tags/analytics><span class=tag-pill>analytics</span>
+</a><a href=/tags/api><span class=tag-pill>api</span>
+</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
+</a><a href=/tags/autovacuum><span class=tag-pill>autovacuum</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (20)</span>
+</a><a href=/post/javascript/><span class=tag-pill>JavaScript (75)</span>
+</a><a href=/post/django/><span class=tag-pill>Django (37)</span>
+</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
+</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
+</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
+</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
+</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/django/037-django-testing-advanced/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Testing 進階：Mock、Factory Boy 與 Coverage | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/26</p></a><a href=/post/postgresql/020-json-jsonb/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">JSON 與 JSONB 操作：PostgreSQL 的半結構化資料處理 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/26</p></a><a href=/post/javascript/data-structures--algorithms/013-segment-tree/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">線段樹 — Lazy Propagation 與區間查詢完整實作 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/26</p></a><a href=/post/postgresql/019-cte-subquery/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">CTE 與子查詢：PostgreSQL 的查詢組合與遞迴能力 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/25</p></a><a href=/post/django/036-django-testing-basics/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Testing 單元測試與整合測試入門 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/25</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>
