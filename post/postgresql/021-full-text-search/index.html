@@ -1,0 +1,366 @@
+<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>全文搜尋：PostgreSQL 內建的文字搜尋引擎 | PostgreSQL | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="全文搜尋：PostgreSQL 內建的文字搜尋引擎 | PostgreSQL | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="深入解析 PostgreSQL 的全文搜尋機制，涵蓋 tsvector 與 tsquery 的內部結構、Text Search Configuration 配置體系、GIN vs GiST 索引選擇、排名與高亮、中文分詞方案、自訂字典、效能調校，以及與 Elasticsearch 的比較。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="深入解析 PostgreSQL 的全文搜尋機制，涵蓋 tsvector 與 tsquery 的內部結構、Text Search Configuration 配置體系、GIN vs GiST 索引選擇、排名與高亮、中文分詞方案、自訂字典、效能調校，以及與 Elasticsearch 的比較。"><meta property="og:url" content="https://benzhub.github.io/post/postgresql/021-full-text-search/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/postgresql/021-full-text-search/><meta name=twitter:description content="深入解析 PostgreSQL 的全文搜尋機制，涵蓋 tsvector 與 tsquery 的內部結構、Text Search Configuration 配置體系、GIN vs GiST 索引選擇、排名與高亮、中文分詞方案、自訂字典、效能調校，以及與 Elasticsearch 的比較。"><meta property="article:published_time" content="2026-06-27T00:00:00+00:00"><meta property="article:updated_time" content="2026-06-27T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/postgresql/021-Full-Text-Search.png"><meta property="og:image:url" content="https://benzhub.github.io/img/postgresql/021-Full-Text-Search.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/postgresql/021-full-text-search/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/postgresql/021-full-text-search/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"全文搜尋：PostgreSQL 內建的文字搜尋引擎 | PostgreSQL\"","description":"\"深入解析 PostgreSQL 的全文搜尋機制，涵蓋 tsvector 與 tsquery 的內部結構、Text Search Configuration 配置體系、GIN vs GiST 索引選擇、排名與高亮、中文分詞方案、自訂字典、效能調校，以及與 Elasticsearch 的比較。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-06-27T00:00:00\u002b00:00","dateModified":"2026-06-27T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/postgresql\/021-Full-Text-Search.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/postgresql\/021-full-text-search\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/postgresql\/"},{"@type":"ListItem","position":3,"name":"\"全文搜尋：PostgreSQL 內建的文字搜尋引擎 | PostgreSQL\""}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">全文搜尋：PostgreSQL 內建的文字搜尋引擎 | PostgreSQL</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/27</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/postgresql class="tag-pill no-underline">postgresql</a>
+<a href=/tags/full-text-search class="tag-pill no-underline">full-text-search</a>
+<a href=/tags/tsvector class="tag-pill no-underline">tsvector</a>
+<a href=/tags/gin class="tag-pill no-underline">gin</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/postgresql/021-Full-Text-Search.png alt="全文搜尋：PostgreSQL 內建的文字搜尋引擎 | PostgreSQL"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p><strong>全文搜尋（Full-Text Search）</strong> 是 <strong>PostgreSQL</strong> 內建的文字搜尋引擎，透過 <strong>tsvector</strong> 與 <strong>tsquery</strong> 兩種特殊資料型別，將原始文字轉換為正規化的詞素（lexeme），再以布林或相鄰運算進行高效匹配。無需 <strong>Elasticsearch</strong> 等外部服務，即可在資料庫內實現生產級的搜尋功能。</p></blockquote><h3 id=全文搜尋三階段處理流程>全文搜尋三階段處理流程</h3><p>PostgreSQL 全文搜尋的核心是一個三階段的文字處理管線：</p><pre tabindex=0><code>輸入文字: &#34;The quick brown foxes jumped over lazy dogs&#34;
+          │
+          ▼
+  階段一：Tokenize（斷詞）
+  Parser 將文字拆解為 Token 並分類
+  結果: &#34;The&#34; &#34;quick&#34; &#34;brown&#34; &#34;foxes&#34; &#34;jumped&#34; &#34;over&#34; &#34;lazy&#34; &#34;dogs&#34;
+          │
+          ▼
+  階段二：Normalize（正規化）
+  Dictionary 對每個 Token 處理：
+  • 詞幹化（Stemming）：foxes → fox
+  • 停用詞移除：the, over → 捨棄
+  • 詞形還原：jumped → jump
+          │
+          ▼
+  階段三：Lexeme（詞素輸出）
+  產生排序的 lexeme 列表存入 tsvector
+  結果: &#39;brown&#39;:3 &#39;dog&#39;:8 &#39;fox&#39;:4 &#39;jump&#39;:5 &#39;lazi&#39;:7 &#39;quick&#39;:2
+</code></pre><p>每個詞素保留了原始位置資訊（數字），用於片語搜尋與排名計算。</p><h3 id=tsvector-內部結構>tsvector 內部結構</h3><p><strong>tsvector</strong> 是一個排序的詞素列表，每個詞素附帶位置資訊與權重標記：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 基本轉換
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> to_tsvector(<span style=color:#e6db74>&#39;english&#39;</span>, <span style=color:#e6db74>&#39;The quick brown fox jumped over the lazy dog&#39;</span>);
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 結果: &#39;brown&#39;:3 &#39;dog&#39;:9 &#39;fox&#39;:4 &#39;jump&#39;:5 &#39;lazi&#39;:8 &#39;quick&#39;:2
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 帶權重的 tsvector（A=最高, B, C, D=最低）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> setweight(to_tsvector(<span style=color:#e6db74>&#39;english&#39;</span>, <span style=color:#e6db74>&#39;PostgreSQL Full-Text Search&#39;</span>), <span style=color:#e6db74>&#39;A&#39;</span>)
+</span></span><span style=display:flex><span>    <span style=color:#f92672>||</span> setweight(to_tsvector(<span style=color:#e6db74>&#39;english&#39;</span>, <span style=color:#e6db74>&#39;Database search engine&#39;</span>), <span style=color:#e6db74>&#39;B&#39;</span>);
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 結果: &#39;databas&#39;:4B &#39;engin&#39;:6B &#39;full&#39;:2A &#39;postgresql&#39;:1A &#39;search&#39;:3A,5B &#39;text&#39;:3A
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- tsvector 特性：
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 1. 詞素按字母序排列
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 2. 相同詞素的多個位置合併為一個條目
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 3. 位置範圍 1-16383，用於片語搜尋
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 4. 權重 A/B/C/D 用於 ts_rank 排名計算
+</span></span></span></code></pre></div><h3 id=tsquery-查詢語法>tsquery 查詢語法</h3><p><strong>tsquery</strong> 儲存搜尋條件的詞素及布林關係：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 布林運算子
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#e6db74>&#39;fat &amp; rat&#39;</span>::tsquery;          <span style=color:#75715e>-- AND：兩者都必須出現
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#e6db74>&#39;fat | rat&#39;</span>::tsquery;          <span style=color:#75715e>-- OR：任一出現即可
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#e6db74>&#39;!fat&#39;</span>::tsquery;               <span style=color:#75715e>-- NOT：不得出現
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#e6db74>&#39;fat &amp; !rat&#39;</span>::tsquery;         <span style=color:#75715e>-- 組合：有 fat 但無 rat
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 相鄰運算子 &lt;-&gt;（片語搜尋）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#e6db74>&#39;full &lt;-&gt; text&#39;</span>::tsquery;      <span style=color:#75715e>-- full 緊接著 text（距離 1）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#e6db74>&#39;fat &lt;2&gt; rat&#39;</span>::tsquery;        <span style=color:#75715e>-- fat 與 rat 之間相隔 1 個詞
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 前綴搜尋
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#e6db74>&#39;super:*&#39;</span>::tsquery;            <span style=color:#75715e>-- 匹配所有以 super 開頭的詞素
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 匹配運算子 @@
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> to_tsvector(<span style=color:#e6db74>&#39;english&#39;</span>, <span style=color:#e6db74>&#39;The quick brown fox&#39;</span>)
+</span></span><span style=display:flex><span>    <span style=color:#f92672>@@</span> to_tsquery(<span style=color:#e6db74>&#39;english&#39;</span>, <span style=color:#e6db74>&#39;fox &amp; quick&#39;</span>);
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 結果: true
+</span></span></span></code></pre></div><h4 id=四種-tsquery-建構函式>四種 tsquery 建構函式</h4><table><thead><tr><th>函式</th><th>輸入範例</th><th>行為</th></tr></thead><tbody><tr><td><code>to_tsquery</code></td><td><code>'fat & rat'</code></td><td>嚴格語法，支援所有運算子</td></tr><tr><td><code>plainto_tsquery</code></td><td><code>'fat rat'</code></td><td>自然語言，空格自動視為 AND</td></tr><tr><td><code>phraseto_tsquery</code></td><td><code>'fat rat'</code></td><td>片語搜尋，要求詞素按順序相鄰</td></tr><tr><td><code>websearch_to_tsquery</code></td><td><code>'fat -rat "big cat"'</code></td><td>Web 風格（PG11+），支援 <code>-</code>、引號、<code>or</code></td></tr></tbody></table><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- plainto_tsquery — 適合使用者搜尋框輸入
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> plainto_tsquery(<span style=color:#e6db74>&#39;english&#39;</span>, <span style=color:#e6db74>&#39;postgresql full text search&#39;</span>);
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 結果: &#39;postgresql&#39; &amp; &#39;full&#39; &amp; &#39;text&#39; &amp; &#39;search&#39;
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- phraseto_tsquery — 精確片語搜尋
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> phraseto_tsquery(<span style=color:#e6db74>&#39;english&#39;</span>, <span style=color:#e6db74>&#39;full text search&#39;</span>);
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 結果: &#39;full&#39; &lt;-&gt; &#39;text&#39; &lt;-&gt; &#39;search&#39;
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- websearch_to_tsquery — 最適合 Web 搜尋場景（PG11+）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> websearch_to_tsquery(<span style=color:#e6db74>&#39;english&#39;</span>, <span style=color:#e6db74>&#39;postgresql -mysql &#34;full text&#34;&#39;</span>);
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 結果: &#39;postgresql&#39; &amp; !&#39;mysql&#39; &amp; &#39;full&#39; &lt;-&gt; &#39;text&#39;
+</span></span></span></code></pre></div><h3 id=建立全文搜尋欄位>建立全文搜尋欄位</h3><h4 id=方法一generated-column推薦>方法一：Generated Column（推薦）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- PG12+ Generated Column 自動維護 tsvector
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> articles (
+</span></span><span style=display:flex><span>    id         SERIAL <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span>,
+</span></span><span style=display:flex><span>    title      TEXT <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span>    body       TEXT <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span>    created_at TIMESTAMPTZ <span style=color:#66d9ef>DEFAULT</span> NOW(),
+</span></span><span style=display:flex><span>    tsv        TSVECTOR <span style=color:#66d9ef>GENERATED</span> ALWAYS <span style=color:#66d9ef>AS</span> (
+</span></span><span style=display:flex><span>                   to_tsvector(<span style=color:#e6db74>&#39;english&#39;</span>,
+</span></span><span style=display:flex><span>                       coalesce(title, <span style=color:#e6db74>&#39;&#39;</span>) <span style=color:#f92672>||</span> <span style=color:#e6db74>&#39; &#39;</span> <span style=color:#f92672>||</span> coalesce(body, <span style=color:#e6db74>&#39;&#39;</span>))
+</span></span><span style=display:flex><span>               ) STORED
+</span></span><span style=display:flex><span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 建立 GIN 索引
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_articles_tsv <span style=color:#66d9ef>ON</span> articles <span style=color:#66d9ef>USING</span> GIN(tsv);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 搜尋（會走索引）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> id, title
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> articles
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> tsv <span style=color:#f92672>@@</span> websearch_to_tsquery(<span style=color:#e6db74>&#39;english&#39;</span>, <span style=color:#e6db74>&#39;postgresql search&#39;</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> ts_rank(tsv, websearch_to_tsquery(<span style=color:#e6db74>&#39;english&#39;</span>, <span style=color:#e6db74>&#39;postgresql search&#39;</span>)) <span style=color:#66d9ef>DESC</span>;
+</span></span></code></pre></div><h4 id=方法二trigger多欄位權重>方法二：Trigger（多欄位權重）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 標題權重 A &gt; 內文權重 B &gt; 標籤權重 C
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> articles (
+</span></span><span style=display:flex><span>    id    SERIAL <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span>,
+</span></span><span style=display:flex><span>    title TEXT <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span>    body  TEXT <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span>    tags  TEXT[],
+</span></span><span style=display:flex><span>    tsv   TSVECTOR
+</span></span><span style=display:flex><span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>OR</span> <span style=color:#66d9ef>REPLACE</span> <span style=color:#66d9ef>FUNCTION</span> articles_tsv_trigger()
+</span></span><span style=display:flex><span><span style=color:#66d9ef>RETURNS</span> <span style=color:#66d9ef>TRIGGER</span> <span style=color:#66d9ef>AS</span> <span style=color:#960050;background-color:#1e0010>$$</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>NEW</span>.tsv :<span style=color:#f92672>=</span>
+</span></span><span style=display:flex><span>        setweight(to_tsvector(<span style=color:#e6db74>&#39;english&#39;</span>, coalesce(<span style=color:#66d9ef>NEW</span>.title, <span style=color:#e6db74>&#39;&#39;</span>)), <span style=color:#e6db74>&#39;A&#39;</span>) <span style=color:#f92672>||</span>
+</span></span><span style=display:flex><span>        setweight(to_tsvector(<span style=color:#e6db74>&#39;english&#39;</span>, coalesce(<span style=color:#66d9ef>NEW</span>.body, <span style=color:#e6db74>&#39;&#39;</span>)),  <span style=color:#e6db74>&#39;B&#39;</span>) <span style=color:#f92672>||</span>
+</span></span><span style=display:flex><span>        setweight(to_tsvector(<span style=color:#e6db74>&#39;english&#39;</span>,
+</span></span><span style=display:flex><span>            coalesce(array_to_string(<span style=color:#66d9ef>NEW</span>.tags, <span style=color:#e6db74>&#39; &#39;</span>), <span style=color:#e6db74>&#39;&#39;</span>)), <span style=color:#e6db74>&#39;C&#39;</span>);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>RETURN</span> <span style=color:#66d9ef>NEW</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span>;
+</span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>$$</span> <span style=color:#66d9ef>LANGUAGE</span> plpgsql;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TRIGGER</span> trig_articles_tsv
+</span></span><span style=display:flex><span><span style=color:#66d9ef>BEFORE</span> <span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>OR</span> <span style=color:#66d9ef>UPDATE</span> <span style=color:#66d9ef>ON</span> articles
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FOR</span> <span style=color:#66d9ef>EACH</span> <span style=color:#66d9ef>ROW</span> <span style=color:#66d9ef>EXECUTE</span> <span style=color:#66d9ef>FUNCTION</span> articles_tsv_trigger();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_articles_tsv <span style=color:#66d9ef>ON</span> articles <span style=color:#66d9ef>USING</span> GIN(tsv);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 初次部署更新已存在資料
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>UPDATE</span> articles <span style=color:#66d9ef>SET</span> tsv <span style=color:#f92672>=</span> tsv;
+</span></span></code></pre></div><h3 id=gin-vs-gist-索引>GIN vs GiST 索引</h3><table><thead><tr><th>特性</th><th>GIN</th><th>GiST</th></tr></thead><tbody><tr><td>索引大小</td><td>較大（精確倒排索引）</td><td>較小（有損簽章摘要）</td></tr><tr><td>建立速度</td><td>較慢</td><td>較快</td></tr><tr><td>查詢速度</td><td>快（無需回表驗證）</td><td>慢（需回表過濾偽陽性）</td></tr><tr><td>更新成本</td><td>較高</td><td>較低</td></tr><tr><td>適用場景</td><td>讀多寫少（推薦）</td><td>極端空間限制</td></tr></tbody></table><pre tabindex=0><code>GIN 倒排索引內部結構：
+
+  &#39;brown&#39; → {行ID: 1, 5, 23, 88}
+  &#39;fox&#39;   → {行ID: 1, 5, 42}
+  &#39;jump&#39;  → {行ID: 5, 88, 101}
+
+  查詢 &#39;fox &amp; jump&#39; → 取交集 → {5}
+
+GiST 簽章索引（有損）：
+
+  每個葉節點儲存 tsvector 的位元圖摘要
+  可能產生偽陽性 → 需回表重新驗證
+</code></pre><p><strong>結論</strong>：除非空間極度受限，否則一律使用 <strong>GIN</strong> 索引。</p><h3 id=排名與高亮>排名與高亮</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- ts_rank：基於詞素頻率的排名
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> id, title,
+</span></span><span style=display:flex><span>       ts_rank(tsv, query) <span style=color:#66d9ef>AS</span> rank
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> articles,
+</span></span><span style=display:flex><span>     websearch_to_tsquery(<span style=color:#e6db74>&#39;english&#39;</span>, <span style=color:#e6db74>&#39;postgresql search&#39;</span>) <span style=color:#66d9ef>AS</span> query
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> tsv <span style=color:#f92672>@@</span> query
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> rank <span style=color:#66d9ef>DESC</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- ts_rank_cd：Cover Density 排名（考慮詞素距離，通常更直觀）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> id, title,
+</span></span><span style=display:flex><span>       ts_rank_cd(tsv, query, <span style=color:#ae81ff>32</span>) <span style=color:#66d9ef>AS</span> rank  <span style=color:#75715e>-- 32 正規化到 0~1
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> articles,
+</span></span><span style=display:flex><span>     to_tsquery(<span style=color:#e6db74>&#39;english&#39;</span>, <span style=color:#e6db74>&#39;postgresql &amp; index&#39;</span>) <span style=color:#66d9ef>AS</span> query
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> tsv <span style=color:#f92672>@@</span> query
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> rank <span style=color:#66d9ef>DESC</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- ts_headline：搜尋結果關鍵字高亮
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> id,
+</span></span><span style=display:flex><span>       ts_headline(<span style=color:#e6db74>&#39;english&#39;</span>, body, query,
+</span></span><span style=display:flex><span>           <span style=color:#e6db74>&#39;StartSel=&lt;mark&gt;, StopSel=&lt;/mark&gt;,
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>            MaxWords=35, MinWords=15,
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>            MaxFragments=3, FragmentDelimiter=&#34; ... &#34;&#39;</span>
+</span></span><span style=display:flex><span>       ) <span style=color:#66d9ef>AS</span> snippet
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> articles,
+</span></span><span style=display:flex><span>     websearch_to_tsquery(<span style=color:#e6db74>&#39;english&#39;</span>, <span style=color:#e6db74>&#39;postgresql search&#39;</span>) <span style=color:#66d9ef>AS</span> query
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> tsv <span style=color:#f92672>@@</span> query;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 完整搜尋結果查詢（排名 + 高亮）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>WITH</span> q <span style=color:#66d9ef>AS</span> (
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>SELECT</span> websearch_to_tsquery(<span style=color:#e6db74>&#39;english&#39;</span>, <span style=color:#e6db74>&#39;postgresql full text&#39;</span>) <span style=color:#66d9ef>AS</span> query
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>    a.id,
+</span></span><span style=display:flex><span>    a.title,
+</span></span><span style=display:flex><span>    ts_rank_cd(a.tsv, q.query, <span style=color:#ae81ff>32</span>) <span style=color:#66d9ef>AS</span> rank,
+</span></span><span style=display:flex><span>    ts_headline(<span style=color:#e6db74>&#39;english&#39;</span>, a.body, q.query,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;StartSel=&lt;em&gt;, StopSel=&lt;/em&gt;, MaxFragments=3&#39;</span>
+</span></span><span style=display:flex><span>    ) <span style=color:#66d9ef>AS</span> snippet
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> articles a, q
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> a.tsv <span style=color:#f92672>@@</span> q.query
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> rank <span style=color:#66d9ef>DESC</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LIMIT</span> <span style=color:#ae81ff>10</span>;
+</span></span></code></pre></div><h3 id=中文搜尋>中文搜尋</h3><p>PostgreSQL 預設 Parser 不支援中文分詞（中文詞語無空格分隔），需安裝額外擴展：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 方案一：zhparser（基於 SCWS 分詞引擎）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> EXTENSION zhparser;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> TEXT <span style=color:#66d9ef>SEARCH</span> CONFIGURATION chinese (PARSER <span style=color:#f92672>=</span> zhparser);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> TEXT <span style=color:#66d9ef>SEARCH</span> CONFIGURATION chinese
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>ADD</span> MAPPING <span style=color:#66d9ef>FOR</span> n, v, a, i, e, l <span style=color:#66d9ef>WITH</span> <span style=color:#66d9ef>simple</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- n=名詞, v=動詞, a=形容詞, i=成語, e=嘆詞, l=慣用語
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 測試
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> to_tsvector(<span style=color:#e6db74>&#39;chinese&#39;</span>, <span style=color:#e6db74>&#39;自然語言處理是人工智慧的重要領域&#39;</span>);
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 結果: &#39;人工智慧&#39;:4 &#39;處理&#39;:3 &#39;自然語言&#39;:1 &#39;領域&#39;:6 &#39;重要&#39;:5
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 建立中文全文搜尋索引
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>TABLE</span> articles <span style=color:#66d9ef>ADD</span> <span style=color:#66d9ef>COLUMN</span> tsv_zh TSVECTOR
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>GENERATED</span> ALWAYS <span style=color:#66d9ef>AS</span> (to_tsvector(<span style=color:#e6db74>&#39;chinese&#39;</span>, coalesce(body, <span style=color:#e6db74>&#39;&#39;</span>))) STORED;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_articles_tsv_zh <span style=color:#66d9ef>ON</span> articles <span style=color:#66d9ef>USING</span> GIN(tsv_zh);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 方案二：pg_jieba（基於結巴分詞，效果更好）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> EXTENSION pg_jieba;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> TEXT <span style=color:#66d9ef>SEARCH</span> CONFIGURATION jieba_cfg (PARSER <span style=color:#f92672>=</span> jieba);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> TEXT <span style=color:#66d9ef>SEARCH</span> CONFIGURATION jieba_cfg
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>ADD</span> MAPPING <span style=color:#66d9ef>FOR</span> n, v, a, i, e, l <span style=color:#66d9ef>WITH</span> <span style=color:#66d9ef>simple</span>;
+</span></span></code></pre></div><h3 id=自訂字典>自訂字典</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 同義詞字典
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 檔案 my_synonyms.syn 放在 tsearch_data 目錄：
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--   postgres  postgresql
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--   pg        postgresql
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--   rdbms     database
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> TEXT <span style=color:#66d9ef>SEARCH</span> <span style=color:#66d9ef>DICTIONARY</span> pg_synonyms (
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>TEMPLATE</span> <span style=color:#f92672>=</span> synonym,
+</span></span><span style=display:flex><span>    SYNONYMS <span style=color:#f92672>=</span> my_synonyms
+</span></span><span style=display:flex><span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 建立使用同義詞的配置
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> TEXT <span style=color:#66d9ef>SEARCH</span> CONFIGURATION my_english (<span style=color:#66d9ef>COPY</span> <span style=color:#f92672>=</span> english);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> TEXT <span style=color:#66d9ef>SEARCH</span> CONFIGURATION my_english
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>ALTER</span> MAPPING <span style=color:#66d9ef>FOR</span> asciiword <span style=color:#66d9ef>WITH</span> pg_synonyms, english_stem;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 測試：搜尋 &#34;pg&#34; 能匹配 &#34;postgresql&#34;
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> to_tsvector(<span style=color:#e6db74>&#39;my_english&#39;</span>, <span style=color:#e6db74>&#39;Learning PostgreSQL&#39;</span>)
+</span></span><span style=display:flex><span>    <span style=color:#f92672>@@</span> to_tsquery(<span style=color:#e6db74>&#39;my_english&#39;</span>, <span style=color:#e6db74>&#39;pg&#39;</span>);
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 結果: true
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- Unaccent 擴展（去除重音符號，歐洲語言必備）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> EXTENSION unaccent;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> unaccent(<span style=color:#e6db74>&#39;Héllo Wörld&#39;</span>);
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 結果: Hello World
+</span></span></span></code></pre></div><h3 id=效能調校>效能調校</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- GIN 索引的 fastupdate 設定
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_articles_tsv <span style=color:#66d9ef>ON</span> articles <span style=color:#66d9ef>USING</span> GIN(tsv)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>WITH</span> (fastupdate <span style=color:#f92672>=</span> <span style=color:#66d9ef>false</span>);
+</span></span><span style=display:flex><span><span style=color:#75715e>-- fastupdate=true（預設）：批次更新，寫入快但偶發清理慢
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- fastupdate=false：即時更新，查詢效能更穩定
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 強制清理 GIN pending list
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> gin_clean_pending_list(<span style=color:#e6db74>&#39;idx_articles_tsv&#39;</span>::regclass);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 大表優化：分區 + 部分索引
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>INDEX</span> idx_articles_tsv_published <span style=color:#66d9ef>ON</span> articles <span style=color:#66d9ef>USING</span> GIN(tsv)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>WHERE</span> status <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;published&#39;</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 僅索引已發布文章，更小更快
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 分頁效能：Keyset Pagination 取代 OFFSET
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 效能差
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> id, title, ts_rank(tsv, query) <span style=color:#66d9ef>AS</span> rank
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> articles, to_tsquery(<span style=color:#e6db74>&#39;english&#39;</span>, <span style=color:#e6db74>&#39;postgresql&#39;</span>) <span style=color:#66d9ef>AS</span> query
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> tsv <span style=color:#f92672>@@</span> query
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> rank <span style=color:#66d9ef>DESC</span>, id <span style=color:#66d9ef>DESC</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>OFFSET</span> <span style=color:#ae81ff>10000</span> <span style=color:#66d9ef>LIMIT</span> <span style=color:#ae81ff>10</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 效能好（Keyset Pagination）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> id, title, ts_rank(tsv, query) <span style=color:#66d9ef>AS</span> rank
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> articles, to_tsquery(<span style=color:#e6db74>&#39;english&#39;</span>, <span style=color:#e6db74>&#39;postgresql&#39;</span>) <span style=color:#66d9ef>AS</span> query
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> tsv <span style=color:#f92672>@@</span> query
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>AND</span> (ts_rank(tsv, query), id) <span style=color:#f92672>&lt;</span> (<span style=color:#ae81ff>0</span>.<span style=color:#ae81ff>0832</span>, <span style=color:#ae81ff>12345</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> rank <span style=color:#66d9ef>DESC</span>, id <span style=color:#66d9ef>DESC</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LIMIT</span> <span style=color:#ae81ff>10</span>;
+</span></span></code></pre></div><h3 id=混合搜尋策略>混合搜尋策略</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 全文搜尋 + 條件過濾
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> id, title, ts_rank(tsv, query) <span style=color:#66d9ef>AS</span> rank
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> articles, to_tsquery(<span style=color:#e6db74>&#39;english&#39;</span>, <span style=color:#e6db74>&#39;postgresql &amp; index&#39;</span>) <span style=color:#66d9ef>AS</span> query
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> tsv <span style=color:#f92672>@@</span> query
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>AND</span> created_at <span style=color:#f92672>&gt;=</span> NOW() <span style=color:#f92672>-</span> INTERVAL <span style=color:#e6db74>&#39;30 days&#39;</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>AND</span> status <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;published&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> rank <span style=color:#66d9ef>DESC</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LIMIT</span> <span style=color:#ae81ff>20</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 結合 pg_trgm 實現模糊 + 全文混合搜尋
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> EXTENSION pg_trgm;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 拼字錯誤容錯
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> id, title, similarity(title, <span style=color:#e6db74>&#39;postgress&#39;</span>) <span style=color:#66d9ef>AS</span> sim
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> articles
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> similarity(title, <span style=color:#e6db74>&#39;postgress&#39;</span>) <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>.<span style=color:#ae81ff>3</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> sim <span style=color:#66d9ef>DESC</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 雙策略：全文搜尋 OR 相似度搜尋
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> id, title
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> articles
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> tsv <span style=color:#f92672>@@</span> plainto_tsquery(<span style=color:#e6db74>&#39;english&#39;</span>, <span style=color:#e6db74>&#39;postgresql&#39;</span>)
+</span></span><span style=display:flex><span>   <span style=color:#66d9ef>OR</span> similarity(title, <span style=color:#e6db74>&#39;postgresql&#39;</span>) <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>.<span style=color:#ae81ff>4</span>;
+</span></span></code></pre></div><h3 id=與-elasticsearch-比較>與 Elasticsearch 比較</h3><table><thead><tr><th>特性</th><th>PostgreSQL FTS</th><th>Elasticsearch</th></tr></thead><tbody><tr><td>部署複雜度</td><td>低（內建）</td><td>高（獨立叢集 + JVM）</td></tr><tr><td>資料一致性</td><td>強一致（ACID）</td><td>最終一致（~1 秒延遲）</td></tr><tr><td>搜尋功能</td><td>基本～中等</td><td>進階（模糊、相關性調校）</td></tr><tr><td>JOIN 支援</td><td>原生 SQL JOIN</td><td>不支援</td></tr><tr><td>中文支援</td><td>需擴展（zhparser）</td><td>內建分析器</td></tr><tr><td>規模</td><td>中小（億級以內）</td><td>大規模（百億級+）</td></tr><tr><td>維運成本</td><td>低</td><td>高</td></tr></tbody></table><pre tabindex=0><code>決策流程：
+
+  每日搜尋量 &lt; 1 億 且 資料量 &lt; 1 億筆
+  └── 搜尋與 SQL 業務緊密結合？
+      ├── 是 → PostgreSQL FTS（維運成本最低）
+      └── 否 → 評估 Elasticsearch
+
+  每日搜尋量 &gt; 1 億 或 需要複雜搜尋特性
+  └── Elasticsearch / OpenSearch
+</code></pre><h3 id=版本演進>版本演進</h3><table><thead><tr><th>版本</th><th>全文搜尋主要改進</th></tr></thead><tbody><tr><td>PG 8.3</td><td>從 contrib/tsearch2 整合進核心</td></tr><tr><td>PG 9.6</td><td><code>phraseto_tsquery</code> 片語搜尋</td></tr><tr><td>PG 11</td><td><code>websearch_to_tsquery</code> Web 風格語法</td></tr><tr><td>PG 12</td><td>Generated Column 簡化 tsvector 維護</td></tr><tr><td>PG 13</td><td>GIN 索引效能改進</td></tr><tr><td>PG 14</td><td><code>to_tsvector</code> 直接接受 json/jsonb</td></tr><tr><td>PG 17</td><td>排名函式效能優化</td></tr></tbody></table><h3 id=常見陷阱>常見陷阱</h3><h4 id=忘記建索引導致全表掃描>忘記建索引導致全表掃描</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 錯誤：每次查詢重新計算 tsvector
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> articles
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> to_tsvector(<span style=color:#e6db74>&#39;english&#39;</span>, body) <span style=color:#f92672>@@</span> to_tsquery(<span style=color:#e6db74>&#39;english&#39;</span>, <span style=color:#e6db74>&#39;search&#39;</span>);
+</span></span><span style=display:flex><span><span style=color:#75715e>-- EXPLAIN 顯示 Seq Scan
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 正確：使用預計算欄位 + GIN 索引
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> articles
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> tsv <span style=color:#f92672>@@</span> to_tsquery(<span style=color:#e6db74>&#39;english&#39;</span>, <span style=color:#e6db74>&#39;search&#39;</span>);
+</span></span><span style=display:flex><span><span style=color:#75715e>-- EXPLAIN 顯示 Bitmap Index Scan
+</span></span></span></code></pre></div><h4 id=搜尋配置不匹配>搜尋配置不匹配</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 錯誤：建索引用 english，查詢用 simple
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- english 的 &#39;running&#39; → &#39;run&#39;
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- simple 的 &#39;running&#39; → &#39;running&#39;
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 兩者不匹配，無法命中！
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 正確：建索引和查詢必須使用相同配置
+</span></span></span></code></pre></div><h4 id=特殊字元語法錯誤>特殊字元語法錯誤</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 錯誤：to_tsquery 不接受特殊字元
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- SELECT to_tsquery(&#39;english&#39;, &#39;C++&#39;);  -- 語法錯誤！
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 正確：使用 websearch_to_tsquery 或 plainto_tsquery
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> websearch_to_tsquery(<span style=color:#e6db74>&#39;english&#39;</span>, <span style=color:#e6db74>&#39;C++&#39;</span>);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> plainto_tsquery(<span style=color:#e6db74>&#39;english&#39;</span>, <span style=color:#e6db74>&#39;C++&#39;</span>);
+</span></span></code></pre></div><h3 id=總結>總結</h3><p><strong>全文搜尋</strong> 是 PostgreSQL 內建的強大文字搜尋引擎：</p><ul><li><strong>tsvector + tsquery</strong> 將文字搜尋轉為高效的詞素匹配</li><li><strong>Generated Column + GIN</strong> 索引是最推薦的部署方式</li><li><strong>websearch_to_tsquery</strong> 最適合 Web 搜尋框場景</li><li>中文搜尋需安裝 <strong>zhparser</strong> 或 <strong>pg_jieba</strong> 分詞擴展</li><li>中小規模場景（億級以內）可完全取代 Elasticsearch，省去額外基礎設施</li><li>透過 <strong>pg_trgm</strong> 可實現模糊搜尋與全文搜尋的混合策略</li></ul><p>下一篇，我們將深入探討 <strong>自訂型別</strong>——PostgreSQL 如何讓你定義 ENUM、複合型別、Domain 與 Range 型別來擴展資料模型。</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
+</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/postgresql/015-index-types/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">索引類型與設計：B-Tree、GIN、GiST、BRIN 完全指南 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/21</span>
+</a><a href=https://benzhub.github.io/post/postgresql/020-json-jsonb/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">JSON 與 JSONB 操作：PostgreSQL 的半結構化資料處理 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/26</span>
+</a><a href=https://benzhub.github.io/post/postgresql/019-cte-subquery/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">CTE 與子查詢：PostgreSQL 的查詢組合與遞迴能力 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/25</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/postgresql/020-json-jsonb/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+<span class="text-sm font-medium">JSON 與 JSONB 操作：PostgreSQL 的半結構化資料處理 | PostgreSQL</span></a></div><div><a href=https://benzhub.github.io/post/postgresql/022-custom-types/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+<span class="text-sm font-medium">自訂型別：ENUM、Domain、Range 與複合型別 | PostgreSQL</span></a></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
+</a><a href=/tags/acid><span class=tag-pill>acid</span>
+</a><a href=/tags/aggregate><span class=tag-pill>aggregate</span>
+</a><a href=/tags/ai><span class=tag-pill>ai</span>
+</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
+</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
+</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
+</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
+</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
+</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
+</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
+</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
+</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
+</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
+</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
+</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
+</a><a href=/tags/analytics><span class=tag-pill>analytics</span>
+</a><a href=/tags/api><span class=tag-pill>api</span>
+</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
+</a><a href=/tags/autovacuum><span class=tag-pill>autovacuum</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (23)</span>
+</a><a href=/post/javascript/><span class=tag-pill>JavaScript (78)</span>
+</a><a href=/post/django/><span class=tag-pill>Django (40)</span>
+</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
+</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
+</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
+</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
+</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/django/040-django-n-plus-1-queryset/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django N+1 查詢問題與 QuerySet 優化實戰 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/29</p></a><a href=/post/postgresql/023-views-materialized-views/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Views 與 Materialized Views：PostgreSQL 的虛擬關係與物化快取 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/29</p></a><a href=/post/javascript/data-structures--algorithms/016-advanced-hashing/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">進階雜湊技術 — Consistent Hashing、Cuckoo Hashing 與 Perfect Hashing | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/29</p></a><a href=/post/django/039-django-performance/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Performance 效能調校全方位指南 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/28</p></a><a href=/post/postgresql/022-custom-types/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">自訂型別：ENUM、Domain、Range 與複合型別 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/28</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>
