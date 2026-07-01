@@ -1,0 +1,561 @@
+<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>Django Docker 容器化部署完全指南 | Django 教學 | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="Django Docker 容器化部署完全指南 | Django 教學 | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="完整教學 Django Docker 容器化部署：從 Dockerfile 多階段建置、docker-compose 編排 Django + PostgreSQL + Redis 服務，到環境變數管理、Volume 資料持久化、Healthcheck 與開發生產環境分離策略，打造可重現的容器化部署架構。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="完整教學 Django Docker 容器化部署：從 Dockerfile 多階段建置、docker-compose 編排 Django + PostgreSQL + Redis 服務，到環境變數管理、Volume 資料持久化、Healthcheck 與開發生產環境分離策略，打造可重現的容器化部署架構。"><meta property="og:url" content="https://benzhub.github.io/post/django/041-django-docker-deployment/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/django/041-django-docker-deployment/><meta name=twitter:description content="完整教學 Django Docker 容器化部署：從 Dockerfile 多階段建置、docker-compose 編排 Django + PostgreSQL + Redis 服務，到環境變數管理、Volume 資料持久化、Healthcheck 與開發生產環境分離策略，打造可重現的容器化部署架構。"><meta property="article:published_time" content="2026-06-30T00:00:00+00:00"><meta property="article:updated_time" content="2026-05-24T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/django/041-Django-Docker-Deployment.png"><meta property="og:image:url" content="https://benzhub.github.io/img/django/041-Django-Docker-Deployment.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/django/041-django-docker-deployment/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/django/041-django-docker-deployment/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"Django Docker 容器化部署完全指南 | Django 教學\"","description":"\"完整教學 Django Docker 容器化部署：從 Dockerfile 多階段建置、docker-compose 編排 Django + PostgreSQL + Redis 服務，到環境變數管理、Volume 資料持久化、Healthcheck 與開發生產環境分離策略，打造可重現的容器化部署架構。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-06-30T00:00:00\u002b00:00","dateModified":"2026-05-24T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/django\/041-Django-Docker-Deployment.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/django\/041-django-docker-deployment\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/django\/"},{"@type":"ListItem","position":3,"name":"\"Django Docker 容器化部署完全指南 | Django 教學\""}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"\"python:3.12-slim 和 python:3.12-alpine 基礎映像該怎麼選？\"","acceptedAnswer":{"@type":"Answer","text":"\"python:3.12-slim 基於 Debian，體積約 120MB，相容性極佳，大多數 Python 套件都能順利安裝，是生產環境的推薦選擇。python:3.12-alpine 基於 Alpine Linux，體積約 50MB，但使用 musl libc 而非 glibc，許多依賴 C 擴展的套件（如 psycopg2、Pillow）需要額外安裝編譯工具，可能導致建置時間大幅增加且容易出錯。\""}},{"@type":"Question","name":"\"docker-compose 中的 depends_on 能保證資料庫完全啟動嗎？\"","acceptedAnswer":{"@type":"Answer","text":"\"不能。depends_on 預設只保證容器啟動順序，不保證服務真正就緒。例如 PostgreSQL 容器啟動後，資料庫引擎可能還在初始化中。解決方法是搭配 healthcheck 使用 condition: service_healthy，讓 Django 服務等到 PostgreSQL 的 pg_isready 健康檢查通過後才啟動。\""}},{"@type":"Question","name":"\"Django 容器中的 collectstatic 應該在什麼時候執行？\"","acceptedAnswer":{"@type":"Answer","text":"\"建議在 Dockerfile 的建置階段執行 collectstatic，將靜態檔案收集到映像中，這樣每次部署都能確保靜態檔案是最新的。可以在 Dockerfile 中設定 DJANGO_SETTINGS_MODULE 環境變數並執行 RUN python manage.py collectstatic --noinput。如果 collectstatic 需要資料庫連線，可以改用 entrypoint 腳本在容器啟動時執行。\""}}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Django Docker 容器化部署完全指南 | Django 教學</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/30
+</span><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001.0 004.582 9m0 0H9m11 11v-5h-.581m0 0A8.003 8.003.0 014.062 13m15.357 2H15"/></svg>
+2026/05/24</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/python class="tag-pill no-underline">python</a>
+<a href=/tags/django class="tag-pill no-underline">django</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/django/041-Django-Docker-Deployment.png alt="Django Docker 容器化部署完全指南 | Django 教學"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p>將 Django 應用部署到生產環境是開發流程的最後一哩路，而 <strong>Docker（容器化技術）</strong> 已成為現代部署的主流方案。透過 Docker，你可以將應用程式、執行環境和所有依賴打包成一個標準化的 <strong>映像（Image）</strong>，確保「在我的機器上能跑」的程式碼在任何環境都能一致運行。本篇將從 Docker 基礎概念出發，逐步帶你撰寫 <strong>Dockerfile</strong>（含 <strong>多階段建置</strong> 與非 root 使用者安全設定）、設定 <strong>.dockerignore</strong>、管理 <strong>requirements.txt</strong>，再用 <strong>docker-compose.yml</strong> 編排 <strong>Django + PostgreSQL + Redis</strong> 的完整服務架構，涵蓋環境變數管理、<strong>Volume（資料卷）</strong> 持久化、<strong>Healthcheck（健康檢查）</strong> 設定、開發與生產環境的 docker-compose 分離策略，以及常見問題排除。</p></blockquote><h3 id=docker-基礎概念>Docker 基礎概念</h3><p>在開始撰寫 Dockerfile 之前，先釐清幾個核心概念。</p><h4 id=映像imagevs-容器container>映像（Image）vs 容器（Container）</h4><table><thead><tr><th>概念</th><th>映像（Image）</th><th>容器（Container）</th></tr></thead><tbody><tr><td>類比</td><td>安裝光碟 / 類別定義</td><td>安裝好的系統 / 物件實例</td></tr><tr><td>狀態</td><td>唯讀（Read-only）</td><td>可讀寫（Read-write）</td></tr><tr><td>建立方式</td><td>透過 Dockerfile <code>build</code></td><td>透過映像 <code>run</code></td></tr><tr><td>可複製性</td><td>一個映像可建立多個容器</td><td>每個容器是獨立的執行環境</td></tr></tbody></table><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 從 Dockerfile 建立映像</span>
+</span></span><span style=display:flex><span>docker build -t myapp:latest .
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 從映像建立並啟動容器</span>
+</span></span><span style=display:flex><span>docker run -d --name myapp-1 myapp:latest
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 查看執行中的容器</span>
+</span></span><span style=display:flex><span>docker ps
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 查看所有映像</span>
+</span></span><span style=display:flex><span>docker images
+</span></span></code></pre></div><h4 id=docker-分層架構>Docker 分層架構</h4><p>Dockerfile 中的每一條指令（<code>FROM</code>、<code>RUN</code>、<code>COPY</code> 等）都會建立一個 <strong>層（Layer）</strong>。Docker 會對每一層進行快取，如果該層的內容沒有變動，就會直接使用快取，大幅加速建置速度。這就是為什麼我們要把變動頻率低的指令（如安裝系統套件）放在前面，變動頻率高的指令（如複製程式碼）放在後面。</p><hr><h3 id=dockerfile-撰寫>Dockerfile 撰寫</h3><h4 id=基礎映像選擇slim-vs-alpine>基礎映像選擇：slim vs alpine</h4><p>選擇基礎映像是 Dockerfile 的第一步，常見的 Python 基礎映像比較如下：</p><table><thead><tr><th>映像</th><th>基於</th><th>體積</th><th>優點</th><th>缺點</th></tr></thead><tbody><tr><td><code>python:3.12</code></td><td>Debian（完整版）</td><td>~900MB</td><td>所有工具齊全</td><td>體積過大，不適合生產</td></tr><tr><td><code>python:3.12-slim</code></td><td>Debian（精簡版）</td><td>~120MB</td><td>相容性佳，套件可直接安裝</td><td>體積較 Alpine 大</td></tr><tr><td><code>python:3.12-alpine</code></td><td>Alpine Linux</td><td>~50MB</td><td>體積最小</td><td>musl libc，C 擴展套件編譯困難</td></tr></tbody></table><p><strong>推薦使用 <code>python:3.12-slim</code></strong>。Alpine 雖然體積小，但在安裝 <code>psycopg2</code>、<code>Pillow</code>、<code>numpy</code> 等依賴 C 擴展的套件時，需要額外安裝大量編譯工具（<code>gcc</code>、<code>musl-dev</code>、<code>libffi-dev</code> 等），最終映像反而可能比 slim 更大，建置時間也更長。</p><h4 id=基礎版-dockerfile>基礎版 Dockerfile</h4><p>先從一個簡單的 Dockerfile 開始理解基本結構：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-dockerfile data-lang=dockerfile><span style=display:flex><span><span style=color:#75715e># 使用 Python 3.12 slim 映像（精簡版，不含編譯工具）</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> <span style=color:#e6db74>python:3.12-slim</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#75715e># 設定工作目錄</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>WORKDIR</span> <span style=color:#e6db74>/app</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#75715e># 設定環境變數</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ENV</span> PYTHONDONTWRITEBYTECODE<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>    <span style=color:#75715e># 不產生 .pyc 檔案</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ENV</span> PYTHONUNBUFFERED<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>           <span style=color:#75715e># 不緩衝 stdout/stderr（即時輸出日誌）</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#75715e># 安裝系統依賴（PostgreSQL 客戶端程式庫）</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>RUN</span> apt-get update <span style=color:#f92672>&amp;&amp;</span> apt-get install -y --no-install-recommends <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>    libpq5 <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>    <span style=color:#f92672>&amp;&amp;</span> rm -rf /var/lib/apt/lists/*<span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#75715e># 安裝 Python 依賴（先複製 requirements.txt 利用快取層）</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>COPY</span> requirements.txt .<span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>RUN</span> pip install --no-cache-dir -r requirements.txt<span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#75715e># 複製應用程式碼</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>COPY</span> . .<span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#75715e># 開放 8000 埠</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>EXPOSE</span> <span style=color:#e6db74>8000</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#75715e># 啟動指令</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CMD</span> [<span style=color:#e6db74>&#34;gunicorn&#34;</span>, <span style=color:#e6db74>&#34;myproject.wsgi:application&#34;</span>, <span style=color:#e6db74>&#34;--bind&#34;</span>, <span style=color:#e6db74>&#34;0.0.0.0:8000&#34;</span>]<span style=color:#960050;background-color:#1e0010>
+</span></span></span></code></pre></div><h4 id=多階段建置multi-stage-build>多階段建置（Multi-stage Build）</h4><p>多階段建置是 Docker 的進階技巧，將「建置階段」和「執行階段」分離，讓最終映像只包含執行時所需的檔案，大幅縮小體積：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-dockerfile data-lang=dockerfile><span style=display:flex><span><span style=color:#75715e># === Stage 1: Builder（建置階段）===</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> <span style=color:#e6db74>python:3.12-slim</span> <span style=color:#66d9ef>AS</span> <span style=color:#e6db74>builder</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>WORKDIR</span> <span style=color:#e6db74>/app</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#75715e># 安裝「編譯」依賴（gcc、libpq-dev 等，最終映像不需要）</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>RUN</span> apt-get update <span style=color:#f92672>&amp;&amp;</span> apt-get install -y --no-install-recommends <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>    build-essential <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>    libpq-dev <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>    <span style=color:#f92672>&amp;&amp;</span> rm -rf /var/lib/apt/lists/*<span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#75715e># 安裝 Python 依賴到使用者目錄（方便後續複製）</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>COPY</span> requirements.txt .<span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>RUN</span> pip install --no-cache-dir --user -r requirements.txt<span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#75715e># === Stage 2: Production（生產階段）===</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> <span style=color:#e6db74>python:3.12-slim</span> <span style=color:#66d9ef>AS</span> <span style=color:#e6db74>production</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>WORKDIR</span> <span style=color:#e6db74>/app</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#75715e># 只安裝「執行時」依賴（libpq5 而非 libpq-dev）</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>RUN</span> apt-get update <span style=color:#f92672>&amp;&amp;</span> apt-get install -y --no-install-recommends <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>    libpq5 <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>    curl <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>    <span style=color:#f92672>&amp;&amp;</span> rm -rf /var/lib/apt/lists/*<span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#75715e># 從 builder 階段複製已安裝的 Python 套件</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>COPY</span> --from<span style=color:#f92672>=</span>builder /root/.local /root/.local<span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ENV</span> PATH<span style=color:#f92672>=</span>/root/.local/bin:$PATH<span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#75715e># 複製應用程式碼</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>COPY</span> . .<span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#75715e># 環境變數</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ENV</span> PYTHONDONTWRITEBYTECODE<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ENV</span> PYTHONUNBUFFERED<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ENV</span> DJANGO_SETTINGS_MODULE<span style=color:#f92672>=</span>myproject.settings.production<span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#75715e># 安全：建立非 root 使用者</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>RUN</span> useradd --no-create-home --shell /bin/false appuser <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>    <span style=color:#f92672>&amp;&amp;</span> mkdir -p /app/staticfiles /app/media <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>    <span style=color:#f92672>&amp;&amp;</span> chown -R appuser:appuser /app<span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#75715e># 收集靜態檔案（在切換使用者之前執行，確保有寫入權限）</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>RUN</span> python manage.py collectstatic --noinput<span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#75715e># 切換為非 root 使用者</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>USER</span> <span style=color:#e6db74>appuser</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>EXPOSE</span> <span style=color:#e6db74>8000</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#75715e># 健康檢查</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>HEALTHCHECK</span> --interval<span style=color:#f92672>=</span>30s --timeout<span style=color:#f92672>=</span>10s --start-period<span style=color:#f92672>=</span>5s --retries<span style=color:#f92672>=</span><span style=color:#ae81ff>3</span> <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>    CMD python -c <span style=color:#e6db74>&#34;import urllib.request; urllib.request.urlopen(&#39;http://localhost:8000/healthz/&#39;)&#34;</span> <span style=color:#f92672>||</span> exit <span style=color:#ae81ff>1</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CMD</span> [<span style=color:#e6db74>&#34;gunicorn&#34;</span>, <span style=color:#e6db74>&#34;myproject.wsgi:application&#34;</span>, <span style=color:#e6db74>&#34;-c&#34;</span>, <span style=color:#e6db74>&#34;gunicorn.conf.py&#34;</span>]<span style=color:#960050;background-color:#1e0010>
+</span></span></span></code></pre></div><p>這段 Dockerfile 的關鍵設計：</p><ol><li><strong>快取層優化</strong>：先複製 <code>requirements.txt</code> 並安裝依賴，只要依賴沒變就使用快取，大幅加速後續建置</li><li><strong>多階段分離</strong>：<code>build-essential</code>、<code>libpq-dev</code> 等編譯工具只存在於 builder 階段，不會進入最終映像</li><li><strong>非 root 使用者</strong>：以 <code>appuser</code> 身份執行應用，限制潛在攻擊的影響範圍</li></ol><h4 id=非-root-使用者安全設定>非 root 使用者安全設定</h4><p>預設情況下，Docker 容器中的程序以 root 身份執行。如果應用程式存在漏洞，攻擊者可能獲得容器內的 root 權限。使用非 root 使用者是 <strong>容器安全最佳實踐（Container Security Best Practice）</strong> 之一：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-dockerfile data-lang=dockerfile><span style=display:flex><span><span style=color:#75715e># 建立系統使用者（無家目錄、無 shell 登入）</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>RUN</span> useradd --no-create-home --shell /bin/false appuser<span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#75715e># 確保應用目錄與需要寫入的目錄擁有權正確</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>RUN</span> chown -R appuser:appuser /app<span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#75715e># 切換使用者（後續所有指令以 appuser 執行）</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>USER</span> <span style=color:#e6db74>appuser</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span></code></pre></div><hr><h3 id=dockerignore-設定>.dockerignore 設定</h3><p><code>.dockerignore</code> 的作用類似 <code>.gitignore</code>，告訴 Docker 在建置映像時忽略哪些檔案，可以加速建置過程並避免將敏感資訊打包進映像：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-text data-lang=text><span style=display:flex><span># .dockerignore
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span># Git
+</span></span><span style=display:flex><span>.git
+</span></span><span style=display:flex><span>.gitignore
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span># Python
+</span></span><span style=display:flex><span>__pycache__
+</span></span><span style=display:flex><span>*.pyc
+</span></span><span style=display:flex><span>*.pyo
+</span></span><span style=display:flex><span>*.egg-info
+</span></span><span style=display:flex><span>.eggs
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span># 虛擬環境
+</span></span><span style=display:flex><span>venv/
+</span></span><span style=display:flex><span>.venv/
+</span></span><span style=display:flex><span>env/
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span># IDE
+</span></span><span style=display:flex><span>.vscode/
+</span></span><span style=display:flex><span>.idea/
+</span></span><span style=display:flex><span>*.swp
+</span></span><span style=display:flex><span>*.swo
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span># 環境變數檔案（含敏感資訊，絕不打包！）
+</span></span><span style=display:flex><span>.env
+</span></span><span style=display:flex><span>.env.*
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span># Docker 自身
+</span></span><span style=display:flex><span>Dockerfile
+</span></span><span style=display:flex><span>docker-compose*.yml
+</span></span><span style=display:flex><span>.dockerignore
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span># 測試與文件
+</span></span><span style=display:flex><span>tests/
+</span></span><span style=display:flex><span>docs/
+</span></span><span style=display:flex><span>*.md
+</span></span><span style=display:flex><span>.coverage
+</span></span><span style=display:flex><span>htmlcov/
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span># 靜態檔案（將在容器內重新 collectstatic）
+</span></span><span style=display:flex><span>staticfiles/
+</span></span><span style=display:flex><span>media/
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span># OS
+</span></span><span style=display:flex><span>.DS_Store
+</span></span><span style=display:flex><span>Thumbs.db
+</span></span></code></pre></div><hr><h3 id=requirementstxt-管理>requirements.txt 管理</h3><p>良好的依賴管理是可重現建置的基礎。建議區分開發和生產依賴：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-text data-lang=text><span style=display:flex><span># requirements/base.txt（共用依賴）
+</span></span><span style=display:flex><span>Django==5.1
+</span></span><span style=display:flex><span>gunicorn==22.0.0
+</span></span><span style=display:flex><span>psycopg2-binary==2.9.9
+</span></span><span style=display:flex><span>django-redis==5.4.0
+</span></span><span style=display:flex><span>whitenoise==6.7.0
+</span></span><span style=display:flex><span>python-decouple==3.8
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-text data-lang=text><span style=display:flex><span># requirements/production.txt（生產環境）
+</span></span><span style=display:flex><span>-r base.txt
+</span></span><span style=display:flex><span>sentry-sdk[django]==2.0.0
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-text data-lang=text><span style=display:flex><span># requirements/development.txt（開發環境）
+</span></span><span style=display:flex><span>-r base.txt
+</span></span><span style=display:flex><span>django-debug-toolbar==4.4.0
+</span></span><span style=display:flex><span>pytest-django==4.8.0
+</span></span></code></pre></div><p>在 Dockerfile 中使用生產依賴：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-dockerfile data-lang=dockerfile><span style=display:flex><span><span style=color:#66d9ef>COPY</span> requirements/base.txt requirements/base.txt<span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>COPY</span> requirements/production.txt requirements/production.txt<span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>RUN</span> pip install --no-cache-dir -r requirements/production.txt<span style=color:#960050;background-color:#1e0010>
+</span></span></span></code></pre></div><p>也可以使用 <code>pip-tools</code> 來管理鎖定版本，確保每次建置都使用完全相同的依賴版本，避免因為版本差異導致「在我的環境可以跑」的問題：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 安裝 pip-tools</span>
+</span></span><span style=display:flex><span>pip install pip-tools
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 從 requirements.in 產生鎖定版本的 requirements.txt</span>
+</span></span><span style=display:flex><span>pip-compile requirements.in --output-file requirements.txt
+</span></span></code></pre></div><hr><h3 id=docker-composeyml-完整範例>docker-compose.yml 完整範例</h3><p><strong>Docker Compose</strong> 是一個用來定義和管理多容器應用的工具，透過一個 YAML 檔案描述所有服務的配置，一條指令即可啟動完整環境。</p><h4 id=django--postgresql--redis-完整架構>Django + PostgreSQL + Redis 完整架構</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#75715e># docker-compose.yml</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>services</span>:
+</span></span><span style=display:flex><span>  <span style=color:#75715e># === Django + Gunicorn ===</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>web</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>build</span>:
+</span></span><span style=display:flex><span>      <span style=color:#f92672>context</span>: <span style=color:#ae81ff>.</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>dockerfile</span>: <span style=color:#ae81ff>Dockerfile</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>env_file</span>: <span style=color:#ae81ff>.env</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>volumes</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>static_volume:/app/staticfiles</span>
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>media_volume:/app/media</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>depends_on</span>:
+</span></span><span style=display:flex><span>      <span style=color:#f92672>db</span>:
+</span></span><span style=display:flex><span>        <span style=color:#f92672>condition</span>: <span style=color:#ae81ff>service_healthy     </span> <span style=color:#75715e># 等待 DB 健康檢查通過</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>redis</span>:
+</span></span><span style=display:flex><span>        <span style=color:#f92672>condition</span>: <span style=color:#ae81ff>service_healthy     </span> <span style=color:#75715e># 等待 Redis 健康檢查通過</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>restart</span>: <span style=color:#ae81ff>unless-stopped</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>networks</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>app_network</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># === PostgreSQL 資料庫 ===</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>db</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>image</span>: <span style=color:#ae81ff>postgres:16-alpine</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>environment</span>:
+</span></span><span style=display:flex><span>      <span style=color:#f92672>POSTGRES_DB</span>: <span style=color:#ae81ff>${DB_NAME}</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>POSTGRES_USER</span>: <span style=color:#ae81ff>${DB_USER}</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>POSTGRES_PASSWORD</span>: <span style=color:#ae81ff>${DB_PASSWORD}</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>volumes</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>postgres_data:/var/lib/postgresql/data  </span> <span style=color:#75715e># 資料持久化</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>healthcheck</span>:
+</span></span><span style=display:flex><span>      <span style=color:#f92672>test</span>: [<span style=color:#e6db74>&#34;CMD-SHELL&#34;</span>, <span style=color:#e6db74>&#34;pg_isready -U ${DB_USER} -d ${DB_NAME}&#34;</span>]
+</span></span><span style=display:flex><span>      <span style=color:#f92672>interval</span>: <span style=color:#ae81ff>10s</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>timeout</span>: <span style=color:#ae81ff>5s</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>retries</span>: <span style=color:#ae81ff>5</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>restart</span>: <span style=color:#ae81ff>unless-stopped</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>networks</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>app_network</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># === Redis（快取 + Celery Broker）===</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>redis</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>image</span>: <span style=color:#ae81ff>redis:7-alpine</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>command</span>: <span style=color:#ae81ff>redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>volumes</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>redis_data:/data                        </span> <span style=color:#75715e># 資料持久化</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>healthcheck</span>:
+</span></span><span style=display:flex><span>      <span style=color:#f92672>test</span>: [<span style=color:#e6db74>&#34;CMD&#34;</span>, <span style=color:#e6db74>&#34;redis-cli&#34;</span>, <span style=color:#e6db74>&#34;--no-auth-warning&#34;</span>, <span style=color:#e6db74>&#34;-a&#34;</span>, <span style=color:#e6db74>&#34;${REDIS_PASSWORD}&#34;</span>, <span style=color:#e6db74>&#34;ping&#34;</span>]
+</span></span><span style=display:flex><span>      <span style=color:#f92672>interval</span>: <span style=color:#ae81ff>10s</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>timeout</span>: <span style=color:#ae81ff>5s</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>retries</span>: <span style=color:#ae81ff>5</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>restart</span>: <span style=color:#ae81ff>unless-stopped</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>networks</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>app_network</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># === Nginx 反向代理 ===</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>nginx</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>image</span>: <span style=color:#ae81ff>nginx:1.25-alpine</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>ports</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#e6db74>&#34;80:80&#34;</span>
+</span></span><span style=display:flex><span>      - <span style=color:#e6db74>&#34;443:443&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>volumes</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro </span> <span style=color:#75715e># 唯讀掛載設定檔</span>
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>static_volume:/var/www/staticfiles:ro                 </span> <span style=color:#75715e># 靜態檔案</span>
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>media_volume:/var/www/media:ro                        </span> <span style=color:#75715e># 媒體檔案</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>depends_on</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>web</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>restart</span>: <span style=color:#ae81ff>unless-stopped</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>networks</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>app_network</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># === Volume 定義 ===</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>volumes</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>postgres_data</span>:       <span style=color:#75715e># PostgreSQL 資料持久化</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>redis_data</span>:          <span style=color:#75715e># Redis 資料持久化</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>static_volume</span>:       <span style=color:#75715e># Django 靜態檔案共享</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>media_volume</span>:        <span style=color:#75715e># Django 媒體檔案共享</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># === Network 定義 ===</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>networks</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>app_network</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>driver</span>: <span style=color:#ae81ff>bridge</span>
+</span></span></code></pre></div><h4 id=服務間依賴depends_on>服務間依賴（depends_on）</h4><p><code>depends_on</code> 用來定義服務的啟動順序，但有一個常見的陷阱需要注意：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#75715e># 錯誤做法：只保證啟動順序，不保證服務就緒</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>depends_on</span>:
+</span></span><span style=display:flex><span>  - <span style=color:#ae81ff>db</span>
+</span></span><span style=display:flex><span>  - <span style=color:#ae81ff>redis</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 正確做法：搭配 healthcheck，等待服務真正就緒</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>depends_on</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>db</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>condition</span>: <span style=color:#ae81ff>service_healthy</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>redis</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>condition</span>: <span style=color:#ae81ff>service_healthy</span>
+</span></span></code></pre></div><p>加上 <code>condition: service_healthy</code> 後，Docker Compose 會等到 <code>db</code> 和 <code>redis</code> 的 healthcheck 通過後才啟動 <code>web</code> 服務，避免 Django 啟動時因資料庫尚未就緒而報錯。</p><hr><h3 id=環境變數管理>環境變數管理</h3><p>環境變數是 Docker 化應用最推薦的設定管理方式，遵循 <strong>12-Factor App（十二要素應用）</strong> 的最佳實踐，將設定與程式碼徹底分離。</p><h4 id=env-檔案範例>.env 檔案範例</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># .env（絕對不進版本控制！加入 .gitignore）</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Django</span>
+</span></span><span style=display:flex><span>DJANGO_SECRET_KEY<span style=color:#f92672>=</span>your-very-long-random-secret-key-here
+</span></span><span style=display:flex><span>DJANGO_SETTINGS_MODULE<span style=color:#f92672>=</span>myproject.settings.production
+</span></span><span style=display:flex><span>ALLOWED_HOSTS<span style=color:#f92672>=</span>yourdomain.com,www.yourdomain.com
+</span></span><span style=display:flex><span>DEBUG<span style=color:#f92672>=</span>False
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Database（DB_HOST 使用 docker-compose 的服務名稱）</span>
+</span></span><span style=display:flex><span>DB_NAME<span style=color:#f92672>=</span>myappdb
+</span></span><span style=display:flex><span>DB_USER<span style=color:#f92672>=</span>myappuser
+</span></span><span style=display:flex><span>DB_PASSWORD<span style=color:#f92672>=</span>strong-db-password
+</span></span><span style=display:flex><span>DB_HOST<span style=color:#f92672>=</span>db
+</span></span><span style=display:flex><span>DB_PORT<span style=color:#f92672>=</span><span style=color:#ae81ff>5432</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Redis（同樣使用服務名稱 redis 作為 hostname）</span>
+</span></span><span style=display:flex><span>REDIS_URL<span style=color:#f92672>=</span>redis://:strong-redis-password@redis:6379/0
+</span></span><span style=display:flex><span>REDIS_PASSWORD<span style=color:#f92672>=</span>strong-redis-password
+</span></span></code></pre></div><p>注意 <code>DB_HOST=db</code> 和 <code>REDIS_URL</code> 中的 <code>redis</code>，這裡使用的是 docker-compose 定義的服務名稱。Docker 的內部 DNS 會自動將服務名稱解析到對應容器的 IP 位址，無需硬編碼 IP。</p><h4 id=django-settings-讀取環境變數>Django settings 讀取環境變數</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># settings/production.py</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> decouple <span style=color:#f92672>import</span> config, Csv
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>SECRET_KEY <span style=color:#f92672>=</span> config(<span style=color:#e6db74>&#39;DJANGO_SECRET_KEY&#39;</span>)
+</span></span><span style=display:flex><span>DEBUG <span style=color:#f92672>=</span> config(<span style=color:#e6db74>&#39;DEBUG&#39;</span>, default<span style=color:#f92672>=</span><span style=color:#66d9ef>False</span>, cast<span style=color:#f92672>=</span>bool)
+</span></span><span style=display:flex><span>ALLOWED_HOSTS <span style=color:#f92672>=</span> config(<span style=color:#e6db74>&#39;ALLOWED_HOSTS&#39;</span>, cast<span style=color:#f92672>=</span>Csv())
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>DATABASES <span style=color:#f92672>=</span> {
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;default&#39;</span>: {
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;ENGINE&#39;</span>: <span style=color:#e6db74>&#39;django.db.backends.postgresql&#39;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;NAME&#39;</span>: config(<span style=color:#e6db74>&#39;DB_NAME&#39;</span>),
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;USER&#39;</span>: config(<span style=color:#e6db74>&#39;DB_USER&#39;</span>),
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;PASSWORD&#39;</span>: config(<span style=color:#e6db74>&#39;DB_PASSWORD&#39;</span>),
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;HOST&#39;</span>: config(<span style=color:#e6db74>&#39;DB_HOST&#39;</span>, default<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;localhost&#39;</span>),
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;PORT&#39;</span>: config(<span style=color:#e6db74>&#39;DB_PORT&#39;</span>, default<span style=color:#f92672>=</span><span style=color:#ae81ff>5432</span>, cast<span style=color:#f92672>=</span>int),
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>CACHES <span style=color:#f92672>=</span> {
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;default&#39;</span>: {
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;BACKEND&#39;</span>: <span style=color:#e6db74>&#39;django_redis.cache.RedisCache&#39;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;LOCATION&#39;</span>: config(<span style=color:#e6db74>&#39;REDIS_URL&#39;</span>),
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;OPTIONS&#39;</span>: {
+</span></span><span style=display:flex><span>            <span style=color:#e6db74>&#39;CLIENT_CLASS&#39;</span>: <span style=color:#e6db74>&#39;django_redis.client.DefaultClient&#39;</span>,
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h4 id=docker-compose-中的-env_file-設定>docker-compose 中的 env_file 設定</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#f92672>services</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>web</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>build</span>: <span style=color:#ae81ff>.</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>env_file</span>: <span style=color:#ae81ff>.env              </span> <span style=color:#75715e># 從 .env 檔案載入所有環境變數</span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 也可以直接覆寫特定變數</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>environment</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>DJANGO_SETTINGS_MODULE=myproject.settings.production</span>
+</span></span></code></pre></div><p><code>env_file</code> 會載入 <code>.env</code> 中的所有鍵值對作為容器的環境變數，而 <code>environment</code> 則可以覆寫或新增特定變數。</p><hr><h3 id=collectstatic-在容器中執行>collectstatic 在容器中執行</h3><p>Django 的靜態檔案（CSS、JavaScript、圖片等）需要透過 <code>collectstatic</code> 指令收集到 <code>STATIC_ROOT</code> 目錄。在 Docker 環境中有兩種執行方式：</p><h4 id=方式一在-dockerfile-中執行推薦>方式一：在 Dockerfile 中執行（推薦）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-dockerfile data-lang=dockerfile><span style=display:flex><span><span style=color:#75715e># 在建置映像時執行 collectstatic</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ENV</span> DJANGO_SETTINGS_MODULE<span style=color:#f92672>=</span>myproject.settings.production<span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>RUN</span> python manage.py collectstatic --noinput<span style=color:#960050;background-color:#1e0010>
+</span></span></span></code></pre></div><p>優點：靜態檔案直接包含在映像中，啟動即可使用，每次部署都能保證一致性。</p><h4 id=方式二在容器啟動時透過-entrypoint-腳本執行>方式二：在容器啟動時透過 Entrypoint 腳本執行</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e>#!/bin/bash
+</span></span></span><span style=display:flex><span><span style=color:#75715e># docker-entrypoint.sh</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>set -e
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>echo <span style=color:#e6db74>&#34;收集靜態檔案...&#34;</span>
+</span></span><span style=display:flex><span>python manage.py collectstatic --noinput
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>echo <span style=color:#e6db74>&#34;執行資料庫遷移...&#34;</span>
+</span></span><span style=display:flex><span>python manage.py migrate --noinput
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>echo <span style=color:#e6db74>&#34;啟動 Gunicorn...&#34;</span>
+</span></span><span style=display:flex><span>exec gunicorn myproject.wsgi:application -c gunicorn.conf.py
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-dockerfile data-lang=dockerfile><span style=display:flex><span><span style=color:#75715e># Dockerfile 中設定 entrypoint</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>COPY</span> docker-entrypoint.sh /docker-entrypoint.sh<span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>RUN</span> chmod +x /docker-entrypoint.sh<span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ENTRYPOINT</span> [<span style=color:#e6db74>&#34;/docker-entrypoint.sh&#34;</span>]<span style=color:#960050;background-color:#1e0010>
+</span></span></span></code></pre></div><p>這種方式適合需要在啟動時才能確定靜態檔案內容的場景，例如使用了環境變數動態產生 JavaScript 設定檔。注意 <code>exec</code> 關鍵字會讓 Gunicorn 取代 shell 程序成為 PID 1，確保能正確接收 Docker 的停止信號。</p><hr><h3 id=volume-資料持久化>Volume 資料持久化</h3><p>Docker 容器是 <strong>無狀態（Stateless）</strong> 的 — 容器刪除後，容器內的資料也會消失。對於需要持久化的資料（如資料庫、上傳的媒體檔案），必須使用 <strong>Volume（資料卷）</strong>。</p><h4 id=volume-類型比較>Volume 類型比較</h4><table><thead><tr><th>類型</th><th>語法</th><th>管理者</th><th>適用場景</th></tr></thead><tbody><tr><td>Named Volume</td><td><code>volume_name:/path</code></td><td>Docker</td><td>資料庫、持久化資料</td></tr><tr><td>Bind Mount</td><td><code>./host/path:/container/path</code></td><td>使用者</td><td>設定檔、開發時的程式碼同步</td></tr><tr><td>tmpfs</td><td><code>tmpfs: /path</code></td><td>記憶體</td><td>敏感臨時資料</td></tr></tbody></table><h4 id=各-volume-的用途與掛載路徑>各 Volume 的用途與掛載路徑</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#f92672>volumes</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>postgres_data</span>:     <span style=color:#75715e># PostgreSQL 資料持久化 → /var/lib/postgresql/data</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>redis_data</span>:        <span style=color:#75715e># Redis AOF 持久化 → /data</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>static_volume</span>:     <span style=color:#75715e># Django 靜態檔案 → /app/staticfiles（web）→ /var/www/staticfiles（nginx）</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>media_volume</span>:      <span style=color:#75715e># 使用者上傳媒體 → /app/media（web）→ /var/www/media（nginx）</span>
+</span></span></code></pre></div><p><code>static_volume</code> 和 <code>media_volume</code> 是 Django 和 Nginx 之間共享靜態資源的關鍵。Django 將檔案寫入 Volume，Nginx 從同一個 Volume 以唯讀模式（<code>:ro</code>）讀取並直接服務給瀏覽器，不需要經過 Gunicorn，效能大幅提升。</p><h4 id=資料備份與還原>資料備份與還原</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 備份 PostgreSQL 資料庫</span>
+</span></span><span style=display:flex><span>docker compose exec db pg_dump -U <span style=color:#e6db74>${</span>DB_USER<span style=color:#e6db74>}</span> <span style=color:#e6db74>${</span>DB_NAME<span style=color:#e6db74>}</span> &gt; backup_<span style=color:#66d9ef>$(</span>date +%Y%m%d<span style=color:#66d9ef>)</span>.sql
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 還原 PostgreSQL 資料庫</span>
+</span></span><span style=display:flex><span>docker compose exec -T db psql -U <span style=color:#e6db74>${</span>DB_USER<span style=color:#e6db74>}</span> <span style=color:#e6db74>${</span>DB_NAME<span style=color:#e6db74>}</span> &lt; backup_20260630.sql
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 備份媒體檔案 Volume</span>
+</span></span><span style=display:flex><span>docker run --rm -v myproject_media_volume:/data -v <span style=color:#66d9ef>$(</span>pwd<span style=color:#66d9ef>)</span>:/backup alpine <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>    tar czf /backup/media_backup.tar.gz -C /data .
+</span></span></code></pre></div><hr><h3 id=healthcheck-設定>Healthcheck 設定</h3><p><strong>Healthcheck（健康檢查）</strong> 讓 Docker 和編排工具可以判斷容器內的服務是否正常運行，不只是「容器有在跑」，而是「服務真的能回應請求」。</p><h4 id=django-健康檢查端點>Django 健康檢查端點</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># myapp/views.py</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.http <span style=color:#f92672>import</span> JsonResponse
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> django.db <span style=color:#f92672>import</span> connection
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>health_check</span>(request):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;Liveness Probe：應用是否存活&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> JsonResponse({<span style=color:#e6db74>&#39;status&#39;</span>: <span style=color:#e6db74>&#39;ok&#39;</span>})
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>readiness_check</span>(request):
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;&#34;&#34;Readiness Probe：應用是否就緒接受流量&#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>    checks <span style=color:#f92672>=</span> {}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 檢查資料庫連線</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>try</span>:
+</span></span><span style=display:flex><span>        connection<span style=color:#f92672>.</span>ensure_connection()
+</span></span><span style=display:flex><span>        checks[<span style=color:#e6db74>&#39;database&#39;</span>] <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;ok&#39;</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>except</span> <span style=color:#a6e22e>Exception</span> <span style=color:#66d9ef>as</span> e:
+</span></span><span style=display:flex><span>        checks[<span style=color:#e6db74>&#39;database&#39;</span>] <span style=color:#f92672>=</span> str(e)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 檢查 Redis 連線</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>try</span>:
+</span></span><span style=display:flex><span>        <span style=color:#f92672>from</span> django.core.cache <span style=color:#f92672>import</span> cache
+</span></span><span style=display:flex><span>        cache<span style=color:#f92672>.</span>set(<span style=color:#e6db74>&#39;healthcheck&#39;</span>, <span style=color:#e6db74>&#39;1&#39;</span>, timeout<span style=color:#f92672>=</span><span style=color:#ae81ff>5</span>)
+</span></span><span style=display:flex><span>        checks[<span style=color:#e6db74>&#39;cache&#39;</span>] <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;ok&#39;</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>except</span> <span style=color:#a6e22e>Exception</span> <span style=color:#66d9ef>as</span> e:
+</span></span><span style=display:flex><span>        checks[<span style=color:#e6db74>&#39;cache&#39;</span>] <span style=color:#f92672>=</span> str(e)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    status_code <span style=color:#f92672>=</span> <span style=color:#ae81ff>200</span> <span style=color:#66d9ef>if</span> all(v <span style=color:#f92672>==</span> <span style=color:#e6db74>&#39;ok&#39;</span> <span style=color:#66d9ef>for</span> v <span style=color:#f92672>in</span> checks<span style=color:#f92672>.</span>values()) <span style=color:#66d9ef>else</span> <span style=color:#ae81ff>503</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> JsonResponse(checks, status<span style=color:#f92672>=</span>status_code)
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># urls.py</span>
+</span></span><span style=display:flex><span>urlpatterns <span style=color:#f92672>=</span> [
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;healthz/&#39;</span>, health_check),      <span style=color:#75715e># Liveness</span>
+</span></span><span style=display:flex><span>    path(<span style=color:#e6db74>&#39;readyz/&#39;</span>, readiness_check),     <span style=color:#75715e># Readiness</span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># ... 其他 URL</span>
+</span></span><span style=display:flex><span>]
+</span></span></code></pre></div><h4 id=healthcheck-參數說明>Healthcheck 參數說明</h4><table><thead><tr><th>參數</th><th>說明</th><th>建議值</th></tr></thead><tbody><tr><td><code>--interval</code></td><td>檢查間隔</td><td>30s</td></tr><tr><td><code>--timeout</code></td><td>單次檢查超時</td><td>10s</td></tr><tr><td><code>--start-period</code></td><td>容器啟動後的寬限期</td><td>5s ~ 40s</td></tr><tr><td><code>--retries</code></td><td>連續失敗幾次視為不健康</td><td>3</td></tr></tbody></table><p>在 Dockerfile 中加入 Healthcheck：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-dockerfile data-lang=dockerfile><span style=display:flex><span><span style=color:#66d9ef>HEALTHCHECK</span> --interval<span style=color:#f92672>=</span>30s --timeout<span style=color:#f92672>=</span>10s --start-period<span style=color:#f92672>=</span>5s --retries<span style=color:#f92672>=</span><span style=color:#ae81ff>3</span> <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>    CMD python -c <span style=color:#e6db74>&#34;import urllib.request; urllib.request.urlopen(&#39;http://localhost:8000/healthz/&#39;)&#34;</span> <span style=color:#f92672>||</span> exit <span style=color:#ae81ff>1</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span></code></pre></div><hr><h3 id=開發環境-vs-生產環境的-docker-compose-分離>開發環境 vs 生產環境的 docker-compose 分離</h3><p>開發環境和生產環境的需求差異很大。Docker Compose 支援多檔案疊加機制，可以用一個基礎設定搭配不同的覆寫檔來滿足兩種環境。</p><h4 id=基礎設定docker-composeyml>基礎設定：docker-compose.yml</h4><p>上面展示的 <code>docker-compose.yml</code> 就是基礎設定，包含 <code>web</code>、<code>db</code>、<code>redis</code> 三個核心服務。</p><h4 id=開發環境覆寫docker-composeoverrideyml>開發環境覆寫：docker-compose.override.yml</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#75715e># docker-compose.override.yml（開發環境，docker compose up 自動載入）</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>services</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>web</span>:
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 開發環境使用 runserver 並掛載本機程式碼</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>command</span>: <span style=color:#ae81ff>python manage.py runserver 0.0.0.0:8000</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>environment</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>DEBUG=True</span>
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>DJANGO_SETTINGS_MODULE=myproject.settings.development</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>volumes</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>.:/app                          </span> <span style=color:#75715e># 掛載本機程式碼，修改後自動重載</span>
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>static_volume:/app/staticfiles</span>
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>media_volume:/app/media</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>ports</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#e6db74>&#34;8000:8000&#34;</span>
+</span></span></code></pre></div><p>開發環境的特點：</p><ul><li>使用 <code>runserver</code> 而非 Gunicorn，支援自動重載</li><li>掛載本機程式碼（Bind Mount），修改後即時生效，不需重新建置映像</li><li>開啟 <code>DEBUG=True</code>，顯示詳細錯誤頁面</li><li>直接暴露 port 8000</li></ul><h4 id=生產環境覆寫docker-composeprodyml>生產環境覆寫：docker-compose.prod.yml</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#75715e># docker-compose.prod.yml（生產環境）</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>services</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>web</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>environment</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>DEBUG=False</span>
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>DJANGO_SETTINGS_MODULE=myproject.settings.production</span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># 生產環境不直接暴露 port，由 Nginx 反向代理</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>ports</span>: []
+</span></span><span style=display:flex><span>    <span style=color:#f92672>deploy</span>:
+</span></span><span style=display:flex><span>      <span style=color:#f92672>resources</span>:
+</span></span><span style=display:flex><span>        <span style=color:#f92672>limits</span>:
+</span></span><span style=display:flex><span>          <span style=color:#f92672>memory</span>: <span style=color:#ae81ff>512M</span>
+</span></span><span style=display:flex><span>          <span style=color:#f92672>cpus</span>: <span style=color:#e6db74>&#39;1.0&#39;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>nginx</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>image</span>: <span style=color:#ae81ff>nginx:1.25-alpine</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>ports</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#e6db74>&#34;80:80&#34;</span>
+</span></span><span style=display:flex><span>      - <span style=color:#e6db74>&#34;443:443&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>volumes</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro</span>
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>static_volume:/var/www/staticfiles:ro</span>
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>media_volume:/var/www/media:ro</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>depends_on</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>web</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>restart</span>: <span style=color:#ae81ff>unless-stopped</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>networks</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>app_network</span>
+</span></span></code></pre></div><h4 id=啟動指令>啟動指令</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 開發環境（自動載入 docker-compose.yml + docker-compose.override.yml）</span>
+</span></span><span style=display:flex><span>docker compose up
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 生產環境（指定基礎設定 + 生產覆寫，跳過 override）</span>
+</span></span><span style=display:flex><span>docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 生產環境建置並重啟</span>
+</span></span><span style=display:flex><span>docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+</span></span></code></pre></div><p>這種分離策略的好處是：基礎設定只維護一份，開發與生產的差異透過覆寫檔管理，避免重複設定且降低出錯機率。</p><hr><h3 id=常見問題排除>常見問題排除</h3><p>容器化部署最常遇到的問題集中在資料庫連線、靜態檔案和權限三個面向。</p><h4 id=問題一資料庫連線被拒>問題一：資料庫連線被拒</h4><pre tabindex=0><code>django.db.utils.OperationalError: could not connect to server: Connection refused
+</code></pre><p><strong>原因與解法：</strong></p><ol><li><strong>DB_HOST 設定錯誤</strong>：在 docker-compose 中，<code>DB_HOST</code> 必須使用服務名稱（如 <code>db</code>），不能用 <code>localhost</code> 或 <code>127.0.0.1</code>，因為每個容器有獨立的網路空間</li><li><strong>資料庫尚未就緒</strong>：使用 <code>depends_on</code> 搭配 <code>condition: service_healthy</code> 確保資料庫完全啟動</li><li><strong>密碼或帳號不匹配</strong>：確認 <code>.env</code> 中的 <code>DB_USER</code>、<code>DB_PASSWORD</code> 與 PostgreSQL 容器的 <code>POSTGRES_USER</code>、<code>POSTGRES_PASSWORD</code> 一致</li></ol><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 除錯：測試容器間的資料庫連線</span>
+</span></span><span style=display:flex><span>docker compose exec web python -c <span style=color:#e6db74>&#34;
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>import psycopg2
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>conn = psycopg2.connect(host=&#39;db&#39;, dbname=&#39;myappdb&#39;, user=&#39;myappuser&#39;, password=&#39;strong-db-password&#39;)
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>print(&#39;連線成功！&#39;)
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>conn.close()
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>&#34;</span>
+</span></span></code></pre></div><h4 id=問題二靜態檔案-404>問題二：靜態檔案 404</h4><p><strong>原因</strong>：Nginx 無法存取 Django 的靜態檔案目錄。</p><p><strong>解法</strong>：透過共享 Volume 讓 Nginx 存取靜態檔案，並確保路徑一致：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#f92672>services</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>web</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>volumes</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>static_volume:/app/staticfiles    </span> <span style=color:#75715e># Django 寫入</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>nginx</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>volumes</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>static_volume:/var/www/staticfiles:ro  </span> <span style=color:#75715e># Nginx 讀取</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># settings.py 中 STATIC_ROOT 必須與 Volume 掛載路徑一致</span>
+</span></span><span style=display:flex><span>STATIC_URL <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;/static/&#39;</span>
+</span></span><span style=display:flex><span>STATIC_ROOT <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;/app/staticfiles&#39;</span>
+</span></span></code></pre></div><h4 id=問題三檔案權限問題>問題三：檔案權限問題</h4><pre tabindex=0><code>PermissionError: [Errno 13] Permission denied
+</code></pre><p><strong>原因</strong>：使用非 root 使用者但檔案屬於 root。</p><p><strong>解法</strong>：在 Dockerfile 中切換使用者之前設定目錄權限：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-dockerfile data-lang=dockerfile><span style=display:flex><span><span style=color:#75715e># 先建立需要寫入的目錄並設定權限</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>RUN</span> mkdir -p /app/staticfiles /app/media <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>    <span style=color:#f92672>&amp;&amp;</span> useradd --no-create-home --shell /bin/false appuser <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>    <span style=color:#f92672>&amp;&amp;</span> chown -R appuser:appuser /app<span style=color:#960050;background-color:#1e0010>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>USER</span> <span style=color:#e6db74>appuser</span><span style=color:#960050;background-color:#1e0010>
+</span></span></span></code></pre></div><h4 id=問題四映像過大>問題四：映像過大</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 診斷：查看映像大小</span>
+</span></span><span style=display:flex><span>docker images myapp
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 查看各層大小，找出肥大的層</span>
+</span></span><span style=display:flex><span>docker history myapp:latest
+</span></span></code></pre></div><p><strong>解法</strong>：</p><ul><li>使用 <code>python:3.12-slim</code> 而非 <code>python:3.12</code>（節省約 600MB）</li><li>使用多階段建置分離編譯工具</li><li>在 <code>RUN</code> 指令結尾清理快取：<code>rm -rf /var/lib/apt/lists/*</code></li><li>合併多個 <code>RUN</code> 指令減少層數</li><li>確認 <code>.dockerignore</code> 排除了不必要的檔案</li></ul><h4 id=常用-docker-除錯指令>常用 Docker 除錯指令</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 建置並啟動所有服務</span>
+</span></span><span style=display:flex><span>docker compose up -d --build
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 查看服務即時日誌</span>
+</span></span><span style=display:flex><span>docker compose logs -f web
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 進入容器執行 Django shell</span>
+</span></span><span style=display:flex><span>docker compose exec web python manage.py shell
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 執行資料庫遷移</span>
+</span></span><span style=display:flex><span>docker compose exec web python manage.py migrate
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 建立超級管理員</span>
+</span></span><span style=display:flex><span>docker compose exec web python manage.py createsuperuser
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 停止所有服務（保留 Volume 資料）</span>
+</span></span><span style=display:flex><span>docker compose down
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 停止並刪除所有資料（含 Volume，慎用！）</span>
+</span></span><span style=display:flex><span>docker compose down -v
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 重新建置並重啟單一服務（不影響其他服務）</span>
+</span></span><span style=display:flex><span>docker compose up -d --no-deps --build web
+</span></span></code></pre></div><hr><h3 id=總結>總結</h3><p>Docker 容器化部署讓 Django 應用的環境一致性和可攜性達到了新的高度。透過 Dockerfile 的多階段建置，我們可以建立精簡且安全的生產映像；透過 <code>.dockerignore</code> 排除不必要的檔案，加速建置並保護敏感資訊；透過 <code>docker-compose.yml</code> 編排 Django、PostgreSQL、Redis、Nginx 等服務，一條指令即可啟動完整的生產環境。環境變數管理遵循 12-Factor App 原則，將設定與程式碼分離；Volume 資料持久化確保資料庫和媒體檔案不會隨容器銷毀而遺失；Healthcheck 讓編排工具能夠自動偵測服務健康狀態並做出相應處理；開發與生產環境的 docker-compose 分離策略則讓團隊能在一致的基礎上靈活切換不同環境。掌握這些 Docker 部署技巧後，你的 Django 應用就已經具備了現代化生產環境部署的完整基礎。</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
+</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/django/040-django-n-plus-1-queryset/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django N+1 查詢問題與 QuerySet 優化實戰 | Django 教學</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/29</span>
+</a><a href=https://benzhub.github.io/post/django/039-django-performance/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django Performance 效能調校全方位指南 | Django 教學</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/28</span>
+</a><a href=https://benzhub.github.io/post/django/038-django-security/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Django Security 安全防護最佳實踐 | Django 教學</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/27</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/django/040-django-n-plus-1-queryset/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+<span class="text-sm font-medium">Django N+1 查詢問題與 QuerySet 優化實戰 | Django 教學</span></a></div><div><a href=https://benzhub.github.io/post/django/042-django-nginx-gunicorn/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+<span class="text-sm font-medium">Django 生產部署：Nginx + Gunicorn 完全指南 | Django 教學</span></a></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
+</a><a href=/tags/acid><span class=tag-pill>acid</span>
+</a><a href=/tags/aggregate><span class=tag-pill>aggregate</span>
+</a><a href=/tags/ai><span class=tag-pill>ai</span>
+</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
+</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
+</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
+</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
+</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
+</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
+</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
+</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
+</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
+</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
+</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
+</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
+</a><a href=/tags/analytics><span class=tag-pill>analytics</span>
+</a><a href=/tags/api><span class=tag-pill>api</span>
+</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
+</a><a href=/tags/audit><span class=tag-pill>audit</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (25)</span>
+</a><a href=/post/javascript/><span class=tag-pill>JavaScript (80)</span>
+</a><a href=/post/django/><span class=tag-pill>Django (42)</span>
+</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
+</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
+</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
+</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
+</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/django/042-django-nginx-gunicorn/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django 生產部署：Nginx + Gunicorn 完全指南 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/01</p></a><a href=/post/postgresql/025-plpgsql/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">PL/pgSQL 程式語言：PostgreSQL 伺服器端程式設計完全指南 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/01</p></a><a href=/post/javascript/data-structures--algorithms/018-two-pointers/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">雙指標技巧 — 四種模式完整解析與面試實戰 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/01</p></a><a href=/post/django/041-django-docker-deployment/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Docker 容器化部署完全指南 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/30</p></a><a href=/post/javascript/data-structures--algorithms/017-recursion-backtracking/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">遞迴與回溯法 — 從遞迴三要素到回溯模板完整教學 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/30</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>

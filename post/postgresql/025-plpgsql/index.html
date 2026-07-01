@@ -1,0 +1,654 @@
+<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>PL/pgSQL 程式語言：PostgreSQL 伺服器端程式設計完全指南 | PostgreSQL | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="PL/pgSQL 程式語言：PostgreSQL 伺服器端程式設計完全指南 | PostgreSQL | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="深入解析 PostgreSQL 內建的過程化語言 PL/pgSQL，涵蓋 Block 結構、變數宣告（%TYPE/%ROWTYPE/RECORD）、控制流程、RAISE 訊息與 EXCEPTION 錯誤處理、動態 SQL（EXECUTE...USING）、回傳型別、Cursor 操作、Plan Caching 機制，以及 PG11+ Stored Procedure 與 Transaction 控制。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="深入解析 PostgreSQL 內建的過程化語言 PL/pgSQL，涵蓋 Block 結構、變數宣告（%TYPE/%ROWTYPE/RECORD）、控制流程、RAISE 訊息與 EXCEPTION 錯誤處理、動態 SQL（EXECUTE...USING）、回傳型別、Cursor 操作、Plan Caching 機制，以及 PG11+ Stored Procedure 與 Transaction 控制。"><meta property="og:url" content="https://benzhub.github.io/post/postgresql/025-plpgsql/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/postgresql/025-plpgsql/><meta name=twitter:description content="深入解析 PostgreSQL 內建的過程化語言 PL/pgSQL，涵蓋 Block 結構、變數宣告（%TYPE/%ROWTYPE/RECORD）、控制流程、RAISE 訊息與 EXCEPTION 錯誤處理、動態 SQL（EXECUTE...USING）、回傳型別、Cursor 操作、Plan Caching 機制，以及 PG11+ Stored Procedure 與 Transaction 控制。"><meta property="article:published_time" content="2026-07-01T00:00:00+00:00"><meta property="article:updated_time" content="2026-07-01T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/postgresql/025-PLpgSQL.png"><meta property="og:image:url" content="https://benzhub.github.io/img/postgresql/025-PLpgSQL.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/postgresql/025-plpgsql/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/postgresql/025-plpgsql/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"PL/pgSQL 程式語言：PostgreSQL 伺服器端程式設計完全指南 | PostgreSQL\"","description":"\"深入解析 PostgreSQL 內建的過程化語言 PL/pgSQL，涵蓋 Block 結構、變數宣告（%TYPE/%ROWTYPE/RECORD）、控制流程、RAISE 訊息與 EXCEPTION 錯誤處理、動態 SQL（EXECUTE...USING）、回傳型別、Cursor 操作、Plan Caching 機制，以及 PG11+ Stored Procedure 與 Transaction 控制。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-07-01T00:00:00\u002b00:00","dateModified":"2026-07-01T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/postgresql\/025-PLpgSQL.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/postgresql\/025-plpgsql\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/postgresql\/"},{"@type":"ListItem","position":3,"name":"\"PL/pgSQL 程式語言：PostgreSQL 伺服器端程式設計完全指南 | PostgreSQL\""}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">PL/pgSQL 程式語言：PostgreSQL 伺服器端程式設計完全指南 | PostgreSQL</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/01</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/postgresql class="tag-pill no-underline">postgresql</a>
+<a href=/tags/plpgsql class="tag-pill no-underline">plpgsql</a>
+<a href=/tags/stored-procedure class="tag-pill no-underline">stored-procedure</a>
+<a href=/tags/function class="tag-pill no-underline">function</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/postgresql/025-PLpgSQL.png alt="PL/pgSQL 程式語言：PostgreSQL 伺服器端程式設計完全指南 | PostgreSQL"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p><strong>PL/pgSQL</strong> 是 <strong>PostgreSQL</strong> 內建的過程化語言（Procedural Language），讓你在資料庫伺服器端撰寫複雜的業務邏輯。它結合了 <strong>SQL</strong> 的資料操作能力與程式語言的流程控制能力——<strong>變數宣告</strong>、<strong>條件判斷</strong>、<strong>迴圈</strong>、<strong>例外處理</strong>，搭配 <strong>Plan Caching</strong> 機制讓執行效率媲美原生 SQL。從 <strong>PG11</strong> 開始更引入了 <strong>Stored Procedure</strong>，支援在程序內進行 <strong>Transaction 控制</strong>。</p></blockquote><h3 id=plpgsql-定位與優勢>PL/pgSQL 定位與優勢</h3><p><strong>PL/pgSQL</strong> 是 PostgreSQL 最常用的伺服器端語言，預設已安裝（<code>CREATE EXTENSION</code> 不需要）。它的核心定位是：</p><ul><li><strong>減少 Client ↔ Server 往返</strong>：將多步驟邏輯封裝在伺服器端，一次呼叫完成</li><li><strong>Plan Caching</strong>：函數內的 SQL 語句在首次執行時編譯並快取執行計畫，後續呼叫直接重用</li><li><strong>安全封裝</strong>：透過 <code>SECURITY DEFINER</code> 讓使用者透過函數存取資料，而非直接授予表級權限</li><li><strong>觸發器邏輯</strong>：Trigger Function 必須用 PL/pgSQL（或其他 PL 語言）撰寫</li></ul><pre tabindex=0><code>PL/pgSQL 在 PostgreSQL 架構中的位置：
+
+  Client Application
+       │
+       ▼
+  SQL Parser → Planner → Executor
+       │                     ▲
+       ▼                     │
+  PL/pgSQL Interpreter ──────┘
+    ├─ Plan Cache（快取 SQL 執行計畫）
+    ├─ Variable Management（變數管理）
+    └─ Control Flow（流程控制）
+</code></pre><h3 id=block-結構>Block 結構</h3><p>PL/pgSQL 的基本執行單位是 <strong>Block</strong>，語法類似 Oracle PL/SQL：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span>[ <span style=color:#f92672>&lt;&lt;</span>label<span style=color:#f92672>&gt;&gt;</span> ]
+</span></span><span style=display:flex><span>[ <span style=color:#66d9ef>DECLARE</span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>-- 變數宣告
+</span></span></span><span style=display:flex><span>]
+</span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>-- 執行邏輯
+</span></span></span><span style=display:flex><span>[ <span style=color:#66d9ef>EXCEPTION</span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>-- 例外處理
+</span></span></span><span style=display:flex><span>]
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span> [ label ];
+</span></span></code></pre></div><p>Block 可以嵌套，內層 Block 可存取外層的變數：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>DO</span> <span style=color:#960050;background-color:#1e0010>$$</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>&lt;&lt;</span>outer_block<span style=color:#f92672>&gt;&gt;</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>DECLARE</span>
+</span></span><span style=display:flex><span>    v_total INT :<span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>    RAISE NOTICE <span style=color:#e6db74>&#39;外層 total = %&#39;</span>, v_total;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>&lt;&lt;</span>inner_block<span style=color:#f92672>&gt;&gt;</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>DECLARE</span>
+</span></span><span style=display:flex><span>        v_total INT :<span style=color:#f92672>=</span> <span style=color:#ae81ff>100</span>;  <span style=color:#75715e>-- 遮蔽外層同名變數
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>        RAISE NOTICE <span style=color:#e6db74>&#39;內層 total = %&#39;</span>, v_total;       <span style=color:#75715e>-- 100
+</span></span></span><span style=display:flex><span>        RAISE NOTICE <span style=color:#e6db74>&#39;外層 total = %&#39;</span>, outer_block.v_total;  <span style=color:#75715e>-- 0（用 label 存取）
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>END</span> inner_block;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    RAISE NOTICE <span style=color:#e6db74>&#39;回到外層 total = %&#39;</span>, v_total;  <span style=color:#75715e>-- 0
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>END</span> outer_block;
+</span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>$$</span>;
+</span></span></code></pre></div><h3 id=變數宣告>變數宣告</h3><h4 id=基本型別>基本型別</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>DECLARE</span>
+</span></span><span style=display:flex><span>    v_id        INT :<span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>    v_name      TEXT;
+</span></span><span style=display:flex><span>    v_price     NUMERIC(<span style=color:#ae81ff>10</span>,<span style=color:#ae81ff>2</span>) :<span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>.<span style=color:#ae81ff>00</span>;
+</span></span><span style=display:flex><span>    v_is_active BOOLEAN :<span style=color:#f92672>=</span> <span style=color:#66d9ef>TRUE</span>;
+</span></span><span style=display:flex><span>    v_created   TIMESTAMPTZ :<span style=color:#f92672>=</span> now();
+</span></span><span style=display:flex><span>    v_tags      TEXT[] :<span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;{}&#39;</span>;           <span style=color:#75715e>-- 陣列
+</span></span></span><span style=display:flex><span>    v_config    JSONB :<span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;{}&#39;</span>;            <span style=color:#75715e>-- JSONB
+</span></span></span></code></pre></div><h4 id=typerowtyperecord>%TYPE、%ROWTYPE、RECORD</h4><table><thead><tr><th>宣告方式</th><th>說明</th><th>適用場景</th></tr></thead><tbody><tr><td><code>v_name table.column%TYPE</code></td><td>繼承特定欄位的型別</td><td>需要與表結構同步</td></tr><tr><td><code>v_row table%ROWTYPE</code></td><td>繼承整張表的行結構</td><td>SELECT * INTO 結果</td></tr><tr><td><code>v_rec RECORD</code></td><td>動態結構，型別在賦值時決定</td><td>結構不固定的查詢結果</td></tr></tbody></table><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>OR</span> <span style=color:#66d9ef>REPLACE</span> <span style=color:#66d9ef>FUNCTION</span> get_product_info(p_id INT)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>RETURNS</span> TEXT
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LANGUAGE</span> plpgsql <span style=color:#66d9ef>AS</span> <span style=color:#960050;background-color:#1e0010>$$</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>DECLARE</span>
+</span></span><span style=display:flex><span>    v_name   products.name<span style=color:#f92672>%</span><span style=color:#66d9ef>TYPE</span>;       <span style=color:#75715e>-- 繼承 products.name 的型別
+</span></span></span><span style=display:flex><span>    v_row    products<span style=color:#f92672>%</span>ROWTYPE;          <span style=color:#75715e>-- 整行結構
+</span></span></span><span style=display:flex><span>    v_rec    RECORD;                    <span style=color:#75715e>-- 動態結構
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>-- %TYPE：只取一個欄位
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>SELECT</span> name <span style=color:#66d9ef>INTO</span> v_name <span style=color:#66d9ef>FROM</span> products <span style=color:#66d9ef>WHERE</span> id <span style=color:#f92672>=</span> p_id;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>-- %ROWTYPE：取整行
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>INTO</span> v_row <span style=color:#66d9ef>FROM</span> products <span style=color:#66d9ef>WHERE</span> id <span style=color:#f92672>=</span> p_id;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>-- RECORD：動態查詢
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>SELECT</span> id, name, price <span style=color:#66d9ef>INTO</span> v_rec
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>FROM</span> products <span style=color:#66d9ef>WHERE</span> id <span style=color:#f92672>=</span> p_id;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>RETURN</span> format(<span style=color:#e6db74>&#39;Name: %s, Price: %s&#39;</span>, v_row.name, v_row.price);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span>;
+</span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>$$</span>;
+</span></span></code></pre></div><p><strong>注意</strong>：<code>%ROWTYPE</code> 在函數建立時綁定表結構，若之後 <code>ALTER TABLE</code> 新增欄位，需重新建立函數。<code>RECORD</code> 則無此限制，但存取不存在的欄位會在執行時報錯。</p><h3 id=控制流程>控制流程</h3><h4 id=if--elsif--else>IF / ELSIF / ELSE</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>OR</span> <span style=color:#66d9ef>REPLACE</span> <span style=color:#66d9ef>FUNCTION</span> classify_score(p_score INT)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>RETURNS</span> TEXT
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LANGUAGE</span> plpgsql <span style=color:#66d9ef>AS</span> <span style=color:#960050;background-color:#1e0010>$$</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>IF</span> p_score <span style=color:#f92672>&gt;=</span> <span style=color:#ae81ff>90</span> <span style=color:#66d9ef>THEN</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>RETURN</span> <span style=color:#e6db74>&#39;A&#39;</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>ELSIF</span> p_score <span style=color:#f92672>&gt;=</span> <span style=color:#ae81ff>80</span> <span style=color:#66d9ef>THEN</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>RETURN</span> <span style=color:#e6db74>&#39;B&#39;</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>ELSIF</span> p_score <span style=color:#f92672>&gt;=</span> <span style=color:#ae81ff>70</span> <span style=color:#66d9ef>THEN</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>RETURN</span> <span style=color:#e6db74>&#39;C&#39;</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>ELSIF</span> p_score <span style=color:#f92672>&gt;=</span> <span style=color:#ae81ff>60</span> <span style=color:#66d9ef>THEN</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>RETURN</span> <span style=color:#e6db74>&#39;D&#39;</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>ELSE</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>RETURN</span> <span style=color:#e6db74>&#39;F&#39;</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>END</span> <span style=color:#66d9ef>IF</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span>;
+</span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>$$</span>;
+</span></span></code></pre></div><h4 id=case>CASE</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 簡單 CASE
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CASE</span> v_status
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>WHEN</span> <span style=color:#e6db74>&#39;active&#39;</span>   <span style=color:#66d9ef>THEN</span> v_label :<span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;啟用&#39;</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>WHEN</span> <span style=color:#e6db74>&#39;inactive&#39;</span> <span style=color:#66d9ef>THEN</span> v_label :<span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;停用&#39;</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>WHEN</span> <span style=color:#e6db74>&#39;pending&#39;</span>  <span style=color:#66d9ef>THEN</span> v_label :<span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;待審&#39;</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>ELSE</span> v_label :<span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;未知&#39;</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span> <span style=color:#66d9ef>CASE</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 搜尋 CASE
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CASE</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>WHEN</span> v_amount <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>10000</span> <span style=color:#66d9ef>THEN</span> v_tier :<span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;VIP&#39;</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>WHEN</span> v_amount <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>5000</span>  <span style=color:#66d9ef>THEN</span> v_tier :<span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;Gold&#39;</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>WHEN</span> v_amount <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>1000</span>  <span style=color:#66d9ef>THEN</span> v_tier :<span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;Silver&#39;</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>ELSE</span> v_tier :<span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;Standard&#39;</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span> <span style=color:#66d9ef>CASE</span>;
+</span></span></code></pre></div><h4 id=迴圈>迴圈</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 基本 LOOP（無窮迴圈 + EXIT 條件）
+</span></span></span><span style=display:flex><span>LOOP
+</span></span><span style=display:flex><span>    v_counter :<span style=color:#f92672>=</span> v_counter <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>    EXIT <span style=color:#66d9ef>WHEN</span> v_counter <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>10</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span> LOOP;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- WHILE 迴圈
+</span></span></span><span style=display:flex><span>WHILE v_balance <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span> LOOP
+</span></span><span style=display:flex><span>    v_balance :<span style=color:#f92672>=</span> v_balance <span style=color:#f92672>-</span> v_payment;
+</span></span><span style=display:flex><span>    v_months :<span style=color:#f92672>=</span> v_months <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span> LOOP;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- FOR 整數範圍
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>FOR</span> i <span style=color:#66d9ef>IN</span> <span style=color:#ae81ff>1</span>..<span style=color:#ae81ff>10</span> LOOP
+</span></span><span style=display:flex><span>    RAISE NOTICE <span style=color:#e6db74>&#39;i = %&#39;</span>, i;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span> LOOP;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- FOR 反向
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>FOR</span> i <span style=color:#66d9ef>IN</span> REVERSE <span style=color:#ae81ff>10</span>..<span style=color:#ae81ff>1</span> LOOP
+</span></span><span style=display:flex><span>    RAISE NOTICE <span style=color:#e6db74>&#39;countdown: %&#39;</span>, i;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span> LOOP;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- FOR 查詢結果（最常用）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>FOR</span> v_rec <span style=color:#66d9ef>IN</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>SELECT</span> id, name, price <span style=color:#66d9ef>FROM</span> products <span style=color:#66d9ef>WHERE</span> category <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;Electronics&#39;</span>
+</span></span><span style=display:flex><span>LOOP
+</span></span><span style=display:flex><span>    RAISE NOTICE <span style=color:#e6db74>&#39;Product: % ($ %)&#39;</span>, v_rec.name, v_rec.price;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span> LOOP;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- FOREACH 陣列元素
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>DECLARE</span>
+</span></span><span style=display:flex><span>    v_tags TEXT[] :<span style=color:#f92672>=</span> ARRAY[<span style=color:#e6db74>&#39;urgent&#39;</span>, <span style=color:#e6db74>&#39;important&#39;</span>, <span style=color:#e6db74>&#39;review&#39;</span>];
+</span></span><span style=display:flex><span>    v_tag  TEXT;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>    FOREACH v_tag <span style=color:#66d9ef>IN</span> ARRAY v_tags LOOP
+</span></span><span style=display:flex><span>        RAISE NOTICE <span style=color:#e6db74>&#39;Tag: %&#39;</span>, v_tag;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>END</span> LOOP;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span>;
+</span></span></code></pre></div><p><strong>CONTINUE</strong> 可跳過當前迭代：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>FOR</span> v_rec <span style=color:#66d9ef>IN</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> orders LOOP
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>CONTINUE</span> <span style=color:#66d9ef>WHEN</span> v_rec.status <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;cancelled&#39;</span>;
+</span></span><span style=display:flex><span>    <span style=color:#75715e>-- 處理非取消的訂單
+</span></span></span><span style=display:flex><span>    PERFORM process_order(v_rec.id);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span> LOOP;
+</span></span></code></pre></div><h3 id=raise-訊息與日誌>RAISE 訊息與日誌</h3><p><strong>RAISE</strong> 用於輸出訊息或拋出錯誤：</p><table><thead><tr><th>等級</th><th>說明</th><th>行為</th></tr></thead><tbody><tr><td><code>DEBUG</code></td><td>除錯資訊</td><td>預設不顯示，需調整 <code>client_min_messages</code></td></tr><tr><td><code>LOG</code></td><td>伺服器日誌</td><td>寫入伺服器 log，不傳給 client</td></tr><tr><td><code>INFO</code></td><td>資訊</td><td>傳給 client</td></tr><tr><td><code>NOTICE</code></td><td>提示</td><td>傳給 client（最常用的除錯手段）</td></tr><tr><td><code>WARNING</code></td><td>警告</td><td>傳給 client，不中斷執行</td></tr><tr><td><code>EXCEPTION</code></td><td>錯誤</td><td><strong>中斷執行</strong>，回滾到最近的 EXCEPTION Block 或整個 Transaction</td></tr></tbody></table><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 格式化訊息（% 為佔位符）
+</span></span></span><span style=display:flex><span>RAISE NOTICE <span style=color:#e6db74>&#39;處理訂單 #%，金額 $%&#39;</span>, v_order_id, v_amount;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 拋出自訂錯誤
+</span></span></span><span style=display:flex><span>RAISE <span style=color:#66d9ef>EXCEPTION</span> <span style=color:#e6db74>&#39;無效的折扣率：%（必須在 0-100 之間）&#39;</span>, v_discount
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>USING</span> ERRCODE <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;check_violation&#39;</span>,
+</span></span><span style=display:flex><span>          HINT <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;請檢查 discount 欄位的值&#39;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 使用 SQLSTATE 錯誤碼
+</span></span></span><span style=display:flex><span>RAISE <span style=color:#66d9ef>EXCEPTION</span> <span style=color:#66d9ef>SQLSTATE</span> <span style=color:#e6db74>&#39;23505&#39;</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>USING</span> MESSAGE <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;訂單編號重複&#39;</span>,
+</span></span><span style=display:flex><span>          DETAIL <span style=color:#f92672>=</span> format(<span style=color:#e6db74>&#39;order_no = %s 已存在&#39;</span>, v_order_no);
+</span></span></code></pre></div><h3 id=exception-錯誤處理>EXCEPTION 錯誤處理</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>OR</span> <span style=color:#66d9ef>REPLACE</span> <span style=color:#66d9ef>FUNCTION</span> safe_transfer(
+</span></span><span style=display:flex><span>    p_from_id INT, p_to_id INT, p_amount NUMERIC
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>RETURNS</span> TEXT
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LANGUAGE</span> plpgsql <span style=color:#66d9ef>AS</span> <span style=color:#960050;background-color:#1e0010>$$</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>DECLARE</span>
+</span></span><span style=display:flex><span>    v_from_balance NUMERIC;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>-- 檢查餘額
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>SELECT</span> balance <span style=color:#66d9ef>INTO</span> v_from_balance
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>FROM</span> accounts <span style=color:#66d9ef>WHERE</span> id <span style=color:#f92672>=</span> p_from_id <span style=color:#66d9ef>FOR</span> <span style=color:#66d9ef>UPDATE</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>IF</span> v_from_balance <span style=color:#f92672>&lt;</span> p_amount <span style=color:#66d9ef>THEN</span>
+</span></span><span style=display:flex><span>        RAISE <span style=color:#66d9ef>EXCEPTION</span> <span style=color:#e6db74>&#39;餘額不足：帳戶 % 餘額 $%，轉帳 $%&#39;</span>,
+</span></span><span style=display:flex><span>            p_from_id, v_from_balance, p_amount;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>END</span> <span style=color:#66d9ef>IF</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>-- 執行轉帳
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>UPDATE</span> accounts <span style=color:#66d9ef>SET</span> balance <span style=color:#f92672>=</span> balance <span style=color:#f92672>-</span> p_amount <span style=color:#66d9ef>WHERE</span> id <span style=color:#f92672>=</span> p_from_id;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>UPDATE</span> accounts <span style=color:#66d9ef>SET</span> balance <span style=color:#f92672>=</span> balance <span style=color:#f92672>+</span> p_amount <span style=color:#66d9ef>WHERE</span> id <span style=color:#f92672>=</span> p_to_id;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>RETURN</span> <span style=color:#e6db74>&#39;OK&#39;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>EXCEPTION</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>WHEN</span> numeric_value_out_of_range <span style=color:#66d9ef>THEN</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>RETURN</span> <span style=color:#e6db74>&#39;金額超出範圍&#39;</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>WHEN</span> undefined_table <span style=color:#66d9ef>THEN</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>RETURN</span> <span style=color:#e6db74>&#39;表不存在&#39;</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>WHEN</span> OTHERS <span style=color:#66d9ef>THEN</span>
+</span></span><span style=display:flex><span>        <span style=color:#75715e>-- 捕獲所有未預期的錯誤
+</span></span></span><span style=display:flex><span>        RAISE WARNING <span style=color:#e6db74>&#39;轉帳失敗：% (SQLSTATE: %)&#39;</span>, SQLERRM, <span style=color:#66d9ef>SQLSTATE</span>;
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>RETURN</span> format(<span style=color:#e6db74>&#39;ERROR: %s&#39;</span>, SQLERRM);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span>;
+</span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>$$</span>;
+</span></span></code></pre></div><p><strong>GET STACKED DIAGNOSTICS</strong> 取得詳細錯誤資訊：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>EXCEPTION</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>WHEN</span> OTHERS <span style=color:#66d9ef>THEN</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>GET</span> STACKED <span style=color:#66d9ef>DIAGNOSTICS</span>
+</span></span><span style=display:flex><span>            v_message    <span style=color:#f92672>=</span> <span style=color:#66d9ef>MESSAGE_TEXT</span>,
+</span></span><span style=display:flex><span>            v_detail     <span style=color:#f92672>=</span> PG_EXCEPTION_DETAIL,
+</span></span><span style=display:flex><span>            v_hint       <span style=color:#f92672>=</span> PG_EXCEPTION_HINT,
+</span></span><span style=display:flex><span>            v_context    <span style=color:#f92672>=</span> PG_EXCEPTION_CONTEXT,
+</span></span><span style=display:flex><span>            v_sqlstate   <span style=color:#f92672>=</span> <span style=color:#66d9ef>RETURNED_SQLSTATE</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> error_log (message, detail, hint, context, <span style=color:#66d9ef>sqlstate</span>, created_at)
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>VALUES</span> (v_message, v_detail, v_hint, v_context, v_sqlstate, now());
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        RAISE;  <span style=color:#75715e>-- 重新拋出原始錯誤
+</span></span></span></code></pre></div><p><strong>重要</strong>：EXCEPTION Block 內部會建立一個隱式 Subtransaction（SAVEPOINT），效能開銷不小。不要在高頻迴圈內使用 EXCEPTION。</p><h3 id=select-into-與-found>SELECT INTO 與 FOUND</h3><p><code>SELECT INTO</code> 將查詢結果存入變數，<code>FOUND</code> 指示是否有結果：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> name, price <span style=color:#66d9ef>INTO</span> v_name, v_price
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> products <span style=color:#66d9ef>WHERE</span> id <span style=color:#f92672>=</span> p_id;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>IF</span> <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>FOUND</span> <span style=color:#66d9ef>THEN</span>
+</span></span><span style=display:flex><span>    RAISE <span style=color:#66d9ef>EXCEPTION</span> <span style=color:#e6db74>&#39;找不到產品 ID: %&#39;</span>, p_id;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span> <span style=color:#66d9ef>IF</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- STRICT 模式：結果必須恰好一行，否則報錯
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> name <span style=color:#66d9ef>INTO</span> <span style=color:#66d9ef>STRICT</span> v_name
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> products <span style=color:#66d9ef>WHERE</span> category <span style=color:#f92672>=</span> p_category;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 0 行 → NO_DATA_FOUND
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 多行 → TOO_MANY_ROWS
+</span></span></span></code></pre></div><p><strong>FOUND 的時機</strong>：每條 SQL 語句都會更新 <code>FOUND</code>，所以要在目標 SQL 之後立即檢查，不要插入其他 SQL。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 錯誤示範
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> ... <span style=color:#66d9ef>INTO</span> v_row <span style=color:#66d9ef>FROM</span> table_a <span style=color:#66d9ef>WHERE</span> ...;
+</span></span><span style=display:flex><span>PERFORM some_function();       <span style=color:#75715e>-- 這會覆蓋 FOUND！
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>IF</span> <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>FOUND</span> <span style=color:#66d9ef>THEN</span> ...          <span style=color:#75715e>-- 此 FOUND 是 some_function() 的結果
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 正確示範
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> ... <span style=color:#66d9ef>INTO</span> v_row <span style=color:#66d9ef>FROM</span> table_a <span style=color:#66d9ef>WHERE</span> ...;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>IF</span> <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>FOUND</span> <span style=color:#66d9ef>THEN</span>              <span style=color:#75715e>-- 立即檢查
+</span></span></span><span style=display:flex><span>    ...
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span> <span style=color:#66d9ef>IF</span>;
+</span></span><span style=display:flex><span>PERFORM some_function();
+</span></span></code></pre></div><h3 id=動態-sqlexecute--using>動態 SQL：EXECUTE &mldr; USING</h3><p>當 SQL 語句需要在執行時動態組合（表名、欄位名不固定），使用 <code>EXECUTE</code>：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>OR</span> <span style=color:#66d9ef>REPLACE</span> <span style=color:#66d9ef>FUNCTION</span> dynamic_count(
+</span></span><span style=display:flex><span>    p_table TEXT,
+</span></span><span style=display:flex><span>    p_where TEXT <span style=color:#66d9ef>DEFAULT</span> <span style=color:#66d9ef>NULL</span>
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>RETURNS</span> BIGINT
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LANGUAGE</span> plpgsql <span style=color:#66d9ef>AS</span> <span style=color:#960050;background-color:#1e0010>$$</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>DECLARE</span>
+</span></span><span style=display:flex><span>    v_sql   TEXT;
+</span></span><span style=display:flex><span>    v_count BIGINT;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>    v_sql :<span style=color:#f92672>=</span> format(<span style=color:#e6db74>&#39;SELECT count(*) FROM %I&#39;</span>, p_table);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>IF</span> p_where <span style=color:#66d9ef>IS</span> <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span> <span style=color:#66d9ef>THEN</span>
+</span></span><span style=display:flex><span>        v_sql :<span style=color:#f92672>=</span> v_sql <span style=color:#f92672>||</span> <span style=color:#e6db74>&#39; WHERE &#39;</span> <span style=color:#f92672>||</span> p_where;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>END</span> <span style=color:#66d9ef>IF</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>EXECUTE</span> v_sql <span style=color:#66d9ef>INTO</span> v_count;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>RETURN</span> v_count;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span>;
+</span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>$$</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 使用
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> dynamic_count(<span style=color:#e6db74>&#39;orders&#39;</span>, <span style=color:#e6db74>&#39;status = &#39;&#39;active&#39;&#39;&#39;</span>);
+</span></span></code></pre></div><h4 id=防-sql-injection-三寶>防 SQL Injection 三寶</h4><table><thead><tr><th>函數/格式</th><th>用途</th><th>範例</th></tr></thead><tbody><tr><td><code>format('%I', name)</code></td><td>識別符（表名、欄名）→ 加雙引號</td><td><code>"my_table"</code></td></tr><tr><td><code>format('%L', value)</code></td><td>字面值 → 加單引號並跳脫</td><td><code>'O''Brien'</code></td></tr><tr><td><code>EXECUTE ... USING $1, $2</code></td><td>參數化值 → 最安全</td><td>參數不嵌入 SQL 字串</td></tr></tbody></table><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 推薦寫法：format %I 處理識別符，USING 處理值
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>OR</span> <span style=color:#66d9ef>REPLACE</span> <span style=color:#66d9ef>FUNCTION</span> find_by_column(
+</span></span><span style=display:flex><span>    p_table  TEXT,
+</span></span><span style=display:flex><span>    p_column TEXT,
+</span></span><span style=display:flex><span>    p_value  TEXT
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>RETURNS</span> <span style=color:#66d9ef>SETOF</span> RECORD
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LANGUAGE</span> plpgsql <span style=color:#66d9ef>AS</span> <span style=color:#960050;background-color:#1e0010>$$</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>RETURN</span> QUERY <span style=color:#66d9ef>EXECUTE</span>
+</span></span><span style=display:flex><span>        format(<span style=color:#e6db74>&#39;SELECT * FROM %I WHERE %I = $1&#39;</span>, p_table, p_column)
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>USING</span> p_value;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span>;
+</span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>$$</span>;
+</span></span></code></pre></div><p><strong>禁止</strong>直接拼接使用者輸入到 SQL 字串：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 危險！SQL Injection 漏洞
+</span></span></span><span style=display:flex><span>v_sql :<span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;SELECT * FROM &#39;</span> <span style=color:#f92672>||</span> p_table <span style=color:#f92672>||</span> <span style=color:#e6db74>&#39; WHERE name = &#39;&#39;&#39;</span> <span style=color:#f92672>||</span> p_name <span style=color:#f92672>||</span> <span style=color:#e6db74>&#39;&#39;&#39;&#39;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 安全做法
+</span></span></span><span style=display:flex><span>v_sql :<span style=color:#f92672>=</span> format(<span style=color:#e6db74>&#39;SELECT * FROM %I WHERE name = $1&#39;</span>, p_table);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>EXECUTE</span> v_sql <span style=color:#66d9ef>USING</span> p_name;
+</span></span></code></pre></div><h3 id=回傳型別>回傳型別</h3><h4 id=回傳單一值>回傳單一值</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>FUNCTION</span> get_count() <span style=color:#66d9ef>RETURNS</span> BIGINT ...
+</span></span></code></pre></div><h4 id=回傳複合型別>回傳複合型別</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 回傳自訂型別
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TYPE</span> product_summary <span style=color:#66d9ef>AS</span> (
+</span></span><span style=display:flex><span>    name TEXT,
+</span></span><span style=display:flex><span>    total_sales NUMERIC
+</span></span><span style=display:flex><span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>FUNCTION</span> top_product() <span style=color:#66d9ef>RETURNS</span> product_summary ...
+</span></span></code></pre></div><h4 id=returns-table回傳表格>RETURNS TABLE（回傳表格）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>OR</span> <span style=color:#66d9ef>REPLACE</span> <span style=color:#66d9ef>FUNCTION</span> search_products(p_keyword TEXT)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>RETURNS</span> <span style=color:#66d9ef>TABLE</span>(id INT, name TEXT, price NUMERIC)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LANGUAGE</span> plpgsql <span style=color:#66d9ef>AS</span> <span style=color:#960050;background-color:#1e0010>$$</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>RETURN</span> QUERY
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>SELECT</span> p.id, p.name, p.price
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>FROM</span> products p
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>WHERE</span> p.name <span style=color:#66d9ef>ILIKE</span> <span style=color:#e6db74>&#39;%&#39;</span> <span style=color:#f92672>||</span> p_keyword <span style=color:#f92672>||</span> <span style=color:#e6db74>&#39;%&#39;</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> p.price <span style=color:#66d9ef>DESC</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span>;
+</span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>$$</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 使用
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> search_products(<span style=color:#e6db74>&#39;laptop&#39;</span>);
+</span></span></code></pre></div><h4 id=return-next逐行回傳>RETURN NEXT（逐行回傳）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>OR</span> <span style=color:#66d9ef>REPLACE</span> <span style=color:#66d9ef>FUNCTION</span> generate_fibonacci(n INT)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>RETURNS</span> <span style=color:#66d9ef>SETOF</span> BIGINT
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LANGUAGE</span> plpgsql <span style=color:#66d9ef>AS</span> <span style=color:#960050;background-color:#1e0010>$$</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>DECLARE</span>
+</span></span><span style=display:flex><span>    a BIGINT :<span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>    b BIGINT :<span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>    temp BIGINT;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>FOR</span> i <span style=color:#66d9ef>IN</span> <span style=color:#ae81ff>1</span>..n LOOP
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>RETURN</span> <span style=color:#66d9ef>NEXT</span> a;
+</span></span><span style=display:flex><span>        temp :<span style=color:#f92672>=</span> a <span style=color:#f92672>+</span> b;
+</span></span><span style=display:flex><span>        a :<span style=color:#f92672>=</span> b;
+</span></span><span style=display:flex><span>        b :<span style=color:#f92672>=</span> temp;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>END</span> LOOP;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span>;
+</span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>$$</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> generate_fibonacci(<span style=color:#ae81ff>10</span>);
+</span></span></code></pre></div><h4 id=return-query-execute動態回傳>RETURN QUERY EXECUTE（動態回傳）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>OR</span> <span style=color:#66d9ef>REPLACE</span> <span style=color:#66d9ef>FUNCTION</span> dynamic_search(
+</span></span><span style=display:flex><span>    p_table TEXT, p_column TEXT, p_value TEXT
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>RETURNS</span> <span style=color:#66d9ef>SETOF</span> RECORD
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LANGUAGE</span> plpgsql <span style=color:#66d9ef>AS</span> <span style=color:#960050;background-color:#1e0010>$$</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>RETURN</span> QUERY <span style=color:#66d9ef>EXECUTE</span>
+</span></span><span style=display:flex><span>        format(<span style=color:#e6db74>&#39;SELECT * FROM %I WHERE %I = $1&#39;</span>, p_table, p_column)
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>USING</span> p_value;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span>;
+</span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>$$</span>;
+</span></span></code></pre></div><h3 id=cursor-操作>Cursor 操作</h3><p>Cursor 適用於處理大量資料而不想一次載入記憶體的場景：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>OR</span> <span style=color:#66d9ef>REPLACE</span> <span style=color:#66d9ef>FUNCTION</span> process_large_table()
+</span></span><span style=display:flex><span><span style=color:#66d9ef>RETURNS</span> VOID
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LANGUAGE</span> plpgsql <span style=color:#66d9ef>AS</span> <span style=color:#960050;background-color:#1e0010>$$</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>DECLARE</span>
+</span></span><span style=display:flex><span>    cur <span style=color:#66d9ef>CURSOR</span> <span style=color:#66d9ef>FOR</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>SELECT</span> id, <span style=color:#66d9ef>data</span> <span style=color:#66d9ef>FROM</span> large_table <span style=color:#66d9ef>WHERE</span> processed <span style=color:#f92672>=</span> <span style=color:#66d9ef>FALSE</span>;
+</span></span><span style=display:flex><span>    v_rec RECORD;
+</span></span><span style=display:flex><span>    v_batch INT :<span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>OPEN</span> cur;
+</span></span><span style=display:flex><span>    LOOP
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>FETCH</span> cur <span style=color:#66d9ef>INTO</span> v_rec;
+</span></span><span style=display:flex><span>        EXIT <span style=color:#66d9ef>WHEN</span> <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>FOUND</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#75715e>-- 處理每一行
+</span></span></span><span style=display:flex><span>        <span style=color:#66d9ef>UPDATE</span> large_table
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>SET</span> processed <span style=color:#f92672>=</span> <span style=color:#66d9ef>TRUE</span>, <span style=color:#66d9ef>result</span> <span style=color:#f92672>=</span> compute(v_rec.<span style=color:#66d9ef>data</span>)
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>WHERE</span> <span style=color:#66d9ef>CURRENT</span> <span style=color:#66d9ef>OF</span> cur;  <span style=color:#75715e>-- 用 Cursor 定位更新
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        v_batch :<span style=color:#f92672>=</span> v_batch <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>IF</span> v_batch <span style=color:#f92672>%</span> <span style=color:#ae81ff>1000</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span> <span style=color:#66d9ef>THEN</span>
+</span></span><span style=display:flex><span>            RAISE NOTICE <span style=color:#e6db74>&#39;已處理 % 行&#39;</span>, v_batch;
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>END</span> <span style=color:#66d9ef>IF</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>END</span> LOOP;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>CLOSE</span> cur;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    RAISE NOTICE <span style=color:#e6db74>&#39;處理完成，共 % 行&#39;</span>, v_batch;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span>;
+</span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>$$</span>;
+</span></span></code></pre></div><p><strong>Refcursor</strong>（可傳遞的 Cursor 參照）：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>OR</span> <span style=color:#66d9ef>REPLACE</span> <span style=color:#66d9ef>FUNCTION</span> open_orders_cursor(p_status TEXT)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>RETURNS</span> REFCURSOR
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LANGUAGE</span> plpgsql <span style=color:#66d9ef>AS</span> <span style=color:#960050;background-color:#1e0010>$$</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>DECLARE</span>
+</span></span><span style=display:flex><span>    cur REFCURSOR :<span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;orders_cur&#39;</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>OPEN</span> cur <span style=color:#66d9ef>FOR</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> orders <span style=color:#66d9ef>WHERE</span> status <span style=color:#f92672>=</span> p_status <span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> created_at;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>RETURN</span> cur;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span>;
+</span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>$$</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- Client 端使用
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> open_orders_cursor(<span style=color:#e6db74>&#39;pending&#39;</span>);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FETCH</span> <span style=color:#ae81ff>10</span> <span style=color:#66d9ef>FROM</span> orders_cur;   <span style=color:#75715e>-- 取 10 行
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>FETCH</span> <span style=color:#ae81ff>10</span> <span style=color:#66d9ef>FROM</span> orders_cur;   <span style=color:#75715e>-- 再取 10 行
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CLOSE</span> orders_cur;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>COMMIT</span>;
+</span></span></code></pre></div><h3 id=plan-caching-機制>Plan Caching 機制</h3><p>PL/pgSQL 函數內的 SQL 語句會在首次執行時產生執行計畫並快取：</p><pre tabindex=0><code>首次呼叫 my_function()：
+  SQL-1 → Parse → Plan → Execute → 快取計畫
+  SQL-2 → Parse → Plan → Execute → 快取計畫
+
+第二次呼叫 my_function()：
+  SQL-1 → 取用快取計畫 → Execute  ← 跳過 Parse + Plan
+  SQL-2 → 取用快取計畫 → Execute
+</code></pre><h4 id=generic-plan-vs-custom-planpg12>Generic Plan vs Custom Plan（PG12+）</h4><p>PostgreSQL 12 起，Planner 會自動在兩種策略間選擇：</p><table><thead><tr><th>策略</th><th>說明</th><th>適用場景</th></tr></thead><tbody><tr><td>Custom Plan</td><td>每次根據參數值產生最佳計畫</td><td>參數值分佈不均，不同值需要不同計畫</td></tr><tr><td>Generic Plan</td><td>使用不依賴參數值的通用計畫</td><td>參數值對計畫影響不大</td></tr></tbody></table><p>前 5 次呼叫一律使用 Custom Plan，之後 Planner 比較兩者成本，自動選擇較優的策略。</p><p>若需強制使用 Generic Plan（例如 Plan 階段耗時太長）：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>SET</span> plan_cache_mode <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;force_generic_plan&#39;</span>;  <span style=color:#75715e>-- Session 級設定
+</span></span></span></code></pre></div><h3 id=函數波動性宣告>函數波動性宣告</h3><table><thead><tr><th>宣告</th><th>意義</th><th>Planner 行為</th></tr></thead><tbody><tr><td><code>IMMUTABLE</code></td><td>相同輸入永遠回傳相同輸出（純函數）</td><td>可在 Plan 階段就執行（常數摺疊）</td></tr><tr><td><code>STABLE</code></td><td>同一 Transaction 內相同輸入回傳相同結果</td><td>可在 Query 中重用結果，不能用於索引</td></tr><tr><td><code>VOLATILE</code>（預設）</td><td>每次呼叫可能回傳不同結果</td><td>不做任何最佳化</td></tr></tbody></table><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- IMMUTABLE：數學計算
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>FUNCTION</span> calculate_tax(amount NUMERIC)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>RETURNS</span> NUMERIC
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LANGUAGE</span> plpgsql <span style=color:#66d9ef>IMMUTABLE</span> <span style=color:#66d9ef>AS</span> <span style=color:#960050;background-color:#1e0010>$$</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>RETURN</span> amount <span style=color:#f92672>*</span> <span style=color:#ae81ff>0</span>.<span style=color:#ae81ff>05</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span>;
+</span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>$$</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- STABLE：讀取設定（同一 TX 內不變）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>FUNCTION</span> get_exchange_rate(currency TEXT)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>RETURNS</span> NUMERIC
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LANGUAGE</span> plpgsql <span style=color:#66d9ef>STABLE</span> <span style=color:#66d9ef>AS</span> <span style=color:#960050;background-color:#1e0010>$$</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>DECLARE</span> v_rate NUMERIC;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>SELECT</span> rate <span style=color:#66d9ef>INTO</span> v_rate <span style=color:#66d9ef>FROM</span> exchange_rates <span style=color:#66d9ef>WHERE</span> code <span style=color:#f92672>=</span> currency;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>RETURN</span> v_rate;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span>;
+</span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>$$</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- VOLATILE：有副作用（INSERT/UPDATE/DELETE、使用 random()、clock_timestamp()）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>FUNCTION</span> log_access(p_user_id INT)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>RETURNS</span> VOID
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LANGUAGE</span> plpgsql <span style=color:#66d9ef>VOLATILE</span> <span style=color:#66d9ef>AS</span> <span style=color:#960050;background-color:#1e0010>$$</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> access_log (user_id, accessed_at) <span style=color:#66d9ef>VALUES</span> (p_user_id, now());
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span>;
+</span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>$$</span>;
+</span></span></code></pre></div><p><strong>陷阱</strong>：錯誤地將 <code>VOLATILE</code> 函數標記為 <code>IMMUTABLE</code> 會導致索引損壞或查詢結果不正確。</p><h3 id=plpgsql-vs-純-sql-函數>PL/pgSQL vs 純 SQL 函數</h3><table><thead><tr><th>面向</th><th>SQL Function</th><th>PL/pgSQL Function</th></tr></thead><tbody><tr><td>語法</td><td>純 SQL 語句</td><td>Block 結構 + 控制流程</td></tr><tr><td>Inlining</td><td>可被 Planner 展開內聯到呼叫者</td><td>不可內聯，獨立執行</td></tr><tr><td>Plan Caching</td><td>每次重新 Plan</td><td>快取 Plan</td></tr><tr><td>適用場景</td><td>簡單計算、型別轉換</td><td>複雜邏輯、多步驟流程</td></tr><tr><td>效能</td><td>簡單查詢更快（因為內聯）</td><td>複雜邏輯更快（因為快取）</td></tr></tbody></table><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- SQL Function（簡單計算，可被內聯）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>FUNCTION</span> full_name(<span style=color:#66d9ef>first</span> TEXT, <span style=color:#66d9ef>last</span> TEXT)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>RETURNS</span> TEXT
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LANGUAGE</span> <span style=color:#66d9ef>SQL</span> <span style=color:#66d9ef>IMMUTABLE</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>AS</span> <span style=color:#960050;background-color:#1e0010>$$</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#66d9ef>first</span> <span style=color:#f92672>||</span> <span style=color:#e6db74>&#39; &#39;</span> <span style=color:#f92672>||</span> <span style=color:#66d9ef>last</span>; <span style=color:#960050;background-color:#1e0010>$$</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- PL/pgSQL Function（複雜邏輯）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>FUNCTION</span> process_order(p_order_id INT)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>RETURNS</span> TEXT
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LANGUAGE</span> plpgsql <span style=color:#66d9ef>AS</span> <span style=color:#960050;background-color:#1e0010>$$</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>DECLARE</span> ...
+</span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>-- 多步驟流程
+</span></span></span><span style=display:flex><span>    ...
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span>;
+</span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>$$</span>;
+</span></span></code></pre></div><p><strong>經驗法則</strong>：能用純 SQL 寫的簡單函數就用 SQL（可內聯），需要條件邏輯、迴圈、例外處理時用 PL/pgSQL。</p><h3 id=do-匿名區塊>DO 匿名區塊</h3><p><code>DO</code> 執行一次性的 PL/pgSQL 程式碼，不建立永久函數：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 批次更新範例
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>DO</span> <span style=color:#960050;background-color:#1e0010>$$</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>DECLARE</span>
+</span></span><span style=display:flex><span>    v_rec RECORD;
+</span></span><span style=display:flex><span>    v_count INT :<span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>FOR</span> v_rec <span style=color:#66d9ef>IN</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>SELECT</span> id <span style=color:#66d9ef>FROM</span> users <span style=color:#66d9ef>WHERE</span> last_login <span style=color:#f92672>&lt;</span> now() <span style=color:#f92672>-</span> interval <span style=color:#e6db74>&#39;1 year&#39;</span>
+</span></span><span style=display:flex><span>    LOOP
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>UPDATE</span> users <span style=color:#66d9ef>SET</span> status <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;inactive&#39;</span> <span style=color:#66d9ef>WHERE</span> id <span style=color:#f92672>=</span> v_rec.id;
+</span></span><span style=display:flex><span>        v_count :<span style=color:#f92672>=</span> v_count <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>END</span> LOOP;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    RAISE NOTICE <span style=color:#e6db74>&#39;已標記 % 個不活躍使用者&#39;</span>, v_count;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span>;
+</span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>$$</span>;
+</span></span></code></pre></div><h3 id=stored-procedurepg11>Stored Procedure（PG11+）</h3><p><strong>PG11</strong> 引入了 <code>CREATE PROCEDURE</code>，與 Function 最大的差別是可以在過程內進行 <strong>Transaction 控制</strong>（<code>COMMIT</code> / <code>ROLLBACK</code>）：</p><table><thead><tr><th>面向</th><th>Function</th><th>Procedure（PG11+）</th></tr></thead><tbody><tr><td>呼叫方式</td><td><code>SELECT func()</code> 或 <code>FROM func()</code></td><td><code>CALL proc()</code></td></tr><tr><td>回傳值</td><td>必須有 RETURNS</td><td>無回傳值（可用 INOUT 參數模擬）</td></tr><tr><td>Transaction 控制</td><td>不可 COMMIT/ROLLBACK</td><td>可以 COMMIT/ROLLBACK</td></tr><tr><td>SQL 內使用</td><td>可在 SELECT/WHERE 中使用</td><td>不可在 SQL 語句中使用</td></tr><tr><td>用途</td><td>計算、查詢、轉換</td><td>ETL、批次處理、長時間運行的流程</td></tr></tbody></table><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>OR</span> <span style=color:#66d9ef>REPLACE</span> <span style=color:#66d9ef>PROCEDURE</span> batch_archive_orders(p_batch_size INT <span style=color:#66d9ef>DEFAULT</span> <span style=color:#ae81ff>1000</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LANGUAGE</span> plpgsql <span style=color:#66d9ef>AS</span> <span style=color:#960050;background-color:#1e0010>$$</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>DECLARE</span>
+</span></span><span style=display:flex><span>    v_archived INT;
+</span></span><span style=display:flex><span>    v_total    INT :<span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>    LOOP
+</span></span><span style=display:flex><span>        <span style=color:#75715e>-- 每批次搬移 p_batch_size 筆
+</span></span></span><span style=display:flex><span>        <span style=color:#66d9ef>WITH</span> moved <span style=color:#66d9ef>AS</span> (
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>DELETE</span> <span style=color:#66d9ef>FROM</span> orders
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>WHERE</span> status <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;completed&#39;</span>
+</span></span><span style=display:flex><span>              <span style=color:#66d9ef>AND</span> completed_at <span style=color:#f92672>&lt;</span> now() <span style=color:#f92672>-</span> interval <span style=color:#e6db74>&#39;2 years&#39;</span>
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>LIMIT</span> p_batch_size
+</span></span><span style=display:flex><span>            RETURNING <span style=color:#f92672>*</span>
+</span></span><span style=display:flex><span>        )
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> orders_archive <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> moved;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>GET</span> <span style=color:#66d9ef>DIAGNOSTICS</span> v_archived <span style=color:#f92672>=</span> <span style=color:#66d9ef>ROW_COUNT</span>;
+</span></span><span style=display:flex><span>        v_total :<span style=color:#f92672>=</span> v_total <span style=color:#f92672>+</span> v_archived;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#75715e>-- 每批次後提交，釋放鎖和資源
+</span></span></span><span style=display:flex><span>        <span style=color:#66d9ef>COMMIT</span>;
+</span></span><span style=display:flex><span>        RAISE NOTICE <span style=color:#e6db74>&#39;已歸檔 % 筆（累計 %）&#39;</span>, v_archived, v_total;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        EXIT <span style=color:#66d9ef>WHEN</span> v_archived <span style=color:#f92672>&lt;</span> p_batch_size;  <span style=color:#75715e>-- 不足一批，處理完畢
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>END</span> LOOP;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    RAISE NOTICE <span style=color:#e6db74>&#39;歸檔完成，共 % 筆&#39;</span>, v_total;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span>;
+</span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>$$</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 呼叫
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CALL</span> batch_archive_orders(<span style=color:#ae81ff>5000</span>);
+</span></span></code></pre></div><p><strong>注意</strong>：<code>CALL</code> 必須在 Transaction Block 外（autocommit 模式），或在已經 COMMIT 過的 Procedure 中呼叫。在顯式 <code>BEGIN ... END</code> Transaction 內呼叫包含 <code>COMMIT</code> 的 Procedure 會報錯。</p><h3 id=實用設計模式>實用設計模式</h3><h4 id=upsert-封裝>Upsert 封裝</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>OR</span> <span style=color:#66d9ef>REPLACE</span> <span style=color:#66d9ef>FUNCTION</span> upsert_setting(
+</span></span><span style=display:flex><span>    p_key TEXT, p_value TEXT
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>RETURNS</span> VOID
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LANGUAGE</span> plpgsql <span style=color:#66d9ef>AS</span> <span style=color:#960050;background-color:#1e0010>$$</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> settings (<span style=color:#66d9ef>key</span>, value, updated_at)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>VALUES</span> (p_key, p_value, now())
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>ON</span> CONFLICT (<span style=color:#66d9ef>key</span>) <span style=color:#66d9ef>DO</span> <span style=color:#66d9ef>UPDATE</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>SET</span> value <span style=color:#f92672>=</span> EXCLUDED.value,
+</span></span><span style=display:flex><span>            updated_at <span style=color:#f92672>=</span> now();
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span>;
+</span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>$$</span>;
+</span></span></code></pre></div><h4 id=分頁查詢函數>分頁查詢函數</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>OR</span> <span style=color:#66d9ef>REPLACE</span> <span style=color:#66d9ef>FUNCTION</span> paginate_products(
+</span></span><span style=display:flex><span>    p_page     INT <span style=color:#66d9ef>DEFAULT</span> <span style=color:#ae81ff>1</span>,
+</span></span><span style=display:flex><span>    p_per_page INT <span style=color:#66d9ef>DEFAULT</span> <span style=color:#ae81ff>20</span>,
+</span></span><span style=display:flex><span>    p_category TEXT <span style=color:#66d9ef>DEFAULT</span> <span style=color:#66d9ef>NULL</span>
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>RETURNS</span> <span style=color:#66d9ef>TABLE</span>(id INT, name TEXT, price NUMERIC, total_count BIGINT)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LANGUAGE</span> plpgsql <span style=color:#66d9ef>STABLE</span> <span style=color:#66d9ef>AS</span> <span style=color:#960050;background-color:#1e0010>$$</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>RETURN</span> QUERY
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>            p.id, p.name, p.price,
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>count</span>(<span style=color:#f92672>*</span>) OVER() <span style=color:#66d9ef>AS</span> total_count
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>FROM</span> products p
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>WHERE</span> (p_category <span style=color:#66d9ef>IS</span> <span style=color:#66d9ef>NULL</span> <span style=color:#66d9ef>OR</span> p.category <span style=color:#f92672>=</span> p_category)
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> p.created_at <span style=color:#66d9ef>DESC</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>LIMIT</span> p_per_page
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>OFFSET</span> (p_page <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>) <span style=color:#f92672>*</span> p_per_page;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span>;
+</span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>$$</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 使用
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> paginate_products(<span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>10</span>, <span style=color:#e6db74>&#39;Electronics&#39;</span>);
+</span></span></code></pre></div><h4 id=重試邏輯>重試邏輯</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>OR</span> <span style=color:#66d9ef>REPLACE</span> <span style=color:#66d9ef>FUNCTION</span> retry_operation(p_max_retries INT <span style=color:#66d9ef>DEFAULT</span> <span style=color:#ae81ff>3</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>RETURNS</span> TEXT
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LANGUAGE</span> plpgsql <span style=color:#66d9ef>AS</span> <span style=color:#960050;background-color:#1e0010>$$</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>DECLARE</span>
+</span></span><span style=display:flex><span>    v_attempt INT :<span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>    v_result  TEXT;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>    LOOP
+</span></span><span style=display:flex><span>        v_attempt :<span style=color:#f92672>=</span> v_attempt <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>            <span style=color:#75715e>-- 嘗試執行可能失敗的操作
+</span></span></span><span style=display:flex><span>            PERFORM do_something_risky();
+</span></span><span style=display:flex><span>            v_result :<span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;SUCCESS&#39;</span>;
+</span></span><span style=display:flex><span>            EXIT;  <span style=color:#75715e>-- 成功就跳出
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>EXCEPTION</span>
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>WHEN</span> serialization_failure <span style=color:#66d9ef>OR</span> deadlock_detected <span style=color:#66d9ef>THEN</span>
+</span></span><span style=display:flex><span>                <span style=color:#66d9ef>IF</span> v_attempt <span style=color:#f92672>&gt;=</span> p_max_retries <span style=color:#66d9ef>THEN</span>
+</span></span><span style=display:flex><span>                    RAISE;  <span style=color:#75715e>-- 超過重試次數，拋出原始錯誤
+</span></span></span><span style=display:flex><span>                <span style=color:#66d9ef>END</span> <span style=color:#66d9ef>IF</span>;
+</span></span><span style=display:flex><span>                RAISE NOTICE <span style=color:#e6db74>&#39;第 % 次嘗試失敗，重試中...&#39;</span>, v_attempt;
+</span></span><span style=display:flex><span>                PERFORM pg_sleep(<span style=color:#ae81ff>0</span>.<span style=color:#ae81ff>1</span> <span style=color:#f92672>*</span> v_attempt);  <span style=color:#75715e>-- 指數退避
+</span></span></span><span style=display:flex><span>        <span style=color:#66d9ef>END</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>END</span> LOOP;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>RETURN</span> v_result;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span>;
+</span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>$$</span>;
+</span></span></code></pre></div><h3 id=版本演進>版本演進</h3><table><thead><tr><th>版本</th><th>新功能</th></tr></thead><tbody><tr><td>PG 8.4</td><td><code>VARIADIC</code> 參數、<code>CASE</code> 表達式</td></tr><tr><td>PG 9.0</td><td><code>DO</code> 匿名區塊、<code>EXECUTE ... USING</code></td></tr><tr><td>PG 9.2</td><td><code>GET STACKED DIAGNOSTICS</code></td></tr><tr><td>PG 9.5</td><td><code>ASSERT</code> 語句（開發用斷言）</td></tr><tr><td>PG 10</td><td>Transaction ID 64-bit 相關改進</td></tr><tr><td>PG 11</td><td><strong>CREATE PROCEDURE</strong> + Transaction 控制（<code>COMMIT</code>/<code>ROLLBACK</code>）</td></tr><tr><td>PG 12</td><td>Plan Caching 改進（Custom vs Generic Plan 自動切換）</td></tr><tr><td>PG 14</td><td>多行字串改進、PROCEDURE OUT 參數改進</td></tr></tbody></table><h3 id=常見陷阱>常見陷阱</h3><h4 id=select-into-與-sql-標準衝突>SELECT INTO 與 SQL 標準衝突</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- PL/pgSQL 的 SELECT INTO 是賦值
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> name <span style=color:#66d9ef>INTO</span> v_name <span style=color:#66d9ef>FROM</span> users <span style=color:#66d9ef>WHERE</span> id <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- SQL 標準的 SELECT INTO 是建表（不要在 PL/pgSQL 中使用）
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- SELECT name INTO new_table FROM users;  -- 語義不同！
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 在 PL/pgSQL 中建表用 CREATE TABLE AS
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> new_table <span style=color:#66d9ef>AS</span> <span style=color:#66d9ef>SELECT</span> name <span style=color:#66d9ef>FROM</span> users;
+</span></span></code></pre></div><h4 id=變數與欄位名稱衝突>變數與欄位名稱衝突</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 危險：v_id 同名於 users.id，WHERE 條件永遠為 true！
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>DECLARE</span>
+</span></span><span style=display:flex><span>    id INT :<span style=color:#f92672>=</span> <span style=color:#ae81ff>5</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>SELECT</span> name <span style=color:#66d9ef>INTO</span> v_name <span style=color:#66d9ef>FROM</span> users <span style=color:#66d9ef>WHERE</span> id <span style=color:#f92672>=</span> id;
+</span></span><span style=display:flex><span>    <span style=color:#75715e>-- PostgreSQL 會把兩個 id 都解讀為欄位 → WHERE users.id = users.id → 永遠 true
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>-- 解法 1：變數加 prefix
+</span></span></span><span style=display:flex><span>    <span style=color:#75715e>-- DECLARE v_id INT := 5;
+</span></span></span><span style=display:flex><span>    <span style=color:#75715e>-- WHERE id = v_id;
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>-- 解法 2：用 label 限定
+</span></span></span><span style=display:flex><span>    <span style=color:#75715e>-- &lt;&lt;fn&gt;&gt; DECLARE id INT := 5;
+</span></span></span><span style=display:flex><span>    <span style=color:#75715e>-- WHERE users.id = fn.id;
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>END</span>;
+</span></span></code></pre></div><p><strong>最佳實踐</strong>：所有變數加 <code>v_</code> 前綴，參數加 <code>p_</code> 前綴，避免與欄位名衝突。</p><h4 id=exception-block-的隱式-savepoint>EXCEPTION Block 的隱式 SAVEPOINT</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 每次迭代都建立/釋放 SAVEPOINT，效能極差
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>FOR</span> v_rec <span style=color:#66d9ef>IN</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> big_table LOOP
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>        PERFORM risky_operation(v_rec.id);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>EXCEPTION</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>WHEN</span> OTHERS <span style=color:#66d9ef>THEN</span> <span style=color:#66d9ef>NULL</span>;  <span style=color:#75715e>-- 吞掉錯誤
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>END</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span> LOOP;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 改進：批次處理，只在外層捕獲
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>FOR</span> v_rec <span style=color:#66d9ef>IN</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> big_table LOOP
+</span></span><span style=display:flex><span>        PERFORM risky_operation(v_rec.id);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>END</span> LOOP;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>EXCEPTION</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>WHEN</span> OTHERS <span style=color:#66d9ef>THEN</span>
+</span></span><span style=display:flex><span>        <span style=color:#75715e>-- 整批回滾，記錄錯誤
+</span></span></span><span style=display:flex><span>        RAISE WARNING <span style=color:#e6db74>&#39;Batch failed: %&#39;</span>, SQLERRM;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>END</span>;
+</span></span></code></pre></div><h4 id=null-比較陷阱>NULL 比較陷阱</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 錯誤：NULL 比較結果永遠是 NULL（不是 TRUE 也不是 FALSE）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>IF</span> v_name <span style=color:#f92672>=</span> <span style=color:#66d9ef>NULL</span> <span style=color:#66d9ef>THEN</span> ...     <span style=color:#75715e>-- 永遠不會進入
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>IF</span> v_name <span style=color:#f92672>!=</span> <span style=color:#e6db74>&#39;test&#39;</span> <span style=color:#66d9ef>THEN</span> ...  <span style=color:#75715e>-- v_name 為 NULL 時也不會進入
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 正確做法
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>IF</span> v_name <span style=color:#66d9ef>IS</span> <span style=color:#66d9ef>NULL</span> <span style=color:#66d9ef>THEN</span> ...
+</span></span><span style=display:flex><span><span style=color:#66d9ef>IF</span> v_name <span style=color:#66d9ef>IS</span> <span style=color:#66d9ef>DISTINCT</span> <span style=color:#66d9ef>FROM</span> <span style=color:#e6db74>&#39;test&#39;</span> <span style=color:#66d9ef>THEN</span> ...  <span style=color:#75715e>-- NULL-safe 比較
+</span></span></span></code></pre></div><h3 id=總結>總結</h3><p><strong>PL/pgSQL</strong> 是 PostgreSQL 伺服器端程式設計的核心武器：</p><ul><li><strong>Block 結構</strong>（DECLARE/BEGIN/EXCEPTION/END）提供完整的程式設計框架</li><li><strong>%TYPE / %ROWTYPE</strong> 讓變數型別與表結構同步，減少維護成本</li><li><strong>EXECUTE &mldr; USING</strong> + <code>format(%I, %L)</code> 是安全動態 SQL 的黃金組合</li><li><strong>EXCEPTION Block</strong> 提供完整的錯誤處理，但要注意隱式 SAVEPOINT 的效能開銷</li><li><strong>Plan Caching</strong> 讓重複執行的函數效能優異，PG12+ 自動選擇最佳策略</li><li><strong>Stored Procedure</strong>（PG11+）支援 Transaction 控制，適合 ETL 和批次處理</li><li>簡單運算用純 SQL Function（可內聯），複雜邏輯用 PL/pgSQL</li></ul><p>下一篇，我們將深入探討 <strong>SQL 函數與自訂函數</strong>——掌握 PostgreSQL 函數生態系統的完整面貌，包含 SQL Function、Aggregate Function、Window Function 的自訂開發。</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
+</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/postgresql/024-triggers-event-triggers/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">觸發器與事件觸發器：PostgreSQL 的自動化執行機制 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/30</span>
+</a><a href=https://benzhub.github.io/post/postgresql/023-views-materialized-views/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Views 與 Materialized Views：PostgreSQL 的虛擬關係與物化快取 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/29</span>
+</a><a href=https://benzhub.github.io/post/postgresql/022-custom-types/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">自訂型別：ENUM、Domain、Range 與複合型別 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/28</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/postgresql/024-triggers-event-triggers/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+<span class="text-sm font-medium">觸發器與事件觸發器：PostgreSQL 的自動化執行機制 | PostgreSQL</span></a></div><div></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
+</a><a href=/tags/acid><span class=tag-pill>acid</span>
+</a><a href=/tags/aggregate><span class=tag-pill>aggregate</span>
+</a><a href=/tags/ai><span class=tag-pill>ai</span>
+</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
+</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
+</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
+</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
+</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
+</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
+</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
+</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
+</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
+</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
+</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
+</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
+</a><a href=/tags/analytics><span class=tag-pill>analytics</span>
+</a><a href=/tags/api><span class=tag-pill>api</span>
+</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
+</a><a href=/tags/audit><span class=tag-pill>audit</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (25)</span>
+</a><a href=/post/javascript/><span class=tag-pill>JavaScript (80)</span>
+</a><a href=/post/django/><span class=tag-pill>Django (42)</span>
+</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
+</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
+</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
+</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
+</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/django/042-django-nginx-gunicorn/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django 生產部署：Nginx + Gunicorn 完全指南 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/01</p></a><a href=/post/postgresql/025-plpgsql/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">PL/pgSQL 程式語言：PostgreSQL 伺服器端程式設計完全指南 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/01</p></a><a href=/post/javascript/data-structures--algorithms/018-two-pointers/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">雙指標技巧 — 四種模式完整解析與面試實戰 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/01</p></a><a href=/post/django/041-django-docker-deployment/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django Docker 容器化部署完全指南 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/30</p></a><a href=/post/javascript/data-structures--algorithms/017-recursion-backtracking/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">遞迴與回溯法 — 從遞迴三要素到回溯模板完整教學 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/06/30</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>
