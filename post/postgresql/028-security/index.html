@@ -1,0 +1,435 @@
+<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>安全與權限管理：從認證到 Row Level Security 全方位防護 | PostgreSQL | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="安全與權限管理：從認證到 Row Level Security 全方位防護 | PostgreSQL | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="深入解析 PostgreSQL 安全加固策略，涵蓋 SCRAM-SHA-256 認證、pg_hba.conf 設定、角色與權限管理、Row Level Security 多租戶隔離、Column-Level Privileges、SSL/TLS 傳輸加密、pgAudit 稽核與 pgcrypto 資料加密。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="深入解析 PostgreSQL 安全加固策略，涵蓋 SCRAM-SHA-256 認證、pg_hba.conf 設定、角色與權限管理、Row Level Security 多租戶隔離、Column-Level Privileges、SSL/TLS 傳輸加密、pgAudit 稽核與 pgcrypto 資料加密。"><meta property="og:url" content="https://benzhub.github.io/post/postgresql/028-security/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/postgresql/028-security/><meta name=twitter:description content="深入解析 PostgreSQL 安全加固策略，涵蓋 SCRAM-SHA-256 認證、pg_hba.conf 設定、角色與權限管理、Row Level Security 多租戶隔離、Column-Level Privileges、SSL/TLS 傳輸加密、pgAudit 稽核與 pgcrypto 資料加密。"><meta property="article:published_time" content="2026-07-04T00:00:00+00:00"><meta property="article:updated_time" content="2026-07-04T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/postgresql/028-Security.png"><meta property="og:image:url" content="https://benzhub.github.io/img/postgresql/028-Security.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/postgresql/028-security/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/postgresql/028-security/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"安全與權限管理：從認證到 Row Level Security 全方位防護 | PostgreSQL\"","description":"\"深入解析 PostgreSQL 安全加固策略，涵蓋 SCRAM-SHA-256 認證、pg_hba.conf 設定、角色與權限管理、Row Level Security 多租戶隔離、Column-Level Privileges、SSL/TLS 傳輸加密、pgAudit 稽核與 pgcrypto 資料加密。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-07-04T00:00:00\u002b00:00","dateModified":"2026-07-04T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/postgresql\/028-Security.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/postgresql\/028-security\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/postgresql\/"},{"@type":"ListItem","position":3,"name":"\"安全與權限管理：從認證到 Row Level Security 全方位防護 | PostgreSQL\""}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">安全與權限管理：從認證到 Row Level Security 全方位防護 | PostgreSQL</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/04</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/postgresql class="tag-pill no-underline">postgresql</a>
+<a href=/tags/security class="tag-pill no-underline">security</a>
+<a href=/tags/rls class="tag-pill no-underline">rls</a>
+<a href=/tags/authentication class="tag-pill no-underline">authentication</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/postgresql/028-Security.png alt="安全與權限管理：從認證到 Row Level Security 全方位防護 | PostgreSQL"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p>安全是資料庫運維的基石。<strong>PostgreSQL</strong> 採用「縱深防禦（Defense in Depth）」策略，從<strong>網路層</strong>、<strong>認證層</strong>、<strong>授權層</strong>到<strong>資料加密層</strong>，每一層都有對應的防護機制。本文將從 <strong>SCRAM-SHA-256</strong> 認證、<strong>pg_hba.conf</strong> 設定，到 <strong>Row Level Security</strong>、<strong>pgAudit</strong> 稽核與 <strong>pgcrypto</strong> 加密，帶你建立完整的 PostgreSQL 安全防線。</p></blockquote><h3 id=postgresql-安全模型總覽>PostgreSQL 安全模型總覽</h3><p>PostgreSQL 採用分層安全架構，每層負責不同範疇的存取控制：</p><pre tabindex=0><code>┌──────────────────────────────────────────┐
+│           網路層（Network Layer）         │
+│   防火牆、SSL/TLS、IP 白名單             │
+├──────────────────────────────────────────┤
+│         認證層（Authentication Layer）    │
+│   pg_hba.conf、SCRAM、Certificate、LDAP  │
+├──────────────────────────────────────────┤
+│         授權層（Authorization Layer）     │
+│   GRANT/REVOKE、角色繼承、物件權限       │
+├──────────────────────────────────────────┤
+│        行級安全（Row Level Security）     │
+│   CREATE POLICY、PERMISSIVE/RESTRICTIVE  │
+├──────────────────────────────────────────┤
+│       欄位級安全（Column-Level Security） │
+│   欄位 GRANT、視圖遮罩                   │
+├──────────────────────────────────────────┤
+│         加密層（Encryption Layer）        │
+│   pgcrypto、TDE、傳輸加密               │
+└──────────────────────────────────────────┘
+</code></pre><p>核心原則是「即使某一層被突破，其他層仍能限制損失範圍」：</p><table><thead><tr><th>原則</th><th>說明</th></tr></thead><tbody><tr><td><strong>最小權限（Least Privilege）</strong></td><td>每個帳號只授予完成工作所需的最低權限</td></tr><tr><td><strong>預設拒絕（Default Deny）</strong></td><td>未明確授權的操作一律拒絕</td></tr><tr><td><strong>稽核可追溯（Auditability）</strong></td><td>所有敏感操作均有日誌紀錄</td></tr><tr><td><strong>定期複查（Periodic Review）</strong></td><td>定期審查權限、憑證與設定</td></tr></tbody></table><hr><h3 id=認證機制authentication>認證機制（Authentication）</h3><p>認證是安全的第一道防線——確認「你是誰」。</p><h4 id=scram-sha-256推薦>SCRAM-SHA-256（推薦）</h4><p><strong>SCRAM-SHA-256</strong> 是 PostgreSQL 10+ 預設且最安全的密碼認證方式，取代舊有的 MD5 認證。它的優點包括：密碼不以明文傳輸、防止重放攻擊（Replay Attack）、伺服器端無法反推明文密碼。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- postgresql.conf
+</span></span></span><span style=display:flex><span>password_encryption <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;scram-sha-256&#39;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 建立使用者，密碼以 SCRAM 格式儲存
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>ROLE</span> app_user <span style=color:#66d9ef>WITH</span> LOGIN PASSWORD <span style=color:#e6db74>&#39;StrongP@ssw0rd!&#39;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 驗證密碼加密格式
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> rolname, <span style=color:#66d9ef>LEFT</span>(rolpassword, <span style=color:#ae81ff>14</span>) <span style=color:#66d9ef>AS</span> format_prefix
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_authid
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> rolname <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;app_user&#39;</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 正確輸出：SCRAM-SHA-256$
+</span></span></span></code></pre></div><h4 id=certificate-憑證認證>Certificate 憑證認證</h4><p>憑證認證透過 TLS 客戶端憑證識別使用者身份，無需密碼，適合**機器對機器（M2M）**場景：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 1. 產生 CA 憑證</span>
+</span></span><span style=display:flex><span>openssl genrsa -out ca.key <span style=color:#ae81ff>4096</span>
+</span></span><span style=display:flex><span>openssl req -new -x509 -days <span style=color:#ae81ff>3650</span> -key ca.key -out ca.crt <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  -subj <span style=color:#e6db74>&#34;/CN=PostgreSQL CA&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 2. 產生伺服器憑證</span>
+</span></span><span style=display:flex><span>openssl genrsa -out server.key <span style=color:#ae81ff>4096</span>
+</span></span><span style=display:flex><span>openssl req -new -key server.key -out server.csr <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  -subj <span style=color:#e6db74>&#34;/CN=db.example.com&#34;</span>
+</span></span><span style=display:flex><span>openssl x509 -req -days <span style=color:#ae81ff>365</span> -in server.csr -CA ca.crt <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  -CAkey ca.key -CAcreateserial -out server.crt
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 3. 產生客戶端憑證（CN 需與 PostgreSQL 使用者名稱一致）</span>
+</span></span><span style=display:flex><span>openssl genrsa -out client.key <span style=color:#ae81ff>4096</span>
+</span></span><span style=display:flex><span>openssl req -new -key client.key -out client.csr <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  -subj <span style=color:#e6db74>&#34;/CN=app_user&#34;</span>
+</span></span><span style=display:flex><span>openssl x509 -req -days <span style=color:#ae81ff>365</span> -in client.csr -CA ca.crt <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  -CAkey ca.key -CAcreateserial -out client.crt
+</span></span></code></pre></div><pre tabindex=0><code># pg_hba.conf — 使用 cert 方法
+hostssl all app_user 10.0.0.0/8 cert clientcert=verify-full
+</code></pre><h4 id=ldap--gssapi-認證>LDAP / GSSAPI 認證</h4><table><thead><tr><th>方式</th><th>適用場景</th><th>特色</th></tr></thead><tbody><tr><td><strong>LDAP</strong></td><td>企業統一身份管理（Active Directory）</td><td>密碼驗證委派給 LDAP Server</td></tr><tr><td><strong>GSSAPI</strong></td><td>Kerberos 環境</td><td>單一登入（SSO），無需額外密碼</td></tr></tbody></table><pre tabindex=0><code># pg_hba.conf — LDAP Search+Bind
+host all all 10.0.0.0/8 ldap \
+  ldapserver=ldap.example.com \
+  ldapbasedn=&#34;ou=users,dc=example,dc=com&#34; \
+  ldapbinddn=&#34;cn=pgbind,dc=example,dc=com&#34; \
+  ldapbindpasswd=&#34;bindpassword&#34; \
+  ldapsearchattribute=uid \
+  ldapscheme=ldaps ldapport=636
+</code></pre><blockquote><p><strong>注意</strong>：LDAP 認證只驗證密碼，使用者仍需在 PostgreSQL 中以 <code>CREATE ROLE</code> 建立。</p></blockquote><hr><h3 id=pg_hbaconf-最佳實踐>pg_hba.conf 最佳實踐</h3><p><code>pg_hba.conf</code>（Host-Based Authentication）是認證的核心設定檔，規則由上至下逐行匹配，<strong>第一條匹配的規則生效</strong>：</p><pre tabindex=0><code># TYPE  DATABASE        USER            ADDRESS                 METHOD
+
+# 1. 本機超級使用者使用 peer（OS 使用者即 PG 使用者）
+local   all             postgres                                peer
+
+# 2. 本機一般連線
+local   all             all                                     scram-sha-256
+
+# 3. 複製連線限制來源 IP
+host    replication     replicator      10.0.1.0/24             scram-sha-256
+
+# 4. 應用程式連線：限定使用者 + 資料庫 + IP + 加密
+hostssl app_db          app_user        10.0.2.0/24             scram-sha-256
+
+# 5. DBA 管理工具：限定 IP 段
+hostssl all             dba_role        10.0.3.0/24             scram-sha-256
+
+# 6. 預設拒絕（最後一行）
+host    all             all             0.0.0.0/0               reject
+</code></pre><p><strong>常見錯誤（務必避免）：</strong></p><ul><li>將 <code>trust</code> 用於非本機連線 → 無需密碼即可登入</li><li>未限定來源 IP（<code>0.0.0.0/0</code> + 非 reject）</li><li>使用 MD5 而非 SCRAM-SHA-256</li><li>寬鬆規則放在嚴格規則之前（後者永遠不生效）</li></ul><hr><h3 id=角色與權限管理>角色與權限管理</h3><h4 id=角色架構設計>角色架構設計</h4><p>PostgreSQL 的角色（Role）統一了使用者與群組的概念。最佳實踐是建立「群組角色（不可登入）」+ 「個人角色（可登入）」的層級結構：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 建立群組角色（不可登入）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>ROLE</span> readonly_group NOLOGIN;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>ROLE</span> readwrite_group NOLOGIN;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 建立可登入使用者
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>ROLE</span> app_user <span style=color:#66d9ef>WITH</span>
+</span></span><span style=display:flex><span>  LOGIN
+</span></span><span style=display:flex><span>  PASSWORD <span style=color:#e6db74>&#39;StrongP@ssw0rd!&#39;</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>CONNECTION</span> <span style=color:#66d9ef>LIMIT</span> <span style=color:#ae81ff>50</span>      <span style=color:#75715e>-- 限制連線數
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>VALID</span> <span style=color:#66d9ef>UNTIL</span> <span style=color:#e6db74>&#39;2027-01-01&#39;</span> <span style=color:#75715e>-- 帳號有效期
+</span></span></span><span style=display:flex><span>  NOSUPERUSER
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>NOCREATEDB</span>
+</span></span><span style=display:flex><span>  NOCREATEROLE;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 建立唯讀分析帳號
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>ROLE</span> analyst <span style=color:#66d9ef>WITH</span> LOGIN PASSWORD <span style=color:#e6db74>&#39;AnalystP@ss!&#39;</span> NOSUPERUSER;
+</span></span></code></pre></div><h4 id=grant--revoke>GRANT / REVOKE</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 授予資料庫連線權限
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>GRANT</span> <span style=color:#66d9ef>CONNECT</span> <span style=color:#66d9ef>ON</span> <span style=color:#66d9ef>DATABASE</span> app_db <span style=color:#66d9ef>TO</span> readonly_group;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>GRANT</span> <span style=color:#66d9ef>CONNECT</span> <span style=color:#66d9ef>ON</span> <span style=color:#66d9ef>DATABASE</span> app_db <span style=color:#66d9ef>TO</span> readwrite_group;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 授予 Schema 使用權
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>GRANT</span> <span style=color:#66d9ef>USAGE</span> <span style=color:#66d9ef>ON</span> <span style=color:#66d9ef>SCHEMA</span> <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>TO</span> readonly_group;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>GRANT</span> <span style=color:#66d9ef>USAGE</span> <span style=color:#66d9ef>ON</span> <span style=color:#66d9ef>SCHEMA</span> <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>TO</span> readwrite_group;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 授予資料表權限
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>GRANT</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#66d9ef>ON</span> <span style=color:#66d9ef>ALL</span> TABLES <span style=color:#66d9ef>IN</span> <span style=color:#66d9ef>SCHEMA</span> <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>TO</span> readonly_group;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>GRANT</span> <span style=color:#66d9ef>SELECT</span>, <span style=color:#66d9ef>INSERT</span>, <span style=color:#66d9ef>UPDATE</span>, <span style=color:#66d9ef>DELETE</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>ON</span> <span style=color:#66d9ef>ALL</span> TABLES <span style=color:#66d9ef>IN</span> <span style=color:#66d9ef>SCHEMA</span> <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>TO</span> readwrite_group;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 授予 Sequence（INSERT 需要）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>GRANT</span> <span style=color:#66d9ef>USAGE</span>, <span style=color:#66d9ef>SELECT</span> <span style=color:#66d9ef>ON</span> <span style=color:#66d9ef>ALL</span> SEQUENCES <span style=color:#66d9ef>IN</span> <span style=color:#66d9ef>SCHEMA</span> <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>TO</span> readwrite_group;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 將群組角色指派給使用者
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>GRANT</span> readonly_group <span style=color:#66d9ef>TO</span> analyst;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>GRANT</span> readwrite_group <span style=color:#66d9ef>TO</span> app_user;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 撤銷 public schema 的預設公開建立權限（PG15 前的安全隱患）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>REVOKE</span> <span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>ON</span> <span style=color:#66d9ef>SCHEMA</span> <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>FROM</span> <span style=color:#66d9ef>PUBLIC</span>;
+</span></span></code></pre></div><h4 id=default-privileges>DEFAULT PRIVILEGES</h4><p><code>DEFAULT PRIVILEGES</code> 確保<strong>未來新建立的物件</strong>自動套用指定權限，解決「忘記 GRANT 新資料表」的常見問題：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 未來由 app_user 建立的資料表，自動授予 readonly_group SELECT
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>DEFAULT</span> <span style=color:#66d9ef>PRIVILEGES</span> <span style=color:#66d9ef>FOR</span> <span style=color:#66d9ef>ROLE</span> app_user <span style=color:#66d9ef>IN</span> <span style=color:#66d9ef>SCHEMA</span> <span style=color:#66d9ef>public</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>GRANT</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#66d9ef>ON</span> TABLES <span style=color:#66d9ef>TO</span> readonly_group;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 未來的 Sequence
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>DEFAULT</span> <span style=color:#66d9ef>PRIVILEGES</span> <span style=color:#66d9ef>FOR</span> <span style=color:#66d9ef>ROLE</span> app_user <span style=color:#66d9ef>IN</span> <span style=color:#66d9ef>SCHEMA</span> <span style=color:#66d9ef>public</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>GRANT</span> <span style=color:#66d9ef>USAGE</span>, <span style=color:#66d9ef>SELECT</span> <span style=color:#66d9ef>ON</span> SEQUENCES <span style=color:#66d9ef>TO</span> readwrite_group;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 未來的函式
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>DEFAULT</span> <span style=color:#66d9ef>PRIVILEGES</span> <span style=color:#66d9ef>FOR</span> <span style=color:#66d9ef>ROLE</span> app_user <span style=color:#66d9ef>IN</span> <span style=color:#66d9ef>SCHEMA</span> <span style=color:#66d9ef>public</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>GRANT</span> <span style=color:#66d9ef>EXECUTE</span> <span style=color:#66d9ef>ON</span> FUNCTIONS <span style=color:#66d9ef>TO</span> readwrite_group;
+</span></span></code></pre></div><h4 id=角色繼承與-set-role>角色繼承與 SET ROLE</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- INHERIT（預設）：自動繼承權限
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>ROLE</span> senior_analyst INHERIT;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>GRANT</span> readonly_group <span style=color:#66d9ef>TO</span> senior_analyst;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>GRANT</span> senior_analyst <span style=color:#66d9ef>TO</span> john_doe;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- john_doe 自動擁有 readonly_group 的所有權限
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- NOINHERIT：需明確 SET ROLE 才能取得權限
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>ROLE</span> privileged_ops NOINHERIT;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>GRANT</span> privileged_ops <span style=color:#66d9ef>TO</span> ops_user;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- ops_user 需執行：
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SET</span> <span style=color:#66d9ef>ROLE</span> privileged_ops;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 執行特權操作...
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>RESET</span> <span style=color:#66d9ef>ROLE</span>;
+</span></span></code></pre></div><h4 id=pg14-預定義角色>PG14+ 預定義角色</h4><p>PostgreSQL 14 引入預定義角色，簡化全庫授權：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 可讀取所有資料表、視圖、序列
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>GRANT</span> pg_read_all_data <span style=color:#66d9ef>TO</span> analyst;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 可寫入所有資料表、視圖、序列
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>GRANT</span> pg_write_all_data <span style=color:#66d9ef>TO</span> etl_user;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 其他實用預定義角色
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>GRANT</span> pg_monitor <span style=color:#66d9ef>TO</span> monitoring_user;         <span style=color:#75715e>-- 監控相關視圖
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>GRANT</span> pg_read_all_settings <span style=color:#66d9ef>TO</span> config_reader; <span style=color:#75715e>-- 讀取 GUC 設定
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>GRANT</span> pg_read_all_stats <span style=color:#66d9ef>TO</span> stats_reader;     <span style=color:#75715e>-- 讀取統計資訊
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>GRANT</span> pg_signal_backend <span style=color:#66d9ef>TO</span> ops_user;         <span style=color:#75715e>-- 可發送 pg_terminate_backend
+</span></span></span></code></pre></div><hr><h3 id=row-level-securityrls>Row Level Security（RLS）</h3><p><strong>RLS</strong> 讓資料表的每一列都有存取政策，不同使用者看到不同的資料子集。這是實現**多租戶（Multi-Tenant）**資料隔離最優雅的方式。</p><h4 id=基本用法>基本用法</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 步驟 1：啟用 RLS
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>TABLE</span> orders ENABLE <span style=color:#66d9ef>ROW</span> <span style=color:#66d9ef>LEVEL</span> <span style=color:#66d9ef>SECURITY</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 步驟 2：建立政策
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 使用者只能看到自己的訂單
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> POLICY user_orders_policy <span style=color:#66d9ef>ON</span> orders
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>FOR</span> <span style=color:#66d9ef>ALL</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>TO</span> app_user
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>USING</span> (user_id <span style=color:#f92672>=</span> <span style=color:#66d9ef>current_user</span>::TEXT)         <span style=color:#75715e>-- 查詢過濾（SELECT/UPDATE/DELETE）
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>WITH</span> <span style=color:#66d9ef>CHECK</span> (user_id <span style=color:#f92672>=</span> <span style=color:#66d9ef>current_user</span>::TEXT);   <span style=color:#75715e>-- 寫入驗證（INSERT/UPDATE）
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 唯讀政策
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> POLICY select_own_data <span style=color:#66d9ef>ON</span> orders
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>FOR</span> <span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>USING</span> (user_id <span style=color:#f92672>=</span> <span style=color:#66d9ef>current_user</span>::TEXT);
+</span></span></code></pre></div><h4 id=permissive-vs-restrictive>PERMISSIVE vs RESTRICTIVE</h4><p>兩種政策模式決定多個 Policy 如何組合：</p><table><thead><tr><th>模式</th><th>組合方式</th><th>典型用途</th></tr></thead><tbody><tr><td><strong>PERMISSIVE</strong>（預設）</td><td>多個 Policy 以 <strong>OR</strong> 合併</td><td>admin 看全部、使用者看自己的</td></tr><tr><td><strong>RESTRICTIVE</strong></td><td>多個 Policy 以 <strong>AND</strong> 合併</td><td>強制所有人不能看已刪除資料</td></tr></tbody></table><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- PERMISSIVE：admin 看到全部
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> POLICY admin_sees_all <span style=color:#66d9ef>ON</span> orders
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>AS</span> PERMISSIVE
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>FOR</span> <span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>TO</span> admin_role
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>USING</span> (<span style=color:#66d9ef>true</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- RESTRICTIVE：無論其他政策，已刪除的資料都不可見
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> POLICY active_records_only <span style=color:#66d9ef>ON</span> orders
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>AS</span> RESTRICTIVE
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>FOR</span> <span style=color:#66d9ef>ALL</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>USING</span> (is_deleted <span style=color:#f92672>=</span> <span style=color:#66d9ef>false</span>);
+</span></span></code></pre></div><h4 id=多租戶場景>多租戶場景</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 建立多租戶資料表
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> tenant_data (
+</span></span><span style=display:flex><span>  id          BIGSERIAL <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span>,
+</span></span><span style=display:flex><span>  tenant_id   INTEGER <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span>  payload     JSONB,
+</span></span><span style=display:flex><span>  created_at  TIMESTAMPTZ <span style=color:#66d9ef>DEFAULT</span> now()
+</span></span><span style=display:flex><span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>TABLE</span> tenant_data ENABLE <span style=color:#66d9ef>ROW</span> <span style=color:#66d9ef>LEVEL</span> <span style=color:#66d9ef>SECURITY</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 透過 Session Variable 隔離租戶
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> POLICY tenant_isolation <span style=color:#66d9ef>ON</span> tenant_data
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>USING</span> (tenant_id <span style=color:#f92672>=</span> current_setting(<span style=color:#e6db74>&#39;app.tenant_id&#39;</span>)::INTEGER)
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>WITH</span> <span style=color:#66d9ef>CHECK</span> (tenant_id <span style=color:#f92672>=</span> current_setting(<span style=color:#e6db74>&#39;app.tenant_id&#39;</span>)::INTEGER);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 應用程式連線後設定：
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- SET app.tenant_id = &#39;42&#39;;
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 連表擁有者也受 RLS 控制
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>TABLE</span> tenant_data <span style=color:#66d9ef>FORCE</span> <span style=color:#66d9ef>ROW</span> <span style=color:#66d9ef>LEVEL</span> <span style=color:#66d9ef>SECURITY</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 為管理員建立繞過政策
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> POLICY admin_bypass <span style=color:#66d9ef>ON</span> tenant_data
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>TO</span> admin_role
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>USING</span> (<span style=color:#66d9ef>true</span>);
+</span></span></code></pre></div><hr><h3 id=column-level-privileges>Column-Level Privileges</h3><p>欄位級權限（Column-Level Privileges）允許對特定欄位授予或拒絕存取，適合保護<strong>薪資</strong>、**個人識別資訊（PII）**等敏感欄位：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> employees (
+</span></span><span style=display:flex><span>  id          SERIAL <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span>,
+</span></span><span style=display:flex><span>  name        VARCHAR(<span style=color:#ae81ff>100</span>),
+</span></span><span style=display:flex><span>  department  VARCHAR(<span style=color:#ae81ff>50</span>),
+</span></span><span style=display:flex><span>  salary      NUMERIC(<span style=color:#ae81ff>10</span>,<span style=color:#ae81ff>2</span>),   <span style=color:#75715e>-- 敏感
+</span></span></span><span style=display:flex><span>  ssn         VARCHAR(<span style=color:#ae81ff>20</span>),     <span style=color:#75715e>-- 敏感
+</span></span></span><span style=display:flex><span>  email       VARCHAR(<span style=color:#ae81ff>100</span>)
+</span></span><span style=display:flex><span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 一般查詢角色：只看非敏感欄位
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>GRANT</span> <span style=color:#66d9ef>SELECT</span> (id, name, department, email) <span style=color:#66d9ef>ON</span> employees <span style=color:#66d9ef>TO</span> hr_viewer;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 薪資管理角色：只看薪資相關
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>GRANT</span> <span style=color:#66d9ef>SELECT</span> (id, name, salary) <span style=color:#66d9ef>ON</span> employees <span style=color:#66d9ef>TO</span> payroll_role;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 欄位級 UPDATE
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>GRANT</span> <span style=color:#66d9ef>UPDATE</span> (email) <span style=color:#66d9ef>ON</span> employees <span style=color:#66d9ef>TO</span> self_service_user;
+</span></span></code></pre></div><p><strong>使用視圖（View）作為欄位遮罩的替代方案：</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 建立遮罩視圖，SSN 只顯示後四碼
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>VIEW</span> employees_public <span style=color:#66d9ef>AS</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>  id, name, department, email,
+</span></span><span style=display:flex><span>  <span style=color:#e6db74>&#39;***-**-&#39;</span> <span style=color:#f92672>||</span> <span style=color:#66d9ef>RIGHT</span>(ssn, <span style=color:#ae81ff>4</span>) <span style=color:#66d9ef>AS</span> ssn_masked
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> employees;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>GRANT</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#66d9ef>ON</span> employees_public <span style=color:#66d9ef>TO</span> hr_viewer;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>REVOKE</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#66d9ef>ON</span> employees <span style=color:#66d9ef>FROM</span> hr_viewer;
+</span></span></code></pre></div><hr><h3 id=ssltls-傳輸加密>SSL/TLS 傳輸加密</h3><h4 id=設定-ssl>設定 SSL</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 產生自簽憑證（生產環境建議使用受信任 CA）</span>
+</span></span><span style=display:flex><span>openssl req -new -x509 -days <span style=color:#ae81ff>365</span> -nodes <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  -out server.crt -keyout server.key <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  -subj <span style=color:#e6db74>&#34;/CN=db.example.com&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 設定正確的檔案權限</span>
+</span></span><span style=display:flex><span>chmod <span style=color:#ae81ff>600</span> server.key
+</span></span><span style=display:flex><span>chown postgres:postgres server.key server.crt
+</span></span></code></pre></div><pre tabindex=0><code># postgresql.conf
+ssl = on
+ssl_cert_file = &#39;server.crt&#39;
+ssl_key_file  = &#39;server.key&#39;
+ssl_min_protocol_version = &#39;TLSv1.2&#39;   -- PG12+
+ssl_ciphers = &#39;HIGH:MEDIUM:+3DES:!aNULL&#39;
+ssl_prefer_server_ciphers = on
+</code></pre><h4 id=強制-ssl-連線>強制 SSL 連線</h4><pre tabindex=0><code># pg_hba.conf
+hostssl   app_db    app_user    10.0.0.0/8    scram-sha-256
+hostssl   all       dba_role    10.0.3.0/24   scram-sha-256
+
+# 拒絕所有非 SSL 連線
+hostnossl all       all         0.0.0.0/0     reject
+</code></pre><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 驗證當前連線是否使用 SSL
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> ssl, <span style=color:#66d9ef>version</span>, cipher, bits
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stat_ssl
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> pid <span style=color:#f92672>=</span> pg_backend_pid();
+</span></span></code></pre></div><hr><h3 id=pgaudit-稽核日誌>pgAudit 稽核日誌</h3><p><strong>pgAudit</strong> 提供詳細的工作階段（Session）和物件（Object）層級稽核日誌，符合 SOX、PCI-DSS 等合規需求。</p><h4 id=安裝與設定>安裝與設定</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 安裝（Ubuntu/Debian）</span>
+</span></span><span style=display:flex><span>apt-get install postgresql-17-pgaudit
+</span></span></code></pre></div><pre tabindex=0><code># postgresql.conf
+shared_preload_libraries = &#39;pgaudit&#39;
+
+# 記錄所有 DDL、DML、角色操作
+pgaudit.log = &#39;ddl, write, role&#39;
+pgaudit.log_catalog = off      -- 避免系統目錄日誌爆炸
+pgaudit.log_parameter = on     -- 記錄查詢參數
+pgaudit.log_relation = on      -- 為每個關聯記錄單獨條目
+</code></pre><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 啟用擴充
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> EXTENSION pgaudit;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 物件級稽核：針對特定資料表
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>ROLE</span> auditor;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>GRANT</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#66d9ef>ON</span> sensitive_table <span style=color:#66d9ef>TO</span> auditor;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>ROLE</span> app_user <span style=color:#66d9ef>SET</span> pgaudit.<span style=color:#66d9ef>role</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;auditor&#39;</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 現在 app_user 對 sensitive_table 的所有 SELECT 都會被記錄
+</span></span></span></code></pre></div><h4 id=日誌格式>日誌格式</h4><pre tabindex=0><code>AUDIT: SESSION,&lt;audit_count&gt;,&lt;sub_count&gt;,&lt;class&gt;,&lt;command&gt;,
+       &lt;object_type&gt;,&lt;object_name&gt;,&lt;statement&gt;,&lt;parameter&gt;
+</code></pre><p>範例：</p><pre tabindex=0><code>AUDIT: SESSION,1,1,WRITE,INSERT,TABLE,public.orders,
+  &#34;INSERT INTO orders (user_id, amount) VALUES ($1, $2)&#34;,&lt;none&gt;
+
+AUDIT: SESSION,2,1,DDL,ALTER TABLE,TABLE,public.employees,
+  &#34;ALTER TABLE employees ADD COLUMN phone VARCHAR(20)&#34;,&lt;none&gt;
+</code></pre><hr><h3 id=pgcrypto-資料加密>pgcrypto 資料加密</h3><p><strong>pgcrypto</strong> 提供應用層級的資料加密函式，可對欄位值進行加密/解密：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> EXTENSION pgcrypto;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 對稱加密（AES）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> sensitive_data (encrypted_payload)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>VALUES</span> (
+</span></span><span style=display:flex><span>  pgp_sym_encrypt(
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;{&#34;ssn&#34;: &#34;123-45-6789&#34;}&#39;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;key_from_vault&#39;</span>,          <span style=color:#75715e>-- 金鑰應來自密鑰管理服務
+</span></span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;cipher-algo=aes256&#39;</span>
+</span></span><span style=display:flex><span>  )
+</span></span><span style=display:flex><span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 解密
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> pgp_sym_decrypt(encrypted_payload::BYTEA, <span style=color:#e6db74>&#39;key_from_vault&#39;</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> sensitive_data <span style=color:#66d9ef>WHERE</span> id <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 密碼雜湊（bcrypt，不可逆）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> crypt(<span style=color:#e6db74>&#39;user_password&#39;</span>, gen_salt(<span style=color:#e6db74>&#39;bf&#39;</span>, <span style=color:#ae81ff>12</span>));
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 驗證密碼
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> crypt(<span style=color:#e6db74>&#39;input_password&#39;</span>, stored_hash) <span style=color:#f92672>=</span> stored_hash <span style=color:#66d9ef>AS</span> is_valid
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> users <span style=color:#66d9ef>WHERE</span> username <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;john_doe&#39;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 產生安全隨機 Token
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> encode(gen_random_bytes(<span style=color:#ae81ff>32</span>), <span style=color:#e6db74>&#39;hex&#39;</span>) <span style=color:#66d9ef>AS</span> api_token;
+</span></span></code></pre></div><h4 id=tde-現況>TDE 現況</h4><p>**TDE（Transparent Data Encryption）**是在儲存層對整個資料庫檔案加密，無需修改應用程式：</p><table><thead><tr><th>方案</th><th>狀態</th></tr></thead><tbody><tr><td>PostgreSQL 原生 TDE</td><td>社群開發中，預計未來版本加入</td></tr><tr><td>EDB Postgres Advanced Server</td><td>商業支援</td></tr><tr><td>AWS RDS/Aurora</td><td>透過 AWS KMS 管理金鑰</td></tr><tr><td>Azure Database for PostgreSQL</td><td>透過 Azure Key Vault 整合</td></tr><tr><td>檔案系統加密（LUKS）</td><td>作業系統層，PG 無感知</td></tr></tbody></table><hr><h3 id=安全稽核檢查清單>安全稽核檢查清單</h3><p>定期執行以下查詢進行安全健檢：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 1. 找出所有 SUPERUSER
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> rolname, rolsuper, rolcreatedb, rolcreaterole
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_roles <span style=color:#66d9ef>WHERE</span> rolsuper <span style=color:#f92672>=</span> <span style=color:#66d9ef>true</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 2. 找出無密碼的可登入帳號
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> rolname <span style=color:#66d9ef>FROM</span> pg_roles
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> rolcanlogin <span style=color:#f92672>=</span> <span style=color:#66d9ef>true</span> <span style=color:#66d9ef>AND</span> rolpassword <span style=color:#66d9ef>IS</span> <span style=color:#66d9ef>NULL</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 3. 找出已過期但仍可登入的帳號
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> rolname, rolvaliduntil <span style=color:#66d9ef>FROM</span> pg_roles
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> rolcanlogin <span style=color:#f92672>=</span> <span style=color:#66d9ef>true</span> <span style=color:#66d9ef>AND</span> rolvaliduntil <span style=color:#f92672>&lt;</span> now();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 4. 找出 PUBLIC 擁有權限的敏感資料表
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> schemaname, tablename, privilege_type
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> information_schema.role_table_grants
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> grantee <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;PUBLIC&#39;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 5. 找出未啟用 RLS 的多租戶資料表
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> schemaname, tablename, rowsecurity
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_tables
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> tablename <span style=color:#66d9ef>IN</span> (
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>SELECT</span> <span style=color:#66d9ef>table_name</span> <span style=color:#66d9ef>FROM</span> information_schema.columns
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>WHERE</span> <span style=color:#66d9ef>column_name</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;tenant_id&#39;</span>
+</span></span><span style=display:flex><span>) <span style=color:#66d9ef>AND</span> rowsecurity <span style=color:#f92672>=</span> <span style=color:#66d9ef>false</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 6. 查看 pg_hba.conf 目前設定
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#66d9ef>type</span>, <span style=color:#66d9ef>database</span>, user_name, address, auth_method
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_hba_file_rules <span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> line_number;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 7. 找出長時間閒置的連線
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> pid, usename, client_addr, <span style=color:#66d9ef>state</span>,
+</span></span><span style=display:flex><span>       now() <span style=color:#f92672>-</span> state_change <span style=color:#66d9ef>AS</span> idle_duration
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stat_activity
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> <span style=color:#66d9ef>state</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;idle&#39;</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>AND</span> now() <span style=color:#f92672>-</span> state_change <span style=color:#f92672>&gt;</span> INTERVAL <span style=color:#e6db74>&#39;30 minutes&#39;</span>;
+</span></span></code></pre></div><hr><h3 id=常見陷阱>常見陷阱</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 陷阱 1：public schema 對所有使用者開放（PG15 前）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>REVOKE</span> <span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>ON</span> <span style=color:#66d9ef>SCHEMA</span> <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>FROM</span> <span style=color:#66d9ef>PUBLIC</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 陷阱 2：應用程式使用 postgres 超級使用者帳號
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 正確：建立最小權限帳號
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>ROLE</span> app_service <span style=color:#66d9ef>WITH</span> LOGIN PASSWORD <span style=color:#e6db74>&#39;...&#39;</span>
+</span></span><span style=display:flex><span>  NOSUPERUSER <span style=color:#66d9ef>NOCREATEDB</span> NOCREATEROLE;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 陷阱 3：未設定連線限制
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>ROLE</span> app_user <span style=color:#66d9ef>CONNECTION</span> <span style=color:#66d9ef>LIMIT</span> <span style=color:#ae81ff>100</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 陷阱 4：GRANT ... TO PUBLIC（影響所有現有和未來帳號）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>REVOKE</span> <span style=color:#66d9ef>ALL</span> <span style=color:#66d9ef>ON</span> <span style=color:#66d9ef>TABLE</span> sensitive_data <span style=color:#66d9ef>FROM</span> <span style=color:#66d9ef>PUBLIC</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 陷阱 5：RLS 未啟用 FORCE，表擁有者繞過 RLS
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>TABLE</span> tenant_data <span style=color:#66d9ef>FORCE</span> <span style=color:#66d9ef>ROW</span> <span style=color:#66d9ef>LEVEL</span> <span style=color:#66d9ef>SECURITY</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 陷阱 6：未設定 search_path，可能導致 Schema 注入
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>ROLE</span> app_user <span style=color:#66d9ef>SET</span> search_path <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;$user&#39;</span>, <span style=color:#66d9ef>public</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 陷阱 7：密碼記錄在命令列歷史
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 改用 \password 命令（提示輸入，不記錄）
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- \password app_user
+</span></span></span></code></pre></div><hr><h3 id=版本演進>版本演進</h3><table><thead><tr><th>版本</th><th>安全相關重要變更</th></tr></thead><tbody><tr><td>PG 9.5</td><td><strong>Row Level Security（RLS）</strong> 正式引入</td></tr><tr><td>PG 10</td><td><strong>SCRAM-SHA-256</strong> 認證取代 MD5</td></tr><tr><td>PG 12</td><td><code>ssl_min_protocol_version</code> 設定</td></tr><tr><td>PG 14</td><td><code>pg_read_all_data</code>、<code>pg_write_all_data</code> 預定義角色</td></tr><tr><td>PG 15</td><td>public schema 預設不再允許 PUBLIC CREATE</td></tr><tr><td>PG 16</td><td>pg_hba.conf 支援連線參數過濾（<code>options</code> 欄位）</td></tr><tr><td>PG 17</td><td>改進的 SSL 憑證驗證、<code>oauth</code> 認證方法（實驗性）</td></tr></tbody></table><hr><h3 id=總結>總結</h3><p>PostgreSQL 的安全模型建立在<strong>縱深防禦</strong>的理念上——從網路層的 SSL/TLS 和防火牆，到認證層的 <strong>SCRAM-SHA-256</strong> 和憑證認證，再到授權層的 <strong>GRANT/REVOKE</strong> 與角色繼承，最後深入到 <strong>Row Level Security</strong> 的行級隔離和 <strong>pgcrypto</strong> 的資料加密。每一層都是獨立的防線，層層堆疊才能構成完整的安全體系。</p><p>關鍵要點：永遠遵循<strong>最小權限原則</strong>、使用 <code>DEFAULT PRIVILEGES</code> 自動化權限管理、為多租戶場景啟用 RLS、用 <strong>pgAudit</strong> 實現合規稽核，以及定期執行安全檢查清單。</p><p>下一篇，我們將深入探討 <strong>備份與還原</strong>——掌握 pg_dump、pg_basebackup、PITR 時間點還原與自動化備份策略，確保你的資料永不丟失。</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
+</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/postgresql/023-views-materialized-views/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Views 與 Materialized Views：PostgreSQL 的虛擬關係與物化快取 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/29</span>
+</a><a href=https://benzhub.github.io/post/postgresql/027-partitioning/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">分區管理：PostgreSQL 宣告式分割表的完整維運指南 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/03</span>
+</a><a href=https://benzhub.github.io/post/postgresql/026-functions-procedures/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">SQL 函數與 Stored Procedure：PostgreSQL 函數生態系統完全指南 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/02</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/postgresql/027-partitioning/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+<span class="text-sm font-medium">分區管理：PostgreSQL 宣告式分割表的完整維運指南 | PostgreSQL</span></a></div><div></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
+</a><a href=/tags/acid><span class=tag-pill>acid</span>
+</a><a href=/tags/aggregate><span class=tag-pill>aggregate</span>
+</a><a href=/tags/ai><span class=tag-pill>ai</span>
+</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
+</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
+</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
+</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
+</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
+</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
+</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
+</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
+</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
+</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
+</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
+</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
+</a><a href=/tags/analytics><span class=tag-pill>analytics</span>
+</a><a href=/tags/api><span class=tag-pill>api</span>
+</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
+</a><a href=/tags/audit><span class=tag-pill>audit</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (28)</span>
+</a><a href=/post/javascript/><span class=tag-pill>JavaScript (83)</span>
+</a><a href=/post/django/><span class=tag-pill>Django (44)</span>
+</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
+</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
+</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
+</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
+</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/postgresql/028-security/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">安全與權限管理：從認證到 Row Level Security 全方位防護 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/04</p></a><a href=/post/javascript/data-structures--algorithms/021-dp-advanced/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">動態規劃進階 — Bitmask DP、Digit DP 與空間優化技巧 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/04</p></a><a href=/post/django/044-django-packages-ecosystem/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Django 套件生態系：必裝套件與推薦工具 | Django 教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/03</p></a><a href=/post/postgresql/027-partitioning/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">分區管理：PostgreSQL 宣告式分割表的完整維運指南 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/03</p></a><a href=/post/javascript/data-structures--algorithms/020-dp-fundamentals/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">動態規劃基礎 — 五步驟解題法與經典 DP 問題詳解 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/03</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>
