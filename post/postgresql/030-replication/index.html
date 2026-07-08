@@ -1,0 +1,386 @@
+<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>複寫與高可用（Replication）：從 Streaming 到 Logical Replication | PostgreSQL | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="複寫與高可用（Replication）：從 Streaming 到 Logical Replication | PostgreSQL | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="深入解析 PostgreSQL 複寫機制，涵蓋 Streaming Replication 物理複寫、Logical Replication 邏輯複寫、同步與非同步模式、Replication Slots、Failover 切換流程，以及 CDC 變更資料擷取實戰。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="深入解析 PostgreSQL 複寫機制，涵蓋 Streaming Replication 物理複寫、Logical Replication 邏輯複寫、同步與非同步模式、Replication Slots、Failover 切換流程，以及 CDC 變更資料擷取實戰。"><meta property="og:url" content="https://benzhub.github.io/post/postgresql/030-replication/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/postgresql/030-replication/><meta name=twitter:description content="深入解析 PostgreSQL 複寫機制，涵蓋 Streaming Replication 物理複寫、Logical Replication 邏輯複寫、同步與非同步模式、Replication Slots、Failover 切換流程，以及 CDC 變更資料擷取實戰。"><meta property="article:published_time" content="2026-07-06T00:00:00+00:00"><meta property="article:updated_time" content="2026-07-06T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/postgresql/030-Replication.png"><meta property="og:image:url" content="https://benzhub.github.io/img/postgresql/030-Replication.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/postgresql/030-replication/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/postgresql/030-replication/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"複寫與高可用（Replication）：從 Streaming 到 Logical Replication | PostgreSQL\"","description":"\"深入解析 PostgreSQL 複寫機制，涵蓋 Streaming Replication 物理複寫、Logical Replication 邏輯複寫、同步與非同步模式、Replication Slots、Failover 切換流程，以及 CDC 變更資料擷取實戰。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-07-06T00:00:00\u002b00:00","dateModified":"2026-07-06T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/postgresql\/030-Replication.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/postgresql\/030-replication\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/postgresql\/"},{"@type":"ListItem","position":3,"name":"\"複寫與高可用（Replication）：從 Streaming 到 Logical Replication | PostgreSQL\""}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">複寫與高可用（Replication）：從 Streaming 到 Logical Replication | PostgreSQL</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/06</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/postgresql class="tag-pill no-underline">postgresql</a>
+<a href=/tags/replication class="tag-pill no-underline">replication</a>
+<a href=/tags/streaming class="tag-pill no-underline">streaming</a>
+<a href=/tags/logical-replication class="tag-pill no-underline">logical-replication</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/postgresql/030-Replication.png alt="複寫與高可用（Replication）：從 Streaming 到 Logical Replication | PostgreSQL"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p><strong>PostgreSQL</strong> 的 <strong>複寫</strong>（Replication）是高可用架構的核心技術。透過將 Primary 節點的資料變更持續同步到 Standby 節點，系統在 Primary 故障時能快速切換。本文將完整解析 <strong>Physical Replication</strong> 與 <strong>Logical Replication</strong> 兩大機制，從設定到 Failover 全流程。</p></blockquote><h3 id=physical-vs-logical-replication>Physical vs Logical Replication</h3><p><strong>PostgreSQL</strong> 提供兩種截然不同的複寫機制，各有適用場景：</p><pre tabindex=0><code>Physical Replication（物理複寫）：
+  Primary → WAL stream (binary) → Standby
+  • 複寫整個叢集（byte-for-byte）
+  • Standby 只讀
+  • DDL 自動同步
+  • 延遲極低（毫秒級）
+
+Logical Replication（邏輯複寫）：
+  Publisher → Decoded change stream (rows) → Subscriber
+  • 可選擇特定 table / 操作
+  • Subscriber 可讀寫
+  • DDL 不自動複寫
+  • 支援跨版本、跨平台
+</code></pre><table><thead><tr><th>面向</th><th>Physical</th><th>Logical</th></tr></thead><tbody><tr><td>複寫單位</td><td>WAL 記錄（bytes）</td><td>行（row）變更</td></tr><tr><td>複寫範圍</td><td>整個叢集</td><td>可選特定 table</td></tr><tr><td>Standby 可寫</td><td>否（只讀）</td><td>是</td></tr><tr><td>DDL 複寫</td><td>自動</td><td>不支援</td></tr><tr><td>跨版本</td><td>不支援</td><td>支援</td></tr><tr><td>資料過濾</td><td>不支援</td><td>Row Filter（PG15+）</td></tr><tr><td>Failover</td><td>簡單（pg_promote）</td><td>複雜</td></tr><tr><td>典型用途</td><td>HA / DR / 讀取擴展</td><td>版本升級 / 跨平台整合</td></tr></tbody></table><h3 id=wal-在複寫中的角色>WAL 在複寫中的角色</h3><p><strong>WAL</strong>（Write-Ahead Log）是所有複寫機制的基礎。Physical Replication 直接傳送 WAL 記錄，Logical Replication 則先透過 Logical Decoding 解碼為行級變更再傳送：</p><pre tabindex=0><code>Primary：
+  Transaction COMMIT
+      │
+      ▼
+  生成 WAL 記錄
+      │
+      ▼
+  WAL Sender process
+      │ Physical → 直接傳送 WAL 記錄
+      │ Logical  → 先解碼，再傳送行級變更
+      ▼
+  Network → Standby WAL Receiver
+
+LSN（Log Sequence Number）追蹤進度：
+  sent_lsn    → 已傳送到的位置
+  write_lsn   → Standby 已寫入的位置
+  flush_lsn   → Standby 已 fsync 的位置
+  replay_lsn  → Standby 已重放的位置
+</code></pre><h3 id=timeline-概念>Timeline 概念</h3><p>Timeline 是 PostgreSQL 避免資料分歧（split-brain）的機制，類似版本控制的分支：</p><pre tabindex=0><code>Timeline 1：
+  ──●──●──●──●──●── (Primary 正常運作)
+                 │ Failover（Primary 宕機）
+                 ▼
+Timeline 2：
+                 ──●──●──●──●── (Standby 晉升為新 Primary)
+
+每個 WAL segment 檔名包含 Timeline ID：
+  000000010000000100000001  → Timeline 1
+  000000020000000100000005  → Timeline 2（Failover 後）
+</code></pre><hr><h3 id=streaming-replication-設定>Streaming Replication 設定</h3><p><strong>Streaming Replication</strong> 是 Physical Replication 的主要實現方式，延遲通常在毫秒級別。</p><h4 id=primary-端設定>Primary 端設定</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-ini data-lang=ini><span style=display:flex><span><span style=color:#75715e># postgresql.conf（Primary）</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>wal_level</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>replica          -- 至少 replica（Logical 需要 logical）</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>max_wal_senders</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>10         -- 每個 Standby 佔用一個</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>wal_keep_size</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>1024         -- 保留的 WAL 量（MB），PG13+</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>hot_standby</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>on             -- 允許 Standby 接受唯讀查詢</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>listen_addresses</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;*&#39;</span>
+</span></span></code></pre></div><pre tabindex=0><code># pg_hba.conf（Primary）
+# TYPE  DATABASE    USER         ADDRESS          METHOD
+host    replication replicator   192.168.1.0/24   scram-sha-256
+</code></pre><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 建立複寫專用使用者
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>ROLE</span> replicator
+</span></span><span style=display:flex><span>  LOGIN
+</span></span><span style=display:flex><span>  REPLICATION
+</span></span><span style=display:flex><span>  PASSWORD <span style=color:#e6db74>&#39;strong_password_here&#39;</span>;
+</span></span></code></pre></div><h4 id=用-pg_basebackup-建立-standby>用 pg_basebackup 建立 Standby</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 在 Standby 伺服器上執行</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 清空 Standby 資料目錄</span>
+</span></span><span style=display:flex><span>rm -rf /var/lib/postgresql/data/*
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 執行 pg_basebackup</span>
+</span></span><span style=display:flex><span>pg_basebackup <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --host<span style=color:#f92672>=</span>192.168.1.10 <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --port<span style=color:#f92672>=</span><span style=color:#ae81ff>5432</span> <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --username<span style=color:#f92672>=</span>replicator <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --pgdata<span style=color:#f92672>=</span>/var/lib/postgresql/data <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --wal-method<span style=color:#f92672>=</span>stream <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --write-recovery-conf <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --checkpoint<span style=color:#f92672>=</span>fast <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --progress <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --verbose
+</span></span></code></pre></div><p><code>--write-recovery-conf</code> 會自動建立 <code>standby.signal</code> 並寫入 <code>postgresql.auto.conf</code>。若需手動設定：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 建立 standby.signal（PG12+）</span>
+</span></span><span style=display:flex><span>touch /var/lib/postgresql/data/standby.signal
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-ini data-lang=ini><span style=display:flex><span><span style=color:#75715e># postgresql.conf（Standby）</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>primary_conninfo</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;host=192.168.1.10 port=5432 user=replicator password=strong_password_here application_name=standby1&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>primary_slot_name</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;standby1_slot&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>recovery_target_timeline</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;latest&#39;</span>
+</span></span></code></pre></div><h4 id=啟動並驗證>啟動並驗證</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 啟動 Standby</span>
+</span></span><span style=display:flex><span>pg_ctl start -D /var/lib/postgresql/data
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 確認正在接收 WAL</span>
+</span></span><span style=display:flex><span>tail -f /var/lib/postgresql/data/log/postgresql-*.log
+</span></span><span style=display:flex><span><span style=color:#75715e># 應看到：LOG: started streaming WAL from primary at 0/4000000 on timeline 1</span>
+</span></span></code></pre></div><p>在 Primary 查看複寫狀態：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 查看所有 Standby 狀態
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>    application_name,
+</span></span><span style=display:flex><span>    client_addr,
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>state</span>,
+</span></span><span style=display:flex><span>    pg_size_pretty(pg_wal_lsn_diff(sent_lsn, replay_lsn)) <span style=color:#66d9ef>AS</span> replication_lag,
+</span></span><span style=display:flex><span>    replay_lag,
+</span></span><span style=display:flex><span>    sync_state
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stat_replication;
+</span></span></code></pre></div><p>在 Standby 確認：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 確認 Standby 身份
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> pg_is_in_recovery();     <span style=color:#75715e>-- 應回傳 true
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 查看接收狀態
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>    pg_last_wal_receive_lsn()  <span style=color:#66d9ef>AS</span> received_lsn,
+</span></span><span style=display:flex><span>    pg_last_wal_replay_lsn()   <span style=color:#66d9ef>AS</span> replayed_lsn,
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>EXTRACT</span>(EPOCH <span style=color:#66d9ef>FROM</span> (now() <span style=color:#f92672>-</span> pg_last_xact_replay_timestamp()))
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>AS</span> lag_seconds;
+</span></span></code></pre></div><hr><h3 id=同步-vs-非同步複寫>同步 vs 非同步複寫</h3><h4 id=非同步預設>非同步（預設）</h4><p>Primary 的 COMMIT 在 WAL 寫入本地磁碟後立即返回，不等待 Standby 確認。適用於效能優先、跨機房（高 RTT）場景。</p><h4 id=同步複寫>同步複寫</h4><p>Primary 的 COMMIT 必須等到指定 Standby 確認後才返回：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-ini data-lang=ini><span style=display:flex><span><span style=color:#75715e># postgresql.conf（Primary）</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 等待名為 standby1 的確認</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>synchronous_standby_names</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;standby1&#39;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># FIRST 語法：等待前 N 個最快確認的</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>synchronous_standby_names</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;FIRST 1 (standby1, standby2, standby3)&#39;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># ANY 語法：等待任意 N 個確認（更高容錯）</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>synchronous_standby_names</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;ANY 2 (standby1, standby2, standby3)&#39;</span>
+</span></span></code></pre></div><p>同步確認級別可在 session 或 transaction 層級調整：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 最強：等待 Standby 已 apply
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SET</span> synchronous_commit <span style=color:#f92672>=</span> remote_apply;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 等待 Standby 已寫入 OS 緩衝（但未 fsync）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SET</span> synchronous_commit <span style=color:#f92672>=</span> remote_write;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 只等 Primary 本地 flush，忽略 Standby
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SET</span> synchronous_commit <span style=color:#f92672>=</span> <span style=color:#66d9ef>local</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 針對單一 transaction
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SET</span> <span style=color:#66d9ef>LOCAL</span> synchronous_commit <span style=color:#f92672>=</span> remote_apply;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>UPDATE</span> orders <span style=color:#66d9ef>SET</span> status <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;confirmed&#39;</span> <span style=color:#66d9ef>WHERE</span> id <span style=color:#f92672>=</span> <span style=color:#ae81ff>42</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>COMMIT</span>;
+</span></span></code></pre></div><table><thead><tr><th>synchronous_commit</th><th>零資料遺失</th><th>效能代價</th></tr></thead><tbody><tr><td>off</td><td>否</td><td>最高（無額外等待）</td></tr><tr><td>local</td><td>否</td><td>高</td></tr><tr><td>on（預設）</td><td>是</td><td>中（1x RTT）</td></tr><tr><td>remote_write</td><td>接近是</td><td>中</td></tr><tr><td>remote_apply</td><td>是</td><td>低（需 Standby apply）</td></tr></tbody></table><hr><h3 id=replication-slots>Replication Slots</h3><p><strong>Replication Slot</strong> 確保 WAL 不被過早清除——只要 Slot 存在，Primary 就不會刪除 consumer 尚未消費的 WAL。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 建立 Physical Replication Slot
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> pg_create_physical_replication_slot(<span style=color:#e6db74>&#39;standby1_slot&#39;</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 建立 Logical Replication Slot
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> pg_create_logical_replication_slot(<span style=color:#e6db74>&#39;my_logical_slot&#39;</span>, <span style=color:#e6db74>&#39;pgoutput&#39;</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 查看所有 Slot 狀態
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>    slot_name,
+</span></span><span style=display:flex><span>    slot_type,
+</span></span><span style=display:flex><span>    active,
+</span></span><span style=display:flex><span>    pg_size_pretty(
+</span></span><span style=display:flex><span>        pg_wal_lsn_diff(pg_current_wal_lsn(), restart_lsn)
+</span></span><span style=display:flex><span>    ) <span style=color:#66d9ef>AS</span> retained_wal
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_replication_slots;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 刪除 Slot
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> pg_drop_replication_slot(<span style=color:#e6db74>&#39;standby1_slot&#39;</span>);
+</span></span></code></pre></div><h4 id=防止-wal-暴增>防止 WAL 暴增</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-ini data-lang=ini><span style=display:flex><span><span style=color:#75715e># postgresql.conf（PG13+）</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 限制 Slot 可保留的最大 WAL</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 超過限制，Slot 會被 invalidate</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>max_slot_wal_keep_size</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>10GB</span>
+</span></span></code></pre></div><p>監控 WAL 積壓：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>    slot_name,
+</span></span><span style=display:flex><span>    active,
+</span></span><span style=display:flex><span>    pg_size_pretty(
+</span></span><span style=display:flex><span>        pg_wal_lsn_diff(pg_current_wal_lsn(), restart_lsn)
+</span></span><span style=display:flex><span>    ) <span style=color:#66d9ef>AS</span> wal_lag,
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>CASE</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>WHEN</span> pg_wal_lsn_diff(pg_current_wal_lsn(), restart_lsn) <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>5</span><span style=color:#f92672>*</span><span style=color:#ae81ff>1024</span><span style=color:#f92672>^</span><span style=color:#ae81ff>3</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>THEN</span> <span style=color:#e6db74>&#39;WARNING: &gt;5GB&#39;</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>ELSE</span> <span style=color:#e6db74>&#39;OK&#39;</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>END</span> <span style=color:#66d9ef>AS</span> status
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_replication_slots
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> pg_wal_lsn_diff(pg_current_wal_lsn(), restart_lsn) <span style=color:#66d9ef>DESC</span> NULLS <span style=color:#66d9ef>LAST</span>;
+</span></span></code></pre></div><h3 id=cascading-replication>Cascading Replication</h3><p>允許 Standby 再向下游提供 WAL 串流，減輕 Primary 負擔：</p><pre tabindex=0><code>Primary（主機房）
+    │ WAL stream
+    ▼
+Standby A（主機房，同步）
+    │ WAL stream（A 作為中繼）
+    ▼
+Standby B（DR 機房，非同步）
+    ├──► Standby C（報表用）
+    └──► Standby D（備份用）
+</code></pre><p>設定方式與一般 Standby 相同，只是 <code>primary_conninfo</code> 指向上游 Standby 而非 Primary。</p><hr><h3 id=logical-replication>Logical Replication</h3><p><strong>Logical Replication</strong> 在行（row）層級傳送變更，適用於跨版本升級、部分表格複寫、雙向複寫等場景。</p><h4 id=建立-publication>建立 Publication</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 在 Publisher 端
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 複寫特定 table
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> PUBLICATION pub_orders <span style=color:#66d9ef>FOR</span> <span style=color:#66d9ef>TABLE</span> orders, order_items;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 複寫整個資料庫的所有 table
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> PUBLICATION pub_all <span style=color:#66d9ef>FOR</span> <span style=color:#66d9ef>ALL</span> TABLES;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 只複寫 INSERT 操作
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> PUBLICATION pub_insert_only
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FOR</span> <span style=color:#66d9ef>TABLE</span> audit_log
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WITH</span> (publish <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;insert&#39;</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- PG15+：複寫特定欄位
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> PUBLICATION pub_partial
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FOR</span> <span style=color:#66d9ef>TABLE</span> customers (id, email, updated_at);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- PG15+：Row Filter（只複寫符合條件的資料）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> PUBLICATION pub_active_users
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FOR</span> <span style=color:#66d9ef>TABLE</span> users <span style=color:#66d9ef>WHERE</span> (status <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;active&#39;</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 查看所有 Publication
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> pg_publication;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> pg_publication_tables;
+</span></span></code></pre></div><h4 id=建立-subscription>建立 Subscription</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 在 Subscriber 端（需事先建立相同結構的 table）
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- DDL 不自動複寫，可用 pg_dump --schema-only 匯出 schema
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 建立 Subscription
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> SUBSCRIPTION sub_orders
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CONNECTION</span> <span style=color:#e6db74>&#39;host=publisher-ip port=5432 dbname=mydb user=replicator password=xxx&#39;</span>
+</span></span><span style=display:flex><span>PUBLICATION pub_orders;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 不做初始資料同步（資料已透過其他方式同步）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> SUBSCRIPTION sub_orders
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CONNECTION</span> <span style=color:#e6db74>&#39;host=publisher-ip ...&#39;</span>
+</span></span><span style=display:flex><span>PUBLICATION pub_orders
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WITH</span> (copy_data <span style=color:#f92672>=</span> <span style=color:#66d9ef>false</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 查看 Subscription 狀態
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> subname, subenabled, subslotname, subpublications
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_subscription;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 查看 per-table 同步狀態
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> pg_subscription_rel;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- srsubstate: i=初始化, d=資料複製中, s=已同步, r=正常複寫
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 管理 Subscription
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> SUBSCRIPTION sub_orders DISABLE;    <span style=color:#75715e>-- 暫停
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> SUBSCRIPTION sub_orders ENABLE;     <span style=color:#75715e>-- 恢復
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> SUBSCRIPTION sub_orders REFRESH PUBLICATION;  <span style=color:#75715e>-- 更新 table 清單
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>DROP</span> SUBSCRIPTION sub_orders;             <span style=color:#75715e>-- 刪除
+</span></span></span></code></pre></div><h4 id=重要限制>重要限制</h4><ol><li><strong>DDL 不複寫</strong>：ALTER TABLE、CREATE INDEX 等需在兩端手動執行</li><li><strong>Sequence 不同步</strong>：Failover 後需手動調整 <code>setval('seq', MAX(id) + 1000)</code></li><li><strong>Large Object 不支援</strong>：改用 bytea 欄位</li><li><strong>需要 REPLICA IDENTITY</strong>：UPDATE/DELETE 需要主鍵或唯一鍵</li></ol><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 若 table 無主鍵，需設定 REPLICA IDENTITY
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>TABLE</span> mytable REPLICA <span style=color:#66d9ef>IDENTITY</span> <span style=color:#66d9ef>FULL</span>;  <span style=color:#75715e>-- 使用所有欄位（效能影響大）
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 或使用唯一索引
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>TABLE</span> mytable REPLICA <span style=color:#66d9ef>IDENTITY</span> <span style=color:#66d9ef>USING</span> <span style=color:#66d9ef>INDEX</span> mytable_unique_idx;
+</span></span></code></pre></div><hr><h3 id=failover--switchover>Failover / Switchover</h3><p><strong>Failover</strong>：Primary 意外宕機，強制晉升 Standby（可能有少量資料遺失）。
+<strong>Switchover</strong>：計劃性切換，確認同步後再切換（零資料遺失）。</p><h4 id=pg_promotepg12>pg_promote()（PG12+）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 在 Standby 上執行
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> pg_promote(wait <span style=color:#f92672>=&gt;</span> <span style=color:#66d9ef>true</span>, wait_seconds <span style=color:#f92672>=&gt;</span> <span style=color:#ae81ff>60</span>);
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 回傳 true 表示晉升成功
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 確認晉升完成
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> pg_is_in_recovery();   <span style=color:#75715e>-- 應回傳 false
+</span></span></span></code></pre></div><h4 id=計劃性-switchover-步驟>計劃性 Switchover 步驟</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 1. 確認 Standby 已同步（lag 接近 0）</span>
+</span></span><span style=display:flex><span>psql -c <span style=color:#e6db74>&#34;SELECT application_name, replay_lag FROM pg_stat_replication;&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 2. 強制 checkpoint</span>
+</span></span><span style=display:flex><span>psql -c <span style=color:#e6db74>&#34;CHECKPOINT;&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 3. 確認 Standby LSN 與 Primary 一致</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Primary：</span>
+</span></span><span style=display:flex><span>psql -c <span style=color:#e6db74>&#34;SELECT pg_current_wal_lsn();&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Standby：</span>
+</span></span><span style=display:flex><span>psql -h standby-ip -c <span style=color:#e6db74>&#34;SELECT pg_last_wal_replay_lsn();&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 4. 優雅關閉 Primary</span>
+</span></span><span style=display:flex><span>pg_ctl stop -D /var/lib/postgresql/data -m fast
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 5. 晉升 Standby</span>
+</span></span><span style=display:flex><span>psql -h standby-ip -c <span style=color:#e6db74>&#34;SELECT pg_promote();&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 6. 更新應用程式連線字串</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 7. 將舊 Primary 設為新 Standby（使用 pg_rewind）</span>
+</span></span><span style=display:flex><span>pg_rewind <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --target-pgdata<span style=color:#f92672>=</span>/var/lib/postgresql/data <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --source-server<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;host=new-primary-ip port=5432 user=replicator&#39;</span> <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --progress
+</span></span><span style=display:flex><span>touch /var/lib/postgresql/data/standby.signal
+</span></span><span style=display:flex><span>pg_ctl start -D /var/lib/postgresql/data
+</span></span></code></pre></div><h4 id=緊急-failover>緊急 Failover</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 1. 確認 Primary 確實無法服務（避免 split-brain）</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 2. 晉升最接近 Primary 的 Standby</span>
+</span></span><span style=display:flex><span>pg_ctl promote -D /var/lib/postgresql/standby_data
+</span></span><span style=display:flex><span><span style=color:#75715e># 3. 更新 DNS / Load Balancer</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 4. 通知其他 Standby 切換到新 Primary</span>
+</span></span><span style=display:flex><span>psql -h other-standby -c <span style=color:#e6db74>&#34;ALTER SYSTEM SET primary_conninfo = &#39;host=new-primary-ip ...&#39;;&#34;</span>
+</span></span><span style=display:flex><span>psql -h other-standby -c <span style=color:#e6db74>&#34;SELECT pg_reload_conf();&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 5. 嘗試用 pg_rewind 恢復舊 Primary</span>
+</span></span></code></pre></div><hr><h3 id=logical-decoding-與-cdc>Logical Decoding 與 CDC</h3><p><strong>Logical Decoding</strong> 是 Logical Replication 的底層機制，允許外部程式讀取 WAL 的解碼輸出，實現 <strong>CDC</strong>（Change Data Capture）：</p><pre tabindex=0><code>WAL records (binary)
+    │
+    ▼
+Output Plugin（解碼器）
+    ├── pgoutput（內建）
+    ├── wal2json（JSON 輸出）
+    └── decoderbufs（Protocol Buffers）
+    │
+    ▼
+Change stream → Consumer
+    ├── Logical Replication Subscriber
+    ├── Debezium → Kafka
+    └── 自訂應用程式
+</code></pre><h4 id=使用-wal2json>使用 wal2json</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 建立 Logical Slot
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> pg_create_logical_replication_slot(<span style=color:#e6db74>&#39;cdc_slot&#39;</span>, <span style=color:#e6db74>&#39;wal2json&#39;</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 讀取變更（不消費：peek）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> pg_logical_slot_peek_changes(<span style=color:#e6db74>&#39;cdc_slot&#39;</span>, <span style=color:#66d9ef>NULL</span>, <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;pretty-print&#39;</span>, <span style=color:#e6db74>&#39;1&#39;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;include-timestamp&#39;</span>, <span style=color:#e6db74>&#39;1&#39;</span>
+</span></span><span style=display:flex><span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 讀取並消費（consume）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> pg_logical_slot_get_changes(<span style=color:#e6db74>&#39;cdc_slot&#39;</span>, <span style=color:#66d9ef>NULL</span>, <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#39;pretty-print&#39;</span>, <span style=color:#e6db74>&#39;1&#39;</span>
+</span></span><span style=display:flex><span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 輸出範例（JSON）：
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- {&#34;change&#34;:[
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--   {&#34;kind&#34;:&#34;insert&#34;,&#34;schema&#34;:&#34;public&#34;,&#34;table&#34;:&#34;orders&#34;,
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--    &#34;columnnames&#34;:[&#34;id&#34;,&#34;customer&#34;,&#34;amount&#34;],
+</span></span></span><span style=display:flex><span><span style=color:#75715e>--    &#34;columnvalues&#34;:[101,&#34;Alice&#34;,599.99]}
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- ]}
+</span></span></span></code></pre></div><hr><h3 id=常見陷阱>常見陷阱</h3><p><strong>1. Replication Slot WAL 積壓（最危險）</strong></p><p>Standby 斷線後 Slot 持續累積 WAL，可能撐爆 Primary 磁碟：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-ini data-lang=ini><span style=display:flex><span><span style=color:#75715e># 設定 max_slot_wal_keep_size 防止暴增</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>max_slot_wal_keep_size</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>10GB</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 搭配監控告警：WAL 積壓 &gt; 可用空間 50% 時告警</span>
+</span></span></code></pre></div><p><strong>2. 同步 Standby 全部離線導致 Primary 掛起</strong></p><p>所有同步 Standby 斷線時，Primary 的所有 COMMIT 都會無限等待：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-ini data-lang=ini><span style=display:flex><span><span style=color:#75715e># 使用 ANY 語法提高容錯</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>synchronous_standby_names</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;ANY 1 (s1, s2, s3)&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 準備緊急回退：SET synchronous_standby_names = &#39;&#39;</span>
+</span></span></code></pre></div><p><strong>3. Timeline 不匹配</strong></p><p>Failover 後舊 Primary 重啟可能產生衝突：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-ini data-lang=ini><span style=display:flex><span><span style=color:#75715e># Standby 設定自動追蹤最新 Timeline</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>recovery_target_timeline</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;latest&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 舊 Primary 使用 pg_rewind 回到正確歷史</span>
+</span></span></code></pre></div><p><strong>4. hot_standby_feedback 未啟用</strong></p><p>Standby 上的長查詢被 Primary 的 VACUUM 取消：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-ini data-lang=ini><span style=display:flex><span><span style=color:#75715e># 開啟回饋機制</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>hot_standby_feedback</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>on</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>max_standby_streaming_delay</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>30s</span>
+</span></span></code></pre></div><p><strong>5. Logical Replication 的 Sequence 陷阱</strong></p><p>Failover 到 Subscriber 後，sequence 值可能衝突：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 晉升 Subscriber 前，手動推進 sequence
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> setval(<span style=color:#e6db74>&#39;orders_id_seq&#39;</span>, (<span style=color:#66d9ef>SELECT</span> <span style=color:#66d9ef>MAX</span>(id) <span style=color:#66d9ef>FROM</span> orders) <span style=color:#f92672>+</span> <span style=color:#ae81ff>1000</span>);
+</span></span></code></pre></div><hr><h3 id=版本演進>版本演進</h3><table><thead><tr><th>版本</th><th>複寫相關新功能</th></tr></thead><tbody><tr><td>PG 9.0</td><td>Streaming Replication、Hot Standby</td></tr><tr><td>PG 9.1</td><td>Synchronous Replication</td></tr><tr><td>PG 9.2</td><td>Cascading Replication</td></tr><tr><td>PG 9.4</td><td>Replication Slots、Logical Decoding</td></tr><tr><td>PG 10</td><td>Logical Replication（Publication/Subscription）</td></tr><tr><td>PG 12</td><td>pg_promote()、standby.signal 取代 recovery.conf</td></tr><tr><td>PG 13</td><td>wal_keep_size 取代 wal_keep_segments；max_slot_wal_keep_size</td></tr><tr><td>PG 15</td><td>Row Filter / Column Filter for Publication</td></tr><tr><td>PG 16</td><td>Standby 可做 pg_basebackup</td></tr><tr><td>PG 17</td><td>Logical Replication Failover Slots；pg_createsubscriber</td></tr></tbody></table><h3 id=總結>總結</h3><p>複寫是 PostgreSQL 高可用架構的根基。關鍵要點：</p><ol><li><strong>Physical Replication</strong> 適合 HA/DR，設定簡單、延遲極低</li><li><strong>Logical Replication</strong> 適合跨版本升級、部分表格同步、CDC 整合</li><li><strong>同步複寫</strong>確保零資料遺失，但有效能代價——用 <code>ANY</code> 語法提高容錯</li><li><strong>Replication Slot</strong> 防止 WAL 被清除，但必須搭配 <code>max_slot_wal_keep_size</code> 監控</li><li><strong>Failover</strong> 使用 <code>pg_promote()</code>，<strong>Switchover</strong> 用 <code>pg_rewind</code> 讓舊 Primary 回歸</li><li>善用 <strong>Cascading Replication</strong> 減輕 Primary 負擔</li></ol><p>下一篇，我們將深入探討 <strong>高可用架構方案</strong>——掌握 Patroni 自動 Failover、HAProxy 負載均衡與 etcd 共識機制，打造真正的零停機 PostgreSQL 叢集。</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
+</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/postgresql/029-backup-restore/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">備份與還原（Backup & Restore）：從 pg_dump 到 PITR 時間點恢復 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/05</span>
+</a><a href=https://benzhub.github.io/post/postgresql/028-security/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">安全與權限管理：從認證到 Row Level Security 全方位防護 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/04</span>
+</a><a href=https://benzhub.github.io/post/postgresql/027-partitioning/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">分區管理：PostgreSQL 宣告式分割表的完整維運指南 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/03</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/postgresql/029-backup-restore/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+<span class="text-sm font-medium">備份與還原（Backup & Restore）：從 pg_dump 到 PITR 時間點恢復 | PostgreSQL</span></a></div><div><a href=https://benzhub.github.io/post/postgresql/031-high-availability/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+<span class="text-sm font-medium">高可用架構（High Availability）：Patroni、repmgr 與自動 Failover | PostgreSQL</span></a></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
+</a><a href=/tags/acid><span class=tag-pill>acid</span>
+</a><a href=/tags/aggregate><span class=tag-pill>aggregate</span>
+</a><a href=/tags/ai><span class=tag-pill>ai</span>
+</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
+</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
+</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
+</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
+</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
+</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
+</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
+</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
+</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
+</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
+</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
+</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
+</a><a href=/tags/analytics><span class=tag-pill>analytics</span>
+</a><a href=/tags/api><span class=tag-pill>api</span>
+</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
+</a><a href=/tags/audit><span class=tag-pill>audit</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (32)</span>
+</a><a href=/post/javascript/><span class=tag-pill>JavaScript (87)</span>
+</a><a href=/post/django/><span class=tag-pill>Django (44)</span>
+</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
+</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
+</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
+</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
+</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/postgresql/032-connection-pooling/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">連線池管理：PgBouncer、Pgpool-II 與應用層池化完全指南 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/08</p></a><a href=/post/javascript/data-structures--algorithms/025-graph-representation/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">圖的表示法 — 鄰接矩陣、鄰接串列與邊串列完整解析 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/08</p></a><a href=/post/javascript/data-structures--algorithms/024-bit-manipulation/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">位元運算 — AND、OR、XOR 六大運算子與 Bitmask 技巧 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/07</p></a><a href=/post/postgresql/031-high-availability/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">高可用架構（High Availability）：Patroni、repmgr 與自動 Failover | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/07</p></a><a href=/post/javascript/data-structures--algorithms/023-divide-conquer/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">分治法 — Divide and Conquer 三階段與 Master Theorem | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/06</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>

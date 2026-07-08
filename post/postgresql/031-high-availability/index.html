@@ -1,0 +1,375 @@
+<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>高可用架構（High Availability）：Patroni、repmgr 與自動 Failover | PostgreSQL | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="高可用架構（High Availability）：Patroni、repmgr 與自動 Failover | PostgreSQL | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="完整解析 PostgreSQL 高可用架構方案，涵蓋 Patroni + etcd + HAProxy 企業級部署、repmgr 複寫管理、pg_auto_failover 輕量方案、Split-Brain 防護與 Kubernetes 原生部署策略。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="完整解析 PostgreSQL 高可用架構方案，涵蓋 Patroni + etcd + HAProxy 企業級部署、repmgr 複寫管理、pg_auto_failover 輕量方案、Split-Brain 防護與 Kubernetes 原生部署策略。"><meta property="og:url" content="https://benzhub.github.io/post/postgresql/031-high-availability/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/postgresql/031-high-availability/><meta name=twitter:description content="完整解析 PostgreSQL 高可用架構方案，涵蓋 Patroni + etcd + HAProxy 企業級部署、repmgr 複寫管理、pg_auto_failover 輕量方案、Split-Brain 防護與 Kubernetes 原生部署策略。"><meta property="article:published_time" content="2026-07-07T00:00:00+00:00"><meta property="article:updated_time" content="2026-07-07T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/postgresql/031-High-Availability.png"><meta property="og:image:url" content="https://benzhub.github.io/img/postgresql/031-High-Availability.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/postgresql/031-high-availability/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/postgresql/031-high-availability/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"高可用架構（High Availability）：Patroni、repmgr 與自動 Failover | PostgreSQL\"","description":"\"完整解析 PostgreSQL 高可用架構方案，涵蓋 Patroni + etcd + HAProxy 企業級部署、repmgr 複寫管理、pg_auto_failover 輕量方案、Split-Brain 防護與 Kubernetes 原生部署策略。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-07-07T00:00:00\u002b00:00","dateModified":"2026-07-07T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/postgresql\/031-High-Availability.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/postgresql\/031-high-availability\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/postgresql\/"},{"@type":"ListItem","position":3,"name":"\"高可用架構（High Availability）：Patroni、repmgr 與自動 Failover | PostgreSQL\""}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">高可用架構（High Availability）：Patroni、repmgr 與自動 Failover | PostgreSQL</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/07</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/postgresql class="tag-pill no-underline">postgresql</a>
+<a href=/tags/high-availability class="tag-pill no-underline">high-availability</a>
+<a href=/tags/patroni class="tag-pill no-underline">patroni</a>
+<a href=/tags/failover class="tag-pill no-underline">failover</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/postgresql/031-High-Availability.png alt="高可用架構（High Availability）：Patroni、repmgr 與自動 Failover | PostgreSQL"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p><strong>PostgreSQL</strong> 高可用（<strong>HA</strong>）架構旨在確保資料庫服務在節點故障、網路中斷時仍能持續運作。本文涵蓋主流 HA 方案——<strong>Patroni</strong> + etcd + HAProxy、<strong>repmgr</strong>、<strong>pg_auto_failover</strong>——的完整部署配置、選型指南，以及 <strong>Kubernetes</strong> 原生部署策略。</p></blockquote><h3 id=ha-基本概念>HA 基本概念</h3><p>在深入各方案之前，先理解四個核心概念：</p><ul><li><strong>Failover（自動故障切換）</strong>——Primary 意外故障時，HA 系統自動將 Standby 晉升為新 Primary，不需人工介入</li><li><strong>Switchover（計畫性切換）</strong>——管理者主動發起的切換，等待 Replica 同步完成，資料零遺失</li><li><strong>Split-Brain（腦裂）</strong>——網路分區導致兩個節點各自認為自己是 Primary 並接受寫入，是最危險的故障情境</li><li><strong>Fencing（隔離機制）</strong>——強制終止舊 Primary（關機、封鎖網路等），確保任何時刻只有一個寫入節點</li></ul><h3 id=rtorpo-與-ha-架構>RTO/RPO 與 HA 架構</h3><table><thead><tr><th>指標</th><th>定義</th><th>典型目標</th><th>影響因素</th></tr></thead><tbody><tr><td>RTO</td><td>故障到服務恢復的最長時間</td><td>&lt; 30 秒 ~ 5 分鐘</td><td>故障偵測速度、Failover 自動化</td></tr><tr><td>RPO</td><td>最大可接受資料遺失時間</td><td>0 秒 ~ 數分鐘</td><td>複寫模式（同步/非同步）</td></tr></tbody></table><p><strong>設計原則：</strong></p><ul><li>同步複寫可達 RPO ≈ 0，但寫入延遲增加</li><li>非同步複寫延遲更低，但 Failover 可能遺失未確認的 WAL</li><li><strong>Patroni</strong> 等工具可將 RTO 壓縮至 30 秒內</li></ul><h3 id=postgresql-ha-方案分類>PostgreSQL HA 方案分類</h3><pre tabindex=0><code>PostgreSQL HA 方案
+├── 基於流複寫
+│   ├── Patroni + DCS（etcd / Consul）
+│   ├── repmgr
+│   └── pg_auto_failover
+├── 基於共享儲存
+│   └── Corosync + Pacemaker + DRBD
+└── Kubernetes 原生
+    ├── CloudNativePG
+    └── Zalando PostgreSQL Operator
+</code></pre><hr><h3 id=patroni--業界標準-ha-框架>Patroni — 業界標準 HA 框架</h3><p><strong>Patroni</strong> 是目前最廣泛採用的 PostgreSQL HA 框架，由 Zalando 開源，將 PostgreSQL 生命週期管理、Leader Election、Failover 自動化整合到單一程式。</p><h4 id=架構圖>架構圖</h4><pre tabindex=0><code>            ┌─────────────────┐
+            │  Client / App   │
+            └────────┬────────┘
+                     │
+            ┌────────▼────────┐
+            │    HAProxy      │
+            │ :5432 → Primary │
+            │ :5433 → Replica │
+            └───┬─────────┬───┘
+                │         │
+    ┌───────────▼──┐  ┌───▼───────────┐
+    │  Patroni     │  │  Patroni      │
+    │  PostgreSQL  │  │  PostgreSQL   │
+    │  (Primary)   │◄─│  (Standby)    │
+    └──────┬───────┘  └──────┬────────┘
+           │                 │
+           └────────┬────────┘
+                    │
+       ┌────────────▼────────────┐
+       │   etcd 叢集（3 節點）    │
+       └─────────────────────────┘
+</code></pre><p><strong>元件職責：</strong></p><ul><li><strong>Patroni</strong>：管理 PostgreSQL 啟停、監控健康、參與 Leader Election</li><li><strong>etcd</strong>：分散式鍵值儲存，儲存叢集狀態與 Leader 資訊</li><li><strong>HAProxy</strong>：根據 Patroni HTTP 端點動態路由讀寫請求</li></ul><h4 id=patroniyml-核心配置>patroni.yml 核心配置</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#f92672>scope</span>: <span style=color:#ae81ff>postgres-ha         </span> <span style=color:#75715e># 叢集名稱（所有節點必須一致）</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>namespace</span>: <span style=color:#ae81ff>/service/</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>name</span>: <span style=color:#ae81ff>node1                </span> <span style=color:#75715e># 本節點唯一名稱</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>restapi</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>listen</span>: <span style=color:#ae81ff>0.0.0.0</span>:<span style=color:#ae81ff>8008</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>connect_address</span>: <span style=color:#ae81ff>192.168.1.11</span>:<span style=color:#ae81ff>8008</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>etcd3</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>hosts</span>:
+</span></span><span style=display:flex><span>    - <span style=color:#ae81ff>192.168.1.11</span>:<span style=color:#ae81ff>2379</span>
+</span></span><span style=display:flex><span>    - <span style=color:#ae81ff>192.168.1.12</span>:<span style=color:#ae81ff>2379</span>
+</span></span><span style=display:flex><span>    - <span style=color:#ae81ff>192.168.1.13</span>:<span style=color:#ae81ff>2379</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>bootstrap</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>dcs</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>ttl</span>: <span style=color:#ae81ff>30</span>                           <span style=color:#75715e># Leader 租約 TTL（秒）</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>loop_wait</span>: <span style=color:#ae81ff>10</span>                     <span style=color:#75715e># 監控迴圈間隔</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>retry_timeout</span>: <span style=color:#ae81ff>10</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>maximum_lag_on_failover</span>: <span style=color:#ae81ff>1048576</span>  <span style=color:#75715e># Failover 允許的最大 WAL 落差</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>postgresql</span>:
+</span></span><span style=display:flex><span>      <span style=color:#f92672>use_pg_rewind</span>: <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>use_slots</span>: <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>parameters</span>:
+</span></span><span style=display:flex><span>        <span style=color:#f92672>wal_level</span>: <span style=color:#ae81ff>replica</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>hot_standby</span>: <span style=color:#e6db74>&#34;on&#34;</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>max_connections</span>: <span style=color:#ae81ff>200</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>max_wal_senders</span>: <span style=color:#ae81ff>10</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>max_replication_slots</span>: <span style=color:#ae81ff>10</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>wal_log_hints</span>: <span style=color:#e6db74>&#34;on&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>initdb</span>:
+</span></span><span style=display:flex><span>    - <span style=color:#f92672>encoding</span>: <span style=color:#ae81ff>UTF8</span>
+</span></span><span style=display:flex><span>    - <span style=color:#ae81ff>data-checksums</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>pg_hba</span>:
+</span></span><span style=display:flex><span>    - <span style=color:#ae81ff>host replication replicator 192.168.1.0/24 scram-sha-256</span>
+</span></span><span style=display:flex><span>    - <span style=color:#ae81ff>host all all 0.0.0.0/0 scram-sha-256</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>users</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>admin</span>:
+</span></span><span style=display:flex><span>      <span style=color:#f92672>password</span>: <span style=color:#e6db74>&#34;StrongPass123!&#34;</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>options</span>:
+</span></span><span style=display:flex><span>        - <span style=color:#ae81ff>createrole</span>
+</span></span><span style=display:flex><span>        - <span style=color:#ae81ff>createdb</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>replicator</span>:
+</span></span><span style=display:flex><span>      <span style=color:#f92672>password</span>: <span style=color:#e6db74>&#34;ReplPass456!&#34;</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>options</span>:
+</span></span><span style=display:flex><span>        - <span style=color:#ae81ff>replication</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>postgresql</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>listen</span>: <span style=color:#ae81ff>0.0.0.0</span>:<span style=color:#ae81ff>5432</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>connect_address</span>: <span style=color:#ae81ff>192.168.1.11</span>:<span style=color:#ae81ff>5432</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>data_dir</span>: <span style=color:#ae81ff>/var/lib/postgresql/16/main</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>bin_dir</span>: <span style=color:#ae81ff>/usr/lib/postgresql/16/bin</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>authentication</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>replication</span>:
+</span></span><span style=display:flex><span>      <span style=color:#f92672>username</span>: <span style=color:#ae81ff>replicator</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>password</span>: <span style=color:#e6db74>&#34;ReplPass456!&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>superuser</span>:
+</span></span><span style=display:flex><span>      <span style=color:#f92672>username</span>: <span style=color:#ae81ff>postgres</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>password</span>: <span style=color:#e6db74>&#34;SuperPass789!&#34;</span>
+</span></span></code></pre></div><h4 id=leader-election-機制>Leader Election 機制</h4><p>Patroni 採用基於 TTL 的分散式鎖實現 Leader Election：</p><ol><li>所有節點競爭在 etcd 中寫入 <code>/service/postgres-ha/leader</code> 鍵</li><li>成功寫入的節點成為 Primary，持續更新租約</li><li>Leader 鍵過期時，WAL 落差在閾值內的候選節點參與新選舉</li></ol><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 查看叢集狀態</span>
+</span></span><span style=display:flex><span>patronictl -c /etc/patroni/patroni.yml list
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 輸出範例：</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># + Cluster: postgres-ha +---------+----+-----------+</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># | Member | Role    | State   | TL | Lag in MB |</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># +--------+---------+---------+----+-----------+</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># | node1  | Leader  | running |  1 |           |</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># | node2  | Replica | running |  1 |       0.0 |</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># | node3  | Replica | running |  1 |       0.0 |</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># +--------+---------+---------+----+-----------+</span>
+</span></span></code></pre></div><h4 id=failover--switchover-操作>Failover / Switchover 操作</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 計畫性 Switchover（零資料遺失）</span>
+</span></span><span style=display:flex><span>patronictl -c /etc/patroni/patroni.yml switchover postgres-ha <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --master node1 <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --candidate node2 <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --scheduled now
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 強制 Failover（緊急情況）</span>
+</span></span><span style=display:flex><span>patronictl -c /etc/patroni/patroni.yml failover postgres-ha <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --master node1 <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --candidate node2 <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --force
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 暫停自動 Failover（維護視窗）</span>
+</span></span><span style=display:flex><span>patronictl -c /etc/patroni/patroni.yml pause postgres-ha
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 恢復自動 Failover</span>
+</span></span><span style=display:flex><span>patronictl -c /etc/patroni/patroni.yml resume postgres-ha
+</span></span></code></pre></div><h4 id=rest-api-健康端點>REST API 健康端點</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># Primary 節點回傳 200，Standby 回傳 503</span>
+</span></span><span style=display:flex><span>curl http://192.168.1.11:8008/primary
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Replica 節點回傳 200，Primary 回傳 503</span>
+</span></span><span style=display:flex><span>curl http://192.168.1.11:8008/replica
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 所有健康節點皆回傳 200</span>
+</span></span><span style=display:flex><span>curl http://192.168.1.11:8008/health
+</span></span></code></pre></div><hr><h3 id=repmgr--複寫管理工具>repmgr — 複寫管理工具</h3><p><strong>repmgr</strong> 由 EDB 維護，提供複寫監控、Failover 管理和叢集拓撲可視化。</p><h4 id=核心配置>核心配置</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-ini data-lang=ini><span style=display:flex><span><span style=color:#75715e># /etc/repmgr.conf</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>node_id</span><span style=color:#f92672>=</span><span style=color:#e6db74>1</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>node_name</span><span style=color:#f92672>=</span><span style=color:#e6db74>node1</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>conninfo</span><span style=color:#f92672>=</span><span style=color:#e6db74>&#39;host=192.168.1.11 user=repmgr dbname=repmgr connect_timeout=2&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>data_directory</span><span style=color:#f92672>=</span><span style=color:#e6db74>&#39;/var/lib/postgresql/16/main&#39;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>failover</span><span style=color:#f92672>=</span><span style=color:#e6db74>automatic</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>promote_command</span><span style=color:#f92672>=</span><span style=color:#e6db74>&#39;/usr/bin/repmgr standby promote -f /etc/repmgr.conf --log-to-file&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>follow_command</span><span style=color:#f92672>=</span><span style=color:#e6db74>&#39;/usr/bin/repmgr standby follow -f /etc/repmgr.conf --log-to-file --upstream-node-id=%n&#39;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>monitoring_history</span><span style=color:#f92672>=</span><span style=color:#e6db74>yes</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>monitor_interval_secs</span><span style=color:#f92672>=</span><span style=color:#e6db74>5</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>reconnect_attempts</span><span style=color:#f92672>=</span><span style=color:#e6db74>3</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>reconnect_interval</span><span style=color:#f92672>=</span><span style=color:#e6db74>5</span>
+</span></span></code></pre></div><h4 id=常用操作>常用操作</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 註冊 Primary</span>
+</span></span><span style=display:flex><span>repmgr -f /etc/repmgr.conf primary register
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 克隆並註冊 Standby</span>
+</span></span><span style=display:flex><span>repmgr -h 192.168.1.11 -U repmgr -d repmgr <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  -f /etc/repmgr.conf standby clone
+</span></span><span style=display:flex><span>repmgr -f /etc/repmgr.conf standby register
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 查看叢集狀態</span>
+</span></span><span style=display:flex><span>repmgr -f /etc/repmgr.conf cluster show
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 計畫性 Switchover（自動跟隨）</span>
+</span></span><span style=display:flex><span>repmgr -f /etc/repmgr.conf standby switchover --siblings-follow
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 啟動自動 Failover 守護程序</span>
+</span></span><span style=display:flex><span>repmgrd -f /etc/repmgr.conf --daemonize
+</span></span></code></pre></div><hr><h3 id=pg_auto_failover--輕量方案>pg_auto_failover — 輕量方案</h3><p>由 Microsoft 開源，採用 Monitor 節點集中管理狀態機，架構最簡單：</p><pre tabindex=0><code>        ┌───────────────────┐
+        │   Monitor Node    │
+        │  :5000            │
+        └───────┬───────────┘
+                │
+    ┌───────────▼───┐    ┌────▼──────────┐
+    │  Primary      │───►│  Secondary    │
+    │  node1:5432   │    │  node2:5432   │
+    └───────────────┘    └───────────────┘
+</code></pre><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># Monitor 節點</span>
+</span></span><span style=display:flex><span>pg_autoctl create monitor <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --pgdata /var/lib/postgresql/monitor <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --pgport <span style=color:#ae81ff>5000</span> <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --hostname monitor.example.com
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Primary 節點</span>
+</span></span><span style=display:flex><span>pg_autoctl create postgres <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --pgdata /var/lib/postgresql/16/main <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --monitor postgresql://autoctl@monitor:5000/pg_auto_failover
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Secondary 節點（自動從 Primary 克隆）</span>
+</span></span><span style=display:flex><span>pg_autoctl create postgres <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --pgdata /var/lib/postgresql/16/main <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --monitor postgresql://autoctl@monitor:5000/pg_auto_failover
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 查看狀態</span>
+</span></span><span style=display:flex><span>pg_autoctl show state --monitor postgresql://autoctl@monitor:5000/pg_auto_failover
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 執行 Failover</span>
+</span></span><span style=display:flex><span>pg_autoctl perform failover --monitor postgresql://autoctl@monitor:5000/pg_auto_failover
+</span></span></code></pre></div><hr><h3 id=haproxy-讀寫分離>HAProxy 讀寫分離</h3><p>HAProxy 透過 Patroni HTTP 端點感知節點角色，實現動態讀寫分離：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-ini data-lang=ini><span style=display:flex><span><span style=color:#75715e># /etc/haproxy/haproxy.cfg</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>global</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>maxconn 100</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>defaults</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>mode tcp</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>timeout client 30m</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>timeout connect 4s</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>timeout server 30m</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>timeout check 5s</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 讀寫端口（只路由到 Primary）</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>listen postgres-primary</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>bind *:5432</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>option httpchk GET /primary</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>http-check expect status 200</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>default-server inter 3s fall 3 rise 2 on-marked-down shutdown-sessions</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>server node1 192.168.1.11:5432 maxconn 100 check port 8008</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>server node2 192.168.1.12:5432 maxconn 100 check port 8008</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>server node3 192.168.1.13:5432 maxconn 100 check port 8008</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 唯讀端口（路由到 Replica）</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>listen postgres-replicas</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>bind *:5433</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>option httpchk GET /replica</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>http-check expect status 200</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>balance roundrobin</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>default-server inter 3s fall 3 rise 2 on-marked-down shutdown-sessions</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>server node1 192.168.1.11:5432 maxconn 100 check port 8008</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>server node2 192.168.1.12:5432 maxconn 100 check port 8008</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>server node3 192.168.1.13:5432 maxconn 100 check port 8008</span>
+</span></span></code></pre></div><h3 id=pgbouncer-搭配-ha>PgBouncer 搭配 HA</h3><p><strong>PgBouncer</strong> 置於 HAProxy 與 PostgreSQL 之間，提供連線池化：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-ini data-lang=ini><span style=display:flex><span><span style=color:#75715e># /etc/pgbouncer/pgbouncer.ini</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>[databases]</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>mydb</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>host=haproxy.example.com port=5432 dbname=mydb</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>mydb_ro</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>host=haproxy.example.com port=5433 dbname=mydb</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>[pgbouncer]</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>pool_mode</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>transaction       # transaction 模式支援 HA 切換</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>max_client_conn</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>1000</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>default_pool_size</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>20</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>server_fast_close</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>1         # Failover 時立即關閉舊連線</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>listen_port</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>6432</span>
+</span></span></code></pre></div><hr><h3 id=split-brain-防護>Split-Brain 防護</h3><h4 id=fencing-機制>Fencing 機制</h4><p><strong>1. 基於 DCS 的 TTL 隔離</strong></p><p>舊 Primary 無法更新 etcd Leader 租約時，Patroni 讓它進入 read-only 模式。租約到期後新 Primary 才被允許提升。</p><p><strong>2. 自訂 Fencing Hook</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#75715e># patroni.yml</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>postgresql</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>pre_promote</span>: <span style=color:#ae81ff>/usr/local/bin/fence_old_primary.sh</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e>#!/bin/bash
+</span></span></span><span style=display:flex><span><span style=color:#75715e># 透過雲端 API 強制停止舊 Primary</span>
+</span></span><span style=display:flex><span>OLD_PRIMARY_INSTANCE_ID<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;i-0123456789abcdef0&#34;</span>
+</span></span><span style=display:flex><span>aws ec2 stop-instances --instance-ids $OLD_PRIMARY_INSTANCE_ID --force
+</span></span><span style=display:flex><span>sleep <span style=color:#ae81ff>10</span>
+</span></span></code></pre></div><p><strong>3. Witness Node</strong></p><p>在 repmgr 中，Witness Node 不運行 PostgreSQL，僅參與仲裁投票。在 Patroni 中，etcd 叢集本身即扮演 Witness 角色。</p><hr><h3 id=三方案比較與選型>三方案比較與選型</h3><table><thead><tr><th>功能</th><th>Patroni</th><th>repmgr</th><th>pg_auto_failover</th></tr></thead><tbody><tr><td>架構複雜度</td><td>高（需 DCS 叢集）</td><td>中</td><td>低</td></tr><tr><td>自動 Failover</td><td>原生支援</td><td>需 repmgrd</td><td>原生支援</td></tr><tr><td>RTO</td><td>&lt; 30 秒</td><td>30~120 秒</td><td>30~60 秒</td></tr><tr><td>REST API</td><td>內建</td><td>無</td><td>無</td></tr><tr><td>HAProxy 整合</td><td>原生</td><td>需自行配置</td><td>需自行配置</td></tr><tr><td>K8s 支援</td><td>Zalando Operator</td><td>有限</td><td>有限</td></tr><tr><td>適合規模</td><td>中大型</td><td>中型</td><td>中小型</td></tr></tbody></table><h4 id=選型決策>選型決策</h4><pre tabindex=0><code>是否在 Kubernetes 上部署？
+├── 是 → CloudNativePG 或 Zalando Operator
+└── 否 →
+    ├── 有能力維運 etcd？ → Patroni（最佳 RTO）
+    ├── 需要最簡架構？ → pg_auto_failover
+    └── 使用 EDB 企業版？ → repmgr
+</code></pre><hr><h3 id=kubernetes-原生部署>Kubernetes 原生部署</h3><h4 id=cloudnativepg>CloudNativePG</h4><p><strong>CloudNativePG</strong>（CNPG）是 CNCF 沙盒項目，功能最完整的 PostgreSQL K8s Operator：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#f92672>apiVersion</span>: <span style=color:#ae81ff>postgresql.cnpg.io/v1</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>kind</span>: <span style=color:#ae81ff>Cluster</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>metadata</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>name</span>: <span style=color:#ae81ff>pg-cluster</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>spec</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>instances</span>: <span style=color:#ae81ff>3</span>              <span style=color:#75715e># 1 Primary + 2 Replica</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>postgresql</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>parameters</span>:
+</span></span><span style=display:flex><span>      <span style=color:#f92672>max_connections</span>: <span style=color:#e6db74>&#34;200&#34;</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>shared_buffers</span>: <span style=color:#e6db74>&#34;256MB&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>storage</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>size</span>: <span style=color:#ae81ff>100Gi</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>storageClass</span>: <span style=color:#ae81ff>fast-ssd</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>backup</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>barmanObjectStore</span>:
+</span></span><span style=display:flex><span>      <span style=color:#f92672>destinationPath</span>: <span style=color:#ae81ff>s3://my-pg-backups/</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>s3Credentials</span>:
+</span></span><span style=display:flex><span>        <span style=color:#f92672>accessKeyId</span>:
+</span></span><span style=display:flex><span>          <span style=color:#f92672>name</span>: <span style=color:#ae81ff>aws-creds</span>
+</span></span><span style=display:flex><span>          <span style=color:#f92672>key</span>: <span style=color:#ae81ff>ACCESS_KEY_ID</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>secretAccessKey</span>:
+</span></span><span style=display:flex><span>          <span style=color:#f92672>name</span>: <span style=color:#ae81ff>aws-creds</span>
+</span></span><span style=display:flex><span>          <span style=color:#f92672>key</span>: <span style=color:#ae81ff>SECRET_ACCESS_KEY</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>monitoring</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>enablePodMonitor</span>: <span style=color:#66d9ef>true</span>
+</span></span></code></pre></div><p>CNPG 自動建立的 Service：</p><ul><li><code>pg-cluster-rw</code> → Primary（讀寫）</li><li><code>pg-cluster-ro</code> → Replica（唯讀）</li><li><code>pg-cluster-r</code> → 所有健康節點</li></ul><h4 id=zalando-postgresql-operator>Zalando PostgreSQL Operator</h4><p>底層使用 Patroni + Spilo 鏡像，適合已熟悉 Patroni 的團隊：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#f92672>apiVersion</span>: <span style=color:#e6db74>&#34;acid.zalan.do/v1&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>kind</span>: <span style=color:#ae81ff>postgresql</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>metadata</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>name</span>: <span style=color:#ae81ff>pg-cluster</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>spec</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>teamId</span>: <span style=color:#e6db74>&#34;myteam&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>numberOfInstances</span>: <span style=color:#ae81ff>3</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>volume</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>size</span>: <span style=color:#ae81ff>100Gi</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>postgresql</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>version</span>: <span style=color:#e6db74>&#34;16&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>users</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>myapp_user</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>superuser</span>
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>createdb</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>databases</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>myapp</span>: <span style=color:#ae81ff>myapp_user</span>
+</span></span></code></pre></div><hr><h3 id=常見陷阱>常見陷阱</h3><p><strong>1. etcd 叢集未達法定人數</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 錯誤：2 節點 etcd，一節點故障後叢集停擺</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 正確：至少 3 節點（容忍 1 故障），5 節點（容忍 2 故障）</span>
+</span></span></code></pre></div><p><strong>2. pg_rewind 未正確配置</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-ini data-lang=ini><span style=display:flex><span><span style=color:#75715e># patroni.yml 必須設定</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>use_pg_rewind: true</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># PostgreSQL 必須啟用</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>wal_log_hints</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>on  # 或使用 data checksums</span>
+</span></span></code></pre></div><p><strong>3. 同步複寫 + 單一 Standby 的可用性陷阱</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-ini data-lang=ini><span style=display:flex><span><span style=color:#75715e># 錯誤：synchronous_standby_names = &#39;*&#39; 在唯一 Standby 故障時主節點無法寫入</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 正確：使用 ANY 語法</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>synchronous_standby_names</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;ANY 1 (node2, node3)&#39;</span>
+</span></span></code></pre></div><p><strong>4. 應用程式未處理連線中斷</strong></p><p>Failover 期間（10~30 秒）連線會中斷，應用程式必須實作重試邏輯。</p><p><strong>5. Load Balancer 健康檢查間隔過長</strong></p><p>HAProxy 的 <code>inter</code> 應設定為 3~5 秒，確保 Failover 後快速切換。</p><hr><h3 id=版本演進>版本演進</h3><table><thead><tr><th>版本</th><th>HA 相關特性</th></tr></thead><tbody><tr><td>PG 9.4</td><td>Replication Slots 引入</td></tr><tr><td>PG 10</td><td>Quorum-based 同步複寫</td></tr><tr><td>PG 11</td><td>pg_rewind 不再需要 wal_log_hints（需 data checksums）</td></tr><tr><td>PG 12</td><td>pg_promote()、standby.signal</td></tr><tr><td>PG 13</td><td>max_slot_wal_keep_size</td></tr><tr><td>PG 15</td><td>兩階段邏輯複寫</td></tr><tr><td>PG 16</td><td>Logical Replication from Standby</td></tr></tbody></table><h3 id=總結>總結</h3><p>高可用架構是生產環境 PostgreSQL 的必備能力：</p><ol><li><strong>Patroni</strong> 是業界標準，RTO &lt; 30 秒，功能最完整，但需要維運 etcd 叢集</li><li><strong>repmgr</strong> 適合中型規模，架構較簡單，與 EDB 企業版整合良好</li><li><strong>pg_auto_failover</strong> 最輕量，適合快速搭建 HA 原型</li><li><strong>Kubernetes</strong> 環境優先選擇 <strong>CloudNativePG</strong>，新建項目首選</li><li><strong>Split-Brain 防護</strong>（Fencing + DCS + Witness）是 HA 架構的最後防線</li><li>無論選擇哪個方案，都必須定期進行 <strong>Failover 演練</strong></li></ol><p>下一篇，我們將深入探討 <strong>連線池化</strong>——掌握 PgBouncer 與 pgpool-II 的配置、調校與效能優化，讓你的 PostgreSQL 連線管理更加高效。</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
+</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/postgresql/030-replication/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">複寫與高可用（Replication）：從 Streaming 到 Logical Replication | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/06</span>
+</a><a href=https://benzhub.github.io/post/postgresql/029-backup-restore/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">備份與還原（Backup & Restore）：從 pg_dump 到 PITR 時間點恢復 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/05</span>
+</a><a href=https://benzhub.github.io/post/postgresql/028-security/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">安全與權限管理：從認證到 Row Level Security 全方位防護 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/04</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/postgresql/030-replication/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+<span class="text-sm font-medium">複寫與高可用（Replication）：從 Streaming 到 Logical Replication | PostgreSQL</span></a></div><div><a href=https://benzhub.github.io/post/postgresql/032-connection-pooling/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+<span class="text-sm font-medium">連線池管理：PgBouncer、Pgpool-II 與應用層池化完全指南 | PostgreSQL</span></a></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
+</a><a href=/tags/acid><span class=tag-pill>acid</span>
+</a><a href=/tags/aggregate><span class=tag-pill>aggregate</span>
+</a><a href=/tags/ai><span class=tag-pill>ai</span>
+</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
+</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
+</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
+</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
+</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
+</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
+</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
+</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
+</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
+</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
+</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
+</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
+</a><a href=/tags/analytics><span class=tag-pill>analytics</span>
+</a><a href=/tags/api><span class=tag-pill>api</span>
+</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
+</a><a href=/tags/audit><span class=tag-pill>audit</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (32)</span>
+</a><a href=/post/javascript/><span class=tag-pill>JavaScript (87)</span>
+</a><a href=/post/django/><span class=tag-pill>Django (44)</span>
+</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
+</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
+</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
+</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
+</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/postgresql/032-connection-pooling/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">連線池管理：PgBouncer、Pgpool-II 與應用層池化完全指南 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/08</p></a><a href=/post/javascript/data-structures--algorithms/025-graph-representation/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">圖的表示法 — 鄰接矩陣、鄰接串列與邊串列完整解析 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/08</p></a><a href=/post/javascript/data-structures--algorithms/024-bit-manipulation/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">位元運算 — AND、OR、XOR 六大運算子與 Bitmask 技巧 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/07</p></a><a href=/post/postgresql/031-high-availability/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">高可用架構（High Availability）：Patroni、repmgr 與自動 Failover | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/07</p></a><a href=/post/javascript/data-structures--algorithms/023-divide-conquer/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">分治法 — Divide and Conquer 三階段與 Master Theorem | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/06</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>

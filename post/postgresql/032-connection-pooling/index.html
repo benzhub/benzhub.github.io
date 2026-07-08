@@ -1,0 +1,447 @@
+<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>連線池管理：PgBouncer、Pgpool-II 與應用層池化完全指南 | PostgreSQL | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="連線池管理：PgBouncer、Pgpool-II 與應用層池化完全指南 | PostgreSQL | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="深入解析 PostgreSQL 連線池管理，從 Fork 模型的成本分析出發，涵蓋三種 Pooling 模式、PgBouncer 核心設定與監控、Pgpool-II 讀寫分離、Odyssey 多執行緒架構、應用層連線池（HikariCP、SQLAlchemy、TypeORM），以及連線池大小公式與雲端環境部署策略。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="深入解析 PostgreSQL 連線池管理，從 Fork 模型的成本分析出發，涵蓋三種 Pooling 模式、PgBouncer 核心設定與監控、Pgpool-II 讀寫分離、Odyssey 多執行緒架構、應用層連線池（HikariCP、SQLAlchemy、TypeORM），以及連線池大小公式與雲端環境部署策略。"><meta property="og:url" content="https://benzhub.github.io/post/postgresql/032-connection-pooling/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/postgresql/032-connection-pooling/><meta name=twitter:description content="深入解析 PostgreSQL 連線池管理，從 Fork 模型的成本分析出發，涵蓋三種 Pooling 模式、PgBouncer 核心設定與監控、Pgpool-II 讀寫分離、Odyssey 多執行緒架構、應用層連線池（HikariCP、SQLAlchemy、TypeORM），以及連線池大小公式與雲端環境部署策略。"><meta property="article:published_time" content="2026-07-08T00:00:00+00:00"><meta property="article:updated_time" content="2026-07-08T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/postgresql/032-Connection-Pooling.png"><meta property="og:image:url" content="https://benzhub.github.io/img/postgresql/032-Connection-Pooling.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/postgresql/032-connection-pooling/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/postgresql/032-connection-pooling/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"連線池管理：PgBouncer、Pgpool-II 與應用層池化完全指南 | PostgreSQL\"","description":"\"深入解析 PostgreSQL 連線池管理，從 Fork 模型的成本分析出發，涵蓋三種 Pooling 模式、PgBouncer 核心設定與監控、Pgpool-II 讀寫分離、Odyssey 多執行緒架構、應用層連線池（HikariCP、SQLAlchemy、TypeORM），以及連線池大小公式與雲端環境部署策略。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-07-08T00:00:00\u002b00:00","dateModified":"2026-07-08T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/postgresql\/032-Connection-Pooling.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/postgresql\/032-connection-pooling\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/postgresql\/"},{"@type":"ListItem","position":3,"name":"\"連線池管理：PgBouncer、Pgpool-II 與應用層池化完全指南 | PostgreSQL\""}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">連線池管理：PgBouncer、Pgpool-II 與應用層池化完全指南 | PostgreSQL</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/08</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/postgresql class="tag-pill no-underline">postgresql</a>
+<a href=/tags/connection-pooling class="tag-pill no-underline">connection-pooling</a>
+<a href=/tags/pgbouncer class="tag-pill no-underline">pgbouncer</a>
+<a href=/tags/performance class="tag-pill no-underline">performance</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/postgresql/032-Connection-Pooling.png alt="連線池管理：PgBouncer、Pgpool-II 與應用層池化完全指南 | PostgreSQL"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p>在 <strong>PostgreSQL</strong> 的 Fork 模型中，每個連線都會佔用一個獨立的 Backend Process，當連線數過高時，系統資源消耗與 Context Switch 開銷會急遽上升。<strong>連線池</strong>（Connection Pooling）透過在應用程式與資料庫之間建立中介層，重複利用已建立的連線，大幅降低開銷並提升整體吞吐量。本篇將從 <strong>PgBouncer</strong>、<strong>Pgpool-II</strong> 到應用層池化，全面解析連線池管理的實務知識。</p></blockquote><h3 id=為什麼需要連線池>為什麼需要連線池？</h3><p>要理解連線池的必要性，必須先理解 PostgreSQL 的程序模型成本。</p><p>每當一個客戶端發起連線請求，Postmaster 會透過 <code>fork()</code> 系統呼叫建立一個全新的 Backend Process：</p><pre tabindex=0><code>客戶端應用程式                     PostgreSQL Postmaster
+      │                                    │
+      │── TCP connect to :5432 ──────────▶│
+      │                                    │  fork() → 新的 Backend Process
+      │◀─── 認證握手（AuthOK）─────────────│
+      │◀─── ParameterStatus / ReadyForQuery─│
+      │                                    │
+      │   （每次連線重複以上流程）           │
+</code></pre><p><strong>每個連線的成本：</strong></p><table><thead><tr><th>成本項目</th><th>說明</th><th>估計消耗</th></tr></thead><tbody><tr><td>OS Process Slot</td><td>每個 Backend 佔用一個 PID</td><td>系統 PID 表資源</td></tr><tr><td>程序記憶體</td><td><code>work_mem</code>、<code>temp_buffers</code> 等基礎開銷</td><td>5–10 MB/連線</td></tr><tr><td>Shared Memory 條目</td><td>ProcArray 中的記錄</td><td>固定大小</td></tr><tr><td><code>fork()</code> 系統呼叫</td><td>記憶體映射初始化、檔案描述符複製</td><td>數毫秒</td></tr><tr><td>認證流程</td><td>密碼驗證、pg_hba.conf 比對、SSL 握手</td><td>數毫秒至數十毫秒</td></tr><tr><td>CPU Context Switch</td><td>連線數越多，OS 排程器負擔越重</td><td>非線性上升</td></tr></tbody></table><p>以一個常見的場景來計算：</p><pre tabindex=0><code>max_connections = 1000，work_mem = 64MB：
+
+  最差情況記憶體消耗 = 1000 × 64MB = 64GB（僅 work_mem）
+  加上 Local Memory 基礎開銷 = 1000 × 8MB = 8GB
+  合計 = 72GB → 遠超多數伺服器實際可用記憶體
+</code></pre><p>Linux 的寫時複製（Copy-on-Write, COW）機制雖可降低 <code>fork()</code> 的記憶體複製成本，但無法消除上述固定開銷。這正是「<strong>連線池比提高 <code>max_connections</code> 更有效率</strong>」的根本原因。</p><p>理想架構是透過連線池將數百個應用端連線壓縮為少量的資料庫實際連線：</p><pre tabindex=0><code>應用程式伺服器（數百個 Thread/Worker）
+          │
+          ▼
+     連線池（PgBouncer）
+     ─────────────────
+     維持 20–50 個實際連線
+          │
+          ▼
+  PostgreSQL（max_connections = 100）
+</code></pre><h3 id=三種-pooling-模式>三種 Pooling 模式</h3><p>連線池軟體通常提供三種模式，差異在於「何時歸還連線給池」：</p><pre tabindex=0><code>Session Pooling（最寬鬆）：
+  客戶端連線 ── 整個 Session 期間佔用一個後端連線 ── 斷線後歸還
+
+Transaction Pooling（最常用）：
+  客戶端連線 ── 每個 Transaction 結束後歸還 ── 下次 Transaction 時重新借用
+
+Statement Pooling（最嚴格）：
+  客戶端連線 ── 每個 SQL 執行後立即歸還 ── 下次 SQL 時重新借用
+</code></pre><table><thead><tr><th>模式</th><th>多路複用效率</th><th>限制</th></tr></thead><tbody><tr><td>Session</td><td>最低（幾乎無多路複用）</td><td>無，功能完整</td></tr><tr><td>Transaction</td><td>高（<strong>生產環境首選</strong>）</td><td>不支援 Session 級別狀態（<code>SET</code>、<code>LISTEN/NOTIFY</code>、Advisory Lock）</td></tr><tr><td>Statement</td><td>最高</td><td>不支援 Multi-statement Transaction、Prepared Statement</td></tr></tbody></table><p><strong>Transaction 模式</strong> 是生產環境最常使用的模式，因為絕大多數 Web 應用的資料庫操作都在單一 Transaction 中完成，不依賴跨 Transaction 的 Session 狀態。</p><h3 id=pgbouncer-核心設定>PgBouncer 核心設定</h3><p><strong>PgBouncer</strong> 是最廣泛使用的 PostgreSQL 連線池，以 C 語言編寫、單執行緒事件迴圈（libevent）架構、記憶體極低（&lt; 2MB），可輕鬆管理數千條客戶端連線。</p><h4 id=安裝>安裝</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># Debian/Ubuntu</span>
+</span></span><span style=display:flex><span>sudo apt install pgbouncer
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># macOS（Homebrew）</span>
+</span></span><span style=display:flex><span>brew install pgbouncer
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 查看版本</span>
+</span></span><span style=display:flex><span>pgbouncer --version
+</span></span></code></pre></div><h4 id=pgbouncerini-設定詳解>pgbouncer.ini 設定詳解</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-ini data-lang=ini><span style=display:flex><span><span style=color:#66d9ef>[databases]</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 語法：別名 = host=主機 port=埠 dbname=資料庫名稱</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>mydb</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>host=127.0.0.1 port=5432 dbname=production</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 可設定多個資料庫</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>analytics</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>host=replica.internal port=5432 dbname=analytics</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 萬用字元（所有資料庫直接轉發）</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>*</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>host=127.0.0.1 port=5432</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>[pgbouncer]</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 監聽設定</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>listen_addr</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>0.0.0.0</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>listen_port</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>6432</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 認證設定</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>auth_type</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>md5</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>auth_file</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>/etc/pgbouncer/userlist.txt</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Pooling 模式</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>pool_mode</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>transaction</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 連線數量控制</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>max_client_conn</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>1000        # 最大客戶端連線數</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>default_pool_size</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>20        # 每個 pool 的預設後端連線數</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>min_pool_size</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>5             # 最小保持的連線數（避免冷啟動延遲）</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>reserve_pool_size</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>5         # 緊急備用連線數</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>max_db_connections</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>100      # 單一資料庫的最大後端連線總數</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 超時設定（秒）</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>server_idle_timeout</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>600     # 後端閒置連線的最大生存時間</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>server_connect_timeout</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>15   # 與後端建立連線的超時</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>query_wait_timeout</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>120      # 等待可用連線的最大時間</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># TLS 設定</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>server_tls_sslmode</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>prefer</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>client_tls_sslmode</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>prefer</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 日誌</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>logfile</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>/var/log/pgbouncer/pgbouncer.log</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>log_pooler_errors</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>1</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 統計資訊</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>stats_period</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>60</span>
+</span></span></code></pre></div><h4 id=使用者認證>使用者認證</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># userlist.txt 格式：&#34;username&#34; &#34;md5hash或明文密碼&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 生成 md5 hash</span>
+</span></span><span style=display:flex><span>echo -n <span style=color:#e6db74>&#34;密碼username&#34;</span> | md5sum
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 範例</span>
+</span></span><span style=display:flex><span><span style=color:#e6db74>&#34;appuser&#34;</span>  <span style=color:#e6db74>&#34;md5abcdef1234567890abcdef1234567890&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#e6db74>&#34;readonly&#34;</span> <span style=color:#e6db74>&#34;md5xxxxxxxxxxxxxxxxxxxxxxxxxxxx&#34;</span>
+</span></span></code></pre></div><p>更安全的做法是使用 <code>auth_query</code> 從 PostgreSQL 動態查詢使用者憑證：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-ini data-lang=ini><span style=display:flex><span><span style=color:#75715e># pgbouncer.ini</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>auth_user</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>pgbouncer_auth</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>auth_query</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>SELECT usename, passwd FROM pg_shadow WHERE usename=$1</span>
+</span></span></code></pre></div><h4 id=transaction-pooling-模式的注意事項>Transaction Pooling 模式的注意事項</h4><p>Transaction 模式下，以下功能無法正常運作，因為它們依賴 Session 級別狀態：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- ❌ SET 指令（下次 Transaction 可能由不同後端處理）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SET</span> search_path <span style=color:#f92672>=</span> myschema;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- ❌ LISTEN/NOTIFY（訂閱在 Session 結束時消失）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>LISTEN</span> my_channel;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- ❌ Advisory Lock（Session 級別的鎖無法跨 Transaction 保持）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> pg_advisory_lock(<span style=color:#ae81ff>12345</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- ❌ Prepared Statement（需 Session 保持）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>PREPARE</span> my_stmt <span style=color:#66d9ef>AS</span> <span style=color:#66d9ef>SELECT</span> ...;
+</span></span></code></pre></div><p><strong>解決方案</strong>：為需要 Session 功能的應用設定獨立的 pool：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-ini data-lang=ini><span style=display:flex><span><span style=color:#66d9ef>[databases]</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>mydb_session</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>host=127.0.0.1 dbname=production pool_mode=session</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>mydb_txn</span>     <span style=color:#f92672>=</span> <span style=color:#e6db74>host=127.0.0.1 dbname=production pool_mode=transaction</span>
+</span></span></code></pre></div><h3 id=pgbouncer-監控與調校>PgBouncer 監控與調校</h3><h4 id=管理控制台>管理控制台</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 連線到 PgBouncer 管理控制台</span>
+</span></span><span style=display:flex><span>psql -h 127.0.0.1 -p <span style=color:#ae81ff>6432</span> -U pgbouncer pgbouncer
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 查看所有 pool 的狀態
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SHOW</span> POOLS;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 關鍵欄位：cl_active, cl_waiting, sv_active, sv_idle, maxwait
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 查看統計資訊
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SHOW</span> STATS;
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 關鍵欄位：total_xact_count, total_query_count, avg_xact_time, avg_query_time
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 查看客戶端/後端連線
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SHOW</span> CLIENTS;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SHOW</span> SERVERS;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 線上重載設定（不中斷服務）
+</span></span></span><span style=display:flex><span>RELOAD;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 維護操作
+</span></span></span><span style=display:flex><span>PAUSE mydb;     <span style=color:#75715e>-- 暫停接收新查詢
+</span></span></span><span style=display:flex><span>RESUME mydb;    <span style=color:#75715e>-- 恢復服務
+</span></span></span><span style=display:flex><span>KILL mydb;      <span style=color:#75715e>-- 關閉特定後端連線
+</span></span></span></code></pre></div><h4 id=關鍵監控指標>關鍵監控指標</h4><table><thead><tr><th>指標</th><th>說明</th><th>警示閾值</th></tr></thead><tbody><tr><td><code>cl_waiting</code></td><td>等待可用連線的客戶端數</td><td>> 0 需注意，持續 > 5 需增加 pool_size</td></tr><tr><td><code>maxwait</code></td><td>等待最久的客戶端等待秒數</td><td>> 30 秒需立即處理</td></tr><tr><td><code>sv_idle</code></td><td>閒置的後端連線數</td><td>長期為 0 表示 pool_size 不足</td></tr><tr><td><code>avg_query_time</code></td><td>平均查詢時間（微秒）</td><td>依業務而定</td></tr><tr><td><code>avg_xact_time</code></td><td>平均 Transaction 時間</td><td>過高表示慢查詢或鎖等待</td></tr></tbody></table><h4 id=設定調校建議>設定調校建議</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-ini data-lang=ini><span style=display:flex><span><span style=color:#75715e># 高並行 OLTP 應用（如 Web API）</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>pool_mode</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>transaction</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>default_pool_size</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>20      # CPU 核心數 × 2</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>max_client_conn</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>2000</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>min_pool_size</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>5</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 分析/報告應用（長查詢）</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>pool_mode</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>session</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>default_pool_size</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>10</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>query_timeout</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>3600        # 允許長達 1 小時的查詢</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>server_idle_timeout</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>1800</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 混合環境：用不同 listen port 區分</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># pgbouncer_oltp.ini → port 6432，transaction mode</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># pgbouncer_analytics.ini → port 6433，session mode</span>
+</span></span></code></pre></div><h3 id=pgpool-ii連線池--中間件>Pgpool-II：連線池 + 中間件</h3><p><strong>Pgpool-II</strong> 除了連線池外，還提供負載平衡、讀寫分離、健康檢查與 Failover 等企業級功能：</p><pre tabindex=0><code>                    ┌──────────────────────────────┐
+                    │          Pgpool-II            │
+                    │                              │
+  應用程式 ────────▶│  ┌──────────┐ ┌───────────┐  │
+                    │  │ 連線池   │ │ 負載平衡  │  │
+                    │  └──────────┘ └───────────┘  │
+                    │  ┌──────────────────────────┐ │
+                    │  │    查詢路由（R/W Split）  │ │
+                    │  │  SELECT → Replica        │ │
+                    │  │  INSERT/UPDATE → Primary │ │
+                    │  └──────────────────────────┘ │
+                    │  ┌──────────┐ ┌───────────┐  │
+                    │  │ 健康檢查 │ │  Watchdog │  │
+                    │  └──────────┘ └───────────┘  │
+                    └──────────────────────────────┘
+                          │              │
+                    ┌─────▼────┐  ┌──────▼────┐
+                    │ Primary  │  │ Replica 1 │
+                    └──────────┘  └───────────┘
+</code></pre><h4 id=核心設定>核心設定</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-ini data-lang=ini><span style=display:flex><span><span style=color:#75715e># pgpool.conf</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>listen_addresses</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;*&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>port</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>5432</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 後端節點</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>backend_hostname0</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;primary.db.internal&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>backend_port0</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>5432</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>backend_weight0</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>1</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>backend_hostname1</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;replica1.db.internal&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>backend_port1</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>5432</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>backend_weight1</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>2            # Replica 接收更多 SELECT 流量</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Pooling 設定</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>num_init_children</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>32         # 子程序數</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>max_pool</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>4                   # 每個子程序的後端連線數</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 負載平衡</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>load_balance_mode</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>on</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 健康檢查</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>health_check_period</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>10</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>health_check_user</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;pgpool_health&#39;</span>
+</span></span></code></pre></div><h4 id=自動讀寫分離>自動讀寫分離</h4><p>Pgpool-II 會自動分析 SQL 語句，將只讀查詢路由到 Replica：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 自動判斷路由目標
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> users <span style=color:#66d9ef>WHERE</span> id <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;       <span style=color:#75715e>-- → Replica（讀）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> orders <span style=color:#66d9ef>VALUES</span> (...);         <span style=color:#75715e>-- → Primary（寫）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>BEGIN</span>; <span style=color:#66d9ef>SELECT</span> <span style=color:#66d9ef>FOR</span> <span style=color:#66d9ef>UPDATE</span> ...; <span style=color:#66d9ef>COMMIT</span>;   <span style=color:#75715e>-- → Primary（寫入語意）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> nextval(<span style=color:#e6db74>&#39;my_sequence&#39;</span>);          <span style=color:#75715e>-- → Primary（序列操作）
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 手動指定路由
+</span></span></span><span style=display:flex><span><span style=color:#75715e>/*NO LOAD BALANCE*/</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> users;   <span style=color:#75715e>-- 強制走 Primary
+</span></span></span></code></pre></div><h3 id=odyssey-與-supavisor>Odyssey 與 Supavisor</h3><h4 id=odysseyyandex-開發>Odyssey（Yandex 開發）</h4><p><strong>Odyssey</strong> 是多執行緒連線池，設計目標是在超高並行場景下超越 PgBouncer：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-hcl data-lang=hcl><span style=display:flex><span><span style=color:#75715e># odyssey.conf
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>listen</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>host</span> <span style=color:#e6db74>&#34;*&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>port</span> <span style=color:#ae81ff>6432</span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>storage</span> <span style=color:#e6db74>&#34;pg_server&#34;</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>type</span> <span style=color:#e6db74>&#34;remote&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>host</span> <span style=color:#e6db74>&#34;127.0.0.1&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>port</span> <span style=color:#ae81ff>5432</span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>database</span> <span style=color:#e6db74>&#34;mydb&#34;</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>user</span> <span style=color:#e6db74>&#34;appuser&#34;</span> {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>authentication</span> <span style=color:#e6db74>&#34;md5&#34;</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>password</span> <span style=color:#e6db74>&#34;secret&#34;</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>storage</span> <span style=color:#e6db74>&#34;pg_server&#34;</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>pool</span> <span style=color:#e6db74>&#34;transaction&#34;</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>pool_size</span> <span style=color:#ae81ff>20</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>pool_timeout</span> <span style=color:#ae81ff>4000</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>pool_ttl</span> <span style=color:#ae81ff>60</span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h4 id=三者比較>三者比較</h4><table><thead><tr><th>特性</th><th>PgBouncer</th><th>Odyssey</th><th>Supavisor</th></tr></thead><tbody><tr><td>架構</td><td>單執行緒（libevent）</td><td>多執行緒</td><td>Actor 模型（Elixir/OTP）</td></tr><tr><td>成熟度</td><td>極高（2007 年起）</td><td>中（2019 年，Yandex 大規模使用）</td><td>較新（Supabase 平台）</td></tr><tr><td>記憶體佔用</td><td>極低（&lt; 2MB）</td><td>較高</td><td>中等</td></tr><tr><td>TLS 彈性</td><td>全局設定</td><td>每個 Route 可獨立設定</td><td>雲端原生 TLS</td></tr><tr><td>多租戶支援</td><td>有限</td><td>一般</td><td>原生支援（雲端設計）</td></tr><tr><td>適用場景</td><td><strong>絕大多數生產環境</strong></td><td>超高並行、精細 TLS 控制</td><td>雲端原生、多租戶 SaaS</td></tr></tbody></table><h3 id=應用層連線池>應用層連線池</h3><p>除了獨立的連線池程序外，應用程式框架和 ORM 也提供了應用層的連線池功能。</p><h4 id=hikaricpjavakotlin>HikariCP（Java/Kotlin）</h4><p>HikariCP 是 Java 生態系中效能最佳的連線池，Spring Boot 的預設選擇：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#75715e>// Spring Boot application.properties</span>
+</span></span><span style=display:flex><span>spring.<span style=color:#a6e22e>datasource</span>.<span style=color:#a6e22e>url</span><span style=color:#f92672>=</span>jdbc:postgresql:<span style=color:#75715e>//localhost:5432/mydb</span>
+</span></span><span style=display:flex><span>spring.<span style=color:#a6e22e>datasource</span>.<span style=color:#a6e22e>username</span><span style=color:#f92672>=</span>appuser
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// HikariCP 設定</span>
+</span></span><span style=display:flex><span>spring.<span style=color:#a6e22e>datasource</span>.<span style=color:#a6e22e>hikari</span>.<span style=color:#a6e22e>maximum</span><span style=color:#f92672>-</span>pool<span style=color:#f92672>-</span>size<span style=color:#f92672>=</span>10
+</span></span><span style=display:flex><span>spring.<span style=color:#a6e22e>datasource</span>.<span style=color:#a6e22e>hikari</span>.<span style=color:#a6e22e>minimum</span><span style=color:#f92672>-</span>idle<span style=color:#f92672>=</span>5
+</span></span><span style=display:flex><span>spring.<span style=color:#a6e22e>datasource</span>.<span style=color:#a6e22e>hikari</span>.<span style=color:#a6e22e>idle</span><span style=color:#f92672>-</span>timeout<span style=color:#f92672>=</span>600000
+</span></span><span style=display:flex><span>spring.<span style=color:#a6e22e>datasource</span>.<span style=color:#a6e22e>hikari</span>.<span style=color:#a6e22e>max</span><span style=color:#f92672>-</span>lifetime<span style=color:#f92672>=</span>1800000
+</span></span><span style=display:flex><span>spring.<span style=color:#a6e22e>datasource</span>.<span style=color:#a6e22e>hikari</span>.<span style=color:#a6e22e>connection</span><span style=color:#f92672>-</span>timeout<span style=color:#f92672>=</span>30000
+</span></span><span style=display:flex><span>spring.<span style=color:#a6e22e>datasource</span>.<span style=color:#a6e22e>hikari</span>.<span style=color:#a6e22e>leak</span><span style=color:#f92672>-</span>detection<span style=color:#f92672>-</span>threshold<span style=color:#f92672>=</span>60000
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#75715e>// 程式碼方式設定</span>
+</span></span><span style=display:flex><span>HikariConfig config <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> HikariConfig();
+</span></span><span style=display:flex><span>config.<span style=color:#a6e22e>setJdbcUrl</span>(<span style=color:#e6db74>&#34;jdbc:postgresql://localhost:5432/mydb&#34;</span>);
+</span></span><span style=display:flex><span>config.<span style=color:#a6e22e>setUsername</span>(<span style=color:#e6db74>&#34;appuser&#34;</span>);
+</span></span><span style=display:flex><span>config.<span style=color:#a6e22e>setMaximumPoolSize</span>(10);
+</span></span><span style=display:flex><span>config.<span style=color:#a6e22e>setMinimumIdle</span>(2);
+</span></span><span style=display:flex><span>config.<span style=color:#a6e22e>setKeepaliveTime</span>(60000);      <span style=color:#75715e>// 防止 idle 斷線</span>
+</span></span><span style=display:flex><span>config.<span style=color:#a6e22e>setMaxLifetime</span>(1800000);      <span style=color:#75715e>// 30 分鐘後強制重建</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>HikariDataSource dataSource <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> HikariDataSource(config);
+</span></span></code></pre></div><h4 id=sqlalchemypython>SQLAlchemy（Python）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> sqlalchemy <span style=color:#f92672>import</span> create_engine
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 標準設定（QueuePool，預設）</span>
+</span></span><span style=display:flex><span>engine <span style=color:#f92672>=</span> create_engine(
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;postgresql+psycopg2://appuser:secret@localhost:5432/mydb&#34;</span>,
+</span></span><span style=display:flex><span>    pool_size<span style=color:#f92672>=</span><span style=color:#ae81ff>5</span>,           <span style=color:#75715e># 核心連線數</span>
+</span></span><span style=display:flex><span>    max_overflow<span style=color:#f92672>=</span><span style=color:#ae81ff>10</span>,       <span style=color:#75715e># 超過 pool_size 時允許額外建立的連線數</span>
+</span></span><span style=display:flex><span>    pool_timeout<span style=color:#f92672>=</span><span style=color:#ae81ff>30</span>,       <span style=color:#75715e># 等待可用連線的超時秒數</span>
+</span></span><span style=display:flex><span>    pool_recycle<span style=color:#f92672>=</span><span style=color:#ae81ff>1800</span>,     <span style=color:#75715e># 連線生存時間（秒）</span>
+</span></span><span style=display:flex><span>    pool_pre_ping<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>,    <span style=color:#75715e># 借出前先 ping，確保連線有效</span>
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 查看連線池狀態</span>
+</span></span><span style=display:flex><span>pool <span style=color:#f92672>=</span> engine<span style=color:#f92672>.</span>pool
+</span></span><span style=display:flex><span>print(<span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;Pool size: </span><span style=color:#e6db74>{</span>pool<span style=color:#f92672>.</span>size()<span style=color:#e6db74>}</span><span style=color:#e6db74>&#34;</span>)
+</span></span><span style=display:flex><span>print(<span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;Checked in: </span><span style=color:#e6db74>{</span>pool<span style=color:#f92672>.</span>checkedin()<span style=color:#e6db74>}</span><span style=color:#e6db74>&#34;</span>)
+</span></span><span style=display:flex><span>print(<span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;Checked out: </span><span style=color:#e6db74>{</span>pool<span style=color:#f92672>.</span>checkedout()<span style=color:#e6db74>}</span><span style=color:#e6db74>&#34;</span>)
+</span></span><span style=display:flex><span>print(<span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;Overflow: </span><span style=color:#e6db74>{</span>pool<span style=color:#f92672>.</span>overflow()<span style=color:#e6db74>}</span><span style=color:#e6db74>&#34;</span>)
+</span></span></code></pre></div><h4 id=typeorm--prismanodejstypescript>TypeORM / Prisma（Node.js/TypeScript）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// TypeORM DataSource 設定
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>AppDataSource</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>DataSource</span>({
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>type</span><span style=color:#f92672>:</span> <span style=color:#e6db74>&#39;postgres&#39;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>host</span><span style=color:#f92672>:</span> <span style=color:#e6db74>&#39;localhost&#39;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>port</span>: <span style=color:#66d9ef>5432</span>,
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>username</span><span style=color:#f92672>:</span> <span style=color:#e6db74>&#39;appuser&#39;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>database</span><span style=color:#f92672>:</span> <span style=color:#e6db74>&#39;mydb&#39;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>extra</span><span style=color:#f92672>:</span> {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>max</span>: <span style=color:#66d9ef>10</span>,                         <span style=color:#75715e>// 最大連線數
+</span></span></span><span style=display:flex><span>        <span style=color:#a6e22e>min</span>: <span style=color:#66d9ef>2</span>,                          <span style=color:#75715e>// 最小連線數
+</span></span></span><span style=display:flex><span>        <span style=color:#a6e22e>idleTimeoutMillis</span>: <span style=color:#66d9ef>600000</span>,       <span style=color:#75715e>// 閒置超時
+</span></span></span><span style=display:flex><span>        <span style=color:#a6e22e>connectionTimeoutMillis</span>: <span style=color:#66d9ef>30000</span>,  <span style=color:#75715e>// 建立連線超時
+</span></span></span><span style=display:flex><span>        <span style=color:#a6e22e>maxUses</span>: <span style=color:#66d9ef>7500</span>,                   <span style=color:#75715e>// 每條連線最多使用次數後重建
+</span></span></span><span style=display:flex><span>    },
+</span></span><span style=display:flex><span>});
+</span></span></code></pre></div><pre tabindex=0><code>// Prisma（透過 URL 參數設定）
+DATABASE_URL=&#34;postgresql://user:pass@localhost:5432/db?connection_limit=10&amp;pool_timeout=30&#34;
+</code></pre><h3 id=連線池大小公式>連線池大小公式</h3><p>選擇正確的 pool size 是效能調校的關鍵。設太大會浪費資源，設太小會造成排隊。</p><h4 id=hikari-公式>Hikari 公式</h4><p>由 HikariCP 作者提出，簡潔有效：</p><pre tabindex=0><code>connections = (core_count × 2) + effective_spindle_count
+</code></pre><ul><li><code>core_count</code>：資料庫伺服器的 CPU 核心數</li><li><code>effective_spindle_count</code>：實際磁碟數（SSD 設為 1）</li></ul><pre tabindex=0><code>範例：8 核 CPU + SSD
+connections = (8 × 2) + 1 = 17
+建議 pool_size ≈ 20（取整 + 少量餘量）
+</code></pre><h4 id=利特爾法則littles-law>利特爾法則（Little&rsquo;s Law）</h4><pre tabindex=0><code>L = λ × W
+
+其中：
+  L = 需要的並行連線數
+  λ = 每秒到達的請求數（QPS）
+  W = 每個請求的平均處理時間（秒）
+
+範例：
+  QPS = 500，平均查詢時間 = 50ms = 0.05s
+  L = 500 × 0.05 = 25 個並行連線
+  建議 pool_size = 25 × 1.2 ≈ 30
+</code></pre><h4 id=常見反模式>常見反模式</h4><pre tabindex=0><code>❌ 反模式：「設大一點比較安全」
+  max_connections = 500，pool_size = 500
+  → 記憶體耗盡，context switch 暴增，效能反而更差
+
+✅ 正確做法：
+  公式計算 → 監控實際使用 → 逐步調整
+  先設小（如 20），發現 cl_waiting 持續偏高再增加
+</code></pre><h4 id=實際調校查詢>實際調校查詢</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 觀察實際連線使用情況
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#66d9ef>COUNT</span>(<span style=color:#f92672>*</span>) <span style=color:#66d9ef>AS</span> active_connections,
+</span></span><span style=display:flex><span>       <span style=color:#66d9ef>state</span>,
+</span></span><span style=display:flex><span>       wait_event_type
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_stat_activity
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> datname <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;mydb&#39;</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>AND</span> backend_type <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;client backend&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>GROUP</span> <span style=color:#66d9ef>BY</span> <span style=color:#66d9ef>state</span>, wait_event_type
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> active_connections <span style=color:#66d9ef>DESC</span>;
+</span></span></code></pre></div><h3 id=pgbouncer-vs-pgpool-ii-選型>PgBouncer vs Pgpool-II 選型</h3><table><thead><tr><th>評估維度</th><th>PgBouncer</th><th>Pgpool-II</th></tr></thead><tbody><tr><td>核心定位</td><td>純連線池</td><td>連線池 + 中間件功能集合</td></tr><tr><td>效能</td><td>極高（overhead 最低）</td><td>稍低（功能更複雜）</td></tr><tr><td>設定複雜度</td><td>低（單一設定檔）</td><td>高（數十個選項）</td></tr><tr><td>讀寫分離</td><td>不支援</td><td><strong>原生支援</strong>，自動路由</td></tr><tr><td>負載平衡</td><td>不支援</td><td><strong>支援</strong>，可設定權重</td></tr><tr><td>Failover</td><td>不支援（需搭配 Patroni）</td><td><strong>內建</strong> Watchdog 機制</td></tr><tr><td>記憶體佔用</td><td>極低（&lt; 2MB）</td><td>中等（多程序架構）</td></tr></tbody></table><p><strong>選型建議：</strong></p><pre tabindex=0><code>選 PgBouncer：
+  ✓ 主要需求是連線多路複用
+  ✓ 已使用 Patroni 等工具管理 HA
+  ✓ 應用層已自行處理讀寫分離
+  ✓ 大多數 Web 應用、API 服務（佔 80% 場景）
+
+選 Pgpool-II：
+  ✓ 需要資料庫層的自動讀寫分離
+  ✓ 需要 Pgpool-II 管理 Failover
+  ✓ 整合傳統應用（無法修改程式碼）
+  ✓ 企業環境需完整中間件方案
+</code></pre><h3 id=連線池健康檢查與連線回收>連線池健康檢查與連線回收</h3><p>長時間閒置的連線可能因為防火牆或 NAT Gateway 的 idle timeout 被靜默中斷，導致取到已失效的連線：</p><pre tabindex=0><code>應用程式 ── 取出閒置 60 分鐘的連線 ──▶ 發送查詢
+                                       │
+                              (連線已被 NAT 丟棄)
+                                       │
+                              Connection reset by peer
+</code></pre><p><strong>各層的防禦機制：</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-ini data-lang=ini><span style=display:flex><span><span style=color:#75715e># PgBouncer 層</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>server_idle_timeout</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>600        # 後端閒置超過 600 秒則關閉</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>server_check_query</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>SELECT 1    # 健康檢查查詢</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>server_check_delay</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>30          # 每 30 秒測試一次閒置連線</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># SQLAlchemy 層</span>
+</span></span><span style=display:flex><span>engine <span style=color:#f92672>=</span> create_engine(url, pool_pre_ping<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- PostgreSQL 伺服器端
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- postgresql.conf
+</span></span></span><span style=display:flex><span>tcp_keepalives_idle <span style=color:#f92672>=</span> <span style=color:#ae81ff>60</span>        <span style=color:#75715e>-- 閒置 60 秒後開始發送 keepalive
+</span></span></span><span style=display:flex><span>tcp_keepalives_interval <span style=color:#f92672>=</span> <span style=color:#ae81ff>10</span>    <span style=color:#75715e>-- keepalive 間隔 10 秒
+</span></span></span><span style=display:flex><span>tcp_keepalives_count <span style=color:#f92672>=</span> <span style=color:#ae81ff>3</span>        <span style=color:#75715e>-- 3 次無回應後斷線
+</span></span></span></code></pre></div><h3 id=prepared-statement-與-transaction-pooling-的兼容性>Prepared Statement 與 Transaction Pooling 的兼容性</h3><p>Transaction Pooling 模式下，Prepared Statement 是常見的陷阱：</p><pre tabindex=0><code>Session A 在 Backend #1：PREPARE my_stmt AS SELECT ...
+Transaction 結束，Backend #1 歸還連線池
+Session A 下次被分配到 Backend #2
+Session A 執行：EXECUTE my_stmt
+→ Backend #2 上不存在 my_stmt → ERROR！
+</code></pre><p><strong>解決方案：</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-ini data-lang=ini><span style=display:flex><span><span style=color:#75715e># 方案一：PgBouncer 1.21+ 內建追蹤</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>[pgbouncer]</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>max_prepared_statements</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>100</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># 方案二：禁用 Server-side Prepared Statements</span>
+</span></span><span style=display:flex><span>engine <span style=color:#f92672>=</span> create_engine(
+</span></span><span style=display:flex><span>    url,
+</span></span><span style=display:flex><span>    connect_args<span style=color:#f92672>=</span>{<span style=color:#e6db74>&#34;options&#34;</span>: <span style=color:#e6db74>&#34;-c plan_cache_mode=force_generic_plan&#34;</span>}
+</span></span><span style=display:flex><span>)
+</span></span></code></pre></div><h3 id=雲端與-serverless-環境>雲端與 Serverless 環境</h3><p>在 Serverless（如 AWS Lambda）環境中，連線池的重要性更加突顯：</p><pre tabindex=0><code>傳統長駐服務：
+  1 個容器 × pool_size 5 = 5 個後端連線   ✓ 可控
+
+Lambda 函數：
+  1000 個並行 Lambda × 嘗試建立連線 = 1000 個同時連線   ❌ 超過 max_connections
+
+解決方案：
+  Lambda → RDS Proxy（AWS 托管 PgBouncer）→ RDS PostgreSQL
+</code></pre><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#75715e># RDS Proxy 連線字串</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 原本直連：</span>
+</span></span><span style=display:flex><span>DATABASE_URL <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;postgresql://user:pass@my-db.abc123.rds.amazonaws.com:5432/mydb&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 透過 RDS Proxy：</span>
+</span></span><span style=display:flex><span>DATABASE_URL <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;postgresql://user:pass@my-db.proxy-abc123.rds.amazonaws.com:5432/mydb&#34;</span>
+</span></span></code></pre></div><h3 id=監控整合prometheus--grafana>監控整合（Prometheus + Grafana）</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#75715e># prometheus.yml</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>scrape_configs</span>:
+</span></span><span style=display:flex><span>  - <span style=color:#f92672>job_name</span>: <span style=color:#e6db74>&#39;pgbouncer&#39;</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>static_configs</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#f92672>targets</span>: [<span style=color:#e6db74>&#39;pgbouncer-exporter:9127&#39;</span>]
+</span></span></code></pre></div><p><strong>關鍵 Grafana 面板指標：</strong></p><table><thead><tr><th>指標</th><th>說明</th></tr></thead><tbody><tr><td><code>pgbouncer_pools_client_active_connections</code></td><td>每個 Pool 的活躍客戶端</td></tr><tr><td><code>pgbouncer_pools_client_waiting_connections</code></td><td>等待中的客戶端（<strong>需設警報</strong>）</td></tr><tr><td><code>pgbouncer_pools_server_idle_connections</code></td><td>閒置後端連線</td></tr><tr><td><code>pgbouncer_stats_queries_duration_microseconds</code></td><td>查詢耗時分佈</td></tr><tr><td><code>pg_connections_used / max_connections</code></td><td>連線使用率（> 80% 需警報）</td></tr></tbody></table><h3 id=高可用架構中的連線池>高可用架構中的連線池</h3><p>在 Patroni 等高可用方案中，連線池需配合 Primary 切換：</p><pre tabindex=0><code>正常狀態：
+  PgBouncer → Primary（:5432）
+               │
+               └─ 複寫 → Standby（:5432）
+
+Failover 發生後：
+  方案一：Patroni + HAProxy
+    PgBouncer → HAProxy（VIP）→ 動態切換後端
+
+  方案二：Patroni REST API 觸發 PgBouncer PAUSE/RESUME
+
+  方案三：pg_auto_failover + DNS 自動更新
+    PgBouncer → 固定 DNS → DNS 指向當前 Primary
+</code></pre><h3 id=總結>總結</h3><p>連線池管理是 PostgreSQL 生產環境部署不可或缺的一環。核心要點：</p><ol><li><strong>Fork 模型成本</strong>：每個連線佔用獨立 Process，提高 <code>max_connections</code> 不如使用連線池</li><li><strong>PgBouncer</strong> 是絕大多數場景的首選，Transaction 模式提供最佳的多路複用效率</li><li><strong>Pgpool-II</strong> 適合需要資料庫層自動讀寫分離與 Failover 的企業環境</li><li><strong>Pool Size 公式</strong>：<code>(CPU核心數 × 2) + 磁碟數</code> 或利特爾法則計算</li><li><strong>Transaction Pooling 限制</strong>：需注意 <code>SET</code>、<code>LISTEN/NOTIFY</code>、Advisory Lock、Prepared Statement 的兼容性</li><li><strong>健康檢查</strong>：多層防禦（PgBouncer <code>server_check_query</code> + 應用層 <code>pool_pre_ping</code> + PostgreSQL <code>tcp_keepalives</code>）</li><li><strong>雲端環境</strong>：使用 RDS Proxy 或外部 PgBouncer 解決 Serverless 連線暴增問題</li></ol><p>下一篇，我們將深入探討 <strong>PostgreSQL 監控與診斷</strong>——掌握 <code>pg_stat_*</code> 系統視圖、<code>EXPLAIN ANALYZE</code> 進階用法、Prometheus + Grafana 監控建置，以及效能瓶頸的系統化排查方法。</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
+</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/postgresql/027-partitioning/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">分區管理：PostgreSQL 宣告式分割表的完整維運指南 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/03</span>
+</a><a href=https://benzhub.github.io/post/postgresql/016-query-planner/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">查詢規劃器與執行計畫：PostgreSQL 如何選擇最優路徑 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/22</span>
+</a><a href=https://benzhub.github.io/post/postgresql/015-index-types/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">索引類型與設計：B-Tree、GIN、GiST、BRIN 完全指南 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/06/21</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/postgresql/031-high-availability/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+<span class="text-sm font-medium">高可用架構（High Availability）：Patroni、repmgr 與自動 Failover | PostgreSQL</span></a></div><div></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
+</a><a href=/tags/acid><span class=tag-pill>acid</span>
+</a><a href=/tags/aggregate><span class=tag-pill>aggregate</span>
+</a><a href=/tags/ai><span class=tag-pill>ai</span>
+</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
+</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
+</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
+</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
+</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
+</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
+</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
+</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
+</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
+</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
+</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
+</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
+</a><a href=/tags/analytics><span class=tag-pill>analytics</span>
+</a><a href=/tags/api><span class=tag-pill>api</span>
+</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
+</a><a href=/tags/audit><span class=tag-pill>audit</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (32)</span>
+</a><a href=/post/javascript/><span class=tag-pill>JavaScript (87)</span>
+</a><a href=/post/django/><span class=tag-pill>Django (44)</span>
+</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
+</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
+</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
+</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
+</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/postgresql/032-connection-pooling/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">連線池管理：PgBouncer、Pgpool-II 與應用層池化完全指南 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/08</p></a><a href=/post/javascript/data-structures--algorithms/025-graph-representation/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">圖的表示法 — 鄰接矩陣、鄰接串列與邊串列完整解析 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/08</p></a><a href=/post/javascript/data-structures--algorithms/024-bit-manipulation/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">位元運算 — AND、OR、XOR 六大運算子與 Bitmask 技巧 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/07</p></a><a href=/post/postgresql/031-high-availability/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">高可用架構（High Availability）：Patroni、repmgr 與自動 Failover | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/07</p></a><a href=/post/javascript/data-structures--algorithms/023-divide-conquer/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">分治法 — Divide and Conquer 三階段與 Master Theorem | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/06</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>
