@@ -1,0 +1,393 @@
+<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>Foreign Data Wrapper（FDW）：跨資料庫查詢的瑞士刀 | PostgreSQL | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="Foreign Data Wrapper（FDW）：跨資料庫查詢的瑞士刀 | PostgreSQL | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="深入解析 PostgreSQL Foreign Data Wrapper（FDW）機制，涵蓋 postgres_fdw、file_fdw 完整設定流程、Pushdown 優化原理、FDW 結合 Table Partitioning 的分散式架構，以及跨資料庫 JOIN、效能調校與常見陷阱。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="深入解析 PostgreSQL Foreign Data Wrapper（FDW）機制，涵蓋 postgres_fdw、file_fdw 完整設定流程、Pushdown 優化原理、FDW 結合 Table Partitioning 的分散式架構，以及跨資料庫 JOIN、效能調校與常見陷阱。"><meta property="og:url" content="https://benzhub.github.io/post/postgresql/037-fdw/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/postgresql/037-fdw/><meta name=twitter:description content="深入解析 PostgreSQL Foreign Data Wrapper（FDW）機制，涵蓋 postgres_fdw、file_fdw 完整設定流程、Pushdown 優化原理、FDW 結合 Table Partitioning 的分散式架構，以及跨資料庫 JOIN、效能調校與常見陷阱。"><meta property="article:published_time" content="2026-07-13T00:00:00+00:00"><meta property="article:updated_time" content="2026-07-13T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/postgresql/037-FDW.png"><meta property="og:image:url" content="https://benzhub.github.io/img/postgresql/037-FDW.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/postgresql/037-fdw/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/postgresql/037-fdw/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"Foreign Data Wrapper（FDW）：跨資料庫查詢的瑞士刀 | PostgreSQL\"","description":"\"深入解析 PostgreSQL Foreign Data Wrapper（FDW）機制，涵蓋 postgres_fdw、file_fdw 完整設定流程、Pushdown 優化原理、FDW 結合 Table Partitioning 的分散式架構，以及跨資料庫 JOIN、效能調校與常見陷阱。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-07-13T00:00:00\u002b00:00","dateModified":"2026-07-13T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/postgresql\/037-FDW.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/postgresql\/037-fdw\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/postgresql\/"},{"@type":"ListItem","position":3,"name":"\"Foreign Data Wrapper（FDW）：跨資料庫查詢的瑞士刀 | PostgreSQL\""}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Foreign Data Wrapper（FDW）：跨資料庫查詢的瑞士刀 | PostgreSQL</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/13</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/postgresql class="tag-pill no-underline">postgresql</a>
+<a href=/tags/fdw class="tag-pill no-underline">FDW</a>
+<a href=/tags/postgres_fdw class="tag-pill no-underline">postgres_fdw</a>
+<a href=/tags/data-integration class="tag-pill no-underline">data-integration</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/postgresql/037-FDW.png alt="Foreign Data Wrapper（FDW）：跨資料庫查詢的瑞士刀 | PostgreSQL"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p><strong>PostgreSQL</strong> 的 <strong>Foreign Data Wrapper（FDW）</strong> 實作了 SQL/MED 標準，讓你透過標準 SQL 語法查詢遠端 <strong>PostgreSQL</strong>、MySQL、Oracle、CSV 檔案甚至 REST API——如同操作本地表格一般。本文從 FDW 三層架構到 <strong>Pushdown</strong> 優化原理，完整解析這個跨資料庫整合的利器。</p></blockquote><h3 id=什麼是-fdw>什麼是 FDW？</h3><p>Foreign Data Wrapper（外部資料封裝器）是 PostgreSQL 實作 <strong>SQL/MED</strong>（Management of External Data，ISO/IEC 9075-9）標準的機制。它將外部資料源的連線、協議轉換、查詢優化等複雜性封裝在擴展層，讓應用程式只需操作 <strong>Foreign Table</strong> 即可存取各種異質資料源。</p><p>PostgreSQL 自 <strong>9.1 版</strong>起提供完整的 SQL/MED 實作，使其能夠作為<strong>資料整合中心（Data Integration Hub）</strong>，統一存取多個外部資料源。</p><h3 id=fdw-三層架構>FDW 三層架構</h3><p>FDW 由三個相互依存的資料庫物件組成，形成完整的連線與存取鏈：</p><pre tabindex=0><code>┌─────────────────────────────────────────────────────┐
+│                    客戶端查詢                          │
+│    SELECT * FROM orders o JOIN remote.users u ...    │
+└────────────────────────┬────────────────────────────┘
+                         │
+                         ▼
+┌─────────────────────────────────────────────────────┐
+│             Foreign Table（外部表格）                   │
+│  定義欄位結構，指向 Foreign Server 上的遠端物件           │
+└────────────────────────┬────────────────────────────┘
+                         │ 使用哪個伺服器？
+                         ▼
+┌─────────────────────────────────────────────────────┐
+│             Foreign Server（外部伺服器）                │
+│  描述遠端資料源的位址、連接埠、資料庫名稱                  │
+└────────────────────────┬────────────────────────────┘
+                         │ 用哪個身份連線？
+                         ▼
+┌─────────────────────────────────────────────────────┐
+│             User Mapping（使用者映射）                  │
+│  將本地使用者身份映射到遠端的認證憑證                      │
+└─────────────────────────────────────────────────────┘
+</code></pre><ul><li><strong>Foreign Data Wrapper</strong>：定義存取特定類型資料源的驅動程式（如 <code>postgres_fdw</code>、<code>file_fdw</code>）</li><li><strong>Foreign Server</strong>：代表一個外部資料源實例，儲存主機、連接埠等連線資訊</li><li><strong>User Mapping</strong>：將本地使用者映射至遠端的認證憑證（帳號、密碼）</li><li><strong>Foreign Table</strong>：本地可見的虛擬表格，定義欄位結構並指向 Foreign Server</li></ul><h3 id=pushdown-優化機制>Pushdown 優化機制</h3><p><strong>Pushdown（下推）</strong> 是 FDW 最重要的效能優化機制。核心思想是將 SQL 操作（WHERE 過濾、JOIN、排序、彙總）推送至遠端執行，減少網路傳輸的資料量。</p><p><strong>沒有 Pushdown</strong>：把整張遠端表格拉回來，本地再過濾 → 傳輸 100 萬筆，只用 100 筆</p><p><strong>有 Pushdown</strong>：遠端先過濾，只傳回結果 → 只傳輸 100 筆，效能大幅提升</p><p><code>postgres_fdw</code> 支援的 Pushdown 類型（截至 PostgreSQL 16）：</p><table><thead><tr><th style=text-align:left>Pushdown 類型</th><th style=text-align:left>說明</th><th style=text-align:left>支援版本</th></tr></thead><tbody><tr><td style=text-align:left>WHERE Pushdown</td><td style=text-align:left>過濾條件在遠端執行</td><td style=text-align:left>9.1+</td></tr><tr><td style=text-align:left>JOIN Pushdown</td><td style=text-align:left>兩張 Foreign Table 的 JOIN 在遠端執行</td><td style=text-align:left>14+</td></tr><tr><td style=text-align:left>Sort Pushdown</td><td style=text-align:left>ORDER BY 在遠端執行</td><td style=text-align:left>14+</td></tr><tr><td style=text-align:left>Aggregate Pushdown</td><td style=text-align:left>COUNT/SUM/AVG 等彙總在遠端執行</td><td style=text-align:left>11+</td></tr><tr><td style=text-align:left>LIMIT/OFFSET Pushdown</td><td style=text-align:left>分頁限制在遠端執行</td><td style=text-align:left>14+</td></tr></tbody></table><h3 id=postgres_fdw-完整設定流程>postgres_fdw 完整設定流程</h3><p><code>postgres_fdw</code> 是 PostgreSQL 官方提供的 FDW，專門用於存取遠端 PostgreSQL 資料庫。</p><h4 id=步驟一安裝擴展>步驟一：安裝擴展</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 安裝 postgres_fdw 擴展
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> EXTENSION <span style=color:#66d9ef>IF</span> <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>EXISTS</span> postgres_fdw;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 確認安裝成功
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> pg_extension <span style=color:#66d9ef>WHERE</span> extname <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;postgres_fdw&#39;</span>;
+</span></span></code></pre></div><h4 id=步驟二建立-foreign-server>步驟二：建立 Foreign Server</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 建立指向遠端 PostgreSQL 實例的 Foreign Server
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> SERVER remote_prod
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>FOREIGN</span> <span style=color:#66d9ef>DATA</span> WRAPPER postgres_fdw
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>OPTIONS</span> (
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>host</span> <span style=color:#e6db74>&#39;10.0.1.100&#39;</span>,       <span style=color:#75715e>-- 遠端主機位址
+</span></span></span><span style=display:flex><span>    port <span style=color:#e6db74>&#39;5432&#39;</span>,              <span style=color:#75715e>-- 遠端連接埠
+</span></span></span><span style=display:flex><span>    dbname <span style=color:#e6db74>&#39;production&#39;</span>,      <span style=color:#75715e>-- 遠端資料庫名稱
+</span></span></span><span style=display:flex><span>    connect_timeout <span style=color:#e6db74>&#39;10&#39;</span>,     <span style=color:#75715e>-- 連線逾時（秒）
+</span></span></span><span style=display:flex><span>    keepalives <span style=color:#e6db74>&#39;1&#39;</span>,           <span style=color:#75715e>-- 啟用 TCP keepalive
+</span></span></span><span style=display:flex><span>    keepalives_idle <span style=color:#e6db74>&#39;60&#39;</span>      <span style=color:#75715e>-- keepalive 閒置時間
+</span></span></span><span style=display:flex><span>  );
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 查看已建立的 Foreign Server
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> pg_foreign_server;
+</span></span></code></pre></div><h4 id=步驟三建立-user-mapping>步驟三：建立 User Mapping</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 為特定本地使用者建立遠端認證映射
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>USER</span> MAPPING <span style=color:#66d9ef>FOR</span> app_user
+</span></span><span style=display:flex><span>  SERVER remote_prod
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>OPTIONS</span> (
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>user</span> <span style=color:#e6db74>&#39;remote_reader&#39;</span>,
+</span></span><span style=display:flex><span>    password <span style=color:#e6db74>&#39;secure_password_here&#39;</span>
+</span></span><span style=display:flex><span>  );
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 為 DBA 建立管理員映射
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>USER</span> MAPPING <span style=color:#66d9ef>FOR</span> postgres
+</span></span><span style=display:flex><span>  SERVER remote_prod
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>OPTIONS</span> (
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>user</span> <span style=color:#e6db74>&#39;remote_admin&#39;</span>,
+</span></span><span style=display:flex><span>    password <span style=color:#e6db74>&#39;admin_password&#39;</span>
+</span></span><span style=display:flex><span>  );
+</span></span></code></pre></div><h4 id=步驟四建立-foreign-table>步驟四：建立 Foreign Table</h4><p><strong>方法 A：手動建立</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 手動定義 Foreign Table（需與遠端表格結構對應）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>FOREIGN</span> <span style=color:#66d9ef>TABLE</span> remote_users (
+</span></span><span style=display:flex><span>  id          BIGINT        <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span>  username    VARCHAR(<span style=color:#ae81ff>100</span>)  <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span>  email       VARCHAR(<span style=color:#ae81ff>255</span>),
+</span></span><span style=display:flex><span>  created_at  <span style=color:#66d9ef>TIMESTAMP</span>     <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span>  status      SMALLINT      <span style=color:#66d9ef>DEFAULT</span> <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span>SERVER remote_prod
+</span></span><span style=display:flex><span><span style=color:#66d9ef>OPTIONS</span> (
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>schema_name</span> <span style=color:#e6db74>&#39;public&#39;</span>,     <span style=color:#75715e>-- 遠端 schema 名稱
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>table_name</span>  <span style=color:#e6db74>&#39;users&#39;</span>       <span style=color:#75715e>-- 遠端表格名稱
+</span></span></span><span style=display:flex><span>);
+</span></span></code></pre></div><p><strong>方法 B：IMPORT FOREIGN SCHEMA 批次匯入</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 建立本地 schema 接收匯入的表格
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>SCHEMA</span> <span style=color:#66d9ef>IF</span> <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>EXISTS</span> remote_schema;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 一次匯入遠端整個 schema 下的所有表格
+</span></span></span><span style=display:flex><span>IMPORT <span style=color:#66d9ef>FOREIGN</span> <span style=color:#66d9ef>SCHEMA</span> <span style=color:#66d9ef>public</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>FROM</span> SERVER remote_prod
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>INTO</span> remote_schema;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 只匯入指定表格
+</span></span></span><span style=display:flex><span>IMPORT <span style=color:#66d9ef>FOREIGN</span> <span style=color:#66d9ef>SCHEMA</span> <span style=color:#66d9ef>public</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>LIMIT</span> <span style=color:#66d9ef>TO</span> (users, orders, products)
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>FROM</span> SERVER remote_prod
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>INTO</span> remote_schema;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 排除特定表格
+</span></span></span><span style=display:flex><span>IMPORT <span style=color:#66d9ef>FOREIGN</span> <span style=color:#66d9ef>SCHEMA</span> <span style=color:#66d9ef>public</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>EXCEPT</span> (audit_logs, temp_tables)
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>FROM</span> SERVER remote_prod
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>INTO</span> remote_schema;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 確認匯入結果
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> foreign_table_schema, foreign_table_name
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> information_schema.foreign_tables
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> <span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>2</span>;
+</span></span></code></pre></div><p><code>IMPORT FOREIGN SCHEMA</code> 是生產環境的首選方法——自動對應欄位類型，省去手動維護的成本。</p><h3 id=file_fdw讀取-csv-與日誌檔>file_fdw：讀取 CSV 與日誌檔</h3><p><code>file_fdw</code> 是官方提供的 FDW，用於將本地檔案系統上的 CSV 或分隔符號格式文字檔映射為 Foreign Table：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 安裝 file_fdw 擴展
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> EXTENSION <span style=color:#66d9ef>IF</span> <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>EXISTS</span> file_fdw;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 建立 Server（每個 file_fdw 通常只需一個）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> SERVER local_files
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>FOREIGN</span> <span style=color:#66d9ef>DATA</span> WRAPPER file_fdw;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 建立 Foreign Table 對應 CSV 檔案
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>FOREIGN</span> <span style=color:#66d9ef>TABLE</span> import_orders (
+</span></span><span style=display:flex><span>  order_id    INTEGER,
+</span></span><span style=display:flex><span>  customer    TEXT,
+</span></span><span style=display:flex><span>  amount      NUMERIC(<span style=color:#ae81ff>10</span>, <span style=color:#ae81ff>2</span>),
+</span></span><span style=display:flex><span>  order_date  DATE,
+</span></span><span style=display:flex><span>  status      TEXT
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span>SERVER local_files
+</span></span><span style=display:flex><span><span style=color:#66d9ef>OPTIONS</span> (
+</span></span><span style=display:flex><span>  filename <span style=color:#e6db74>&#39;/var/lib/postgresql/imports/orders.csv&#39;</span>,
+</span></span><span style=display:flex><span>  format   <span style=color:#e6db74>&#39;csv&#39;</span>,
+</span></span><span style=display:flex><span>  header   <span style=color:#e6db74>&#39;true&#39;</span>,       <span style=color:#75715e>-- 第一列為標頭
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>delimiter</span> <span style=color:#e6db74>&#39;,&#39;</span>,         <span style=color:#75715e>-- 欄位分隔符號
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>null</span>     <span style=color:#e6db74>&#39;NULL&#39;</span>,       <span style=color:#75715e>-- NULL 值的表示方式
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>encoding</span> <span style=color:#e6db74>&#39;UTF8&#39;</span>
+</span></span><span style=display:flex><span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 查詢 CSV 資料（如同本地表格）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> import_orders <span style=color:#66d9ef>WHERE</span> amount <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>1000</span>;
+</span></span></code></pre></div><h4 id=讀取-postgresql-csv-日誌>讀取 PostgreSQL CSV 日誌</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 將 PostgreSQL CSV 日誌映射為可查詢的表格
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>FOREIGN</span> <span style=color:#66d9ef>TABLE</span> pg_log_import (
+</span></span><span style=display:flex><span>  log_time              <span style=color:#66d9ef>TIMESTAMP</span> <span style=color:#66d9ef>WITH</span> TIME <span style=color:#66d9ef>ZONE</span>,
+</span></span><span style=display:flex><span>  user_name             TEXT,
+</span></span><span style=display:flex><span>  database_name         TEXT,
+</span></span><span style=display:flex><span>  process_id            INTEGER,
+</span></span><span style=display:flex><span>  connection_from       TEXT,
+</span></span><span style=display:flex><span>  session_id            TEXT,
+</span></span><span style=display:flex><span>  session_line_num      BIGINT,
+</span></span><span style=display:flex><span>  command_tag           TEXT,
+</span></span><span style=display:flex><span>  session_start_time    <span style=color:#66d9ef>TIMESTAMP</span> <span style=color:#66d9ef>WITH</span> TIME <span style=color:#66d9ef>ZONE</span>,
+</span></span><span style=display:flex><span>  virtual_transaction_id TEXT,
+</span></span><span style=display:flex><span>  transaction_id        BIGINT,
+</span></span><span style=display:flex><span>  error_severity        TEXT,
+</span></span><span style=display:flex><span>  sql_state_code        TEXT,
+</span></span><span style=display:flex><span>  message               TEXT,
+</span></span><span style=display:flex><span>  detail                TEXT,
+</span></span><span style=display:flex><span>  hint                  TEXT,
+</span></span><span style=display:flex><span>  internal_query        TEXT,
+</span></span><span style=display:flex><span>  internal_query_pos    INTEGER,
+</span></span><span style=display:flex><span>  context               TEXT,
+</span></span><span style=display:flex><span>  query                 TEXT,
+</span></span><span style=display:flex><span>  query_pos             INTEGER,
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>location</span>              TEXT,
+</span></span><span style=display:flex><span>  application_name      TEXT
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span>SERVER local_files
+</span></span><span style=display:flex><span><span style=color:#66d9ef>OPTIONS</span> (
+</span></span><span style=display:flex><span>  filename <span style=color:#e6db74>&#39;/var/log/postgresql/postgresql-2026-07-13.csv&#39;</span>,
+</span></span><span style=display:flex><span>  format   <span style=color:#e6db74>&#39;csv&#39;</span>
+</span></span><span style=display:flex><span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 分析日誌中的錯誤
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> log_time, error_severity, sql_state_code, message
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_log_import
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> error_severity <span style=color:#66d9ef>IN</span> (<span style=color:#e6db74>&#39;ERROR&#39;</span>, <span style=color:#e6db74>&#39;FATAL&#39;</span>, <span style=color:#e6db74>&#39;PANIC&#39;</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> log_time <span style=color:#66d9ef>DESC</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LIMIT</span> <span style=color:#ae81ff>20</span>;
+</span></span></code></pre></div><p>注意：<code>file_fdw</code> 只支援<strong>讀取操作</strong>（唯讀），且檔案必須對 PostgreSQL 進程可讀。</p><h3 id=跨資料庫-join-實戰>跨資料庫 JOIN 實戰</h3><p>以下示範實際業務場景：本地資料庫存放訂單，遠端資料庫存放客戶資料：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- JOIN 本地訂單與遠端客戶資料
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>  o.order_id,
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>c</span>.name        <span style=color:#66d9ef>AS</span> customer_name,
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>c</span>.email,
+</span></span><span style=display:flex><span>  o.total,
+</span></span><span style=display:flex><span>  o.status,
+</span></span><span style=display:flex><span>  o.created_at
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> orders o
+</span></span><span style=display:flex><span><span style=color:#66d9ef>JOIN</span> remote_schema.customers <span style=color:#66d9ef>c</span> <span style=color:#66d9ef>ON</span> <span style=color:#66d9ef>c</span>.id <span style=color:#f92672>=</span> o.customer_id
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> o.status <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;pending&#39;</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>AND</span> o.created_at <span style=color:#f92672>&gt;=</span> <span style=color:#66d9ef>CURRENT_DATE</span> <span style=color:#f92672>-</span> INTERVAL <span style=color:#e6db74>&#39;7 days&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> o.total <span style=color:#66d9ef>DESC</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>LIMIT</span> <span style=color:#ae81ff>100</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 彙總查詢：各國客戶的總消費金額
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>c</span>.country,
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>COUNT</span>(o.order_id)   <span style=color:#66d9ef>AS</span> order_count,
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>SUM</span>(o.total)        <span style=color:#66d9ef>AS</span> total_revenue
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> orders o
+</span></span><span style=display:flex><span><span style=color:#66d9ef>JOIN</span> remote_schema.customers <span style=color:#66d9ef>c</span> <span style=color:#66d9ef>ON</span> <span style=color:#66d9ef>c</span>.id <span style=color:#f92672>=</span> o.customer_id
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> <span style=color:#66d9ef>c</span>.status <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;active&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>GROUP</span> <span style=color:#66d9ef>BY</span> <span style=color:#66d9ef>c</span>.country
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> total_revenue <span style=color:#66d9ef>DESC</span>;
+</span></span></code></pre></div><h3 id=用-explain-驗證-pushdown>用 EXPLAIN 驗證 Pushdown</h3><p>使用 <code>EXPLAIN (VERBOSE, ANALYZE)</code> 可以查看實際發送至遠端的 SQL 語句：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 查看查詢計畫，確認 Pushdown 是否生效
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>EXPLAIN</span> (<span style=color:#66d9ef>VERBOSE</span>, <span style=color:#66d9ef>ANALYZE</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#66d9ef>c</span>.name, <span style=color:#66d9ef>SUM</span>(o.total)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> orders o
+</span></span><span style=display:flex><span><span style=color:#66d9ef>JOIN</span> remote_schema.customers <span style=color:#66d9ef>c</span> <span style=color:#66d9ef>ON</span> <span style=color:#66d9ef>c</span>.id <span style=color:#f92672>=</span> o.customer_id
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> <span style=color:#66d9ef>c</span>.country <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;TW&#39;</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>AND</span> o.created_at <span style=color:#f92672>&gt;=</span> <span style=color:#e6db74>&#39;2026-01-01&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>GROUP</span> <span style=color:#66d9ef>BY</span> <span style=color:#66d9ef>c</span>.name;
+</span></span></code></pre></div><p>典型輸出（Pushdown 生效時）：</p><pre tabindex=0><code>HashAggregate  (cost=... rows=... width=...)
+  -&gt;  Hash Join  (cost=... rows=... width=...)
+        Hash Cond: (o.customer_id = c.id)
+        -&gt;  Seq Scan on orders o  (cost=...)
+              Filter: (created_at &gt;= &#39;2026-01-01&#39;)
+        -&gt;  Hash  (cost=... rows=... width=...)
+              -&gt;  Foreign Scan on customers c  (cost=...)
+                    Output: c.name, c.id
+                    Remote SQL: SELECT id, name FROM public.customers
+                                WHERE ((country = &#39;TW&#39;))
+</code></pre><p><code>Remote SQL</code> 欄位顯示實際傳送至遠端的 SQL——確認 WHERE 條件已被成功下推。</p><h3 id=fdw-結合-table-partitioning分散式架構>FDW 結合 Table Partitioning：分散式架構</h3><p>PostgreSQL 的宣告式分割可以與 FDW 結合，建立橫跨多台實例的分散式查詢架構：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 建立分割主表（本地）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> sales (
+</span></span><span style=display:flex><span>  sale_id    BIGINT   <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span>  region     TEXT     <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span>  amount     NUMERIC,
+</span></span><span style=display:flex><span>  sale_date  DATE     <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>
+</span></span><span style=display:flex><span>) PARTITION <span style=color:#66d9ef>BY</span> LIST (region);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 建立各遠端伺服器
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> SERVER shard_apac <span style=color:#66d9ef>FOREIGN</span> <span style=color:#66d9ef>DATA</span> WRAPPER postgres_fdw
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>OPTIONS</span> (<span style=color:#66d9ef>host</span> <span style=color:#e6db74>&#39;10.0.1.10&#39;</span>, port <span style=color:#e6db74>&#39;5432&#39;</span>, dbname <span style=color:#e6db74>&#39;sales_db&#39;</span>);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> SERVER shard_emea <span style=color:#66d9ef>FOREIGN</span> <span style=color:#66d9ef>DATA</span> WRAPPER postgres_fdw
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>OPTIONS</span> (<span style=color:#66d9ef>host</span> <span style=color:#e6db74>&#39;10.0.1.20&#39;</span>, port <span style=color:#e6db74>&#39;5432&#39;</span>, dbname <span style=color:#e6db74>&#39;sales_db&#39;</span>);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> SERVER shard_amer <span style=color:#66d9ef>FOREIGN</span> <span style=color:#66d9ef>DATA</span> WRAPPER postgres_fdw
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>OPTIONS</span> (<span style=color:#66d9ef>host</span> <span style=color:#e6db74>&#39;10.0.1.30&#39;</span>, port <span style=color:#e6db74>&#39;5432&#39;</span>, dbname <span style=color:#e6db74>&#39;sales_db&#39;</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 建立 User Mapping（略：同前述步驟三）
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 建立 Foreign Table 作為分割分片
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>FOREIGN</span> <span style=color:#66d9ef>TABLE</span> sales_apac
+</span></span><span style=display:flex><span>  PARTITION <span style=color:#66d9ef>OF</span> sales <span style=color:#66d9ef>FOR</span> <span style=color:#66d9ef>VALUES</span> <span style=color:#66d9ef>IN</span> (<span style=color:#e6db74>&#39;TW&#39;</span>, <span style=color:#e6db74>&#39;JP&#39;</span>, <span style=color:#e6db74>&#39;SG&#39;</span>, <span style=color:#e6db74>&#39;AU&#39;</span>, <span style=color:#e6db74>&#39;KR&#39;</span>)
+</span></span><span style=display:flex><span>  SERVER shard_apac
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>OPTIONS</span> (<span style=color:#66d9ef>schema_name</span> <span style=color:#e6db74>&#39;public&#39;</span>, <span style=color:#66d9ef>table_name</span> <span style=color:#e6db74>&#39;sales&#39;</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>FOREIGN</span> <span style=color:#66d9ef>TABLE</span> sales_emea
+</span></span><span style=display:flex><span>  PARTITION <span style=color:#66d9ef>OF</span> sales <span style=color:#66d9ef>FOR</span> <span style=color:#66d9ef>VALUES</span> <span style=color:#66d9ef>IN</span> (<span style=color:#e6db74>&#39;DE&#39;</span>, <span style=color:#e6db74>&#39;FR&#39;</span>, <span style=color:#e6db74>&#39;GB&#39;</span>, <span style=color:#e6db74>&#39;NL&#39;</span>, <span style=color:#e6db74>&#39;IT&#39;</span>)
+</span></span><span style=display:flex><span>  SERVER shard_emea
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>OPTIONS</span> (<span style=color:#66d9ef>schema_name</span> <span style=color:#e6db74>&#39;public&#39;</span>, <span style=color:#66d9ef>table_name</span> <span style=color:#e6db74>&#39;sales&#39;</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>FOREIGN</span> <span style=color:#66d9ef>TABLE</span> sales_amer
+</span></span><span style=display:flex><span>  PARTITION <span style=color:#66d9ef>OF</span> sales <span style=color:#66d9ef>FOR</span> <span style=color:#66d9ef>VALUES</span> <span style=color:#66d9ef>IN</span> (<span style=color:#e6db74>&#39;US&#39;</span>, <span style=color:#e6db74>&#39;CA&#39;</span>, <span style=color:#e6db74>&#39;MX&#39;</span>, <span style=color:#e6db74>&#39;BR&#39;</span>)
+</span></span><span style=display:flex><span>  SERVER shard_amer
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>OPTIONS</span> (<span style=color:#66d9ef>schema_name</span> <span style=color:#e6db74>&#39;public&#39;</span>, <span style=color:#66d9ef>table_name</span> <span style=color:#e6db74>&#39;sales&#39;</span>);
+</span></span></code></pre></div><p>查詢時，PostgreSQL 自動根據分割鍵路由至對應分片：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- Partition Pruning + FDW Pushdown 雙重優化
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 只查詢 shard_apac，不會存取其他分片
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> region, <span style=color:#66d9ef>SUM</span>(amount) <span style=color:#66d9ef>AS</span> total
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> sales
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> region <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;TW&#39;</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>AND</span> sale_date <span style=color:#f92672>&gt;=</span> <span style=color:#e6db74>&#39;2026-01-01&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>GROUP</span> <span style=color:#66d9ef>BY</span> region;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 跨分片彙總：自動查詢所有分片並合併結果
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> region, <span style=color:#66d9ef>SUM</span>(amount)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> sales
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> sale_date <span style=color:#66d9ef>BETWEEN</span> <span style=color:#e6db74>&#39;2026-01-01&#39;</span> <span style=color:#66d9ef>AND</span> <span style=color:#e6db74>&#39;2026-03-31&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>GROUP</span> <span style=color:#66d9ef>BY</span> region
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> <span style=color:#ae81ff>2</span> <span style=color:#66d9ef>DESC</span>;
+</span></span></code></pre></div><p>這種架構實現了類似 Citus 的水平擴展，而 <strong>Partition Pruning</strong> 確保查詢只存取相關分片。</p><h3 id=效能調校>效能調校</h3><h4 id=fetch_size-調整>fetch_size 調整</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- fetch_size 控制每次批次取回的列數（預設 100，對大型結果集過低）
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- Server 層級設定
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> SERVER remote_prod <span style=color:#66d9ef>OPTIONS</span> (<span style=color:#66d9ef>SET</span> fetch_size <span style=color:#e6db74>&#39;5000&#39;</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- Foreign Table 層級設定（覆蓋 Server 設定）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>FOREIGN</span> <span style=color:#66d9ef>TABLE</span> remote_schema.large_table
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>OPTIONS</span> (<span style=color:#66d9ef>ADD</span> fetch_size <span style=color:#e6db74>&#39;10000&#39;</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- batch_size：INSERT 批次大小（PostgreSQL 14 新增）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> SERVER remote_prod <span style=color:#66d9ef>OPTIONS</span> (<span style=color:#66d9ef>ADD</span> batch_size <span style=color:#e6db74>&#39;100&#39;</span>);
+</span></span></code></pre></div><h4 id=非同步執行postgresql-14>非同步執行（PostgreSQL 14+）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- async_capable 允許非同步並行掃描多個 Foreign Table
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> SERVER remote_prod <span style=color:#66d9ef>OPTIONS</span> (<span style=color:#66d9ef>ADD</span> async_capable <span style=color:#e6db74>&#39;true&#39;</span>);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> SERVER remote_backup <span style=color:#66d9ef>OPTIONS</span> (<span style=color:#66d9ef>ADD</span> async_capable <span style=color:#e6db74>&#39;true&#39;</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 設定並行工作者數量
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SET</span> max_parallel_workers_per_gather <span style=color:#f92672>=</span> <span style=color:#ae81ff>4</span>;
+</span></span></code></pre></div><h4 id=use_remote_estimate>use_remote_estimate</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 讓規劃器使用遠端 EXPLAIN 取得更準確的成本估算
+</span></span></span><span style=display:flex><span><span style=color:#75715e>-- 代價：每次規劃都會對遠端發出 EXPLAIN 查詢
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> SERVER remote_prod <span style=color:#66d9ef>OPTIONS</span> (<span style=color:#66d9ef>ADD</span> use_remote_estimate <span style=color:#e6db74>&#39;true&#39;</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 或手動調整統計樣本大小
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>FOREIGN</span> <span style=color:#66d9ef>TABLE</span> remote_schema.customers
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>COLUMN</span> id <span style=color:#66d9ef>SET</span> <span style=color:#66d9ef>STATISTICS</span> <span style=color:#ae81ff>1000</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ANALYZE</span> remote_schema.customers;
+</span></span></code></pre></div><h4 id=連線管理>連線管理</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- keep_connections 減少重複建立連線的成本（預設開啟）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> SERVER remote_prod <span style=color:#66d9ef>OPTIONS</span> (<span style=color:#66d9ef>SET</span> keep_connections <span style=color:#e6db74>&#39;on&#39;</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 查看目前的 FDW 連線狀態
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> postgres_fdw_get_connections();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 手動清除閒置的 FDW 連線
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> postgres_fdw_disconnect(<span style=color:#e6db74>&#39;remote_prod&#39;</span>);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> postgres_fdw_disconnect_all();
+</span></span></code></pre></div><h3 id=常見陷阱與注意事項>常見陷阱與注意事項</h3><table><thead><tr><th style=text-align:left>陷阱</th><th style=text-align:left>說明</th><th style=text-align:left>建議</th></tr></thead><tbody><tr><td style=text-align:left>交易一致性</td><td style=text-align:left>FDW 不完全支援分散式 2PC</td><td style=text-align:left>盡量只做讀取，寫入改用本地 queue</td></tr><tr><td style=text-align:left>統計資訊不準</td><td style=text-align:left>Foreign Table 預設統計不準確</td><td style=text-align:left>啟用 <code>use_remote_estimate</code> 或定期 <code>ANALYZE</code></td></tr><tr><td style=text-align:left>Pushdown 失效</td><td style=text-align:left>使用本地函數或型別轉換會阻止 Pushdown</td><td style=text-align:left>用 <code>EXPLAIN</code> 確認 Remote SQL</td></tr><tr><td style=text-align:left>fetch_size 過低</td><td style=text-align:left>預設 100，大量資料查詢效能差</td><td style=text-align:left>調高至 1000-10000</td></tr><tr><td style=text-align:left>密碼明文存放</td><td style=text-align:left>User Mapping 密碼存在 <code>pg_user_mappings</code></td><td style=text-align:left>限制 <code>pg_user_mappings</code> 存取權限</td></tr><tr><td style=text-align:left>SAVEPOINT 相容性</td><td style=text-align:left>ROLLBACK TO SAVEPOINT 會關閉遠端游標</td><td style=text-align:left>避免在 FDW 查詢中使用 SAVEPOINT</td></tr><tr><td style=text-align:left>時區不一致</td><td style=text-align:left>本地與遠端時區設定不同</td><td style=text-align:left>統一使用 UTC</td></tr><tr><td style=text-align:left>網路延遲</td><td style=text-align:left>高延遲網路會拖慢所有查詢</td><td style=text-align:left>優先使用 Pushdown，減少往返次數</td></tr></tbody></table><h3 id=其他常用-fdw>其他常用 FDW</h3><h4 id=oracle_fdw>oracle_fdw</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 存取 Oracle 資料庫
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> EXTENSION oracle_fdw;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> SERVER oracle_db
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>FOREIGN</span> <span style=color:#66d9ef>DATA</span> WRAPPER oracle_fdw
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>OPTIONS</span> (dbserver <span style=color:#e6db74>&#39;//10.0.1.50:1521/ORCL&#39;</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>USER</span> MAPPING <span style=color:#66d9ef>FOR</span> app_user
+</span></span><span style=display:flex><span>  SERVER oracle_db
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>OPTIONS</span> (<span style=color:#66d9ef>user</span> <span style=color:#e6db74>&#39;oracle_user&#39;</span>, password <span style=color:#e6db74>&#39;oracle_pass&#39;</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>FOREIGN</span> <span style=color:#66d9ef>TABLE</span> oracle_customers (
+</span></span><span style=display:flex><span>  cust_id   NUMERIC(<span style=color:#ae81ff>10</span>),
+</span></span><span style=display:flex><span>  cust_name VARCHAR(<span style=color:#ae81ff>100</span>),
+</span></span><span style=display:flex><span>  region    VARCHAR(<span style=color:#ae81ff>50</span>)
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span>SERVER oracle_db
+</span></span><span style=display:flex><span><span style=color:#66d9ef>OPTIONS</span> (<span style=color:#66d9ef>schema</span> <span style=color:#e6db74>&#39;HR&#39;</span>, <span style=color:#66d9ef>table</span> <span style=color:#e6db74>&#39;CUSTOMERS&#39;</span>);
+</span></span></code></pre></div><h4 id=mysql_fdw>mysql_fdw</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 存取 MySQL / MariaDB
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> EXTENSION mysql_fdw;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> SERVER mysql_db
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>FOREIGN</span> <span style=color:#66d9ef>DATA</span> WRAPPER mysql_fdw
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>OPTIONS</span> (<span style=color:#66d9ef>host</span> <span style=color:#e6db74>&#39;10.0.1.60&#39;</span>, port <span style=color:#e6db74>&#39;3306&#39;</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>USER</span> MAPPING <span style=color:#66d9ef>FOR</span> postgres
+</span></span><span style=display:flex><span>  SERVER mysql_db
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>OPTIONS</span> (username <span style=color:#e6db74>&#39;mysql_user&#39;</span>, password <span style=color:#e6db74>&#39;mysql_pass&#39;</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>FOREIGN</span> <span style=color:#66d9ef>TABLE</span> mysql_products (
+</span></span><span style=display:flex><span>  id    INT         <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span>  name  VARCHAR(<span style=color:#ae81ff>255</span>),
+</span></span><span style=display:flex><span>  price NUMERIC(<span style=color:#ae81ff>10</span>, <span style=color:#ae81ff>2</span>),
+</span></span><span style=display:flex><span>  stock INT
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span>SERVER mysql_db
+</span></span><span style=display:flex><span><span style=color:#66d9ef>OPTIONS</span> (dbname <span style=color:#e6db74>&#39;shop&#39;</span>, <span style=color:#66d9ef>table_name</span> <span style=color:#e6db74>&#39;products&#39;</span>);
+</span></span></code></pre></div><h3 id=fdw-pushdown-支援矩陣>FDW Pushdown 支援矩陣</h3><table><thead><tr><th style=text-align:left>FDW</th><th style=text-align:left>WHERE</th><th style=text-align:left>JOIN</th><th style=text-align:left>Sort</th><th style=text-align:left>Aggregate</th><th style=text-align:left>LIMIT</th><th style=text-align:left>寫入</th></tr></thead><tbody><tr><td style=text-align:left>postgres_fdw</td><td style=text-align:left>完整</td><td style=text-align:left>完整（14+）</td><td style=text-align:left>完整（14+）</td><td style=text-align:left>完整（11+）</td><td style=text-align:left>完整（14+）</td><td style=text-align:left>支援</td></tr><tr><td style=text-align:left>file_fdw</td><td style=text-align:left>本地過濾</td><td style=text-align:left>不支援</td><td style=text-align:left>不支援</td><td style=text-align:left>不支援</td><td style=text-align:left>不支援</td><td style=text-align:left>不支援</td></tr><tr><td style=text-align:left>oracle_fdw</td><td style=text-align:left>完整</td><td style=text-align:left>部分</td><td style=text-align:left>部分</td><td style=text-align:left>部分</td><td style=text-align:left>支援</td><td style=text-align:left>支援</td></tr><tr><td style=text-align:left>mysql_fdw</td><td style=text-align:left>完整</td><td style=text-align:left>部分</td><td style=text-align:left>部分</td><td style=text-align:left>部分</td><td style=text-align:left>支援</td><td style=text-align:left>支援</td></tr><tr><td style=text-align:left>tds_fdw</td><td style=text-align:left>部分</td><td style=text-align:left>不支援</td><td style=text-align:left>不支援</td><td style=text-align:left>不支援</td><td style=text-align:left>支援</td><td style=text-align:left>支援</td></tr></tbody></table><p>即使 FDW 宣告支援某類 Pushdown，規劃器仍可能基於成本估算選擇不使用——務必透過 <code>EXPLAIN</code> 確認。</p><h3 id=fdw-版本演進>FDW 版本演進</h3><table><thead><tr><th style=text-align:left>PostgreSQL 版本</th><th style=text-align:left>FDW 重要功能</th></tr></thead><tbody><tr><td style=text-align:left>9.1</td><td style=text-align:left>基本 FDW API，可讀取外部資料</td></tr><tr><td style=text-align:left>9.3</td><td style=text-align:left>可寫入 Foreign Table（INSERT/UPDATE/DELETE）</td></tr><tr><td style=text-align:left>9.6</td><td style=text-align:left>Upper-Relation Pushdown API</td></tr><tr><td style=text-align:left>10</td><td style=text-align:left>宣告式分割 + FDW 可作為分片</td></tr><tr><td style=text-align:left>11</td><td style=text-align:left>postgres_fdw Aggregate Pushdown</td></tr><tr><td style=text-align:left>12</td><td style=text-align:left>Partition-wise JOIN/Aggregate Pushdown</td></tr><tr><td style=text-align:left>14</td><td style=text-align:left>async_capable 非同步掃描、Sort/LIMIT Pushdown、batch_size</td></tr><tr><td style=text-align:left>15</td><td style=text-align:left>RLS 與 FDW 整合改善</td></tr><tr><td style=text-align:left>16</td><td style=text-align:left>postgres_fdw 效能改善，更精準 Cost 估算</td></tr><tr><td style=text-align:left>17</td><td style=text-align:left>Foreign Table 統計資訊收集效能優化</td></tr></tbody></table><h3 id=總結>總結</h3><p><strong>Foreign Data Wrapper</strong> 是 PostgreSQL 作為資料整合中心的核心機制。掌握以下重點：</p><ol><li><strong>三層架構</strong>：Foreign Data Wrapper → Foreign Server → User Mapping → Foreign Table</li><li><strong>Pushdown 是效能關鍵</strong>：用 <code>EXPLAIN (VERBOSE)</code> 確認 <code>Remote SQL</code> 確實包含過濾條件</li><li><strong><code>IMPORT FOREIGN SCHEMA</code></strong> 比手動建立 Foreign Table 更省事、更不容易出錯</li><li><strong>fetch_size</strong> 預設 100 太低，生產環境建議調至 1000-10000</li><li><strong>FDW + Partitioning</strong> 可實現類似 Citus 的分散式查詢架構</li><li><strong>交易一致性限制</strong>：FDW 不支援完整的 2PC，跨庫寫入需謹慎</li></ol><p>下一篇，我們將探討 <strong>PostgreSQL 規則系統（Rule System）</strong>——了解 PostgreSQL 獨有的查詢重寫機制，以及它與 Trigger 的差異和適用場景。</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
+</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/postgresql/036-useful-extensions/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">PostgreSQL 實用擴充精選：pg_cron、pg_repack 與 pg_hint_plan | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/12</span>
+</a><a href=https://benzhub.github.io/post/postgresql/035-extensions/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">PostgreSQL 擴充模組生態：從 pg_stat_statements 到 PostGIS | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/11</span>
+</a><a href=https://benzhub.github.io/post/postgresql/034-configuration-tuning/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">PostgreSQL 組態調校：從預設值到生產級效能 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/10</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/postgresql/036-useful-extensions/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+<span class="text-sm font-medium">PostgreSQL 實用擴充精選：pg_cron、pg_repack 與 pg_hint_plan | PostgreSQL</span></a></div><div><a href=https://benzhub.github.io/post/postgresql/038-rules-and-events/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+<span class="text-sm font-medium">Rules 與 LISTEN/NOTIFY：查詢改寫與即時事件通知 | PostgreSQL</span></a></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
+</a><a href=/tags/acid><span class=tag-pill>acid</span>
+</a><a href=/tags/aggregate><span class=tag-pill>aggregate</span>
+</a><a href=/tags/ai><span class=tag-pill>ai</span>
+</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
+</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
+</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
+</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
+</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
+</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
+</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
+</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
+</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
+</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
+</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
+</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
+</a><a href=/tags/analytics><span class=tag-pill>analytics</span>
+</a><a href=/tags/api><span class=tag-pill>api</span>
+</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
+</a><a href=/tags/audit><span class=tag-pill>audit</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (39)</span>
+</a><a href=/post/javascript/><span class=tag-pill>JavaScript (94)</span>
+</a><a href=/post/django/><span class=tag-pill>Django (44)</span>
+</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
+</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
+</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
+</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
+</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/postgresql/039-other-languages/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">PL/Python、PL/Perl、PL/v8：PostgreSQL 的多語言程序擴展 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/15</p></a><a href=/post/javascript/data-structures--algorithms/032-string-algorithms/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">字串演算法完全指南 — KMP、Rabin-Karp、Z-Algorithm 與 Aho-Corasick | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/15</p></a><a href=/post/postgresql/038-rules-and-events/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Rules 與 LISTEN/NOTIFY：查詢改寫與即時事件通知 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/14</p></a><a href=/post/javascript/data-structures--algorithms/031-network-flow/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">網路流完全指南 — Ford-Fulkerson、Dinic 演算法與最大流最小割定理 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/14</p></a><a href=/post/postgresql/037-fdw/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Foreign Data Wrapper（FDW）：跨資料庫查詢的瑞士刀 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/13</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>

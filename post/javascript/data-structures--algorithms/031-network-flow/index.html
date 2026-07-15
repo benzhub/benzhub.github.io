@@ -1,0 +1,795 @@
+<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>網路流完全指南 — Ford-Fulkerson、Dinic 演算法與最大流最小割定理 | 資料結構與演算法 | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="網路流完全指南 — Ford-Fulkerson、Dinic 演算法與最大流最小割定理 | 資料結構與演算法 | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="深入解析網路流演算法，從 Ford-Fulkerson 到 Dinic's Algorithm，掌握最大流最小割定理、增廣路徑法、二分圖匹配等核心概念，搭配 JavaScript/TypeScript 與 C++ 完整實作與 LeetCode 練習題"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="深入解析網路流演算法，從 Ford-Fulkerson 到 Dinic's Algorithm，掌握最大流最小割定理、增廣路徑法、二分圖匹配等核心概念，搭配 JavaScript/TypeScript 與 C++ 完整實作與 LeetCode 練習題"><meta property="og:url" content="https://benzhub.github.io/post/javascript/data-structures--algorithms/031-network-flow/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/javascript/data-structures--algorithms/031-network-flow/><meta name=twitter:description content="深入解析網路流演算法，從 Ford-Fulkerson 到 Dinic's Algorithm，掌握最大流最小割定理、增廣路徑法、二分圖匹配等核心概念，搭配 JavaScript/TypeScript 與 C++ 完整實作與 LeetCode 練習題"><meta property="article:published_time" content="2026-07-14T00:00:00+00:00"><meta property="article:updated_time" content="2026-07-14T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/javascript/Data%20Structures%20&%20Algorithms/031-Network-Flow.png"><meta property="og:image:url" content="https://benzhub.github.io/img/javascript/Data%20Structures%20&%20Algorithms/031-Network-Flow.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/javascript/data-structures--algorithms/031-network-flow/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/javascript/data-structures--algorithms/031-network-flow/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"網路流完全指南 — Ford-Fulkerson、Dinic 演算法與最大流最小割定理 | 資料結構與演算法\"","description":"\"深入解析網路流演算法，從 Ford-Fulkerson 到 Dinic's Algorithm，掌握最大流最小割定理、增廣路徑法、二分圖匹配等核心概念，搭配 JavaScript/TypeScript 與 C++ 完整實作與 LeetCode 練習題\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-07-14T00:00:00\u002b00:00","dateModified":"2026-07-14T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/javascript\/Data%20Structures%20\u0026%20Algorithms\/031-Network-Flow.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/javascript\/data-structures--algorithms\/031-network-flow\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/javascript\/"},{"@type":"ListItem","position":3,"name":"\"網路流完全指南 — Ford-Fulkerson、Dinic 演算法與最大流最小割定理 | 資料結構與演算法\""}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"\"什麼是網路流中的殘餘網路（Residual Network）？\"","acceptedAnswer":{"@type":"Answer","text":"\"殘餘網路是最大流演算法的核心工具。對於原圖中每條邊 (u,v)，殘餘網路包含兩條邊：正向殘餘邊（容量 = 原容量 - 已用流量，表示還能推多少）和反向殘餘邊（容量 = 已用流量，表示能退回多少）。反向邊讓演算法能『反悔』之前的路由決策，是找到最優解的關鍵。\""}},{"@type":"Question","name":"\"Ford-Fulkerson 和 Dinic 演算法有什麼差別？該選哪個？\"","acceptedAnswer":{"@type":"Answer","text":"\"Ford-Fulkerson 用 DFS 找增廣路徑，時間複雜度 O(E × |f*|) 依賴最大流值，容量大時可能很慢。Edmonds-Karp（BFS 版本）改善為 O(V × E²)。Dinic 用 BFS 建分層圖 + DFS 找阻塞流，複雜度 O(V² × E)，是競程和面試中的首選。實務上 Dinic 配合當前弧優化，效能遠超 Edmonds-Karp。\""}},{"@type":"Question","name":"\"最大流最小割定理在實際開發中有什麼應用？\"","acceptedAnswer":{"@type":"Answer","text":"\"最大流最小割定理表明：從源點到匯點的最大流量等於最小割的容量。實際應用包括：(1) 影像分割——用最小割將像素分為前景與背景；(2) 網路可靠性分析——找出瓶頸鏈路；(3) 任務分配——用二分圖匹配分配工作；(4) 航線規劃——最大化運輸吞吐量。\""}}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">網路流完全指南 — Ford-Fulkerson、Dinic 演算法與最大流最小割定理 | 資料結構與演算法</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/14</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/javascript class="tag-pill no-underline">javascript</a>
+<a href=/tags/%E8%B3%87%E6%96%99%E7%B5%90%E6%A7%8B%E6%BC%94%E7%AE%97%E6%B3%95 class="tag-pill no-underline">資料結構&演算法</a>
+<a href=/tags/%E7%B6%B2%E8%B7%AF%E6%B5%81 class="tag-pill no-underline">網路流</a>
+<a href=/tags/network-flow class="tag-pill no-underline">Network Flow</a>
+<a href=/tags/max-flow class="tag-pill no-underline">Max Flow</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/javascript/Data%20Structures%20&%20Algorithms/031-Network-Flow.png alt="網路流完全指南 — Ford-Fulkerson、Dinic 演算法與最大流最小割定理 | 資料結構與演算法"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p><strong>網路流（Network Flow）</strong> 是圖論中最強大的技術之一，研究在有容量限制的有向圖中，從源點到匯點能傳送的最大流量問題。從 <strong>Ford-Fulkerson</strong> 的增廣路徑法，到 <strong>Dinic</strong> 的分層圖與阻塞流，再到 <strong>最大流最小割定理</strong> 揭示的深刻對偶性，這些概念在航線排程、影像分割、任務分配等領域都有重要應用。本文帶你從核心原理到 TypeScript 與 C++ 完整實作，全面掌握網路流演算法。</p></blockquote><h3 id=前言>前言</h3><p>想像一座城市的自來水管道系統：水從淨水廠（源點）出發，經過大大小小的管道流向千家萬戶，最終匯集到下游處理廠（匯點）。每條管道有其最大承載量——粗管能通過更多水，細管則形成瓶頸。問題是：<strong>在所有管道容量限制下，整個系統最多能從源點送多少水到匯點？</strong></p><p>這就是 <strong>最大流問題（Maximum Flow Problem）</strong> 的本質。它不只是一個抽象的數學問題——Google 用網路流優化資料中心間的流量分配、Adobe Photoshop 用最小割做影像分割、航空公司用它規劃航線排程。</p><p>學習本文後，你將能夠：</p><ul><li>理解 <strong>流網路（Flow Network）</strong> 的三大約束條件：容量限制、反對稱性、流量守恆</li><li>掌握 <strong>殘餘網路（Residual Network）</strong> 與反向邊的「退流」機制</li><li>理解並證明 <strong>最大流最小割定理（Max-Flow Min-Cut Theorem）</strong></li><li>實作 <strong>Edmonds-Karp</strong>（BFS 增廣路徑）與 <strong>Dinic</strong> 演算法（分層圖 + 阻塞流）</li><li>將網路流應用於 <strong>二分圖最大匹配</strong> 和 <strong>最小費用流</strong> 等變體問題</li></ul><hr><h3 id=核心概念>核心概念</h3><h4 id=流網路flow-network>流網路（Flow Network）</h4><p>一個流網路 G = (V, E) 是一個有向圖，包含以下要素：</p><ul><li>每條邊 (u, v) 有一個 <strong>容量上限</strong> c(u, v) >= 0</li><li>一個 <strong>源點 s</strong>（Source，流的起點）和一個 <strong>匯點 t</strong>（Sink，流的終點）</li><li>每條邊上的實際流量 f(u, v) 必須滿足三大條件</li></ul><pre tabindex=0><code>三大流量條件：
+
+1. 容量限制（Capacity Constraint）：
+   0 &lt;= f(u, v) &lt;= c(u, v)    對所有邊 (u, v)
+   → 流量不能超過管道容量
+
+2. 反對稱性（Skew Symmetry）：
+   f(u, v) = -f(v, u)
+   → 如果 u→v 的流量是 6，那 v→u 的流量就是 -6
+
+3. 流量守恆（Flow Conservation）：
+   對所有 u（除了 s 和 t），流入 u 的總流量 = 流出 u 的總流量
+   → 中間節點不能「積水」或「漏水」
+
+最大流 |f| = 從 s 流出的總流量 = 流入 t 的總流量
+</code></pre><p>用自來水管道的比喻：容量限制是管道的物理承載量、流量守恆是中間水管不會漏水、最大流就是整個管網能輸送的最大水量。</p><h4 id=殘餘網路residual-network與反向邊>殘餘網路（Residual Network）與反向邊</h4><p>殘餘網路是理解所有最大流演算法的核心工具。對於原圖中每條邊 (u -> v)，殘餘網路包含兩條邊：</p><pre tabindex=0><code>原圖邊 (u → v)：容量 c = 10，當前流量 f = 6
+
+殘餘網路包含：
+  正向殘餘邊  u ──[cf=4]──→ v    （cf = c - f = 10 - 6 = 4，還能再推多少）
+  反向殘餘邊  v ──[cf=6]──→ u    （cf = f = 6，可以退回多少已送出的流量）
+
+反向邊的意義：
+  允許演算法「反悔」之前的路由決策，
+  將流從某條路徑「退回」再改走另一條路徑，
+  這是增廣路徑能找到最優解的關鍵。
+</code></pre><p>為什麼需要反向邊？考慮一個簡單的例子：如果演算法先走了一條「不太好」的路徑，反向邊提供了修正機會——透過在反向邊上推流，等效於「取消」之前的流量分配，讓它改走更好的路徑。沒有反向邊，貪婪式的路徑選擇可能卡在次優解。</p><h4 id=增廣路徑augmenting-path>增廣路徑（Augmenting Path）</h4><p><strong>增廣路徑</strong> 是殘餘網路中從 s 到 t 的任意一條路徑，路徑上每條邊的殘餘容量都大於 0。路徑的 <strong>瓶頸容量（Bottleneck）</strong> 是所有邊殘餘容量的最小值，決定了本次能推送的流量。</p><pre tabindex=0><code>增廣路徑的流量計算：
+
+路徑 s → A → B → t
+  殘餘容量：s→A: 4，A→B: 3，B→t: 7
+  瓶頸 = min(4, 3, 7) = 3
+  沿此路徑增廣：每條邊的殘餘容量各減 3，反向邊各加 3
+</code></pre><p><strong>Ford-Fulkerson 方法</strong> 的核心思想就是：反覆在殘餘網路中找增廣路徑，直到找不到為止。此時的總流量就是最大流。</p><h4 id=最大流最小割定理max-flow-min-cut-theorem>最大流最小割定理（Max-Flow Min-Cut Theorem）</h4><p><strong>割（Cut）</strong> 是將節點集 V 分為兩個不相交的子集 S 和 T = V \ S，其中 s 屬於 S、t 屬於 T。割的容量定義為所有從 S 到 T 的邊的容量之和（注意：不包含 T 到 S 的邊）。</p><p><strong>最大流最小割定理（Max-Flow Min-Cut Theorem）</strong>：在任何流網路中，最大流的值等於最小割的容量。</p><pre tabindex=0><code>直觀理解：
+
+  任何從 s 到 t 的流必須穿越任何割，所以：
+    最大流 &lt;= 任意割的容量
+
+  當 Ford-Fulkerson 終止時（找不到增廣路徑），
+  s 在殘餘網路中能到達的節點集合 S 就構成最小割：
+    最大流 = 這個割的容量
+
+範例：
+  s ─[4]→ A ─[3]→ t
+  s ─[2]→ B ─[5]→ t
+  A ─[1]→ B
+
+  最大流 = 6（路徑 s→A→t 送 3，s→B→t 送 2，s→A→B→t 送 1）
+  最小割：切斷 s→A(4) 和 s→B(2)，容量 = 4 + 2 = 6 ✓
+</code></pre><p>這個定理的重要性在於：它將「求最大流」和「找最小割」兩個看似不同的問題等價起來。在實務中，最小割常用於分析網路的瓶頸和脆弱點。</p><hr><h3 id=三大演算法對比>三大演算法對比</h3><p>在深入實作之前，先比較三種主要的最大流演算法：</p><table><thead><tr><th>演算法</th><th>增廣路徑選法</th><th>時間複雜度</th><th>說明</th></tr></thead><tbody><tr><td>Ford-Fulkerson（DFS）</td><td>任意路徑（DFS）</td><td>O(E x |f*|)</td><td>|f*| = 最大流值，容量為整數時終止</td></tr><tr><td>Edmonds-Karp（BFS）</td><td>最短路徑（邊數最少）</td><td>O(V x E²)</td><td>多項式保證，不依賴流量大小</td></tr><tr><td>Dinic（分層圖 + 阻塞流）</td><td>分層圖上的阻塞流</td><td>O(V² x E)</td><td>最快通用演算法，單位容量 O(E sqrt(E))</td></tr></tbody></table><ul><li><strong>Ford-Fulkerson</strong> 用 DFS 找路徑，簡單但效能依賴最大流值——如果容量是 10^9，可能需要 10^9 次迭代</li><li><strong>Edmonds-Karp</strong> 用 BFS 保證每次找最短增廣路徑，時間複雜度成為多項式</li><li><strong>Dinic</strong> 進一步優化，用 BFS 建分層圖、DFS 找阻塞流，搭配當前弧優化後效能優秀，是競程和面試的首選</li></ul><hr><h3 id=javascript--typescript-實作>JavaScript / TypeScript 實作</h3><h4 id=edmonds-karp-演算法bfs-增廣路徑>Edmonds-Karp 演算法（BFS 增廣路徑）</h4><p>Edmonds-Karp 是 Ford-Fulkerson 方法的一個特例：它用 <strong>BFS</strong> 來尋找增廣路徑，確保每次找到的都是 <strong>邊數最短</strong> 的路徑。這一改進使得時間複雜度從依賴流量值的 O(E x |f*|) 變成多項式的 O(V x E²)。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// Edmonds-Karp 演算法（Ford-Fulkerson + BFS）
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 時間複雜度：O(V × E²)
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 適用場景：中小規模圖，或作為理解網路流的入門
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>interface</span> <span style=color:#a6e22e>Edge</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>to</span>: <span style=color:#66d9ef>number</span>;    <span style=color:#75715e>// 終點
+</span></span></span><span style=display:flex><span>  <span style=color:#a6e22e>cap</span>: <span style=color:#66d9ef>number</span>;   <span style=color:#75715e>// 當前殘餘容量
+</span></span></span><span style=display:flex><span>  <span style=color:#a6e22e>rev</span>: <span style=color:#66d9ef>number</span>;   <span style=color:#75715e>// 反向邊在 graph[to] 中的索引
+</span></span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>EdmondsKarp</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>graph</span>: <span style=color:#66d9ef>Edge</span>[][]; <span style=color:#75715e>// 鄰接表（含反向邊）
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#66d9ef>readonly</span> <span style=color:#a6e22e>n</span>: <span style=color:#66d9ef>number</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>constructor</span>(<span style=color:#a6e22e>n</span>: <span style=color:#66d9ef>number</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>n</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>n</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>graph</span> <span style=color:#f92672>=</span> Array.<span style=color:#66d9ef>from</span>({ <span style=color:#a6e22e>length</span>: <span style=color:#66d9ef>n</span> }, () <span style=color:#f92672>=&gt;</span> []);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 添加有向邊（同時自動添加反向邊，反向邊初始容量 = 0）
+</span></span></span><span style=display:flex><span>  <span style=color:#a6e22e>addEdge</span>(<span style=color:#66d9ef>from</span><span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>to</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>cap</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>void</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>forwardIdx</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>graph</span>[<span style=color:#a6e22e>to</span>].<span style=color:#a6e22e>length</span>;    <span style=color:#75715e>// 正向邊的反向邊索引
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>backwardIdx</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>graph</span>[<span style=color:#66d9ef>from</span>].<span style=color:#a6e22e>length</span>;  <span style=color:#75715e>// 反向邊的正向邊索引
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>graph</span>[<span style=color:#66d9ef>from</span>].<span style=color:#a6e22e>push</span>({ <span style=color:#a6e22e>to</span>, <span style=color:#a6e22e>cap</span>, <span style=color:#a6e22e>rev</span>: <span style=color:#66d9ef>forwardIdx</span> });
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>graph</span>[<span style=color:#a6e22e>to</span>].<span style=color:#a6e22e>push</span>({ <span style=color:#a6e22e>to</span>: <span style=color:#66d9ef>from</span>, <span style=color:#a6e22e>cap</span>: <span style=color:#66d9ef>0</span>, <span style=color:#a6e22e>rev</span>: <span style=color:#66d9ef>backwardIdx</span> });
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// BFS 尋找從 s 到 t 的最短增廣路徑
+</span></span></span><span style=display:flex><span>  <span style=color:#75715e>// 返回路徑上的瓶頸容量（0 表示找不到路徑）
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>bfs</span>(
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>s</span>: <span style=color:#66d9ef>number</span>,
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>t</span>: <span style=color:#66d9ef>number</span>,
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>parent</span>: <span style=color:#66d9ef>Array</span><span style=color:#f92672>&lt;</span>{ <span style=color:#a6e22e>node</span>: <span style=color:#66d9ef>number</span>; <span style=color:#a6e22e>edgeIdx</span>: <span style=color:#66d9ef>number</span> }<span style=color:#f92672>&gt;</span>
+</span></span><span style=display:flex><span>  )<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// parent[v] 記錄到達 v 的前一個節點和使用的邊索引
+</span></span></span><span style=display:flex><span>    <span style=color:#a6e22e>parent</span>.<span style=color:#a6e22e>fill</span>({ <span style=color:#a6e22e>node</span><span style=color:#f92672>:</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>, <span style=color:#a6e22e>edgeIdx</span><span style=color:#f92672>:</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span> });
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>visited</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> Array(<span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>n</span>).<span style=color:#a6e22e>fill</span>(<span style=color:#66d9ef>false</span>);
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>visited</span>[<span style=color:#a6e22e>s</span>] <span style=color:#f92672>=</span> <span style=color:#66d9ef>true</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>queue</span>: <span style=color:#66d9ef>Array</span><span style=color:#f92672>&lt;</span>[<span style=color:#66d9ef>number</span>, <span style=color:#66d9ef>number</span>]<span style=color:#f92672>&gt;</span> <span style=color:#f92672>=</span> [[<span style=color:#a6e22e>s</span>, <span style=color:#66d9ef>Infinity</span>]]; <span style=color:#75715e>// [節點, 到此節點的瓶頸容量]
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>head</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>while</span> (<span style=color:#a6e22e>head</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>queue</span>.<span style=color:#a6e22e>length</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>const</span> [<span style=color:#a6e22e>u</span>, <span style=color:#a6e22e>flow</span>] <span style=color:#f92672>=</span> <span style=color:#a6e22e>queue</span>[<span style=color:#a6e22e>head</span><span style=color:#f92672>++</span>];
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>i</span> <span style=color:#f92672>&lt;</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>graph</span>[<span style=color:#a6e22e>u</span>].<span style=color:#a6e22e>length</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>e</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>graph</span>[<span style=color:#a6e22e>u</span>][<span style=color:#a6e22e>i</span>];
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#75715e>// 只走殘餘容量 &gt; 0 且未被訪問的邊
+</span></span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span><span style=color:#a6e22e>visited</span>[<span style=color:#a6e22e>e</span>.<span style=color:#a6e22e>to</span>] <span style=color:#f92672>&amp;&amp;</span> <span style=color:#a6e22e>e</span>.<span style=color:#a6e22e>cap</span> <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>          <span style=color:#a6e22e>visited</span>[<span style=color:#a6e22e>e</span>.<span style=color:#a6e22e>to</span>] <span style=color:#f92672>=</span> <span style=color:#66d9ef>true</span>;
+</span></span><span style=display:flex><span>          <span style=color:#a6e22e>parent</span>[<span style=color:#a6e22e>e</span>.<span style=color:#a6e22e>to</span>] <span style=color:#f92672>=</span> { <span style=color:#a6e22e>node</span>: <span style=color:#66d9ef>u</span>, <span style=color:#a6e22e>edgeIdx</span>: <span style=color:#66d9ef>i</span> };
+</span></span><span style=display:flex><span>          <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>newFlow</span> <span style=color:#f92672>=</span> Math.<span style=color:#a6e22e>min</span>(<span style=color:#a6e22e>flow</span>, <span style=color:#a6e22e>e</span>.<span style=color:#a6e22e>cap</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>          <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>e</span>.<span style=color:#a6e22e>to</span> <span style=color:#f92672>===</span> <span style=color:#a6e22e>t</span>) <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>newFlow</span>; <span style=color:#75715e>// 到達匯點，返回瓶頸容量
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>          <span style=color:#a6e22e>queue</span>.<span style=color:#a6e22e>push</span>([<span style=color:#a6e22e>e</span>.<span style=color:#a6e22e>to</span>, <span style=color:#a6e22e>newFlow</span>]);
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>      }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>; <span style=color:#75715e>// 找不到增廣路徑
+</span></span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 主函式：求 s 到 t 的最大流
+</span></span></span><span style=display:flex><span>  <span style=color:#a6e22e>maxflow</span>(<span style=color:#a6e22e>s</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>t</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>totalFlow</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>parent</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> Array(<span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>n</span>).<span style=color:#a6e22e>fill</span>({ <span style=color:#a6e22e>node</span><span style=color:#f92672>:</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>, <span style=color:#a6e22e>edgeIdx</span><span style=color:#f92672>:</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span> });
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>pathFlow</span>: <span style=color:#66d9ef>number</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>while</span> ((<span style=color:#a6e22e>pathFlow</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>bfs</span>(<span style=color:#a6e22e>s</span>, <span style=color:#a6e22e>t</span>, <span style=color:#a6e22e>parent</span>)) <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>totalFlow</span> <span style=color:#f92672>+=</span> <span style=color:#a6e22e>pathFlow</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>      <span style=color:#75715e>// 沿增廣路徑更新殘餘容量（回溯 parent 鏈）
+</span></span></span><span style=display:flex><span>      <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>curr</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>t</span>;
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>while</span> (<span style=color:#a6e22e>curr</span> <span style=color:#f92672>!==</span> <span style=color:#a6e22e>s</span>) {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>const</span> { <span style=color:#a6e22e>node</span>: <span style=color:#66d9ef>prev</span>, <span style=color:#a6e22e>edgeIdx</span> } <span style=color:#f92672>=</span> <span style=color:#a6e22e>parent</span>[<span style=color:#a6e22e>curr</span>];
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>graph</span>[<span style=color:#a6e22e>prev</span>][<span style=color:#a6e22e>edgeIdx</span>].<span style=color:#a6e22e>cap</span> <span style=color:#f92672>-=</span> <span style=color:#a6e22e>pathFlow</span>;                    <span style=color:#75715e>// 正向邊容量減少
+</span></span></span><span style=display:flex><span>        <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>graph</span>[<span style=color:#a6e22e>curr</span>][<span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>graph</span>[<span style=color:#a6e22e>prev</span>][<span style=color:#a6e22e>edgeIdx</span>].<span style=color:#a6e22e>rev</span>].<span style=color:#a6e22e>cap</span> <span style=color:#f92672>+=</span> <span style=color:#a6e22e>pathFlow</span>; <span style=color:#75715e>// 反向邊容量增加
+</span></span></span><span style=display:flex><span>        <span style=color:#a6e22e>curr</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>prev</span>;
+</span></span><span style=display:flex><span>      }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>totalFlow</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── 使用範例 ──────────────────────────────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>ek</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>EdmondsKarp</span>(<span style=color:#ae81ff>6</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>ek</span>.<span style=color:#a6e22e>addEdge</span>(<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>10</span>); <span style=color:#75715e>// s → 城市A，容量10
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>ek</span>.<span style=color:#a6e22e>addEdge</span>(<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>10</span>); <span style=color:#75715e>// s → 城市B，容量10
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>ek</span>.<span style=color:#a6e22e>addEdge</span>(<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>4</span>);  <span style=color:#75715e>// A → C，容量4
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>ek</span>.<span style=color:#a6e22e>addEdge</span>(<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>2</span>);  <span style=color:#75715e>// A → B，容量2
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>ek</span>.<span style=color:#a6e22e>addEdge</span>(<span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>4</span>, <span style=color:#ae81ff>9</span>);  <span style=color:#75715e>// B → D，容量9
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>ek</span>.<span style=color:#a6e22e>addEdge</span>(<span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>5</span>, <span style=color:#ae81ff>10</span>); <span style=color:#75715e>// C → t，容量10
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>ek</span>.<span style=color:#a6e22e>addEdge</span>(<span style=color:#ae81ff>4</span>, <span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>6</span>);  <span style=color:#75715e>// D → C，容量6
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>ek</span>.<span style=color:#a6e22e>addEdge</span>(<span style=color:#ae81ff>4</span>, <span style=color:#ae81ff>5</span>, <span style=color:#ae81ff>10</span>); <span style=color:#75715e>// D → t，容量10
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#e6db74>&#34;Edmonds-Karp 最大流:&#34;</span>, <span style=color:#a6e22e>ek</span>.<span style=color:#a6e22e>maxflow</span>(<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>5</span>)); <span style=color:#75715e>// 輸出：19
+</span></span></span></code></pre></div><h4 id=dinic-演算法分層圖--阻塞流>Dinic 演算法（分層圖 + 阻塞流）</h4><p><strong>Dinic 演算法</strong> 是競賽中最常用的最大流演算法，時間複雜度 O(V² x E)。它的核心改進是引入 <strong>分層圖（Level Graph）</strong> 和 <strong>阻塞流（Blocking Flow）</strong> 的概念：</p><ol><li><strong>BFS 建立分層圖</strong>：記錄每個節點到源點的最短距離 <code>level[v]</code>，只保留 <code>level[to] = level[from] + 1</code> 的邊</li><li><strong>DFS 找阻塞流</strong>：在分層圖中反覆用 DFS 推流，直到所有 s 到 t 的路徑上都有飽和邊</li><li><strong>當前弧優化（Current Arc Optimization）</strong>：用 <code>iter[v]</code> 記錄每個節點上次掃到的邊，避免重複遍歷已飽和的邊</li><li><strong>重複迭代</strong>：每輪後重建殘餘網路和分層圖，直到 BFS 無法到達 t</li></ol><pre tabindex=0><code>Dinic 分層圖建構過程（完整範例）：
+
+圖：s=0, t=5
+  0→1(容量10), 0→2(容量10)
+  1→3(容量4), 1→2(容量2)
+  2→4(容量9)
+  3→5(容量10)
+  4→3(容量6), 4→5(容量10)
+
+第一輪 BFS 分層（距離/level）：
+  level: [s=0, 1=1, 2=1, 3=2, 4=2, t=3]
+
+  分層圖（只留 level[to] = level[from] + 1 的邊）：
+  s(0) ──[10]──→ 1(1) ──[4]──→ 3(2) ──[10]──→ t(3)
+   │              │
+  [10]           [2]
+   │              ↓
+   └──────────→ 2(1) ──[9]──→ 4(2) ──[10]──→ t(3)
+                               │
+                              [6]
+                               ↓
+                              3(2) ──[10]──→ t(3)
+
+  阻塞流（DFS 推流）：
+  路徑 s→1→3→t：推 min(10,4,10) = 4，邊 1→3 飽和
+  路徑 s→2→4→t：推 min(10,9,10) = 9，邊 2→4 飽和
+  → 本輪阻塞流 = 13
+
+第二輪 BFS（更新殘餘網路後重新分層）：
+  level[t] 增大 → 繼續找阻塞流...
+  每輪後 level[t] 嚴格增加 → 最多 O(V) 輪
+</code></pre><p>以下是 Dinic 演算法的完整 TypeScript 實作：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// Dinic 最大流演算法
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 時間複雜度：O(V² × E)，單位容量圖為 O(E × √E)
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 適用場景：一般最大流問題，競賽中的主力演算法
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>interface</span> <span style=color:#a6e22e>DinicEdge</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>to</span>: <span style=color:#66d9ef>number</span>;   <span style=color:#75715e>// 終點
+</span></span></span><span style=display:flex><span>  <span style=color:#a6e22e>cap</span>: <span style=color:#66d9ef>number</span>;  <span style=color:#75715e>// 當前殘餘容量
+</span></span></span><span style=display:flex><span>  <span style=color:#a6e22e>rev</span>: <span style=color:#66d9ef>number</span>;  <span style=color:#75715e>// 反向邊在 graph[to] 中的索引（維護殘餘網路的關鍵）
+</span></span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>MaxFlow</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>graph</span>: <span style=color:#66d9ef>DinicEdge</span>[][]; <span style=color:#75715e>// 鄰接表（含反向邊）
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>level</span>: <span style=color:#66d9ef>number</span>[];     <span style=color:#75715e>// BFS 分層，level[v] = s 到 v 的最短距離
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>iter</span>: <span style=color:#66d9ef>number</span>[];      <span style=color:#75715e>// 當前弧優化：避免重複遍歷飽和邊
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#66d9ef>readonly</span> <span style=color:#a6e22e>n</span>: <span style=color:#66d9ef>number</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>constructor</span>(<span style=color:#a6e22e>n</span>: <span style=color:#66d9ef>number</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>n</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>n</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>graph</span> <span style=color:#f92672>=</span> Array.<span style=color:#66d9ef>from</span>({ <span style=color:#a6e22e>length</span>: <span style=color:#66d9ef>n</span> }, () <span style=color:#f92672>=&gt;</span> []);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>level</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> Array(<span style=color:#a6e22e>n</span>).<span style=color:#a6e22e>fill</span>(<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>iter</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> Array(<span style=color:#a6e22e>n</span>).<span style=color:#a6e22e>fill</span>(<span style=color:#ae81ff>0</span>);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 添加有向邊（同時添加殘餘反向邊，初始容量 = 0）
+</span></span></span><span style=display:flex><span>  <span style=color:#a6e22e>addEdge</span>(<span style=color:#66d9ef>from</span><span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>to</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>cap</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>void</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>forwardIdx</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>graph</span>[<span style=color:#a6e22e>to</span>].<span style=color:#a6e22e>length</span>;    <span style=color:#75715e>// 正向邊的反向邊在 graph[to] 中的索引
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>backwardIdx</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>graph</span>[<span style=color:#66d9ef>from</span>].<span style=color:#a6e22e>length</span>;  <span style=color:#75715e>// 反向邊的正向邊在 graph[from] 中的索引
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>graph</span>[<span style=color:#66d9ef>from</span>].<span style=color:#a6e22e>push</span>({ <span style=color:#a6e22e>to</span>, <span style=color:#a6e22e>cap</span>, <span style=color:#a6e22e>rev</span>: <span style=color:#66d9ef>forwardIdx</span> });
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>graph</span>[<span style=color:#a6e22e>to</span>].<span style=color:#a6e22e>push</span>({ <span style=color:#a6e22e>to</span>: <span style=color:#66d9ef>from</span>, <span style=color:#a6e22e>cap</span>: <span style=color:#66d9ef>0</span>, <span style=color:#a6e22e>rev</span>: <span style=color:#66d9ef>backwardIdx</span> }); <span style=color:#75715e>// 反向邊，容量初始為 0
+</span></span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// BFS 建立分層圖：O(V + E)
+</span></span></span><span style=display:flex><span>  <span style=color:#75715e>// 返回 true 表示 t 可達（還有增廣路徑）
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>bfs</span>(<span style=color:#a6e22e>s</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>t</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>boolean</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>level</span>.<span style=color:#a6e22e>fill</span>(<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>queue</span>: <span style=color:#66d9ef>number</span>[] <span style=color:#f92672>=</span> [<span style=color:#a6e22e>s</span>];
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>level</span>[<span style=color:#a6e22e>s</span>] <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>head</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>while</span> (<span style=color:#a6e22e>head</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>queue</span>.<span style=color:#a6e22e>length</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>v</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>queue</span>[<span style=color:#a6e22e>head</span><span style=color:#f92672>++</span>];
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>const</span> <span style=color:#a6e22e>e</span> <span style=color:#66d9ef>of</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>graph</span>[<span style=color:#a6e22e>v</span>]) {
+</span></span><span style=display:flex><span>        <span style=color:#75715e>// 只走殘餘容量 &gt; 0 且未被訪問的邊
+</span></span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>e</span>.<span style=color:#a6e22e>cap</span> <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span> <span style=color:#f92672>&amp;&amp;</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>level</span>[<span style=color:#a6e22e>e</span>.<span style=color:#a6e22e>to</span>] <span style=color:#f92672>&lt;</span> <span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>          <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>level</span>[<span style=color:#a6e22e>e</span>.<span style=color:#a6e22e>to</span>] <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>level</span>[<span style=color:#a6e22e>v</span>] <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>          <span style=color:#a6e22e>queue</span>.<span style=color:#a6e22e>push</span>(<span style=color:#a6e22e>e</span>.<span style=color:#a6e22e>to</span>);
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>      }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>level</span>[<span style=color:#a6e22e>t</span>] <span style=color:#f92672>&gt;=</span> <span style=color:#ae81ff>0</span>; <span style=color:#75715e>// 若 t 可達，返回 true
+</span></span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// DFS 找阻塞流（含當前弧優化）：O(V × E)
+</span></span></span><span style=display:flex><span>  <span style=color:#75715e>// f = 從路徑上游傳來的可用流量上限
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>dfs</span>(<span style=color:#a6e22e>v</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>t</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>f</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>v</span> <span style=color:#f92672>===</span> <span style=color:#a6e22e>t</span>) <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>f</span>; <span style=color:#75715e>// 到達匯點，返回可推流量
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 當前弧優化：從上次停止的邊繼續掃描，跳過已飽和的邊
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (; <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>iter</span>[<span style=color:#a6e22e>v</span>] <span style=color:#f92672>&lt;</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>graph</span>[<span style=color:#a6e22e>v</span>].<span style=color:#a6e22e>length</span>; <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>iter</span>[<span style=color:#a6e22e>v</span>]<span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>e</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>graph</span>[<span style=color:#a6e22e>v</span>][<span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>iter</span>[<span style=color:#a6e22e>v</span>]];
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>      <span style=color:#75715e>// 只走分層圖中的邊（level[to] = level[v] + 1）且有殘餘容量
+</span></span></span><span style=display:flex><span>      <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>e</span>.<span style=color:#a6e22e>cap</span> <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span> <span style=color:#f92672>&amp;&amp;</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>level</span>[<span style=color:#a6e22e>v</span>] <span style=color:#f92672>&lt;</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>level</span>[<span style=color:#a6e22e>e</span>.<span style=color:#a6e22e>to</span>]) {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>d</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>dfs</span>(<span style=color:#a6e22e>e</span>.<span style=color:#a6e22e>to</span>, <span style=color:#a6e22e>t</span>, Math.<span style=color:#a6e22e>min</span>(<span style=color:#a6e22e>f</span>, <span style=color:#a6e22e>e</span>.<span style=color:#a6e22e>cap</span>));
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>d</span> <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>          <span style=color:#a6e22e>e</span>.<span style=color:#a6e22e>cap</span> <span style=color:#f92672>-=</span> <span style=color:#a6e22e>d</span>;                          <span style=color:#75715e>// 正向邊容量減少
+</span></span></span><span style=display:flex><span>          <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>graph</span>[<span style=color:#a6e22e>e</span>.<span style=color:#a6e22e>to</span>][<span style=color:#a6e22e>e</span>.<span style=color:#a6e22e>rev</span>].<span style=color:#a6e22e>cap</span> <span style=color:#f92672>+=</span> <span style=color:#a6e22e>d</span>;    <span style=color:#75715e>// 反向邊容量增加（允許「退流」）
+</span></span></span><span style=display:flex><span>          <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>d</span>;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>      }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>; <span style=color:#75715e>// 此節點已無法推流
+</span></span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 主函式：求 s 到 t 的最大流
+</span></span></span><span style=display:flex><span>  <span style=color:#75715e>// 每輪 BFS + DFS，最多 O(V) 輪
+</span></span></span><span style=display:flex><span>  <span style=color:#a6e22e>maxflow</span>(<span style=color:#a6e22e>s</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>t</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>flow</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>while</span> (<span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>bfs</span>(<span style=color:#a6e22e>s</span>, <span style=color:#a6e22e>t</span>)) {
+</span></span><span style=display:flex><span>      <span style=color:#75715e>// 每次 BFS 後重置當前弧指針
+</span></span></span><span style=display:flex><span>      <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>iter</span>.<span style=color:#a6e22e>fill</span>(<span style=color:#ae81ff>0</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>f</span>: <span style=color:#66d9ef>number</span>;
+</span></span><span style=display:flex><span>      <span style=color:#75715e>// 在當前分層圖上反覆推流，直到阻塞
+</span></span></span><span style=display:flex><span>      <span style=color:#66d9ef>while</span> ((<span style=color:#a6e22e>f</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>dfs</span>(<span style=color:#a6e22e>s</span>, <span style=color:#a6e22e>t</span>, <span style=color:#66d9ef>Infinity</span>)) <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>flow</span> <span style=color:#f92672>+=</span> <span style=color:#a6e22e>f</span>;
+</span></span><span style=display:flex><span>      }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>flow</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 求最小割：在最大流計算完成後，BFS 仍可達的節點構成 S 集合
+</span></span></span><span style=display:flex><span>  <span style=color:#a6e22e>minCut</span>(<span style=color:#a6e22e>s</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>boolean</span>[] {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>inS</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> Array(<span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>n</span>).<span style=color:#a6e22e>fill</span>(<span style=color:#66d9ef>false</span>);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>i</span> <span style=color:#f92672>&lt;</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>n</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>inS</span>[<span style=color:#a6e22e>i</span>] <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>level</span>[<span style=color:#a6e22e>i</span>] <span style=color:#f92672>&gt;=</span> <span style=color:#ae81ff>0</span>; <span style=color:#75715e>// 最後一次 BFS 後可達的節點屬於 S
+</span></span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>inS</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 輸出每條邊的實際流量（用於調試與分析）
+</span></span></span><span style=display:flex><span>  <span style=color:#a6e22e>getEdgeFlows</span>()<span style=color:#f92672>:</span> Array<span style=color:#f92672>&lt;</span>{ <span style=color:#66d9ef>from</span><span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span>; <span style=color:#a6e22e>to</span>: <span style=color:#66d9ef>number</span>; <span style=color:#a6e22e>flow</span>: <span style=color:#66d9ef>number</span>; <span style=color:#a6e22e>cap</span>: <span style=color:#66d9ef>number</span> }<span style=color:#f92672>&gt;</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>result</span>: <span style=color:#66d9ef>Array</span><span style=color:#f92672>&lt;</span>{ <span style=color:#66d9ef>from</span><span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span>; <span style=color:#a6e22e>to</span>: <span style=color:#66d9ef>number</span>; <span style=color:#a6e22e>flow</span>: <span style=color:#66d9ef>number</span>; <span style=color:#a6e22e>cap</span>: <span style=color:#66d9ef>number</span> }<span style=color:#f92672>&gt;</span> <span style=color:#f92672>=</span> [];
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>v</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>v</span> <span style=color:#f92672>&lt;</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>n</span>; <span style=color:#a6e22e>v</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>const</span> <span style=color:#a6e22e>e</span> <span style=color:#66d9ef>of</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>graph</span>[<span style=color:#a6e22e>v</span>]) {
+</span></span><span style=display:flex><span>        <span style=color:#75715e>// 正向邊的原始容量 = 當前殘餘容量 + 反向邊的殘餘容量
+</span></span></span><span style=display:flex><span>        <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>originalCap</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>e</span>.<span style=color:#a6e22e>cap</span> <span style=color:#f92672>+</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>graph</span>[<span style=color:#a6e22e>e</span>.<span style=color:#a6e22e>to</span>][<span style=color:#a6e22e>e</span>.<span style=color:#a6e22e>rev</span>].<span style=color:#a6e22e>cap</span>;
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>originalCap</span> <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>          <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>flow</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>graph</span>[<span style=color:#a6e22e>e</span>.<span style=color:#a6e22e>to</span>][<span style=color:#a6e22e>e</span>.<span style=color:#a6e22e>rev</span>].<span style=color:#a6e22e>cap</span>; <span style=color:#75715e>// 反向邊容量 = 實際流量
+</span></span></span><span style=display:flex><span>          <span style=color:#a6e22e>result</span>.<span style=color:#a6e22e>push</span>({ <span style=color:#66d9ef>from</span><span style=color:#f92672>:</span> <span style=color:#a6e22e>v</span>, <span style=color:#a6e22e>to</span>: <span style=color:#66d9ef>e.to</span>, <span style=color:#a6e22e>flow</span>, <span style=color:#a6e22e>cap</span>: <span style=color:#66d9ef>originalCap</span> });
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>      }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>result</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── 使用範例：航線排程最大吞吐量 ──────────────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 節點：s=0（出發地），t=5（目的地）
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 中轉站：1=城市A，2=城市B，3=城市C，4=城市D
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>mf</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>MaxFlow</span>(<span style=color:#ae81ff>6</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 從源點出發的航線（容量 = 每日最大班次）
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>mf</span>.<span style=color:#a6e22e>addEdge</span>(<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>10</span>); <span style=color:#75715e>// s → 城市A，10班/天
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>mf</span>.<span style=color:#a6e22e>addEdge</span>(<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>10</span>); <span style=color:#75715e>// s → 城市B，10班/天
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 城市間連線
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>mf</span>.<span style=color:#a6e22e>addEdge</span>(<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>4</span>);  <span style=color:#75715e>// A → C，4班/天
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>mf</span>.<span style=color:#a6e22e>addEdge</span>(<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>2</span>);  <span style=color:#75715e>// A → B，2班/天（共用航線）
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>mf</span>.<span style=color:#a6e22e>addEdge</span>(<span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>4</span>, <span style=color:#ae81ff>9</span>);  <span style=color:#75715e>// B → D，9班/天
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 到達目的地的航線
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>mf</span>.<span style=color:#a6e22e>addEdge</span>(<span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>5</span>, <span style=color:#ae81ff>10</span>); <span style=color:#75715e>// C → t，10班/天
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>mf</span>.<span style=color:#a6e22e>addEdge</span>(<span style=color:#ae81ff>4</span>, <span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>6</span>);  <span style=color:#75715e>// D → C，6班/天
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>mf</span>.<span style=color:#a6e22e>addEdge</span>(<span style=color:#ae81ff>4</span>, <span style=color:#ae81ff>5</span>, <span style=color:#ae81ff>10</span>); <span style=color:#75715e>// D → t，10班/天
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#e6db74>&#34;Dinic 最大流:&#34;</span>, <span style=color:#a6e22e>mf</span>.<span style=color:#a6e22e>maxflow</span>(<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>5</span>)); <span style=color:#75715e>// 輸出：19
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 輸出各邊實際流量
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>flows</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>mf</span>.<span style=color:#a6e22e>getEdgeFlows</span>();
+</span></span><span style=display:flex><span><span style=color:#a6e22e>flows</span>.<span style=color:#a6e22e>forEach</span>(({ <span style=color:#66d9ef>from</span>, <span style=color:#a6e22e>to</span>, <span style=color:#a6e22e>flow</span>, <span style=color:#a6e22e>cap</span> }) <span style=color:#f92672>=&gt;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>flow</span> <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>) <span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#e6db74>`  </span><span style=color:#e6db74>${</span><span style=color:#66d9ef>from</span><span style=color:#e6db74>}</span><span style=color:#e6db74> → </span><span style=color:#e6db74>${</span><span style=color:#a6e22e>to</span><span style=color:#e6db74>}</span><span style=color:#e6db74>: </span><span style=color:#e6db74>${</span><span style=color:#a6e22e>flow</span><span style=color:#e6db74>}</span><span style=color:#e6db74>/</span><span style=color:#e6db74>${</span><span style=color:#a6e22e>cap</span><span style=color:#e6db74>}</span><span style=color:#e6db74>`</span>);
+</span></span><span style=display:flex><span>});
+</span></span></code></pre></div><h4 id=二分圖最大匹配匈牙利演算法>二分圖最大匹配（匈牙利演算法）</h4><p><strong>二分圖最大匹配</strong> 是網路流的重要特例。匈牙利演算法（Hungarian Algorithm）用 DFS 找增廣路徑，本質上等同於在單位容量的流網路上做 Ford-Fulkerson：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// 匈牙利演算法（Hungarian Algorithm）
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 時間複雜度：O(V × E)
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 適用：二分圖最大匹配（任務分配、人員調度）
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>BipartiteMatching</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#66d9ef>readonly</span> <span style=color:#a6e22e>leftN</span>: <span style=color:#66d9ef>number</span>;  <span style=color:#75715e>// 左側節點數量
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#66d9ef>readonly</span> <span style=color:#a6e22e>rightN</span>: <span style=color:#66d9ef>number</span>; <span style=color:#75715e>// 右側節點數量
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>adj</span>: <span style=color:#66d9ef>number</span>[][];         <span style=color:#75715e>// adj[左節點] = [可匹配的右節點列表]
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>matchL</span>: <span style=color:#66d9ef>number</span>[];        <span style=color:#75715e>// matchL[左節點] = 匹配的右節點（-1 表示未匹配）
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>matchR</span>: <span style=color:#66d9ef>number</span>[];        <span style=color:#75715e>// matchR[右節點] = 匹配的左節點（-1 表示未匹配）
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>constructor</span>(<span style=color:#a6e22e>leftN</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>rightN</span>: <span style=color:#66d9ef>number</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>leftN</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>leftN</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>rightN</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>rightN</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>adj</span> <span style=color:#f92672>=</span> Array.<span style=color:#66d9ef>from</span>({ <span style=color:#a6e22e>length</span>: <span style=color:#66d9ef>leftN</span> }, () <span style=color:#f92672>=&gt;</span> []);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>matchL</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> Array(<span style=color:#a6e22e>leftN</span>).<span style=color:#a6e22e>fill</span>(<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>matchR</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> Array(<span style=color:#a6e22e>rightN</span>).<span style=color:#a6e22e>fill</span>(<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 添加左節點 u 到右節點 v 的邊
+</span></span></span><span style=display:flex><span>  <span style=color:#a6e22e>addEdge</span>(<span style=color:#a6e22e>u</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>v</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>void</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>adj</span>[<span style=color:#a6e22e>u</span>].<span style=color:#a6e22e>push</span>(<span style=color:#a6e22e>v</span>);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 對左節點 u 做 DFS，嘗試找增廣路徑
+</span></span></span><span style=display:flex><span>  <span style=color:#75715e>// visited：本輪 DFS 中已訪問的右節點（避免循環）
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>dfs</span>(<span style=color:#a6e22e>u</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>visited</span>: <span style=color:#66d9ef>boolean</span>[])<span style=color:#f92672>:</span> <span style=color:#66d9ef>boolean</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>const</span> <span style=color:#a6e22e>v</span> <span style=color:#66d9ef>of</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>adj</span>[<span style=color:#a6e22e>u</span>]) {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span><span style=color:#a6e22e>visited</span>[<span style=color:#a6e22e>v</span>]) {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>visited</span>[<span style=color:#a6e22e>v</span>] <span style=color:#f92672>=</span> <span style=color:#66d9ef>true</span>; <span style=color:#75715e>// 標記 v 在本輪已嘗試
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#75715e>// 若 v 未匹配，或 v 的當前匹配左節點能改配其他右節點（增廣路徑）
+</span></span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> (<span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>matchR</span>[<span style=color:#a6e22e>v</span>] <span style=color:#f92672>===</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span> <span style=color:#f92672>||</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>dfs</span>(<span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>matchR</span>[<span style=color:#a6e22e>v</span>], <span style=color:#a6e22e>visited</span>)) {
+</span></span><span style=display:flex><span>          <span style=color:#75715e>// 更新匹配：u 與 v 互相匹配
+</span></span></span><span style=display:flex><span>          <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>matchL</span>[<span style=color:#a6e22e>u</span>] <span style=color:#f92672>=</span> <span style=color:#a6e22e>v</span>;
+</span></span><span style=display:flex><span>          <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>matchR</span>[<span style=color:#a6e22e>v</span>] <span style=color:#f92672>=</span> <span style=color:#a6e22e>u</span>;
+</span></span><span style=display:flex><span>          <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>true</span>; <span style=color:#75715e>// 增廣成功
+</span></span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>      }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>false</span>; <span style=color:#75715e>// 無法增廣
+</span></span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 執行最大匹配，返回匹配數量
+</span></span></span><span style=display:flex><span>  <span style=color:#a6e22e>maxMatching</span>()<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>result</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>u</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>u</span> <span style=color:#f92672>&lt;</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>leftN</span>; <span style=color:#a6e22e>u</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#75715e>// 每個左節點嘗試一次增廣，visited 每輪重置
+</span></span></span><span style=display:flex><span>      <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>visited</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> Array(<span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>rightN</span>).<span style=color:#a6e22e>fill</span>(<span style=color:#66d9ef>false</span>);
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>if</span> (<span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>dfs</span>(<span style=color:#a6e22e>u</span>, <span style=color:#a6e22e>visited</span>)) {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>result</span><span style=color:#f92672>++</span>;
+</span></span><span style=display:flex><span>      }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>result</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 獲取最終匹配對（左節點 → 右節點）
+</span></span></span><span style=display:flex><span>  <span style=color:#a6e22e>getMatching</span>()<span style=color:#f92672>:</span> Array<span style=color:#f92672>&lt;</span>[<span style=color:#66d9ef>number</span>, <span style=color:#66d9ef>number</span>]<span style=color:#f92672>&gt;</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>pairs</span>: <span style=color:#66d9ef>Array</span><span style=color:#f92672>&lt;</span>[<span style=color:#66d9ef>number</span>, <span style=color:#66d9ef>number</span>]<span style=color:#f92672>&gt;</span> <span style=color:#f92672>=</span> [];
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>u</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>u</span> <span style=color:#f92672>&lt;</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>leftN</span>; <span style=color:#a6e22e>u</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>if</span> (<span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>matchL</span>[<span style=color:#a6e22e>u</span>] <span style=color:#f92672>!==</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>) {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>pairs</span>.<span style=color:#a6e22e>push</span>([<span style=color:#a6e22e>u</span>, <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>matchL</span>[<span style=color:#a6e22e>u</span>]]);
+</span></span><span style=display:flex><span>      }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>pairs</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── 使用範例：工程師任務分配 ──────────────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 場景：3 位工程師（左側）匹配 4 個任務（右側）
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 每位工程師有能力完成的任務集合
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>bm</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>BipartiteMatching</span>(<span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>4</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 工程師 0：能完成任務 0 和任務 1
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>bm</span>.<span style=color:#a6e22e>addEdge</span>(<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>0</span>);
+</span></span><span style=display:flex><span><span style=color:#a6e22e>bm</span>.<span style=color:#a6e22e>addEdge</span>(<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>1</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 工程師 1：能完成任務 1 和任務 2
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>bm</span>.<span style=color:#a6e22e>addEdge</span>(<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>1</span>);
+</span></span><span style=display:flex><span><span style=color:#a6e22e>bm</span>.<span style=color:#a6e22e>addEdge</span>(<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>2</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 工程師 2：能完成任務 2 和任務 3
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>bm</span>.<span style=color:#a6e22e>addEdge</span>(<span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>2</span>);
+</span></span><span style=display:flex><span><span style=color:#a6e22e>bm</span>.<span style=color:#a6e22e>addEdge</span>(<span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>matchCount</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>bm</span>.<span style=color:#a6e22e>maxMatching</span>();
+</span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#e6db74>`最大匹配數（同時完成的任務數）: </span><span style=color:#e6db74>${</span><span style=color:#a6e22e>matchCount</span><span style=color:#e6db74>}</span><span style=color:#e6db74>`</span>); <span style=color:#75715e>// 輸出：3
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>pairs</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>bm</span>.<span style=color:#a6e22e>getMatching</span>();
+</span></span><span style=display:flex><span><span style=color:#a6e22e>pairs</span>.<span style=color:#a6e22e>forEach</span>(([<span style=color:#a6e22e>eng</span>, <span style=color:#a6e22e>task</span>]) <span style=color:#f92672>=&gt;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#e6db74>`  工程師</span><span style=color:#e6db74>${</span><span style=color:#a6e22e>eng</span><span style=color:#e6db74>}</span><span style=color:#e6db74> → 任務</span><span style=color:#e6db74>${</span><span style=color:#a6e22e>task</span><span style=color:#e6db74>}</span><span style=color:#e6db74>`</span>);
+</span></span><span style=display:flex><span>});
+</span></span><span style=display:flex><span><span style=color:#75715e>// 工程師0 → 任務0（或任務1）
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 工程師1 → 任務1（或任務2）
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 工程師2 → 任務2（或任務3）
+</span></span></span></code></pre></div><hr><h3 id=c-對照實作>C++ 對照實作</h3><p>以下是相同演算法的 C++ 實作。C++ 在競賽環境中更常用於網路流，因為其效能優勢和標準的 <code>bits/stdc++.h</code> 萬用標頭檔。</p><h4 id=語言差異重點>語言差異重點</h4><ul><li>C++ 使用 <code>vector&lt;vector&lt;Edge>></code> 代替 TypeScript 的 <code>Edge[][]</code>，記憶體管理更直接</li><li>C++ 的 <code>int&</code> 引用特性讓當前弧優化寫法更簡潔（<code>for (int& i = iter[v]; ...)</code>）</li><li>C++ 使用 <code>INT_MAX</code> 而 TypeScript 使用 <code>Infinity</code></li><li>C++ 的 struct 預設公開成員，而 TypeScript 需明確標記 <code>public</code></li></ul><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-cpp data-lang=cpp><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;bits/stdc++.h&gt;</span><span style=color:#75715e>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> std;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ===== Dinic 最大流演算法 =====
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 時間複雜度：O(V² × E)
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 對於單位容量圖（二分圖匹配）：O(E × √E)
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>struct</span> <span style=color:#a6e22e>Edge</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>int</span> to, rev;  <span style=color:#75715e>// 終點，反向邊索引
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>int</span> cap;      <span style=color:#75715e>// 殘餘容量
+</span></span></span><span style=display:flex><span>};
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>MaxFlow</span> {
+</span></span><span style=display:flex><span><span style=color:#66d9ef>private</span><span style=color:#f92672>:</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>int</span> n;
+</span></span><span style=display:flex><span>    vector<span style=color:#f92672>&lt;</span>vector<span style=color:#f92672>&lt;</span>Edge<span style=color:#f92672>&gt;&gt;</span> graph;
+</span></span><span style=display:flex><span>    vector<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;</span> level; <span style=color:#75715e>// BFS 分層
+</span></span></span><span style=display:flex><span>    vector<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;</span> iter;  <span style=color:#75715e>// 當前弧優化
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// BFS 建立分層圖
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>bool</span> <span style=color:#a6e22e>bfs</span>(<span style=color:#66d9ef>int</span> s, <span style=color:#66d9ef>int</span> t) {
+</span></span><span style=display:flex><span>        level.assign(n, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>);
+</span></span><span style=display:flex><span>        queue<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;</span> q;
+</span></span><span style=display:flex><span>        level[s] <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>        q.push(s);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>while</span> (<span style=color:#f92672>!</span>q.empty()) {
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>int</span> v <span style=color:#f92672>=</span> q.front(); q.pop();
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>const</span> <span style=color:#66d9ef>auto</span><span style=color:#f92672>&amp;</span> e : graph[v]) {
+</span></span><span style=display:flex><span>                <span style=color:#66d9ef>if</span> (e.cap <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span> <span style=color:#f92672>&amp;&amp;</span> level[e.to] <span style=color:#f92672>&lt;</span> <span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>                    level[e.to] <span style=color:#f92672>=</span> level[v] <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>                    q.push(e.to);
+</span></span><span style=display:flex><span>                }
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> level[t] <span style=color:#f92672>&gt;=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// DFS 推阻塞流（含當前弧優化）
+</span></span></span><span style=display:flex><span>    <span style=color:#75715e>// 注意 int&amp; i = iter[v] 是 C++ 引用，直接修改 iter[v] 的值
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>dfs</span>(<span style=color:#66d9ef>int</span> v, <span style=color:#66d9ef>int</span> t, <span style=color:#66d9ef>int</span> f) {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> (v <span style=color:#f92672>==</span> t) <span style=color:#66d9ef>return</span> f;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span><span style=color:#f92672>&amp;</span> i <span style=color:#f92672>=</span> iter[v]; i <span style=color:#f92672>&lt;</span> (<span style=color:#66d9ef>int</span>)graph[v].size(); i<span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>            Edge<span style=color:#f92672>&amp;</span> e <span style=color:#f92672>=</span> graph[v][i];
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>if</span> (e.cap <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span> <span style=color:#f92672>&amp;&amp;</span> level[v] <span style=color:#f92672>&lt;</span> level[e.to]) {
+</span></span><span style=display:flex><span>                <span style=color:#66d9ef>int</span> d <span style=color:#f92672>=</span> dfs(e.to, t, min(f, e.cap));
+</span></span><span style=display:flex><span>                <span style=color:#66d9ef>if</span> (d <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>                    e.cap <span style=color:#f92672>-=</span> d;
+</span></span><span style=display:flex><span>                    graph[e.to][e.rev].cap <span style=color:#f92672>+=</span> d;
+</span></span><span style=display:flex><span>                    <span style=color:#66d9ef>return</span> d;
+</span></span><span style=display:flex><span>                }
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>public</span><span style=color:#f92672>:</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>explicit</span> MaxFlow(<span style=color:#66d9ef>int</span> n) <span style=color:#f92672>:</span> n(n), graph(n), level(n), iter(n) {}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 添加有向邊（自動添加反向邊）
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>addEdge</span>(<span style=color:#66d9ef>int</span> from, <span style=color:#66d9ef>int</span> to, <span style=color:#66d9ef>int</span> cap) {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>int</span> fwdIdx <span style=color:#f92672>=</span> graph[to].size();
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>int</span> bwdIdx <span style=color:#f92672>=</span> graph[from].size();
+</span></span><span style=display:flex><span>        graph[from].push_back({ to, fwdIdx, cap });
+</span></span><span style=display:flex><span>        graph[to].push_back({ from, bwdIdx, <span style=color:#ae81ff>0</span> }); <span style=color:#75715e>// 反向邊初始容量 0
+</span></span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 求最大流
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>maxflow</span>(<span style=color:#66d9ef>int</span> s, <span style=color:#66d9ef>int</span> t) {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>int</span> flow <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>while</span> (bfs(s, t)) {
+</span></span><span style=display:flex><span>            iter.assign(n, <span style=color:#ae81ff>0</span>);
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>int</span> f;
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>while</span> ((f <span style=color:#f92672>=</span> dfs(s, t, INT_MAX)) <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>                flow <span style=color:#f92672>+=</span> f;
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> flow;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 找最小割的 S 集合（BFS 後 level[v] &gt;= 0 的節點）
+</span></span></span><span style=display:flex><span>    vector<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>bool</span><span style=color:#f92672>&gt;</span> minCutS(<span style=color:#66d9ef>int</span> s, <span style=color:#66d9ef>int</span> t) {
+</span></span><span style=display:flex><span>        maxflow(s, t); <span style=color:#75715e>// 先求最大流
+</span></span></span><span style=display:flex><span>        bfs(s, t);     <span style=color:#75715e>// 最後一次 BFS 確定可達節點
+</span></span></span><span style=display:flex><span>        vector<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>bool</span><span style=color:#f92672>&gt;</span> inS(n);
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> n; i<span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>            inS[i] <span style=color:#f92672>=</span> (level[i] <span style=color:#f92672>&gt;=</span> <span style=color:#ae81ff>0</span>); <span style=color:#75715e>// 可達 = 在 S 集合中
+</span></span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> inS;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>};
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ===== 匈牙利演算法（二部圖最大匹配）=====
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>BipartiteMatching</span> {
+</span></span><span style=display:flex><span><span style=color:#66d9ef>private</span><span style=color:#f92672>:</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>int</span> leftN, rightN;
+</span></span><span style=display:flex><span>    vector<span style=color:#f92672>&lt;</span>vector<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;&gt;</span> adj;
+</span></span><span style=display:flex><span>    vector<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;</span> matchR; <span style=color:#75715e>// matchR[右節點] = 匹配的左節點
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>bool</span> <span style=color:#a6e22e>dfs</span>(<span style=color:#66d9ef>int</span> u, vector<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>bool</span><span style=color:#f92672>&gt;&amp;</span> visited) {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> v : adj[u]) {
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span>visited[v]) {
+</span></span><span style=display:flex><span>                visited[v] <span style=color:#f92672>=</span> true;
+</span></span><span style=display:flex><span>                <span style=color:#66d9ef>if</span> (matchR[v] <span style=color:#f92672>==</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span> <span style=color:#f92672>||</span> dfs(matchR[v], visited)) {
+</span></span><span style=display:flex><span>                    matchR[v] <span style=color:#f92672>=</span> u;
+</span></span><span style=display:flex><span>                    <span style=color:#66d9ef>return</span> true;
+</span></span><span style=display:flex><span>                }
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> false;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>public</span><span style=color:#f92672>:</span>
+</span></span><span style=display:flex><span>    BipartiteMatching(<span style=color:#66d9ef>int</span> leftN, <span style=color:#66d9ef>int</span> rightN)
+</span></span><span style=display:flex><span>        <span style=color:#f92672>:</span> leftN(leftN), rightN(rightN),
+</span></span><span style=display:flex><span>          adj(leftN), matchR(rightN, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>) {}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>addEdge</span>(<span style=color:#66d9ef>int</span> u, <span style=color:#66d9ef>int</span> v) {
+</span></span><span style=display:flex><span>        adj[u].push_back(v);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>maxMatching</span>() {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>int</span> result <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> u <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; u <span style=color:#f92672>&lt;</span> leftN; u<span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>            vector<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>bool</span><span style=color:#f92672>&gt;</span> visited(rightN, false);
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>if</span> (dfs(u, visited)) result<span style=color:#f92672>++</span>;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> result;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 輸出最終匹配對
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>printMatching</span>() <span style=color:#66d9ef>const</span> {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> v <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; v <span style=color:#f92672>&lt;</span> rightN; v<span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>if</span> (matchR[v] <span style=color:#f92672>!=</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>) {
+</span></span><span style=display:flex><span>                cout <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34;左&#34;</span> <span style=color:#f92672>&lt;&lt;</span> matchR[v] <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34; &lt;-&gt; 右&#34;</span> <span style=color:#f92672>&lt;&lt;</span> v <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>;
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>};
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ===== 主程式：測試 =====
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 測試 Dinic 最大流
+</span></span></span><span style=display:flex><span>    {
+</span></span><span style=display:flex><span>        MaxFlow mf(<span style=color:#ae81ff>6</span>);
+</span></span><span style=display:flex><span>        mf.addEdge(<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>10</span>);
+</span></span><span style=display:flex><span>        mf.addEdge(<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>10</span>);
+</span></span><span style=display:flex><span>        mf.addEdge(<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>4</span>);
+</span></span><span style=display:flex><span>        mf.addEdge(<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>2</span>);
+</span></span><span style=display:flex><span>        mf.addEdge(<span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>4</span>, <span style=color:#ae81ff>9</span>);
+</span></span><span style=display:flex><span>        mf.addEdge(<span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>5</span>, <span style=color:#ae81ff>10</span>);
+</span></span><span style=display:flex><span>        mf.addEdge(<span style=color:#ae81ff>4</span>, <span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>6</span>);
+</span></span><span style=display:flex><span>        mf.addEdge(<span style=color:#ae81ff>4</span>, <span style=color:#ae81ff>5</span>, <span style=color:#ae81ff>10</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        cout <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34;最大流: &#34;</span> <span style=color:#f92672>&lt;&lt;</span> mf.maxflow(<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>5</span>) <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>; <span style=color:#75715e>// 19
+</span></span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 測試二部圖匹配
+</span></span></span><span style=display:flex><span>    {
+</span></span><span style=display:flex><span>        BipartiteMatching bm(<span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>4</span>);
+</span></span><span style=display:flex><span>        bm.addEdge(<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>0</span>); bm.addEdge(<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>1</span>);
+</span></span><span style=display:flex><span>        bm.addEdge(<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>1</span>); bm.addEdge(<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>2</span>);
+</span></span><span style=display:flex><span>        bm.addEdge(<span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>2</span>); bm.addEdge(<span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        cout <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34;最大匹配: &#34;</span> <span style=color:#f92672>&lt;&lt;</span> bm.maxMatching() <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>; <span style=color:#75715e>// 3
+</span></span></span><span style=display:flex><span>        bm.printMatching();
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><hr><h3 id=複雜度分析>複雜度分析</h3><table><thead><tr><th>演算法</th><th>時間複雜度</th><th>空間複雜度</th><th>適用場景</th></tr></thead><tbody><tr><td>Ford-Fulkerson（DFS）</td><td>O(E x |f*|)</td><td>O(V + E)</td><td>容量小的整數圖</td></tr><tr><td>Edmonds-Karp（BFS）</td><td>O(V x E²)</td><td>O(V + E)</td><td>中小規模、入門學習</td></tr><tr><td>Dinic（分層圖 + 阻塞流）</td><td>O(V² x E)</td><td>O(V + E)</td><td><strong>通用首選，競賽主力</strong></td></tr><tr><td>Dinic（單位容量圖）</td><td>O(E x sqrt(V))</td><td>O(V + E)</td><td>二分圖匹配的特例</td></tr><tr><td>匈牙利演算法</td><td>O(V x E)</td><td>O(V + E)</td><td>二分圖最大匹配專用</td></tr><tr><td>Hopcroft-Karp</td><td>O(E x sqrt(V))</td><td>O(V + E)</td><td>大規模二分圖匹配</td></tr></tbody></table><p><strong>效能比較重點</strong>：</p><ul><li>Edmonds-Karp 的 O(V x E²) 在稠密圖上可能很慢，因為 E 可以接近 V²</li><li>Dinic 的 O(V² x E) 在大多數實際案例中表現遠優於理論上界</li><li>當前弧優化對 Dinic 的實際效能提升巨大——沒有它，DFS 階段退化為 O(VE²)</li><li>對於二分圖匹配，Dinic 退化為 Hopcroft-Karp 的等效複雜度 O(E x sqrt(V))</li></ul><hr><h3 id=變體與延伸>變體與延伸</h3><h4 id=二分圖最大匹配與-konig-定理>二分圖最大匹配與 Konig 定理</h4><p><strong>二分圖最大匹配</strong> 可以直接轉化為最大流問題：</p><pre tabindex=0><code>原二部圖：
+  左側 L = {A, B, C}
+  右側 R = {1, 2, 3, 4}
+  邊：A-1, A-2, B-2, B-3, C-3, C-4
+
+轉化為最大流：
+  新增超級源點 s，連接 s→A, s→B, s→C（容量 1）
+  新增超級匯點 t，連接 1→t, 2→t, 3→t, 4→t（容量 1）
+  原邊方向 A→1, A→2, B→2, B→3, C→3, C→4（容量 1）
+
+  最大流 = 最大匹配數
+</code></pre><p><strong>Konig 定理</strong>：在二分圖中，最大匹配數 = 最小頂點覆蓋數。這是最大流最小割定理在二分圖上的特例。</p><h4 id=最小費用最大流minimum-cost-maximum-flow>最小費用最大流（Minimum Cost Maximum Flow）</h4><p>當每條邊除了容量之外還有一個「單位流量成本」時，我們希望在達到最大流的前提下，使總成本最小。</p><p>做法：將 Edmonds-Karp 中的 BFS 替換為 <strong>SPFA（Bellman-Ford 的佇列優化）</strong> 或 <strong>Dijkstra（需要 Johnson 重標號處理負權邊）</strong>，每次找成本最低的增廣路徑。</p><pre tabindex=0><code>典型應用：
+  - 物流配送：在滿足需求的前提下最小化運輸成本
+  - 任務調度：在完成所有任務的前提下最小化人力成本
+  - 二分圖帶權最佳匹配（等效於 Kuhn-Munkres / 匈牙利帶權演算法）
+</code></pre><h4 id=多源多匯問題>多源多匯問題</h4><p>當流網路有多個源點 s₁, s₂, &mldr; 和多個匯點 t₁, t₂, &mldr; 時，只需添加：</p><ul><li><strong>超級源點 S</strong>：S → s₁（容量 ∞）, S → s₂（容量 ∞）, &mldr;</li><li><strong>超級匯點 T</strong>：t₁ → T（容量 ∞）, t₂ → T（容量 ∞）, &mldr;</li></ul><p>然後在新圖上求 S 到 T 的最大流即可。如果各源點/匯點有供應量/需求量限制，可以把容量 ∞ 替換為相應的限制值。</p><h4 id=有上下界的流>有上下界的流</h4><p>有些問題要求某些邊的流量不僅有上界，還有下界 l(u,v) &lt;= f(u,v) &lt;= c(u,v)。解法是引入 <strong>循環流</strong> 的概念，建構輔助網路並轉化為標準最大流問題。</p><hr><h3 id=常見面試考點>常見面試考點</h3><p><strong>面試中網路流的常見問法：</strong></p><ol><li><p><strong>概念理解題</strong> — 解釋殘餘網路和反向邊的作用。回答要點：反向邊讓演算法能「反悔」之前的路由決策，是保證找到全域最優解的關鍵</p></li><li><p><strong>最大流最小割定理的應用</strong> — 給一個網路圖，手算最大流和最小割。要能識別最小割的邊集合，以及它與瓶頸分析的關係</p></li><li><p><strong>二分圖匹配建模</strong> — 將實際問題（任務分配、排班、配對）轉化為二分圖匹配。關鍵是識別「左側集合」和「右側集合」</p></li><li><p><strong>Ford-Fulkerson vs Edmonds-Karp vs Dinic 的差異</strong> — 能說清楚三者的增廣策略和時間複雜度差異，以及 Dinic 為何最快</p></li><li><p><strong>網路流建模</strong> — 面試中最難的部分：將看似不相關的問題轉化為網路流。常見轉化技巧包括「拆點」（一個節點拆為入節點和出節點，用容量邊連接）和「超級源/匯」</p></li></ol><p><strong>常見陷阱：</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// 陷阱 1：忘記添加反向邊
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 錯誤：只有正向邊，殘餘網路不完整，演算法無法退流
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>graph</span>[<span style=color:#66d9ef>from</span>].<span style=color:#a6e22e>push</span>({ <span style=color:#a6e22e>to</span>, <span style=color:#a6e22e>cap</span>, <span style=color:#a6e22e>rev</span>: <span style=color:#66d9ef>0</span> }); <span style=color:#75715e>// 沒有反向邊！
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 正確：同時添加反向邊（容量為 0）
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>graph</span>[<span style=color:#66d9ef>from</span>].<span style=color:#a6e22e>push</span>({ <span style=color:#a6e22e>to</span>, <span style=color:#a6e22e>cap</span>, <span style=color:#a6e22e>rev</span>: <span style=color:#66d9ef>graph</span>[<span style=color:#a6e22e>to</span>].<span style=color:#a6e22e>length</span> });
+</span></span><span style=display:flex><span><span style=color:#a6e22e>graph</span>[<span style=color:#a6e22e>to</span>].<span style=color:#a6e22e>push</span>({ <span style=color:#a6e22e>to</span>: <span style=color:#66d9ef>from</span>, <span style=color:#a6e22e>cap</span>: <span style=color:#66d9ef>0</span>, <span style=color:#a6e22e>rev</span>: <span style=color:#66d9ef>graph</span>[<span style=color:#66d9ef>from</span>].<span style=color:#a6e22e>length</span> <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span> });
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 陷阱 2：Dinic 遺漏當前弧優化
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 錯誤：每次 DFS 都從第 0 條邊開始，退化為 O(V × E²)
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>const</span> <span style=color:#a6e22e>e</span> <span style=color:#66d9ef>of</span> <span style=color:#a6e22e>graph</span>[<span style=color:#a6e22e>v</span>]) { <span style=color:#75715e>/* 每次都掃描所有邊 */</span> }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 正確：用 iter[v] 持續前進
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>for</span> (; <span style=color:#a6e22e>iter</span>[<span style=color:#a6e22e>v</span>] <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>graph</span>[<span style=color:#a6e22e>v</span>].<span style=color:#a6e22e>length</span>; <span style=color:#a6e22e>iter</span>[<span style=color:#a6e22e>v</span>]<span style=color:#f92672>++</span>) { <span style=color:#75715e>/* 跳過已飽和邊 */</span> }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 陷阱 3：匈牙利演算法的 visited 沒有每輪重置
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 錯誤：visited 跨輪持久，導致右側節點被錯誤鎖定
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>visited</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> Array(<span style=color:#a6e22e>rightN</span>).<span style=color:#a6e22e>fill</span>(<span style=color:#66d9ef>false</span>); <span style=color:#75715e>// 在迴圈外宣告
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>u</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>u</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>leftN</span>; <span style=color:#a6e22e>u</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>dfs</span>(<span style=color:#a6e22e>u</span>, <span style=color:#a6e22e>visited</span>); <span style=color:#75715e>// 前一輪的 visited 影響後一輪！
+</span></span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 正確：每個左節點嘗試前重置 visited
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>u</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>u</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>leftN</span>; <span style=color:#a6e22e>u</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>visited</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> Array(<span style=color:#a6e22e>rightN</span>).<span style=color:#a6e22e>fill</span>(<span style=color:#66d9ef>false</span>); <span style=color:#75715e>// 每輪重新建立
+</span></span></span><span style=display:flex><span>  <span style=color:#a6e22e>dfs</span>(<span style=color:#a6e22e>u</span>, <span style=color:#a6e22e>visited</span>);
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p><strong>Ford-Fulkerson 的無限迴圈風險</strong>：若容量為無理數（如 1/sqrt(2)），DFS 版本可能永遠不終止——每次增廣的流量越來越小但永遠不歸零。解法：使用 BFS（Edmonds-Karp）或分層圖（Dinic），它們都有多項式時間保證。</p><hr><h3 id=leetcode-練習>LeetCode 練習</h3><p>網路流在 LeetCode 上的純題目較少（多為 Hard+），但以下題目涉及網路流的核心思想或可用網路流建模：</p><table><thead><tr><th>題號</th><th>題目</th><th>難度</th><th>核心技巧</th></tr></thead><tbody><tr><td>1591</td><td>Strange Printer II</td><td>Hard</td><td>拓撲排序判斷可行性，類似流網路的有向圖分析</td></tr><tr><td>785</td><td>Is Graph Bipartite?</td><td>Medium</td><td>二分圖判定（BFS/DFS 染色），是匹配的前置知識</td></tr><tr><td>1349</td><td>Maximum Students Taking Exam</td><td>Hard</td><td>二分圖匹配（匈牙利演算法）或狀態壓縮 DP</td></tr><tr><td>1494</td><td>Parallel Courses II</td><td>Hard</td><td>狀態壓縮 DP，可用類網路流思路建模</td></tr><tr><td>LCP 04</td><td>覆蓋（Domino and Tromino Tiling 變體）</td><td>Hard</td><td>二分圖最大匹配的直接應用</td></tr></tbody></table><h4 id=leetcode-785--is-graph-bipartite>LeetCode 785 — Is Graph Bipartite?</h4><p>判斷一個圖是否為二分圖——這是所有二分圖匹配問題的前置條件。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// BFS 染色法：O(V + E)
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 二分圖的充要條件：不存在奇數長度的環
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>isBipartite</span>(<span style=color:#a6e22e>graph</span>: <span style=color:#66d9ef>number</span>[][])<span style=color:#f92672>:</span> <span style=color:#66d9ef>boolean</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>n</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>graph</span>.<span style=color:#a6e22e>length</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>color</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> Array(<span style=color:#a6e22e>n</span>).<span style=color:#a6e22e>fill</span>(<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>); <span style=color:#75715e>// -1 表示未染色
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>start</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>start</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>n</span>; <span style=color:#a6e22e>start</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>color</span>[<span style=color:#a6e22e>start</span>] <span style=color:#f92672>!==</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>) <span style=color:#66d9ef>continue</span>; <span style=color:#75715e>// 已染色，跳過
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// BFS 染色
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>queue</span>: <span style=color:#66d9ef>number</span>[] <span style=color:#f92672>=</span> [<span style=color:#a6e22e>start</span>];
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>color</span>[<span style=color:#a6e22e>start</span>] <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>head</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>while</span> (<span style=color:#a6e22e>head</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>queue</span>.<span style=color:#a6e22e>length</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>u</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>queue</span>[<span style=color:#a6e22e>head</span><span style=color:#f92672>++</span>];
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>const</span> <span style=color:#a6e22e>v</span> <span style=color:#66d9ef>of</span> <span style=color:#a6e22e>graph</span>[<span style=color:#a6e22e>u</span>]) {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>color</span>[<span style=color:#a6e22e>v</span>] <span style=color:#f92672>===</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>) {
+</span></span><span style=display:flex><span>          <span style=color:#a6e22e>color</span>[<span style=color:#a6e22e>v</span>] <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> <span style=color:#f92672>-</span> <span style=color:#a6e22e>color</span>[<span style=color:#a6e22e>u</span>]; <span style=color:#75715e>// 鄰居染相反顏色
+</span></span></span><span style=display:flex><span>          <span style=color:#a6e22e>queue</span>.<span style=color:#a6e22e>push</span>(<span style=color:#a6e22e>v</span>);
+</span></span><span style=display:flex><span>        } <span style=color:#66d9ef>else</span> <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>color</span>[<span style=color:#a6e22e>v</span>] <span style=color:#f92672>===</span> <span style=color:#a6e22e>color</span>[<span style=color:#a6e22e>u</span>]) {
+</span></span><span style=display:flex><span>          <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>false</span>; <span style=color:#75715e>// 相鄰節點同色，不是二分圖
+</span></span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>      }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>true</span>;
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 時間複雜度：O(V + E)；空間複雜度：O(V)
+</span></span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h4 id=leetcode-1349--maximum-students-taking-exam>LeetCode 1349 — Maximum Students Taking Exam</h4><p>這題可以用二分圖匹配來解：將座位按棋盤格染色，相鄰（會作弊）的座位分屬不同顏色組。求最大獨立集 = 總可用座位 - 最大匹配。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// 提示：將座位按 (row + col) % 2 分為兩組
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 建立二分圖：有作弊風險的座位對之間連邊
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 最大可坐學生數 = 可用座位數 - 最大匹配數（Konig 定理）
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 實作時直接用匈牙利演算法求最大匹配
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>maxStudents</span>(<span style=color:#a6e22e>seats</span>: <span style=color:#66d9ef>string</span>[][])<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>m</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>seats</span>.<span style=color:#a6e22e>length</span>, <span style=color:#a6e22e>n</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>seats</span>[<span style=color:#ae81ff>0</span>].<span style=color:#a6e22e>length</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>dirs</span> <span style=color:#f92672>=</span> [[<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>], [<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>1</span>], [<span style=color:#ae81ff>0</span>, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>], [<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>1</span>], [<span style=color:#ae81ff>1</span>, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>], [<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>1</span>]];
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 將座位編號，分為左右兩組
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>available</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>id</span> <span style=color:#f92672>=</span> Array.<span style=color:#66d9ef>from</span>({ <span style=color:#a6e22e>length</span>: <span style=color:#66d9ef>m</span> }, () <span style=color:#f92672>=&gt;</span> <span style=color:#66d9ef>new</span> Array(<span style=color:#a6e22e>n</span>).<span style=color:#a6e22e>fill</span>(<span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>));
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>leftNodes</span>: <span style=color:#66d9ef>number</span>[][] <span style=color:#f92672>=</span> []; <span style=color:#75715e>// (row+col) % 2 === 0 的座位
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>rightNodes</span>: <span style=color:#66d9ef>number</span>[][] <span style=color:#f92672>=</span> []; <span style=color:#75715e>// (row+col) % 2 === 1 的座位
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>i</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>m</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>j</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>j</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>n</span>; <span style=color:#a6e22e>j</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>seats</span>[<span style=color:#a6e22e>i</span>][<span style=color:#a6e22e>j</span>] <span style=color:#f92672>===</span> <span style=color:#e6db74>&#39;.&#39;</span>) {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>available</span><span style=color:#f92672>++</span>;
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> ((<span style=color:#a6e22e>i</span> <span style=color:#f92672>+</span> <span style=color:#a6e22e>j</span>) <span style=color:#f92672>%</span> <span style=color:#ae81ff>2</span> <span style=color:#f92672>===</span> <span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>          <span style=color:#a6e22e>id</span>[<span style=color:#a6e22e>i</span>][<span style=color:#a6e22e>j</span>] <span style=color:#f92672>=</span> <span style=color:#a6e22e>leftNodes</span>.<span style=color:#a6e22e>length</span>;
+</span></span><span style=display:flex><span>          <span style=color:#a6e22e>leftNodes</span>.<span style=color:#a6e22e>push</span>([<span style=color:#a6e22e>i</span>, <span style=color:#a6e22e>j</span>]);
+</span></span><span style=display:flex><span>        } <span style=color:#66d9ef>else</span> {
+</span></span><span style=display:flex><span>          <span style=color:#a6e22e>id</span>[<span style=color:#a6e22e>i</span>][<span style=color:#a6e22e>j</span>] <span style=color:#f92672>=</span> <span style=color:#a6e22e>rightNodes</span>.<span style=color:#a6e22e>length</span>;
+</span></span><span style=display:flex><span>          <span style=color:#a6e22e>rightNodes</span>.<span style=color:#a6e22e>push</span>([<span style=color:#a6e22e>i</span>, <span style=color:#a6e22e>j</span>]);
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>      }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 建立二分圖匹配
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>bm</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>BipartiteMatching</span>(<span style=color:#a6e22e>leftNodes</span>.<span style=color:#a6e22e>length</span>, <span style=color:#a6e22e>rightNodes</span>.<span style=color:#a6e22e>length</span>);
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>const</span> [<span style=color:#a6e22e>r</span>, <span style=color:#a6e22e>c</span>] <span style=color:#66d9ef>of</span> <span style=color:#a6e22e>leftNodes</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>const</span> [<span style=color:#a6e22e>dr</span>, <span style=color:#a6e22e>dc</span>] <span style=color:#66d9ef>of</span> <span style=color:#a6e22e>dirs</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>nr</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>r</span> <span style=color:#f92672>+</span> <span style=color:#a6e22e>dr</span>, <span style=color:#a6e22e>nc</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>c</span> <span style=color:#f92672>+</span> <span style=color:#a6e22e>dc</span>;
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>nr</span> <span style=color:#f92672>&gt;=</span> <span style=color:#ae81ff>0</span> <span style=color:#f92672>&amp;&amp;</span> <span style=color:#a6e22e>nr</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>m</span> <span style=color:#f92672>&amp;&amp;</span> <span style=color:#a6e22e>nc</span> <span style=color:#f92672>&gt;=</span> <span style=color:#ae81ff>0</span> <span style=color:#f92672>&amp;&amp;</span> <span style=color:#a6e22e>nc</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>n</span> <span style=color:#f92672>&amp;&amp;</span> <span style=color:#a6e22e>id</span>[<span style=color:#a6e22e>nr</span>][<span style=color:#a6e22e>nc</span>] <span style=color:#f92672>!==</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span> <span style=color:#f92672>&amp;&amp;</span> (<span style=color:#a6e22e>nr</span> <span style=color:#f92672>+</span> <span style=color:#a6e22e>nc</span>) <span style=color:#f92672>%</span> <span style=color:#ae81ff>2</span> <span style=color:#f92672>===</span> <span style=color:#ae81ff>1</span>) {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>bm</span>.<span style=color:#a6e22e>addEdge</span>(<span style=color:#a6e22e>id</span>[<span style=color:#a6e22e>r</span>][<span style=color:#a6e22e>c</span>], <span style=color:#a6e22e>id</span>[<span style=color:#a6e22e>nr</span>][<span style=color:#a6e22e>nc</span>]);
+</span></span><span style=display:flex><span>      }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// Konig 定理：最大獨立集 = 總數 - 最大匹配
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>available</span> <span style=color:#f92672>-</span> <span style=color:#a6e22e>bm</span>.<span style=color:#a6e22e>maxMatching</span>();
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><hr><h3 id=常見陷阱總整理>常見陷阱總整理</h3><table><thead><tr><th>陷阱</th><th>症狀</th><th>解法</th></tr></thead><tbody><tr><td>忘記添加反向邊</td><td>演算法找不到最優解</td><td><code>addEdge</code> 中同時 push 反向邊（cap=0）</td></tr><tr><td>Dinic 缺少當前弧優化</td><td>TLE，時間退化為 O(VE²)</td><td>用 <code>iter[v]</code> 記住掃描位置</td></tr><tr><td>匈牙利 visited 未重置</td><td>匹配數偏少</td><td>每輪 <code>new Array(rightN).fill(false)</code></td></tr><tr><td>Ford-Fulkerson 用於非整數容量</td><td>可能無限迴圈</td><td>改用 Edmonds-Karp 或 Dinic</td></tr><tr><td>容量很大時用 Ford-Fulkerson</td><td>TLE（O(E x |f*|)）</td><td>改用 Dinic（不依賴流量大小）</td></tr><tr><td><code>rev</code> 索引計算錯誤</td><td>正反向邊不對應，結果錯誤</td><td>push 前先記錄 <code>graph[to].length</code></td></tr></tbody></table><hr><h3 id=總結>總結</h3><p>本文涵蓋了網路流演算法的核心知識：</p><ul><li><strong>流網路基礎</strong>：容量限制、流量守恆、殘餘網路三大概念構成理解網路流的基石。反向邊的「退流」機制是所有增廣路徑方法能找到最優解的數學保證</li><li><strong>最大流最小割定理</strong>：最大流值 = 最小割容量，這個定理將「推流」和「找瓶頸」兩個問題等價起來，在實際應用中意義深遠</li><li><strong>三大演算法</strong>：Ford-Fulkerson（DFS，O(E x |f*|)）→ Edmonds-Karp（BFS，O(VE²)）→ Dinic（分層圖 + 阻塞流，O(V²E)），每一步改進都針對前一步的效能瓶頸</li><li><strong>Dinic 演算法</strong> 搭配當前弧優化是競程和面試的首選實作，理解 BFS 分層 + DFS 推流 + iter 優化三個組件缺一不可</li><li><strong>二分圖匹配</strong> 是網路流最重要的特例，匈牙利演算法和 Konig 定理是面試高頻考點</li></ul><p>網路流的精髓在於 <strong>建模能力</strong>——把現實問題轉化為流網路。任務分配、影像分割、航線規劃、網路可靠性分析，這些看似不同的問題都能用同一套演算法框架解決。</p><a class="text-blue-500 font-bold no-underline" href=/post/javascript/data-structures-algorithms/030-tree-algorithms/ target=_blank>上一篇：樹演算法 — LCA、樹 DP 與重鏈剖分進階技巧</a><p>下一篇預告：<strong>字串演算法（String Algorithms）</strong> — KMP、Rabin-Karp、Trie 與後綴陣列，解鎖文字處理的高效演算法。</p><p>希望這篇文章能幫助你深入理解網路流演算法的核心原理與實作技巧。如有任何問題或疑惑，歡迎透過
+<a class="text-blue-500 font-bold no-underline" href=/contact/ target=_blank>Contact 頁面</a>
+與我聯繫！</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
+</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/javascript/data-structures--algorithms/030-tree-algorithms/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">樹演算法 — LCA、樹 DP 與重鏈剖分進階技巧 | 資料結構與演算法</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/13</span>
+</a><a href=https://benzhub.github.io/post/javascript/data-structures--algorithms/029-mst/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">最小生成樹 — Kruskal 與 Prim 演算法完整比較與實作 | 資料結構與演算法</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/12</span>
+</a><a href=https://benzhub.github.io/post/javascript/data-structures--algorithms/028-topological-sort/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">拓撲排序 — Kahn's BFS 與 DFS 雙解法完整教學 | 資料結構與演算法</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/11</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/javascript/data-structures--algorithms/030-tree-algorithms/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+<span class="text-sm font-medium">樹演算法 — LCA、樹 DP 與重鏈剖分進階技巧 | 資料結構與演算法</span></a></div><div><a href=https://benzhub.github.io/post/javascript/data-structures--algorithms/032-string-algorithms/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+<span class="text-sm font-medium">字串演算法完全指南 — KMP、Rabin-Karp、Z-Algorithm 與 Aho-Corasick | 資料結構與演算法</span></a></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
+</a><a href=/tags/acid><span class=tag-pill>acid</span>
+</a><a href=/tags/aggregate><span class=tag-pill>aggregate</span>
+</a><a href=/tags/ai><span class=tag-pill>ai</span>
+</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
+</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
+</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
+</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
+</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
+</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
+</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
+</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
+</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
+</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
+</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
+</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
+</a><a href=/tags/analytics><span class=tag-pill>analytics</span>
+</a><a href=/tags/api><span class=tag-pill>api</span>
+</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
+</a><a href=/tags/audit><span class=tag-pill>audit</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (39)</span>
+</a><a href=/post/javascript/><span class=tag-pill>JavaScript (94)</span>
+</a><a href=/post/django/><span class=tag-pill>Django (44)</span>
+</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
+</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
+</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
+</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
+</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/postgresql/039-other-languages/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">PL/Python、PL/Perl、PL/v8：PostgreSQL 的多語言程序擴展 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/15</p></a><a href=/post/javascript/data-structures--algorithms/032-string-algorithms/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">字串演算法完全指南 — KMP、Rabin-Karp、Z-Algorithm 與 Aho-Corasick | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/15</p></a><a href=/post/postgresql/038-rules-and-events/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Rules 與 LISTEN/NOTIFY：查詢改寫與即時事件通知 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/14</p></a><a href=/post/javascript/data-structures--algorithms/031-network-flow/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">網路流完全指南 — Ford-Fulkerson、Dinic 演算法與最大流最小割定理 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/14</p></a><a href=/post/postgresql/037-fdw/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Foreign Data Wrapper（FDW）：跨資料庫查詢的瑞士刀 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/13</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>
