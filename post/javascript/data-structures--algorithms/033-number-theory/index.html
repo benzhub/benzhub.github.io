@@ -1,0 +1,921 @@
+<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>數論完全指南 — GCD、模運算、質數篩法與中國剩餘定理 | 資料結構與演算法 | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="數論完全指南 — GCD、模運算、質數篩法與中國剩餘定理 | 資料結構與演算法 | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="深入解析競賽與面試必備的數論知識，掌握歐幾里得演算法、擴展 GCD、模運算、質因數分解、Sieve of Eratosthenes、費馬小定理與中國剩餘定理，搭配 JavaScript/TypeScript 與 C++ 完整實作"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="深入解析競賽與面試必備的數論知識，掌握歐幾里得演算法、擴展 GCD、模運算、質因數分解、Sieve of Eratosthenes、費馬小定理與中國剩餘定理，搭配 JavaScript/TypeScript 與 C++ 完整實作"><meta property="og:url" content="https://benzhub.github.io/post/javascript/data-structures--algorithms/033-number-theory/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/javascript/data-structures--algorithms/033-number-theory/><meta name=twitter:description content="深入解析競賽與面試必備的數論知識，掌握歐幾里得演算法、擴展 GCD、模運算、質因數分解、Sieve of Eratosthenes、費馬小定理與中國剩餘定理，搭配 JavaScript/TypeScript 與 C++ 完整實作"><meta property="article:published_time" content="2026-07-16T00:00:00+00:00"><meta property="article:updated_time" content="2026-07-16T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/javascript/Data%20Structures%20&%20Algorithms/033-Number-Theory.png"><meta property="og:image:url" content="https://benzhub.github.io/img/javascript/Data%20Structures%20&%20Algorithms/033-Number-Theory.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/javascript/data-structures--algorithms/033-number-theory/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/javascript/data-structures--algorithms/033-number-theory/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"數論完全指南 — GCD、模運算、質數篩法與中國剩餘定理 | 資料結構與演算法\"","description":"\"深入解析競賽與面試必備的數論知識，掌握歐幾里得演算法、擴展 GCD、模運算、質因數分解、Sieve of Eratosthenes、費馬小定理與中國剩餘定理，搭配 JavaScript/TypeScript 與 C++ 完整實作\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-07-16T00:00:00\u002b00:00","dateModified":"2026-07-16T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/javascript\/Data%20Structures%20\u0026%20Algorithms\/033-Number-Theory.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/javascript\/data-structures--algorithms\/033-number-theory\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/javascript\/"},{"@type":"ListItem","position":3,"name":"\"數論完全指南 — GCD、模運算、質數篩法與中國剩餘定理 | 資料結構與演算法\""}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"\"為什麼 JavaScript 中做模運算乘法需要用 BigInt？\"","acceptedAnswer":{"@type":"Answer","text":"\"JavaScript 的 Number 型別使用 IEEE 754 雙精度浮點數，整數精度只有 53 位元（2^53）。當兩個接近 10^9 的數相乘時，結果可能超過 2^53 而失去精度，導致模運算結果錯誤。使用 BigInt（如 1000000007n）可以處理任意精度整數運算，確保模運算結果正確。一般建議當模數超過 2^26（約 6700 萬）時就改用 BigInt。\""}},{"@type":"Question","name":"\"Sieve of Eratosthenes 和線性篩（Linear Sieve）有什麼差別？該用哪個？\"","acceptedAnswer":{"@type":"Answer","text":"\"Eratosthenes 篩法的時間複雜度為 O(N log log N)，實作簡單，對大部分場景已經足夠快。線性篩的時間複雜度為嚴格 O(N)，每個合數只被其最小質因數篩掉一次，額外提供每個數的最小質因數（minPrime），方便後續做質因數分解。如果你只需要找出所有質數，用 Eratosthenes 篩即可；如果還需要快速分解質因數，或 N 極大（超過 10^8）且需要極致效能，則選擇線性篩。\""}},{"@type":"Question","name":"\"中國剩餘定理（CRT）在實際程式設計中有什麼應用場景？\"","acceptedAnswer":{"@type":"Answer","text":"\"CRT 最常見的應用是在多模數系統中還原答案。例如競賽題要求答案對某個大數取模，但計算過程涉及除法，無法直接取模時，可以對多個互質的小質數分別計算結果，再用 CRT 合併。工程上，CRT 也用於 RSA 加密的效能優化（CRT-RSA 可將解密速度提升約 4 倍）、大整數運算的殘數系統（Residue Number System），以及分散式系統中的秘密分享協定。\""}}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">數論完全指南 — GCD、模運算、質數篩法與中國剩餘定理 | 資料結構與演算法</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/16</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/javascript class="tag-pill no-underline">javascript</a>
+<a href=/tags/%E8%B3%87%E6%96%99%E7%B5%90%E6%A7%8B%E6%BC%94%E7%AE%97%E6%B3%95 class="tag-pill no-underline">資料結構&演算法</a>
+<a href=/tags/%E6%95%B8%E8%AB%96 class="tag-pill no-underline">數論</a>
+<a href=/tags/number-theory class="tag-pill no-underline">Number Theory</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/javascript/Data%20Structures%20&%20Algorithms/033-Number-Theory.png alt="數論完全指南 — GCD、模運算、質數篩法與中國剩餘定理 | 資料結構與演算法"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p><strong>數論（Number Theory）</strong> 是演算法競賽與技術面試中最常見的數學工具箱，從 <strong>歐幾里得演算法（Euclidean Algorithm）</strong> 求最大公因數、<strong>質數篩法（Sieve of Eratosthenes）</strong> 高效列舉質數，到 <strong>模運算（Modular Arithmetic）</strong> 處理大數取餘、<strong>費馬小定理（Fermat&rsquo;s Little Theorem）</strong> 求模反元素，再到 <strong>中國剩餘定理（Chinese Remainder Theorem）</strong> 合併多模數方程式——這些工具構成了密碼學、雜湊函式、隨機化演算法的底層基石。本文帶你從直覺出發，逐步掌握所有核心數論演算法的原理與完整實作，搭配 JavaScript/TypeScript 與 C++ 雙語言範例，全面解鎖數論演算法的實戰能力。</p></blockquote><h3 id=前言>前言</h3><p>想像你是一位郵務分揀員，面前有一堆需要投遞的信件。你發現每第 2 封信的收件人在 A 區、每第 3 封在 B 區、每第 5 封在 C 區。有些信件同時符合多個條件——比如第 6 封同時屬於 A 區和 B 區（因為 6 是 2 和 3 的公倍數），第 30 封則三區皆屬。這種「整除」、「倍數」、「餘數」的規律，正是 <strong>數論（Number Theory）</strong> 的核心研究對象。</p><p>在程式設計的世界中，數論無處不在：</p><ul><li><strong>密碼學</strong>：RSA 加密依賴大質數與模反元素</li><li><strong>雜湊函式</strong>：模運算將任意大的鍵值映射到固定範圍</li><li><strong>競賽與面試</strong>：大量題目要求「答案對 10^9 + 7 取餘」</li><li><strong>分散式系統</strong>：一致性雜湊（Consistent Hashing）使用模運算分配節點</li></ul><p>學習本文後，你將能夠：</p><ul><li>理解並實作 <strong>歐幾里得演算法（GCD）</strong> 與 <strong>擴展 GCD</strong>，求解線性丟番圖方程</li><li>掌握 <strong>模運算</strong> 的基本性質與常見陷阱（負數取模、溢位問題）</li><li>使用 <strong>Sieve of Eratosthenes</strong> 和 <strong>線性篩</strong> 高效列舉質數</li><li>實作 <strong>快速冪（Binary Exponentiation）</strong> 與 <strong>模反元素（Modular Inverse）</strong></li><li>理解 <strong>費馬小定理</strong> 與 <strong>中國剩餘定理</strong> 的原理與應用</li><li>運用數論工具解決 LeetCode 高頻面試題</li></ul><hr><h3 id=核心概念>核心概念</h3><h4 id=gcd-與-lcm最大公因數與最小公倍數>GCD 與 LCM（最大公因數與最小公倍數）</h4><p><strong>最大公因數（Greatest Common Divisor，GCD）</strong> 是能同時整除兩個整數的最大正整數。例如 <code>gcd(48, 18) = 6</code>。</p><p><strong>最小公倍數（Least Common Multiple，LCM）</strong> 是能同時被兩個整數整除的最小正整數。GCD 和 LCM 之間的關係為：</p><pre tabindex=0><code>lcm(a, b) = a × b / gcd(a, b)
+          = (a / gcd(a, b)) × b    ← 先除後乘，防溢位
+</code></pre><h4 id=歐幾里得演算法euclidean-algorithm>歐幾里得演算法（Euclidean Algorithm）</h4><p>歐幾里得演算法（又稱 <strong>輾轉相除法</strong>）是求 GCD 的經典方法，基於以下數學性質：</p><pre tabindex=0><code>gcd(a, b) = gcd(b, a % b)
+gcd(a, 0) = a
+
+範例：gcd(48, 18)
+= gcd(18, 48 % 18) = gcd(18, 12)
+= gcd(12, 18 % 12) = gcd(12, 6)
+= gcd(6,  12 % 6)  = gcd(6, 0)
+= 6
+</code></pre><p>每次取餘至少會讓較大的數減半，因此時間複雜度為 <strong>O(log min(a, b))</strong>。</p><h4 id=模運算modular-arithmetic>模運算（Modular Arithmetic）</h4><p>模運算是數論的基礎運算，核心性質如下：</p><pre tabindex=0><code>(a + b) % m = ((a % m) + (b % m)) % m
+(a - b) % m = ((a % m) - (b % m) + m) % m    ← 加 m 防負數
+(a × b) % m = ((a % m) × (b % m)) % m
+(a / b) % m ≠ (a % m) / (b % m)              ← 除法不能直接取模！
+</code></pre><p>除法在模運算中不能直接操作，需要使用 <strong>模反元素（Modular Inverse）</strong> 將除法轉換為乘法。</p><p><strong>負數取模的陷阱：</strong></p><p>在 JavaScript 與 C++ 中，<code>(-7) % 3 = -1</code>，但數學上的正確結果是 2。修正公式為：</p><pre tabindex=0><code>((a % m) + m) % m
+</code></pre><h4 id=質數prime-numbers>質數（Prime Numbers）</h4><p><strong>質數</strong> 是大於 1 且只能被 1 和自身整除的正整數。質數在數論中的地位就像化學中的元素——任何大於 1 的正整數都可以唯一分解為質數的乘積（<strong>算術基本定理</strong>）。</p><pre tabindex=0><code>判斷質數的暴力法：試除到 √n
+  isPrime(29)：檢查 2, 3, 4, 5 → 都不整除 → 是質數
+  isPrime(36)：檢查 2 → 36 % 2 = 0 → 不是質數
+
+為什麼只需要試到 √n？
+  若 n = a × b 且 a ≤ b，則 a ≤ √n
+  因此若 √n 以內沒有因數，n 就是質數
+</code></pre><h4 id=sieve-of-eratosthenes埃拉托斯特尼篩法>Sieve of Eratosthenes（埃拉托斯特尼篩法）</h4><p>當我們需要一次找出某個範圍內的 <strong>所有質數</strong> 時，逐一判斷太慢。Sieve of Eratosthenes 的思路是：從 2 開始，將每個質數的所有倍數標記為合數。</p><pre tabindex=0><code>初始：[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+篩 2：[2, 3, ✗, 5, ✗, 7, ✗, 9,  ✗, 11,  ✗, 13]
+篩 3：[2, 3, ✗, 5, ✗, 7, ✗, ✗,  ✗, 11,  ✗, 13]
+篩 5：無新標記（25 &gt; 13）
+結果：2, 3, 5, 7, 11, 13
+</code></pre><p><strong>優化要點：</strong> 對質數 i，從 <code>i * i</code> 開始標記（因為 <code>i * 2</code>、<code>i * 3</code> &mldr; <code>i * (i-1)</code> 已被更小的質數篩過）。</p><h4 id=快速冪binary-exponentiation>快速冪（Binary Exponentiation）</h4><p>計算 <code>a^n % m</code> 時，若 n 很大（如 10^18），逐次相乘不可行。<strong>快速冪</strong> 利用指數的二進位拆分，將 O(n) 降為 O(log n)：</p><pre tabindex=0><code>a^13 = a^(1101₂) = a^8 × a^4 × a^1
+
+步驟：
+  n=13 (奇數): result *= a → a¹,  a → a²,  n=6
+  n=6  (偶數): skip,              a → a⁴,  n=3
+  n=3  (奇數): result *= a → a⁵,  a → a⁸,  n=1
+  n=1  (奇數): result *= a → a¹³, n=0 → 結束
+</code></pre><h4 id=費馬小定理fermats-little-theorem>費馬小定理（Fermat&rsquo;s Little Theorem）</h4><p>當 p 為質數且 a 不被 p 整除時：</p><pre tabindex=0><code>a^(p-1) ≡ 1 (mod p)
+
+推論：a 的模反元素 a⁻¹ ≡ a^(p-2) (mod p)
+</code></pre><p>這讓我們可以用快速冪在 O(log p) 時間內求出模反元素，前提是模數為質數。</p><h4 id=中國剩餘定理chinese-remainder-theoremcrt>中國剩餘定理（Chinese Remainder Theorem，CRT）</h4><p>CRT 解決的問題是：給定多個 <strong>模數互質</strong> 的同餘方程式，求滿足所有方程式的最小正整數 x。</p><pre tabindex=0><code>x ≡ 2 (mod 3)
+x ≡ 3 (mod 5)
+x ≡ 2 (mod 7)
+
+M = 3 × 5 × 7 = 105
+M₁ = 105/3 = 35,  35⁻¹ ≡ 2 (mod 3),  → 2 × 35 × 2 = 140
+M₂ = 105/5 = 21,  21⁻¹ ≡ 1 (mod 5),  → 3 × 21 × 1 = 63
+M₃ = 105/7 = 15,  15⁻¹ ≡ 1 (mod 7),  → 2 × 15 × 1 = 30
+
+x = (140 + 63 + 30) % 105 = 233 % 105 = 23
+
+驗證：23 % 3 = 2 ✓, 23 % 5 = 3 ✓, 23 % 7 = 2 ✓
+</code></pre><hr><h3 id=javascript--typescript-實作>JavaScript / TypeScript 實作</h3><h4 id=gcd--迭代與遞迴版本>GCD — 迭代與遞迴版本</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// ─── GCD（最大公因數）─────────────────────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 歐幾里得演算法（輾轉相除法）
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 時間複雜度：O(log min(a, b))
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 迭代版本（推薦，無遞迴堆疊開銷）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>gcd</span>(<span style=color:#a6e22e>a</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>b</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>while</span> (<span style=color:#a6e22e>b</span> <span style=color:#f92672>!==</span> <span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>    [<span style=color:#a6e22e>a</span>, <span style=color:#a6e22e>b</span>] <span style=color:#f92672>=</span> [<span style=color:#a6e22e>b</span>, <span style=color:#a6e22e>a</span> <span style=color:#f92672>%</span> <span style=color:#a6e22e>b</span>];
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>a</span>;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 遞迴版本（簡潔但有堆疊深度限制）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>gcdRecursive</span>(<span style=color:#a6e22e>a</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>b</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>b</span> <span style=color:#f92672>===</span> <span style=color:#ae81ff>0</span>) <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>a</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>gcdRecursive</span>(<span style=color:#a6e22e>b</span>, <span style=color:#a6e22e>a</span> <span style=color:#f92672>%</span> <span style=color:#a6e22e>b</span>);
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// LCM（最小公倍數）— 先除後乘，防止溢位
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>lcm</span>(<span style=color:#a6e22e>a</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>b</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> (<span style=color:#a6e22e>a</span> <span style=color:#f92672>/</span> <span style=color:#a6e22e>gcd</span>(<span style=color:#a6e22e>a</span>, <span style=color:#a6e22e>b</span>)) <span style=color:#f92672>*</span> <span style=color:#a6e22e>b</span>;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── 測試 ─────────────────────────────────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>gcd</span>(<span style=color:#ae81ff>48</span>, <span style=color:#ae81ff>18</span>));        <span style=color:#75715e>// 輸出：6
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>gcd</span>(<span style=color:#ae81ff>100</span>, <span style=color:#ae81ff>75</span>));       <span style=color:#75715e>// 輸出：25
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>gcd</span>(<span style=color:#ae81ff>17</span>, <span style=color:#ae81ff>13</span>));        <span style=color:#75715e>// 輸出：1（互質）
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>lcm</span>(<span style=color:#ae81ff>4</span>, <span style=color:#ae81ff>6</span>));          <span style=color:#75715e>// 輸出：12
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>lcm</span>(<span style=color:#ae81ff>12</span>, <span style=color:#ae81ff>18</span>));        <span style=color:#75715e>// 輸出：36
+</span></span></span></code></pre></div><h4 id=擴展歐幾里得演算法extended-gcd>擴展歐幾里得演算法（Extended GCD）</h4><p>擴展 GCD 不僅求出 <code>gcd(a, b)</code>，還找出整數解 <code>x, y</code> 使得 <code>a*x + b*y = gcd(a, b)</code>。這是求解 <strong>線性丟番圖方程（Linear Diophantine Equation）</strong> 與計算 <strong>模反元素</strong> 的核心工具。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// ─── 擴展 GCD ────────────────────────────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 回傳 [gcd, x, y]，使得 a*x + b*y = gcd(a, b)
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>extendedGcd</span>(<span style=color:#a6e22e>a</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>b</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> [<span style=color:#66d9ef>number</span>, <span style=color:#66d9ef>number</span>, <span style=color:#66d9ef>number</span>] {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>b</span> <span style=color:#f92672>===</span> <span style=color:#ae81ff>0</span>) <span style=color:#66d9ef>return</span> [<span style=color:#a6e22e>a</span>, <span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>0</span>];
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> [<span style=color:#a6e22e>g</span>, <span style=color:#a6e22e>x1</span>, <span style=color:#a6e22e>y1</span>] <span style=color:#f92672>=</span> <span style=color:#a6e22e>extendedGcd</span>(<span style=color:#a6e22e>b</span>, <span style=color:#a6e22e>a</span> <span style=color:#f92672>%</span> <span style=color:#a6e22e>b</span>);
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 利用遞推關係：
+</span></span></span><span style=display:flex><span>  <span style=color:#75715e>// a*x + b*y = g
+</span></span></span><span style=display:flex><span>  <span style=color:#75715e>// b*x₁ + (a % b)*y₁ = g
+</span></span></span><span style=display:flex><span>  <span style=color:#75715e>// b*x₁ + (a - ⌊a/b⌋*b)*y₁ = g
+</span></span></span><span style=display:flex><span>  <span style=color:#75715e>// a*y₁ + b*(x₁ - ⌊a/b⌋*y₁) = g
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>x</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>y1</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>y</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>x1</span> <span style=color:#f92672>-</span> Math.<span style=color:#a6e22e>floor</span>(<span style=color:#a6e22e>a</span> <span style=color:#f92672>/</span> <span style=color:#a6e22e>b</span>) <span style=color:#f92672>*</span> <span style=color:#a6e22e>y1</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> [<span style=color:#a6e22e>g</span>, <span style=color:#a6e22e>x</span>, <span style=color:#a6e22e>y</span>];
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── 測試 ─────────────────────────────────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> [<span style=color:#a6e22e>g</span>, <span style=color:#a6e22e>x</span>, <span style=color:#a6e22e>y</span>] <span style=color:#f92672>=</span> <span style=color:#a6e22e>extendedGcd</span>(<span style=color:#ae81ff>35</span>, <span style=color:#ae81ff>15</span>);
+</span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#e6db74>`gcd=</span><span style=color:#e6db74>${</span><span style=color:#a6e22e>g</span><span style=color:#e6db74>}</span><span style=color:#e6db74>, x=</span><span style=color:#e6db74>${</span><span style=color:#a6e22e>x</span><span style=color:#e6db74>}</span><span style=color:#e6db74>, y=</span><span style=color:#e6db74>${</span><span style=color:#a6e22e>y</span><span style=color:#e6db74>}</span><span style=color:#e6db74>`</span>);
+</span></span><span style=display:flex><span><span style=color:#75715e>// 輸出：gcd=5, x=1, y=-2
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 驗證：35*1 + 15*(-2) = 35 - 30 = 5 ✓
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> [<span style=color:#a6e22e>g2</span>, <span style=color:#a6e22e>x2</span>, <span style=color:#a6e22e>y2</span>] <span style=color:#f92672>=</span> <span style=color:#a6e22e>extendedGcd</span>(<span style=color:#ae81ff>240</span>, <span style=color:#ae81ff>46</span>);
+</span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#e6db74>`gcd=</span><span style=color:#e6db74>${</span><span style=color:#a6e22e>g2</span><span style=color:#e6db74>}</span><span style=color:#e6db74>, x=</span><span style=color:#e6db74>${</span><span style=color:#a6e22e>x2</span><span style=color:#e6db74>}</span><span style=color:#e6db74>, y=</span><span style=color:#e6db74>${</span><span style=color:#a6e22e>y2</span><span style=color:#e6db74>}</span><span style=color:#e6db74>`</span>);
+</span></span><span style=display:flex><span><span style=color:#75715e>// 輸出：gcd=2, x=-9, y=47
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 驗證：240*(-9) + 46*47 = -2160 + 2162 = 2 ✓
+</span></span></span></code></pre></div><h4 id=模運算快速冪modular-exponentiation>模運算快速冪（Modular Exponentiation）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// ─── 快速冪（Binary Exponentiation）─────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 計算 base^exp % mod
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 時間複雜度：O(log exp)
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// BigInt 版本（推薦，適合 mod &gt; 2^26 的場景）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>modPow</span>(<span style=color:#a6e22e>base</span>: <span style=color:#66d9ef>bigint</span>, <span style=color:#a6e22e>exp</span>: <span style=color:#66d9ef>bigint</span>, <span style=color:#a6e22e>mod</span>: <span style=color:#66d9ef>bigint</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>bigint</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>result</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span><span style=color:#a6e22e>n</span>;
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>base</span> <span style=color:#f92672>%=</span> <span style=color:#a6e22e>mod</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 確保 base 為正
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>base</span> <span style=color:#f92672>&lt;</span> <span style=color:#ae81ff>0</span><span style=color:#a6e22e>n</span>) <span style=color:#a6e22e>base</span> <span style=color:#f92672>+=</span> <span style=color:#a6e22e>mod</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>while</span> (<span style=color:#a6e22e>exp</span> <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span><span style=color:#a6e22e>n</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 若指數最低位為 1，將當前 base 乘入結果
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>exp</span> <span style=color:#f92672>&amp;</span> <span style=color:#ae81ff>1</span><span style=color:#a6e22e>n</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>result</span> <span style=color:#f92672>=</span> (<span style=color:#a6e22e>result</span> <span style=color:#f92672>*</span> <span style=color:#a6e22e>base</span>) <span style=color:#f92672>%</span> <span style=color:#a6e22e>mod</span>;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// base 自乘，指數右移一位（等於除以 2）
+</span></span></span><span style=display:flex><span>    <span style=color:#a6e22e>base</span> <span style=color:#f92672>=</span> (<span style=color:#a6e22e>base</span> <span style=color:#f92672>*</span> <span style=color:#a6e22e>base</span>) <span style=color:#f92672>%</span> <span style=color:#a6e22e>mod</span>;
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>exp</span> <span style=color:#f92672>&gt;&gt;=</span> <span style=color:#ae81ff>1</span><span style=color:#a6e22e>n</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>result</span>;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// Number 版本（適合 mod &lt; 2^26 ≈ 6700 萬的小模數場景）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>modPowNum</span>(<span style=color:#a6e22e>base</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>exp</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>mod</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>result</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>base</span> <span style=color:#f92672>%=</span> <span style=color:#a6e22e>mod</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>while</span> (<span style=color:#a6e22e>exp</span> <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>exp</span> <span style=color:#f92672>&amp;</span> <span style=color:#ae81ff>1</span>) <span style=color:#a6e22e>result</span> <span style=color:#f92672>=</span> (<span style=color:#a6e22e>result</span> <span style=color:#f92672>*</span> <span style=color:#a6e22e>base</span>) <span style=color:#f92672>%</span> <span style=color:#a6e22e>mod</span>;
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>base</span> <span style=color:#f92672>=</span> (<span style=color:#a6e22e>base</span> <span style=color:#f92672>*</span> <span style=color:#a6e22e>base</span>) <span style=color:#f92672>%</span> <span style=color:#a6e22e>mod</span>;
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>exp</span> <span style=color:#f92672>&gt;&gt;=</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>result</span>;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── 測試 ─────────────────────────────────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>modPow</span>(<span style=color:#ae81ff>2</span><span style=color:#a6e22e>n</span>, <span style=color:#ae81ff>10</span><span style=color:#a6e22e>n</span>, <span style=color:#ae81ff>1000</span><span style=color:#a6e22e>n</span>));
+</span></span><span style=display:flex><span><span style=color:#75715e>// 輸出：24n（1024 % 1000 = 24）
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>MOD</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span><span style=color:#a6e22e>_000_000_007n</span>;
+</span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>modPow</span>(<span style=color:#ae81ff>3</span><span style=color:#a6e22e>n</span>, <span style=color:#ae81ff>100</span><span style=color:#a6e22e>n</span>, <span style=color:#a6e22e>MOD</span>));
+</span></span><span style=display:flex><span><span style=color:#75715e>// 輸出：981453966n
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>modPow</span>(<span style=color:#ae81ff>2</span><span style=color:#a6e22e>n</span>, <span style=color:#ae81ff>1000000000000000000</span><span style=color:#a6e22e>n</span>, <span style=color:#a6e22e>MOD</span>));
+</span></span><span style=display:flex><span><span style=color:#75715e>// 輸出：49000n（快速冪讓 10^18 次方也能瞬間算完）
+</span></span></span></code></pre></div><h4 id=sieve-of-eratosthenes質數篩法>Sieve of Eratosthenes（質數篩法）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// ─── Eratosthenes 篩法 ──────────────────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 找出 [2, n] 範圍內所有質數
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 時間複雜度：O(N log log N)，空間：O(N)
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>sieveOfEratosthenes</span>(<span style=color:#a6e22e>n</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span>[] {
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 使用 Uint8Array 節省記憶體（相比 boolean[]）
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>isPrime</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>Uint8Array</span>(<span style=color:#a6e22e>n</span> <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>).<span style=color:#a6e22e>fill</span>(<span style=color:#ae81ff>1</span>);
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>isPrime</span>[<span style=color:#ae81ff>0</span>] <span style=color:#f92672>=</span> <span style=color:#a6e22e>isPrime</span>[<span style=color:#ae81ff>1</span>] <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 只需篩到 √n，因為更大的合數已被更小的質因數篩掉
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>; <span style=color:#a6e22e>i</span> <span style=color:#f92672>*</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>&lt;=</span> <span style=color:#a6e22e>n</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>isPrime</span>[<span style=color:#a6e22e>i</span>]) {
+</span></span><span style=display:flex><span>      <span style=color:#75715e>// 從 i*i 開始標記（i*2, i*3, ..., i*(i-1) 已被更小質數處理）
+</span></span></span><span style=display:flex><span>      <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>j</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>*</span> <span style=color:#a6e22e>i</span>; <span style=color:#a6e22e>j</span> <span style=color:#f92672>&lt;=</span> <span style=color:#a6e22e>n</span>; <span style=color:#a6e22e>j</span> <span style=color:#f92672>+=</span> <span style=color:#a6e22e>i</span>) {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>isPrime</span>[<span style=color:#a6e22e>j</span>] <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>      }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 收集所有質數
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>primes</span>: <span style=color:#66d9ef>number</span>[] <span style=color:#f92672>=</span> [];
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>; <span style=color:#a6e22e>i</span> <span style=color:#f92672>&lt;=</span> <span style=color:#a6e22e>n</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>isPrime</span>[<span style=color:#a6e22e>i</span>]) <span style=color:#a6e22e>primes</span>.<span style=color:#a6e22e>push</span>(<span style=color:#a6e22e>i</span>);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>primes</span>;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── 測試 ─────────────────────────────────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>sieveOfEratosthenes</span>(<span style=color:#ae81ff>30</span>));
+</span></span><span style=display:flex><span><span style=color:#75715e>// 輸出：[2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>sieveOfEratosthenes</span>(<span style=color:#ae81ff>50</span>).<span style=color:#a6e22e>length</span>);
+</span></span><span style=display:flex><span><span style=color:#75715e>// 輸出：15（50 以內有 15 個質數）
+</span></span></span></code></pre></div><h4 id=線性篩linear-sieve>線性篩（Linear Sieve）</h4><p>線性篩保證每個合數只被其 <strong>最小質因數</strong> 篩掉一次，時間複雜度嚴格 O(N)。額外的好處是同時求出每個數的最小質因數 <code>minPrime[]</code>，可用於快速質因數分解。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// ─── 線性篩 ─────────────────────────────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 時間複雜度：嚴格 O(N)，空間：O(N)
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>linearSieve</span>(<span style=color:#a6e22e>n</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>primes</span>: <span style=color:#66d9ef>number</span>[];
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>minPrime</span>: <span style=color:#66d9ef>number</span>[];
+</span></span><span style=display:flex><span>} {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>minPrime</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> Array(<span style=color:#a6e22e>n</span> <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>).<span style=color:#a6e22e>fill</span>(<span style=color:#ae81ff>0</span>);
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>primes</span>: <span style=color:#66d9ef>number</span>[] <span style=color:#f92672>=</span> [];
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>; <span style=color:#a6e22e>i</span> <span style=color:#f92672>&lt;=</span> <span style=color:#a6e22e>n</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>minPrime</span>[<span style=color:#a6e22e>i</span>] <span style=color:#f92672>===</span> <span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#75715e>// i 是質數，自身即為最小質因數
+</span></span></span><span style=display:flex><span>      <span style=color:#a6e22e>minPrime</span>[<span style=color:#a6e22e>i</span>] <span style=color:#f92672>=</span> <span style=color:#a6e22e>i</span>;
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>primes</span>.<span style=color:#a6e22e>push</span>(<span style=color:#a6e22e>i</span>);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 用已知質數篩掉 i * p 的合數
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>const</span> <span style=color:#a6e22e>p</span> <span style=color:#66d9ef>of</span> <span style=color:#a6e22e>primes</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>p</span> <span style=color:#f92672>&gt;</span> <span style=color:#a6e22e>minPrime</span>[<span style=color:#a6e22e>i</span>] <span style=color:#f92672>||</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>*</span> <span style=color:#a6e22e>p</span> <span style=color:#f92672>&gt;</span> <span style=color:#a6e22e>n</span>) <span style=color:#66d9ef>break</span>;
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>minPrime</span>[<span style=color:#a6e22e>i</span> <span style=color:#f92672>*</span> <span style=color:#a6e22e>p</span>] <span style=color:#f92672>=</span> <span style=color:#a6e22e>p</span>;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> { <span style=color:#a6e22e>primes</span>, <span style=color:#a6e22e>minPrime</span> };
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── 測試 ─────────────────────────────────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> { <span style=color:#a6e22e>primes</span>, <span style=color:#a6e22e>minPrime</span> } <span style=color:#f92672>=</span> <span style=color:#a6e22e>linearSieve</span>(<span style=color:#ae81ff>30</span>);
+</span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>primes</span>);
+</span></span><span style=display:flex><span><span style=color:#75715e>// 輸出：[2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>minPrime</span>[<span style=color:#ae81ff>12</span>]); <span style=color:#75715e>// 輸出：2（12 的最小質因數是 2）
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>minPrime</span>[<span style=color:#ae81ff>15</span>]); <span style=color:#75715e>// 輸出：3（15 的最小質因數是 3）
+</span></span></span></code></pre></div><h4 id=質因數分解prime-factorization>質因數分解（Prime Factorization）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// ─── 試除法質因數分解 ───────────────────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 時間複雜度：O(√n)
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>primeFactorize</span>(<span style=color:#a6e22e>n</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#a6e22e>Map</span>&lt;<span style=color:#f92672>number</span>, <span style=color:#a6e22e>number</span>&gt; {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>factors</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>Map</span>&lt;<span style=color:#f92672>number</span>, <span style=color:#a6e22e>number</span>&gt;();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 從最小質數開始試除
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>d</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>; <span style=color:#a6e22e>d</span> <span style=color:#f92672>*</span> <span style=color:#a6e22e>d</span> <span style=color:#f92672>&lt;=</span> <span style=color:#a6e22e>n</span>; <span style=color:#a6e22e>d</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>while</span> (<span style=color:#a6e22e>n</span> <span style=color:#f92672>%</span> <span style=color:#a6e22e>d</span> <span style=color:#f92672>===</span> <span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>factors</span>.<span style=color:#66d9ef>set</span>(<span style=color:#a6e22e>d</span>, (<span style=color:#a6e22e>factors</span>.<span style=color:#66d9ef>get</span>(<span style=color:#a6e22e>d</span>) <span style=color:#f92672>||</span> <span style=color:#ae81ff>0</span>) <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>);
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>n</span> <span style=color:#f92672>/=</span> <span style=color:#a6e22e>d</span>;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 剩餘的 n &gt; 1 本身就是質因數
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>n</span> <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>1</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>factors</span>.<span style=color:#66d9ef>set</span>(<span style=color:#a6e22e>n</span>, <span style=color:#ae81ff>1</span>);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>factors</span>;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── 利用線性篩的最小質因數快速分解 ─────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 前提：已用 linearSieve 預計算 minPrime[]
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 時間複雜度：O(log n)（每次除以最小質因數）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>factorizeWithMinPrime</span>(
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>n</span>: <span style=color:#66d9ef>number</span>,
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>minPrime</span>: <span style=color:#66d9ef>number</span>[]
+</span></span><span style=display:flex><span>)<span style=color:#f92672>:</span> <span style=color:#a6e22e>Map</span>&lt;<span style=color:#f92672>number</span>, <span style=color:#a6e22e>number</span>&gt; {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>factors</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>Map</span>&lt;<span style=color:#f92672>number</span>, <span style=color:#a6e22e>number</span>&gt;();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>while</span> (<span style=color:#a6e22e>n</span> <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>1</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>p</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>minPrime</span>[<span style=color:#a6e22e>n</span>];
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>count</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>while</span> (<span style=color:#a6e22e>n</span> <span style=color:#f92672>%</span> <span style=color:#a6e22e>p</span> <span style=color:#f92672>===</span> <span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>n</span> <span style=color:#f92672>/=</span> <span style=color:#a6e22e>p</span>;
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>count</span><span style=color:#f92672>++</span>;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>factors</span>.<span style=color:#66d9ef>set</span>(<span style=color:#a6e22e>p</span>, <span style=color:#a6e22e>count</span>);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>factors</span>;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── 測試 ─────────────────────────────────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>primeFactorize</span>(<span style=color:#ae81ff>360</span>));
+</span></span><span style=display:flex><span><span style=color:#75715e>// 輸出：Map { 2 =&gt; 3, 3 =&gt; 2, 5 =&gt; 1 }（360 = 2³ × 3² × 5）
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>primeFactorize</span>(<span style=color:#ae81ff>97</span>));
+</span></span><span style=display:flex><span><span style=color:#75715e>// 輸出：Map { 97 =&gt; 1 }（97 是質數）
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 使用線性篩版本
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> { <span style=color:#a6e22e>minPrime</span>: <span style=color:#66d9ef>mp</span> } <span style=color:#f92672>=</span> <span style=color:#a6e22e>linearSieve</span>(<span style=color:#ae81ff>1000</span>);
+</span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>factorizeWithMinPrime</span>(<span style=color:#ae81ff>360</span>, <span style=color:#a6e22e>mp</span>));
+</span></span><span style=display:flex><span><span style=color:#75715e>// 輸出：Map { 2 =&gt; 3, 3 =&gt; 2, 5 =&gt; 1 }
+</span></span></span></code></pre></div><h4 id=模反元素modular-inverse>模反元素（Modular Inverse）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// ─── 模反元素 ───────────────────────────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// a 的模反元素 a⁻¹ 滿足：a × a⁻¹ ≡ 1 (mod m)
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 應用：計算 (a / b) % m → a * inv(b) % m
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 方法一：費馬小定理（m 必須為質數）
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// a⁻¹ ≡ a^(m-2) (mod m)，時間：O(log m)
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>modInverseFermat</span>(<span style=color:#a6e22e>a</span>: <span style=color:#66d9ef>bigint</span>, <span style=color:#a6e22e>m</span>: <span style=color:#66d9ef>bigint</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>bigint</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>modPow</span>(<span style=color:#a6e22e>a</span>, <span style=color:#a6e22e>m</span> <span style=color:#f92672>-</span> <span style=color:#ae81ff>2</span><span style=color:#a6e22e>n</span>, <span style=color:#a6e22e>m</span>);
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 方法二：擴展 GCD（適用任意模數，只要 gcd(a, m) = 1）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>modInverseExtGcd</span>(<span style=color:#a6e22e>a</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>m</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> [<span style=color:#a6e22e>g</span>, <span style=color:#a6e22e>x</span>] <span style=color:#f92672>=</span> <span style=color:#a6e22e>extendedGcd</span>(<span style=color:#a6e22e>a</span>, <span style=color:#a6e22e>m</span>);
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>g</span> <span style=color:#f92672>!==</span> <span style=color:#ae81ff>1</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>throw</span> <span style=color:#66d9ef>new</span> Error(<span style=color:#e6db74>`模反元素不存在：gcd(</span><span style=color:#e6db74>${</span><span style=color:#a6e22e>a</span><span style=color:#e6db74>}</span><span style=color:#e6db74>, </span><span style=color:#e6db74>${</span><span style=color:#a6e22e>m</span><span style=color:#e6db74>}</span><span style=color:#e6db74>) = </span><span style=color:#e6db74>${</span><span style=color:#a6e22e>g</span><span style=color:#e6db74>}</span><span style=color:#e6db74> ≠ 1`</span>);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> ((<span style=color:#a6e22e>x</span> <span style=color:#f92672>%</span> <span style=color:#a6e22e>m</span>) <span style=color:#f92672>+</span> <span style=color:#a6e22e>m</span>) <span style=color:#f92672>%</span> <span style=color:#a6e22e>m</span>;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 方法三：線性預計算 [1, n] 所有逆元（O(N)）
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 適合需要大量逆元的場景（如組合數計算）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>precomputeInverses</span>(<span style=color:#a6e22e>n</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>mod</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span>[] {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>inv</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> Array(<span style=color:#a6e22e>n</span> <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>).<span style=color:#a6e22e>fill</span>(<span style=color:#ae81ff>0</span>);
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>inv</span>[<span style=color:#ae81ff>1</span>] <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>; <span style=color:#a6e22e>i</span> <span style=color:#f92672>&lt;=</span> <span style=color:#a6e22e>n</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 推導式：inv[i] = -(mod / i) * inv[mod % i] % mod
+</span></span></span><span style=display:flex><span>    <span style=color:#a6e22e>inv</span>[<span style=color:#a6e22e>i</span>] <span style=color:#f92672>=</span>
+</span></span><span style=display:flex><span>      ((<span style=color:#f92672>-</span>(Math.<span style=color:#a6e22e>floor</span>(<span style=color:#a6e22e>mod</span> <span style=color:#f92672>/</span> <span style=color:#a6e22e>i</span>)) <span style=color:#f92672>*</span> <span style=color:#a6e22e>inv</span>[<span style=color:#a6e22e>mod</span> <span style=color:#f92672>%</span> <span style=color:#a6e22e>i</span>]) <span style=color:#f92672>%</span> <span style=color:#a6e22e>mod</span> <span style=color:#f92672>+</span> <span style=color:#a6e22e>mod</span>) <span style=color:#f92672>%</span> <span style=color:#a6e22e>mod</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>inv</span>;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── 測試 ─────────────────────────────────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>MOD_P</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span><span style=color:#a6e22e>_000_000_007n</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>inv3</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>modInverseFermat</span>(<span style=color:#ae81ff>3</span><span style=color:#a6e22e>n</span>, <span style=color:#a6e22e>MOD_P</span>);
+</span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>inv3</span>);
+</span></span><span style=display:flex><span><span style=color:#75715e>// 輸出：333333336n
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 驗證：3 × 333333336 % (10^9+7) = 1
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>((<span style=color:#ae81ff>3</span><span style=color:#a6e22e>n</span> <span style=color:#f92672>*</span> <span style=color:#a6e22e>inv3</span>) <span style=color:#f92672>%</span> <span style=color:#a6e22e>MOD_P</span>);
+</span></span><span style=display:flex><span><span style=color:#75715e>// 輸出：1n ✓
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>modInverseExtGcd</span>(<span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>7</span>));
+</span></span><span style=display:flex><span><span style=color:#75715e>// 輸出：5（因為 3 × 5 = 15 ≡ 1 (mod 7)）
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>invTable</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>precomputeInverses</span>(<span style=color:#ae81ff>10</span>, <span style=color:#ae81ff>13</span>);
+</span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>invTable</span>.<span style=color:#a6e22e>slice</span>(<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>11</span>));
+</span></span><span style=display:flex><span><span style=color:#75715e>// 輸出：[1, 7, 9, 10, 8, 11, 2, 5, 3, 4]
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 驗證：2 × 7 = 14 ≡ 1 (mod 13) ✓
+</span></span></span></code></pre></div><h4 id=中國剩餘定理crt>中國剩餘定理（CRT）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// ─── 中國剩餘定理 ───────────────────────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 解聯立同餘方程式：
+</span></span></span><span style=display:flex><span><span style=color:#75715e>//   x ≡ r₁ (mod m₁)
+</span></span></span><span style=display:flex><span><span style=color:#75715e>//   x ≡ r₂ (mod m₂)
+</span></span></span><span style=display:flex><span><span style=color:#75715e>//   ...
+</span></span></span><span style=display:flex><span><span style=color:#75715e>//   x ≡ rₖ (mod mₖ)
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 前提：所有 mᵢ 兩兩互質
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 回傳最小非負整數解 x
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>chineseRemainderTheorem</span>(
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>remainders</span>: <span style=color:#66d9ef>bigint</span>[],
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>moduli</span>: <span style=color:#66d9ef>bigint</span>[]
+</span></span><span style=display:flex><span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>bigint</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>n</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>remainders</span>.<span style=color:#a6e22e>length</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 計算所有模數的乘積 M
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>M</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span><span style=color:#a6e22e>n</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>const</span> <span style=color:#a6e22e>m</span> <span style=color:#66d9ef>of</span> <span style=color:#a6e22e>moduli</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>M</span> <span style=color:#f92672>*=</span> <span style=color:#a6e22e>m</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>result</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span><span style=color:#a6e22e>n</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>i</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>n</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>Mi</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>M</span> <span style=color:#f92672>/</span> <span style=color:#a6e22e>moduli</span>[<span style=color:#a6e22e>i</span>]; <span style=color:#75715e>// Mi = M / mᵢ
+</span></span></span><span style=display:flex><span>    <span style=color:#75715e>// 求 Mi 在 mod mᵢ 下的逆元
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>MiInv</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>modPow</span>(<span style=color:#a6e22e>Mi</span>, <span style=color:#a6e22e>moduli</span>[<span style=color:#a6e22e>i</span>] <span style=color:#f92672>-</span> <span style=color:#ae81ff>2</span><span style=color:#a6e22e>n</span>, <span style=color:#a6e22e>moduli</span>[<span style=color:#a6e22e>i</span>]);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 累加 rᵢ × Mi × Mi⁻¹
+</span></span></span><span style=display:flex><span>    <span style=color:#a6e22e>result</span> <span style=color:#f92672>=</span> (<span style=color:#a6e22e>result</span> <span style=color:#f92672>+</span> <span style=color:#a6e22e>remainders</span>[<span style=color:#a6e22e>i</span>] <span style=color:#f92672>*</span> <span style=color:#a6e22e>Mi</span> <span style=color:#f92672>%</span> <span style=color:#a6e22e>M</span> <span style=color:#f92672>*</span> <span style=color:#a6e22e>MiInv</span>) <span style=color:#f92672>%</span> <span style=color:#a6e22e>M</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> (<span style=color:#a6e22e>result</span> <span style=color:#f92672>+</span> <span style=color:#a6e22e>M</span>) <span style=color:#f92672>%</span> <span style=color:#a6e22e>M</span>; <span style=color:#75715e>// 確保結果為正
+</span></span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── 擴展 GCD 版本（適用非質數模數）────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>extGcdBigInt</span>(
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>a</span>: <span style=color:#66d9ef>bigint</span>,
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>b</span>: <span style=color:#66d9ef>bigint</span>
+</span></span><span style=display:flex><span>)<span style=color:#f92672>:</span> [<span style=color:#66d9ef>bigint</span>, <span style=color:#66d9ef>bigint</span>, <span style=color:#66d9ef>bigint</span>] {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>b</span> <span style=color:#f92672>===</span> <span style=color:#ae81ff>0</span><span style=color:#a6e22e>n</span>) <span style=color:#66d9ef>return</span> [<span style=color:#a6e22e>a</span>, <span style=color:#ae81ff>1</span><span style=color:#a6e22e>n</span>, <span style=color:#ae81ff>0</span><span style=color:#a6e22e>n</span>];
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> [<span style=color:#a6e22e>g</span>, <span style=color:#a6e22e>x1</span>, <span style=color:#a6e22e>y1</span>] <span style=color:#f92672>=</span> <span style=color:#a6e22e>extGcdBigInt</span>(<span style=color:#a6e22e>b</span>, <span style=color:#a6e22e>a</span> <span style=color:#f92672>%</span> <span style=color:#a6e22e>b</span>);
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> [<span style=color:#a6e22e>g</span>, <span style=color:#a6e22e>y1</span>, <span style=color:#a6e22e>x1</span> <span style=color:#f92672>-</span> (<span style=color:#a6e22e>a</span> <span style=color:#f92672>/</span> <span style=color:#a6e22e>b</span>) <span style=color:#f92672>*</span> <span style=color:#a6e22e>y1</span>];
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>crtGeneral</span>(
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>remainders</span>: <span style=color:#66d9ef>bigint</span>[],
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>moduli</span>: <span style=color:#66d9ef>bigint</span>[]
+</span></span><span style=display:flex><span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>bigint</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>r</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>remainders</span>[<span style=color:#ae81ff>0</span>];
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>m</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>moduli</span>[<span style=color:#ae81ff>0</span>];
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>; <span style=color:#a6e22e>i</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>remainders</span>.<span style=color:#a6e22e>length</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>r2</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>remainders</span>[<span style=color:#a6e22e>i</span>];
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>m2</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>moduli</span>[<span style=color:#a6e22e>i</span>];
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> [<span style=color:#a6e22e>g</span>, <span style=color:#a6e22e>p</span>, <span style=color:#a6e22e>_q</span>] <span style=color:#f92672>=</span> <span style=color:#a6e22e>extGcdBigInt</span>(<span style=color:#a6e22e>m</span>, <span style=color:#a6e22e>m2</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> ((<span style=color:#a6e22e>r2</span> <span style=color:#f92672>-</span> <span style=color:#a6e22e>r</span>) <span style=color:#f92672>%</span> <span style=color:#a6e22e>g</span> <span style=color:#f92672>!==</span> <span style=color:#ae81ff>0</span><span style=color:#a6e22e>n</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>throw</span> <span style=color:#66d9ef>new</span> Error(<span style=color:#e6db74>&#34;無解：模數不互質且餘數不相容&#34;</span>);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>lcmVal</span> <span style=color:#f92672>=</span> (<span style=color:#a6e22e>m</span> <span style=color:#f92672>/</span> <span style=color:#a6e22e>g</span>) <span style=color:#f92672>*</span> <span style=color:#a6e22e>m2</span>;
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>r</span> <span style=color:#f92672>=</span> (<span style=color:#a6e22e>r</span> <span style=color:#f92672>+</span> <span style=color:#a6e22e>m</span> <span style=color:#f92672>*</span> ((<span style=color:#a6e22e>r2</span> <span style=color:#f92672>-</span> <span style=color:#a6e22e>r</span>) <span style=color:#f92672>/</span> <span style=color:#a6e22e>g</span> <span style=color:#f92672>%</span> (<span style=color:#a6e22e>m2</span> <span style=color:#f92672>/</span> <span style=color:#a6e22e>g</span>) <span style=color:#f92672>*</span> <span style=color:#a6e22e>p</span> <span style=color:#f92672>%</span> (<span style=color:#a6e22e>m2</span> <span style=color:#f92672>/</span> <span style=color:#a6e22e>g</span>))) <span style=color:#f92672>%</span> <span style=color:#a6e22e>lcmVal</span>;
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>r</span> <span style=color:#f92672>=</span> (<span style=color:#a6e22e>r</span> <span style=color:#f92672>+</span> <span style=color:#a6e22e>lcmVal</span>) <span style=color:#f92672>%</span> <span style=color:#a6e22e>lcmVal</span>;
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>m</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>lcmVal</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>r</span>;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── 測試 ─────────────────────────────────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// x ≡ 2 (mod 3), x ≡ 3 (mod 5), x ≡ 2 (mod 7)
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>answer</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>chineseRemainderTheorem</span>(
+</span></span><span style=display:flex><span>  [<span style=color:#ae81ff>2</span><span style=color:#a6e22e>n</span>, <span style=color:#ae81ff>3</span><span style=color:#a6e22e>n</span>, <span style=color:#ae81ff>2</span><span style=color:#a6e22e>n</span>],
+</span></span><span style=display:flex><span>  [<span style=color:#ae81ff>3</span><span style=color:#a6e22e>n</span>, <span style=color:#ae81ff>5</span><span style=color:#a6e22e>n</span>, <span style=color:#ae81ff>7</span><span style=color:#a6e22e>n</span>]
+</span></span><span style=display:flex><span>);
+</span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>answer</span>);
+</span></span><span style=display:flex><span><span style=color:#75715e>// 輸出：23n
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 驗證
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#ae81ff>23</span><span style=color:#a6e22e>n</span> <span style=color:#f92672>%</span> <span style=color:#ae81ff>3</span><span style=color:#a6e22e>n</span>); <span style=color:#75715e>// 輸出：2n ✓
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#ae81ff>23</span><span style=color:#a6e22e>n</span> <span style=color:#f92672>%</span> <span style=color:#ae81ff>5</span><span style=color:#a6e22e>n</span>); <span style=color:#75715e>// 輸出：3n ✓
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#ae81ff>23</span><span style=color:#a6e22e>n</span> <span style=color:#f92672>%</span> <span style=color:#ae81ff>7</span><span style=color:#a6e22e>n</span>); <span style=color:#75715e>// 輸出：2n ✓
+</span></span></span></code></pre></div><hr><h3 id=c-對照實作>C++ 對照實作</h3><p>以下提供與 TypeScript 版本對應的 C++ 實作。C++ 在數論計算中有幾個顯著差異：</p><ul><li><strong>原生 64 位整數</strong>：<code>long long</code>（64-bit）直接可用，不需要 BigInt</li><li><strong><code>__int128</code> 防溢位</strong>：當兩個接近 10^18 的數相乘時，中間結果可能超過 64 位，C++ 提供 <code>__int128</code> 處理</li><li><strong>內建函式</strong>：C++17 提供 <code>std::gcd</code> 和 <code>std::lcm</code>（需 <code>&lt;numeric></code>），GCC 提供 <code>__gcd</code></li><li><strong>位元運算效能</strong>：C++ 的位元運算比 JavaScript 更直接，不需考慮 32-bit 截斷</li></ul><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-cpp data-lang=cpp><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;bits/stdc++.h&gt;</span><span style=color:#75715e>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> std;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>using</span> ll <span style=color:#f92672>=</span> <span style=color:#66d9ef>long</span> <span style=color:#66d9ef>long</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── GCD / LCM ─────────────────────────────────────────
+</span></span></span><span style=display:flex><span>ll <span style=color:#a6e22e>gcd</span>(ll a, ll b) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>while</span> (b) { a <span style=color:#f92672>%=</span> b; swap(a, b); }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> a;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>ll <span style=color:#a6e22e>lcm</span>(ll a, ll b) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> a <span style=color:#f92672>/</span> gcd(a, b) <span style=color:#f92672>*</span> b; <span style=color:#75715e>// 先除後乘防溢位
+</span></span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── 擴展 GCD ──────────────────────────────────────────
+</span></span></span><span style=display:flex><span>ll <span style=color:#a6e22e>extGcd</span>(ll a, ll b, ll<span style=color:#f92672>&amp;</span> x, ll<span style=color:#f92672>&amp;</span> y) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (b <span style=color:#f92672>==</span> <span style=color:#ae81ff>0</span>) { x <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>; y <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; <span style=color:#66d9ef>return</span> a; }
+</span></span><span style=display:flex><span>    ll x1, y1;
+</span></span><span style=display:flex><span>    ll g <span style=color:#f92672>=</span> extGcd(b, a <span style=color:#f92672>%</span> b, x1, y1);
+</span></span><span style=display:flex><span>    x <span style=color:#f92672>=</span> y1;
+</span></span><span style=display:flex><span>    y <span style=color:#f92672>=</span> x1 <span style=color:#f92672>-</span> (a <span style=color:#f92672>/</span> b) <span style=color:#f92672>*</span> y1;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> g;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── 快速冪 ────────────────────────────────────────────
+</span></span></span><span style=display:flex><span>ll <span style=color:#a6e22e>modPow</span>(ll base, ll exp, ll mod) {
+</span></span><span style=display:flex><span>    ll result <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>    base <span style=color:#f92672>%=</span> mod;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (base <span style=color:#f92672>&lt;</span> <span style=color:#ae81ff>0</span>) base <span style=color:#f92672>+=</span> mod;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>while</span> (exp <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> (exp <span style=color:#f92672>&amp;</span> <span style=color:#ae81ff>1</span>)
+</span></span><span style=display:flex><span>            result <span style=color:#f92672>=</span> (__int128)result <span style=color:#f92672>*</span> base <span style=color:#f92672>%</span> mod;
+</span></span><span style=display:flex><span>        base <span style=color:#f92672>=</span> (__int128)base <span style=color:#f92672>*</span> base <span style=color:#f92672>%</span> mod;
+</span></span><span style=display:flex><span>        exp <span style=color:#f92672>&gt;&gt;=</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> result;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── 模反元素 ──────────────────────────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 費馬小定理法（mod 必須為質數）
+</span></span></span><span style=display:flex><span>ll <span style=color:#a6e22e>modInverse</span>(ll a, ll mod) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> modPow(a, mod <span style=color:#f92672>-</span> <span style=color:#ae81ff>2</span>, mod);
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 擴展 GCD 法（適用任意互質模數）
+</span></span></span><span style=display:flex><span>ll <span style=color:#a6e22e>modInverseExtGcd</span>(ll a, ll m) {
+</span></span><span style=display:flex><span>    ll x, y;
+</span></span><span style=display:flex><span>    ll g <span style=color:#f92672>=</span> extGcd(a, m, x, y);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (g <span style=color:#f92672>!=</span> <span style=color:#ae81ff>1</span>) <span style=color:#66d9ef>return</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>; <span style=color:#75715e>// 逆元不存在
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> (x <span style=color:#f92672>%</span> m <span style=color:#f92672>+</span> m) <span style=color:#f92672>%</span> m;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── Sieve of Eratosthenes ─────────────────────────────
+</span></span></span><span style=display:flex><span>vector<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;</span> sieveOfEratosthenes(<span style=color:#66d9ef>int</span> n) {
+</span></span><span style=display:flex><span>    vector<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>bool</span><span style=color:#f92672>&gt;</span> isPrime(n <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>, true);
+</span></span><span style=display:flex><span>    isPrime[<span style=color:#ae81ff>0</span>] <span style=color:#f92672>=</span> isPrime[<span style=color:#ae81ff>1</span>] <span style=color:#f92672>=</span> false;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>; (ll)i <span style=color:#f92672>*</span> i <span style=color:#f92672>&lt;=</span> n; i<span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> (isPrime[i]) {
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> j <span style=color:#f92672>=</span> i <span style=color:#f92672>*</span> i; j <span style=color:#f92672>&lt;=</span> n; j <span style=color:#f92672>+=</span> i) {
+</span></span><span style=display:flex><span>                isPrime[j] <span style=color:#f92672>=</span> false;
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    vector<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;</span> primes;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>; i <span style=color:#f92672>&lt;=</span> n; i<span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> (isPrime[i]) primes.push_back(i);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> primes;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── 線性篩 ────────────────────────────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>void</span> <span style=color:#a6e22e>linearSieve</span>(<span style=color:#66d9ef>int</span> n, vector<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;&amp;</span> primes,
+</span></span><span style=display:flex><span>                 vector<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;&amp;</span> minPrime) {
+</span></span><span style=display:flex><span>    minPrime.assign(n <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>0</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>; i <span style=color:#f92672>&lt;=</span> n; i<span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> (minPrime[i] <span style=color:#f92672>==</span> <span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>            minPrime[i] <span style=color:#f92672>=</span> i;
+</span></span><span style=display:flex><span>            primes.push_back(i);
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> p : primes) {
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>if</span> (p <span style=color:#f92672>&gt;</span> minPrime[i] <span style=color:#f92672>||</span> (ll)i <span style=color:#f92672>*</span> p <span style=color:#f92672>&gt;</span> n) <span style=color:#66d9ef>break</span>;
+</span></span><span style=display:flex><span>            minPrime[i <span style=color:#f92672>*</span> p] <span style=color:#f92672>=</span> p;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── 質因數分解 ────────────────────────────────────────
+</span></span></span><span style=display:flex><span>map<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span>, <span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;</span> primeFactorize(<span style=color:#66d9ef>int</span> n) {
+</span></span><span style=display:flex><span>    map<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span>, <span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;</span> factors;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> d <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>; (ll)d <span style=color:#f92672>*</span> d <span style=color:#f92672>&lt;=</span> n; d<span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>while</span> (n <span style=color:#f92672>%</span> d <span style=color:#f92672>==</span> <span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>            factors[d]<span style=color:#f92672>++</span>;
+</span></span><span style=display:flex><span>            n <span style=color:#f92672>/=</span> d;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (n <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>1</span>) factors[n]<span style=color:#f92672>++</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> factors;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── 中國剩餘定理 ──────────────────────────────────────
+</span></span></span><span style=display:flex><span>ll <span style=color:#a6e22e>chineseRemainderTheorem</span>(vector<span style=color:#f92672>&lt;</span>ll<span style=color:#f92672>&gt;&amp;</span> remainders,
+</span></span><span style=display:flex><span>                           vector<span style=color:#f92672>&lt;</span>ll<span style=color:#f92672>&gt;&amp;</span> moduli) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>int</span> n <span style=color:#f92672>=</span> remainders.size();
+</span></span><span style=display:flex><span>    ll M <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (ll m : moduli) M <span style=color:#f92672>*=</span> m;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    ll result <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> n; i<span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>        ll Mi <span style=color:#f92672>=</span> M <span style=color:#f92672>/</span> moduli[i];
+</span></span><span style=display:flex><span>        ll MiInv <span style=color:#f92672>=</span> modInverse(Mi <span style=color:#f92672>%</span> moduli[i], moduli[i]);
+</span></span><span style=display:flex><span>        result <span style=color:#f92672>=</span> (result <span style=color:#f92672>+</span>
+</span></span><span style=display:flex><span>            (__int128)remainders[i] <span style=color:#f92672>*</span> Mi <span style=color:#f92672>%</span> M <span style=color:#f92672>*</span> MiInv) <span style=color:#f92672>%</span> M;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> (result <span style=color:#f92672>+</span> M) <span style=color:#f92672>%</span> M;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── 測試 ───────────────────────────────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// GCD / LCM
+</span></span></span><span style=display:flex><span>    cout <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34;gcd(48, 18) = &#34;</span> <span style=color:#f92672>&lt;&lt;</span> gcd(<span style=color:#ae81ff>48</span>, <span style=color:#ae81ff>18</span>) <span style=color:#f92672>&lt;&lt;</span> endl; <span style=color:#75715e>// 6
+</span></span></span><span style=display:flex><span>    cout <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34;lcm(4, 6) = &#34;</span> <span style=color:#f92672>&lt;&lt;</span> lcm(<span style=color:#ae81ff>4</span>, <span style=color:#ae81ff>6</span>) <span style=color:#f92672>&lt;&lt;</span> endl;     <span style=color:#75715e>// 12
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 擴展 GCD
+</span></span></span><span style=display:flex><span>    ll x, y;
+</span></span><span style=display:flex><span>    ll g <span style=color:#f92672>=</span> extGcd(<span style=color:#ae81ff>35</span>, <span style=color:#ae81ff>15</span>, x, y);
+</span></span><span style=display:flex><span>    cout <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34;extGcd(35,15): g=&#34;</span> <span style=color:#f92672>&lt;&lt;</span> g
+</span></span><span style=display:flex><span>         <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34; x=&#34;</span> <span style=color:#f92672>&lt;&lt;</span> x <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34; y=&#34;</span> <span style=color:#f92672>&lt;&lt;</span> y <span style=color:#f92672>&lt;&lt;</span> endl;
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// g=5, x=1, y=-2
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 快速冪
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> ll MOD <span style=color:#f92672>=</span> <span style=color:#ae81ff>1e9</span> <span style=color:#f92672>+</span> <span style=color:#ae81ff>7</span>;
+</span></span><span style=display:flex><span>    cout <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34;2^10 % 1000 = &#34;</span> <span style=color:#f92672>&lt;&lt;</span> modPow(<span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>10</span>, <span style=color:#ae81ff>1000</span>) <span style=color:#f92672>&lt;&lt;</span> endl;
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 24
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 質數篩
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>auto</span> primes <span style=color:#f92672>=</span> sieveOfEratosthenes(<span style=color:#ae81ff>30</span>);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> p : primes) cout <span style=color:#f92672>&lt;&lt;</span> p <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34; &#34;</span>;
+</span></span><span style=display:flex><span>    cout <span style=color:#f92672>&lt;&lt;</span> endl;
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 2 3 5 7 11 13 17 19 23 29
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 質因數分解
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>auto</span> factors <span style=color:#f92672>=</span> primeFactorize(<span style=color:#ae81ff>360</span>);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>auto</span><span style=color:#f92672>&amp;</span> [p, e] <span style=color:#f92672>:</span> factors) {
+</span></span><span style=display:flex><span>        cout <span style=color:#f92672>&lt;&lt;</span> p <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34;^&#34;</span> <span style=color:#f92672>&lt;&lt;</span> e <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34; &#34;</span>;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    cout <span style=color:#f92672>&lt;&lt;</span> endl;
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 2^3 3^2 5^1
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// CRT
+</span></span></span><span style=display:flex><span>    vector<span style=color:#f92672>&lt;</span>ll<span style=color:#f92672>&gt;</span> r <span style=color:#f92672>=</span> {<span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>2</span>}, m <span style=color:#f92672>=</span> {<span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>5</span>, <span style=color:#ae81ff>7</span>};
+</span></span><span style=display:flex><span>    cout <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34;CRT answer = &#34;</span>
+</span></span><span style=display:flex><span>         <span style=color:#f92672>&lt;&lt;</span> chineseRemainderTheorem(r, m) <span style=color:#f92672>&lt;&lt;</span> endl;
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 23
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p><strong>C++ vs TypeScript 實作差異整理：</strong></p><table><thead><tr><th>面向</th><th>TypeScript</th><th>C++</th></tr></thead><tbody><tr><td>大整數</td><td><code>BigInt</code>（<code>1000000007n</code>）</td><td><code>long long</code> + <code>__int128</code></td></tr><tr><td>GCD 內建</td><td>無（需自行實作）</td><td><code>std::gcd</code>（C++17）</td></tr><tr><td>溢位處理</td><td>BigInt 無上限</td><td><code>__int128</code> 中間結果</td></tr><tr><td>陣列初始化</td><td><code>new Array(n).fill(0)</code></td><td><code>vector&lt;int>(n, 0)</code></td></tr><tr><td>位元運算</td><td>注意 32-bit 截斷</td><td>原生 64-bit 支援</td></tr><tr><td>效能</td><td>較慢（適合練習）</td><td>較快（適合競賽）</td></tr></tbody></table><hr><h3 id=複雜度分析>複雜度分析</h3><table><thead><tr><th>演算法</th><th>時間複雜度</th><th>空間複雜度</th><th>備註</th></tr></thead><tbody><tr><td>歐幾里得 GCD</td><td>O(log min(a, b))</td><td>O(1)</td><td>迭代版本</td></tr><tr><td>擴展 GCD</td><td>O(log min(a, b))</td><td>O(log min(a, b))</td><td>遞迴堆疊</td></tr><tr><td>快速冪</td><td>O(log n)</td><td>O(1)</td><td>迭代版本</td></tr><tr><td>判斷質數（試除法）</td><td>O(√n)</td><td>O(1)</td><td>—</td></tr><tr><td>Sieve of Eratosthenes</td><td>O(N log log N)</td><td>O(N)</td><td>接近線性</td></tr><tr><td>線性篩</td><td>O(N)</td><td>O(N)</td><td>嚴格線性，額外記錄 minPrime</td></tr><tr><td>質因數分解（試除法）</td><td>O(√n)</td><td>O(log n)</td><td>因數個數最多 O(log n)</td></tr><tr><td>質因數分解（minPrime）</td><td>O(log n)</td><td>O(1)</td><td>需 O(N) 預處理</td></tr><tr><td>模反元素（費馬小定理）</td><td>O(log p)</td><td>O(1)</td><td>p 必須為質數</td></tr><tr><td>模反元素（擴展 GCD）</td><td>O(log m)</td><td>O(log m)</td><td>適用任意互質模數</td></tr><tr><td>線性逆元預計算</td><td>O(N)</td><td>O(N)</td><td>預計算 [1, N] 所有逆元</td></tr><tr><td>中國剩餘定理</td><td>O(k log M)</td><td>O(k)</td><td>k 為方程式數量</td></tr><tr><td>Miller-Rabin 素性測試</td><td>O(k log² n)</td><td>O(1)</td><td>k 為測試輪數</td></tr></tbody></table><hr><h3 id=變體與延伸>變體與延伸</h3><h4 id=miller-rabin-素性測試>Miller-Rabin 素性測試</h4><p>當數字非常大（超過 10^18）時，Sieve 無法使用。<strong>Miller-Rabin</strong> 是一種機率型素性測試，使用多個基底可以達到確定性結果（對有限範圍的整數）。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// ─── Miller-Rabin 素性測試 ──────────────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>millerRabin</span>(<span style=color:#a6e22e>n</span>: <span style=color:#66d9ef>bigint</span>, <span style=color:#a6e22e>a</span>: <span style=color:#66d9ef>bigint</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>boolean</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>n</span> <span style=color:#f92672>%</span> <span style=color:#a6e22e>a</span> <span style=color:#f92672>===</span> <span style=color:#ae81ff>0</span><span style=color:#a6e22e>n</span>) <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>n</span> <span style=color:#f92672>===</span> <span style=color:#a6e22e>a</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 將 n-1 分解為 d × 2^r
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>d</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>n</span> <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span><span style=color:#a6e22e>n</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>r</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span><span style=color:#a6e22e>n</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>while</span> (<span style=color:#a6e22e>d</span> <span style=color:#f92672>%</span> <span style=color:#ae81ff>2</span><span style=color:#a6e22e>n</span> <span style=color:#f92672>===</span> <span style=color:#ae81ff>0</span><span style=color:#a6e22e>n</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>d</span> <span style=color:#f92672>/=</span> <span style=color:#ae81ff>2</span><span style=color:#a6e22e>n</span>;
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>r</span><span style=color:#f92672>++</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 計算 a^d mod n
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>x</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>modPow</span>(<span style=color:#a6e22e>a</span>, <span style=color:#a6e22e>d</span>, <span style=color:#a6e22e>n</span>);
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>x</span> <span style=color:#f92672>===</span> <span style=color:#ae81ff>1</span><span style=color:#a6e22e>n</span> <span style=color:#f92672>||</span> <span style=color:#a6e22e>x</span> <span style=color:#f92672>===</span> <span style=color:#a6e22e>n</span> <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span><span style=color:#a6e22e>n</span>) <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>true</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 反覆平方 r-1 次
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span><span style=color:#a6e22e>n</span>; <span style=color:#a6e22e>i</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>r</span> <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span><span style=color:#a6e22e>n</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>x</span> <span style=color:#f92672>=</span> (<span style=color:#a6e22e>x</span> <span style=color:#f92672>*</span> <span style=color:#a6e22e>x</span>) <span style=color:#f92672>%</span> <span style=color:#a6e22e>n</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>x</span> <span style=color:#f92672>===</span> <span style=color:#a6e22e>n</span> <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span><span style=color:#a6e22e>n</span>) <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>true</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>false</span>;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 確定性版本：對 n &lt; 3.3 × 10^24 範圍正確
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>isPrime</span>(<span style=color:#a6e22e>n</span>: <span style=color:#66d9ef>bigint</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>boolean</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>n</span> <span style=color:#f92672>&lt;</span> <span style=color:#ae81ff>2</span><span style=color:#a6e22e>n</span>) <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>false</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>n</span> <span style=color:#f92672>&lt;</span> <span style=color:#ae81ff>4</span><span style=color:#a6e22e>n</span>) <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>true</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>n</span> <span style=color:#f92672>%</span> <span style=color:#ae81ff>2</span><span style=color:#a6e22e>n</span> <span style=color:#f92672>===</span> <span style=color:#ae81ff>0</span><span style=color:#a6e22e>n</span>) <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>false</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>witnesses</span> <span style=color:#f92672>=</span> [<span style=color:#ae81ff>2</span><span style=color:#a6e22e>n</span>, <span style=color:#ae81ff>3</span><span style=color:#a6e22e>n</span>, <span style=color:#ae81ff>5</span><span style=color:#a6e22e>n</span>, <span style=color:#ae81ff>7</span><span style=color:#a6e22e>n</span>, <span style=color:#ae81ff>11</span><span style=color:#a6e22e>n</span>, <span style=color:#ae81ff>13</span><span style=color:#a6e22e>n</span>,
+</span></span><span style=display:flex><span>                     <span style=color:#ae81ff>17</span><span style=color:#a6e22e>n</span>, <span style=color:#ae81ff>19</span><span style=color:#a6e22e>n</span>, <span style=color:#ae81ff>23</span><span style=color:#a6e22e>n</span>, <span style=color:#ae81ff>29</span><span style=color:#a6e22e>n</span>, <span style=color:#ae81ff>31</span><span style=color:#a6e22e>n</span>, <span style=color:#ae81ff>37</span><span style=color:#a6e22e>n</span>];
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>const</span> <span style=color:#a6e22e>a</span> <span style=color:#66d9ef>of</span> <span style=color:#a6e22e>witnesses</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>n</span> <span style=color:#f92672>===</span> <span style=color:#a6e22e>a</span>) <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>true</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span><span style=color:#a6e22e>millerRabin</span>(<span style=color:#a6e22e>n</span>, <span style=color:#a6e22e>a</span>)) <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>false</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>true</span>;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── 測試 ─────────────────────────────────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>isPrime</span>(<span style=color:#ae81ff>1000000007</span><span style=color:#a6e22e>n</span>)); <span style=color:#75715e>// 輸出：true（常用模數）
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>isPrime</span>(<span style=color:#ae81ff>998244353</span><span style=color:#a6e22e>n</span>));  <span style=color:#75715e>// 輸出：true（NTT 常用模數）
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>isPrime</span>(<span style=color:#ae81ff>100</span><span style=color:#a6e22e>n</span>));        <span style=color:#75715e>// 輸出：false
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>isPrime</span>(<span style=color:#ae81ff>2</span><span style=color:#a6e22e>n</span>));          <span style=color:#75715e>// 輸出：true
+</span></span></span></code></pre></div><h4 id=歐拉函數eulers-totient-function>歐拉函數（Euler&rsquo;s Totient Function）</h4><p><strong>歐拉函數 phi(n)</strong> 計算 [1, n] 中與 n 互質的正整數個數。它是費馬小定理的推廣——<strong>歐拉定理</strong>：若 gcd(a, n) = 1，則 <code>a^phi(n) ≡ 1 (mod n)</code>。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// ─── 歐拉函數 ──────────────────────────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 公式：phi(n) = n × ∏(1 - 1/p)，p 為 n 的所有質因數
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>eulerTotient</span>(<span style=color:#a6e22e>n</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>result</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>n</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>p</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>; <span style=color:#a6e22e>p</span> <span style=color:#f92672>*</span> <span style=color:#a6e22e>p</span> <span style=color:#f92672>&lt;=</span> <span style=color:#a6e22e>n</span>; <span style=color:#a6e22e>p</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>n</span> <span style=color:#f92672>%</span> <span style=color:#a6e22e>p</span> <span style=color:#f92672>===</span> <span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#75715e>// 移除所有 p 因子
+</span></span></span><span style=display:flex><span>      <span style=color:#66d9ef>while</span> (<span style=color:#a6e22e>n</span> <span style=color:#f92672>%</span> <span style=color:#a6e22e>p</span> <span style=color:#f92672>===</span> <span style=color:#ae81ff>0</span>) <span style=color:#a6e22e>n</span> <span style=color:#f92672>/=</span> <span style=color:#a6e22e>p</span>;
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>result</span> <span style=color:#f92672>-=</span> <span style=color:#a6e22e>result</span> <span style=color:#f92672>/</span> <span style=color:#a6e22e>p</span>; <span style=color:#75715e>// result *= (1 - 1/p)
+</span></span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>n</span> <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>1</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>result</span> <span style=color:#f92672>-=</span> <span style=color:#a6e22e>result</span> <span style=color:#f92672>/</span> <span style=color:#a6e22e>n</span>; <span style=color:#75715e>// 最後剩下的質因數
+</span></span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>result</span>;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 篩法批量計算 [1, n] 所有 phi 值
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>sieveTotient</span>(<span style=color:#a6e22e>n</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span>[] {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>phi</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> Array(<span style=color:#a6e22e>n</span> <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>).<span style=color:#a6e22e>fill</span>(<span style=color:#ae81ff>0</span>);
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>i</span> <span style=color:#f92672>&lt;=</span> <span style=color:#a6e22e>n</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span>) <span style=color:#a6e22e>phi</span>[<span style=color:#a6e22e>i</span>] <span style=color:#f92672>=</span> <span style=color:#a6e22e>i</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>; <span style=color:#a6e22e>i</span> <span style=color:#f92672>&lt;=</span> <span style=color:#a6e22e>n</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>phi</span>[<span style=color:#a6e22e>i</span>] <span style=color:#f92672>===</span> <span style=color:#a6e22e>i</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#75715e>// i 是質數
+</span></span></span><span style=display:flex><span>      <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>j</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>i</span>; <span style=color:#a6e22e>j</span> <span style=color:#f92672>&lt;=</span> <span style=color:#a6e22e>n</span>; <span style=color:#a6e22e>j</span> <span style=color:#f92672>+=</span> <span style=color:#a6e22e>i</span>) {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>phi</span>[<span style=color:#a6e22e>j</span>] <span style=color:#f92672>-=</span> <span style=color:#a6e22e>phi</span>[<span style=color:#a6e22e>j</span>] <span style=color:#f92672>/</span> <span style=color:#a6e22e>i</span>; <span style=color:#75715e>// phi[j] *= (1 - 1/i)
+</span></span></span><span style=display:flex><span>      }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>phi</span>;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── 測試 ─────────────────────────────────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>eulerTotient</span>(<span style=color:#ae81ff>12</span>));
+</span></span><span style=display:flex><span><span style=color:#75715e>// 輸出：4（與 12 互質的數：1, 5, 7, 11）
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>eulerTotient</span>(<span style=color:#ae81ff>7</span>));
+</span></span><span style=display:flex><span><span style=color:#75715e>// 輸出：6（質數 p 的 phi(p) = p-1）
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>sieveTotient</span>(<span style=color:#ae81ff>12</span>));
+</span></span><span style=display:flex><span><span style=color:#75715e>// 輸出：[0, 1, 1, 2, 2, 4, 2, 6, 4, 6, 4, 10, 4]
+</span></span></span></code></pre></div><h4 id=mobius-函數進階>Mobius 函數（進階）</h4><p><strong>Mobius 函數 mu(n)</strong> 在容斥原理與數論反演（Mobius Inversion）中扮演核心角色：</p><pre tabindex=0><code>mu(1) = 1
+mu(n) = 0     若 n 有平方因子（如 4, 8, 12, ...）
+mu(n) = (-1)^k 若 n 是 k 個不同質數的乘積
+</code></pre><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// ─── Mobius 函數（篩法計算）─────────────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>sieveMobius</span>(<span style=color:#a6e22e>n</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span>[] {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>mu</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> Array(<span style=color:#a6e22e>n</span> <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>).<span style=color:#a6e22e>fill</span>(<span style=color:#ae81ff>0</span>);
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>minPrimeArr</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> Array(<span style=color:#a6e22e>n</span> <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>).<span style=color:#a6e22e>fill</span>(<span style=color:#ae81ff>0</span>);
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>primesArr</span>: <span style=color:#66d9ef>number</span>[] <span style=color:#f92672>=</span> [];
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>mu</span>[<span style=color:#ae81ff>1</span>] <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>; <span style=color:#a6e22e>i</span> <span style=color:#f92672>&lt;=</span> <span style=color:#a6e22e>n</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>minPrimeArr</span>[<span style=color:#a6e22e>i</span>] <span style=color:#f92672>===</span> <span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>minPrimeArr</span>[<span style=color:#a6e22e>i</span>] <span style=color:#f92672>=</span> <span style=color:#a6e22e>i</span>;
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>primesArr</span>.<span style=color:#a6e22e>push</span>(<span style=color:#a6e22e>i</span>);
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>mu</span>[<span style=color:#a6e22e>i</span>] <span style=color:#f92672>=</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>; <span style=color:#75715e>// 質數的 mu = -1
+</span></span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>const</span> <span style=color:#a6e22e>p</span> <span style=color:#66d9ef>of</span> <span style=color:#a6e22e>primesArr</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>p</span> <span style=color:#f92672>&gt;</span> <span style=color:#a6e22e>minPrimeArr</span>[<span style=color:#a6e22e>i</span>] <span style=color:#f92672>||</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>*</span> <span style=color:#a6e22e>p</span> <span style=color:#f92672>&gt;</span> <span style=color:#a6e22e>n</span>) <span style=color:#66d9ef>break</span>;
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>minPrimeArr</span>[<span style=color:#a6e22e>i</span> <span style=color:#f92672>*</span> <span style=color:#a6e22e>p</span>] <span style=color:#f92672>=</span> <span style=color:#a6e22e>p</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>i</span> <span style=color:#f92672>%</span> <span style=color:#a6e22e>p</span> <span style=color:#f92672>===</span> <span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>mu</span>[<span style=color:#a6e22e>i</span> <span style=color:#f92672>*</span> <span style=color:#a6e22e>p</span>] <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; <span style=color:#75715e>// 有平方因子
+</span></span></span><span style=display:flex><span>      } <span style=color:#66d9ef>else</span> {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>mu</span>[<span style=color:#a6e22e>i</span> <span style=color:#f92672>*</span> <span style=color:#a6e22e>p</span>] <span style=color:#f92672>=</span> <span style=color:#f92672>-</span><span style=color:#a6e22e>mu</span>[<span style=color:#a6e22e>i</span>]; <span style=color:#75715e>// 多一個質因數，翻轉符號
+</span></span></span><span style=display:flex><span>      }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>mu</span>;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── 測試 ─────────────────────────────────────────────────
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>mu</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>sieveMobius</span>(<span style=color:#ae81ff>12</span>);
+</span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>mu</span>);
+</span></span><span style=display:flex><span><span style=color:#75715e>// 輸出：[0, 1, -1, -1, 0, -1, 1, -1, 0, 0, 1, -1, 0]
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// mu(1)=1, mu(2)=-1, mu(6)=1(=2×3, 兩個質因數)
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// mu(4)=0(4=2², 有平方因子)
+</span></span></span></code></pre></div><hr><h3 id=常見面試考點>常見面試考點</h3><p>數論在面試中的出題頻率很高，以下整理常見考點與應對策略：</p><p><strong>1. GCD / LCM 相關</strong></p><ul><li>求兩數或多數的 GCD/LCM</li><li>判斷兩數是否互質（gcd = 1）</li><li>利用 GCD 簡化分數</li><li><strong>關鍵公式</strong>：<code>lcm(a, b) = a / gcd(a, b) * b</code>（先除後乘防溢位）</li></ul><p><strong>2. 模運算相關</strong></p><ul><li>計算大數模運算（避免溢位）</li><li>負數取模的正確處理：<code>((a % m) + m) % m</code></li><li>「答案對 10^9 + 7 取餘」的題目套路：加減乘直接取模，除法用模反元素</li></ul><p><strong>3. 質數相關</strong></p><ul><li>判斷質數（試除法，O(√n)）</li><li>計算範圍內質數個數（Sieve）</li><li>質因數分解</li><li>唯一分解定理的應用</li></ul><p><strong>4. 快速冪相關</strong></p><ul><li>實作 <code>pow(x, n)</code>（包含負指數處理）</li><li>矩陣快速冪（斐波那契數列加速）</li><li>超大指數取模（<code>a^b % m</code>，b 可能是陣列表示的超大數）</li></ul><p><strong>5. 組合數學（常搭配數論出題）</strong></p><ul><li>C(n, k) % p 的計算（階乘 + 逆元預計算）</li><li>Catalan 數</li><li>容斥原理</li></ul><hr><h3 id=leetcode-練習>LeetCode 練習</h3><p>以下精選 5 道與數論密切相關的 LeetCode 題目，涵蓋從基礎到進階的各個面向：</p><h4 id=204-count-primes計算質數數量>204. Count Primes（計算質數數量）</h4><p><strong>難度：</strong> Medium | <strong>方法：</strong> Sieve of Eratosthenes</p><p>給定整數 n，回傳小於 n 的質數個數。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>countPrimes</span>(<span style=color:#a6e22e>n</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>n</span> <span style=color:#f92672>&lt;</span> <span style=color:#ae81ff>2</span>) <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 使用 Uint8Array 節省記憶體
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>isPrime</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>Uint8Array</span>(<span style=color:#a6e22e>n</span>).<span style=color:#a6e22e>fill</span>(<span style=color:#ae81ff>1</span>);
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>isPrime</span>[<span style=color:#ae81ff>0</span>] <span style=color:#f92672>=</span> <span style=color:#a6e22e>isPrime</span>[<span style=color:#ae81ff>1</span>] <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>; <span style=color:#a6e22e>i</span> <span style=color:#f92672>*</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>n</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>isPrime</span>[<span style=color:#a6e22e>i</span>]) {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>j</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>*</span> <span style=color:#a6e22e>i</span>; <span style=color:#a6e22e>j</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>n</span>; <span style=color:#a6e22e>j</span> <span style=color:#f92672>+=</span> <span style=color:#a6e22e>i</span>) {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>isPrime</span>[<span style=color:#a6e22e>j</span>] <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>      }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>count</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span>; <span style=color:#a6e22e>i</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>n</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>isPrime</span>[<span style=color:#a6e22e>i</span>]) <span style=color:#a6e22e>count</span><span style=color:#f92672>++</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>count</span>;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 測試
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>countPrimes</span>(<span style=color:#ae81ff>10</span>));  <span style=color:#75715e>// 輸出：4（2, 3, 5, 7）
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>countPrimes</span>(<span style=color:#ae81ff>0</span>));   <span style=color:#75715e>// 輸出：0
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>countPrimes</span>(<span style=color:#ae81ff>1</span>));   <span style=color:#75715e>// 輸出：0
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>countPrimes</span>(<span style=color:#ae81ff>100</span>)); <span style=color:#75715e>// 輸出：25
+</span></span></span></code></pre></div><p><strong>複雜度：</strong> 時間 O(N log log N)，空間 O(N)</p><h4 id=50-powx-n快速冪>50. Pow(x, n)（快速冪）</h4><p><strong>難度：</strong> Medium | <strong>方法：</strong> Binary Exponentiation</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>myPow</span>(<span style=color:#a6e22e>x</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>n</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 處理負指數：x^(-n) = (1/x)^n
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>n</span> <span style=color:#f92672>&lt;</span> <span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>x</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span> <span style=color:#f92672>/</span> <span style=color:#a6e22e>x</span>;
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>n</span> <span style=color:#f92672>=</span> <span style=color:#f92672>-</span><span style=color:#a6e22e>n</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>result</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>base</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>x</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>while</span> (<span style=color:#a6e22e>n</span> <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>n</span> <span style=color:#f92672>&amp;</span> <span style=color:#ae81ff>1</span>) <span style=color:#a6e22e>result</span> <span style=color:#f92672>*=</span> <span style=color:#a6e22e>base</span>; <span style=color:#75715e>// 奇數指數：乘入結果
+</span></span></span><span style=display:flex><span>    <span style=color:#a6e22e>base</span> <span style=color:#f92672>*=</span> <span style=color:#a6e22e>base</span>;              <span style=color:#75715e>// base 自乘
+</span></span></span><span style=display:flex><span>    <span style=color:#a6e22e>n</span> <span style=color:#f92672>&gt;&gt;=</span> <span style=color:#ae81ff>1</span>;                   <span style=color:#75715e>// 指數減半
+</span></span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>result</span>;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 測試
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>myPow</span>(<span style=color:#ae81ff>2.0</span>, <span style=color:#ae81ff>10</span>));   <span style=color:#75715e>// 輸出：1024.0
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>myPow</span>(<span style=color:#ae81ff>2.1</span>, <span style=color:#ae81ff>3</span>));    <span style=color:#75715e>// 輸出：9.261
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>myPow</span>(<span style=color:#ae81ff>2.0</span>, <span style=color:#f92672>-</span><span style=color:#ae81ff>2</span>));   <span style=color:#75715e>// 輸出：0.25
+</span></span></span></code></pre></div><p><strong>複雜度：</strong> 時間 O(log n)，空間 O(1)</p><h4 id=878-nth-magical-number第-n-個神奇數字>878. Nth Magical Number（第 N 個神奇數字）</h4><p><strong>難度：</strong> Hard | <strong>方法：</strong> 二分搜尋 + GCD/LCM + 容斥原理</p><p>若正整數能被 a 或 b 整除，則稱為「神奇數字」。給定 n, a, b，求第 n 個神奇數字（mod 10^9+7）。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>nthMagicalNumber</span>(<span style=color:#a6e22e>n</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>a</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>b</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>MOD</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span><span style=color:#a6e22e>_000_000_007n</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>function</span> <span style=color:#a6e22e>gcdLocal</span>(<span style=color:#a6e22e>x</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>y</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>while</span> (<span style=color:#a6e22e>y</span>) { [<span style=color:#a6e22e>x</span>, <span style=color:#a6e22e>y</span>] <span style=color:#f92672>=</span> [<span style=color:#a6e22e>y</span>, <span style=color:#a6e22e>x</span> <span style=color:#f92672>%</span> <span style=color:#a6e22e>y</span>]; }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>x</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>lcmAB</span> <span style=color:#f92672>=</span> (<span style=color:#a6e22e>a</span> <span style=color:#f92672>/</span> <span style=color:#a6e22e>gcdLocal</span>(<span style=color:#a6e22e>a</span>, <span style=color:#a6e22e>b</span>)) <span style=color:#f92672>*</span> <span style=color:#a6e22e>b</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// count(x)：不超過 x 的神奇數字數量（容斥原理）
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>function</span> <span style=color:#a6e22e>count</span>(<span style=color:#a6e22e>x</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> Math.<span style=color:#a6e22e>floor</span>(<span style=color:#a6e22e>x</span> <span style=color:#f92672>/</span> <span style=color:#a6e22e>a</span>) <span style=color:#f92672>+</span> Math.<span style=color:#a6e22e>floor</span>(<span style=color:#a6e22e>x</span> <span style=color:#f92672>/</span> <span style=color:#a6e22e>b</span>)
+</span></span><span style=display:flex><span>         <span style=color:#f92672>-</span> Math.<span style=color:#a6e22e>floor</span>(<span style=color:#a6e22e>x</span> <span style=color:#f92672>/</span> <span style=color:#a6e22e>lcmAB</span>);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 二分搜尋：找最小 x 使得 count(x) &gt;= n
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>lo</span> <span style=color:#f92672>=</span> Math.<span style=color:#a6e22e>min</span>(<span style=color:#a6e22e>a</span>, <span style=color:#a6e22e>b</span>);
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>hi</span> <span style=color:#f92672>=</span> Math.<span style=color:#a6e22e>min</span>(<span style=color:#a6e22e>a</span>, <span style=color:#a6e22e>b</span>) <span style=color:#f92672>*</span> <span style=color:#a6e22e>n</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>while</span> (<span style=color:#a6e22e>lo</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>hi</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>mid</span> <span style=color:#f92672>=</span> Math.<span style=color:#a6e22e>floor</span>((<span style=color:#a6e22e>lo</span> <span style=color:#f92672>+</span> <span style=color:#a6e22e>hi</span>) <span style=color:#f92672>/</span> <span style=color:#ae81ff>2</span>);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>count</span>(<span style=color:#a6e22e>mid</span>) <span style=color:#f92672>&gt;=</span> <span style=color:#a6e22e>n</span>) <span style=color:#a6e22e>hi</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>mid</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>else</span> <span style=color:#a6e22e>lo</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>mid</span> <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> Number(<span style=color:#a6e22e>BigInt</span>(<span style=color:#a6e22e>lo</span>) <span style=color:#f92672>%</span> <span style=color:#a6e22e>MOD</span>);
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 測試
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>nthMagicalNumber</span>(<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>));  <span style=color:#75715e>// 輸出：2
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>nthMagicalNumber</span>(<span style=color:#ae81ff>4</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>));  <span style=color:#75715e>// 輸出：6
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>nthMagicalNumber</span>(<span style=color:#ae81ff>5</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>4</span>));  <span style=color:#75715e>// 輸出：10
+</span></span></span></code></pre></div><p><strong>複雜度：</strong> 時間 O(log(N x min(a, b)))，空間 O(1)</p><h4 id=372-super-pow超級次方>372. Super Pow（超級次方）</h4><p><strong>難度：</strong> Medium | <strong>方法：</strong> 快速冪 + 遞歸分解大指數</p><p>計算 <code>a^b mod 1337</code>，其中 b 是以陣列形式表示的超大正整數。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>superPow</span>(<span style=color:#a6e22e>a</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>b</span>: <span style=color:#66d9ef>number</span>[])<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>MOD</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>1337</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 快速冪（小模數，用 Number 即可）
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>function</span> <span style=color:#a6e22e>power</span>(<span style=color:#a6e22e>base</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>exp</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>result</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>base</span> <span style=color:#f92672>%=</span> <span style=color:#a6e22e>MOD</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>while</span> (<span style=color:#a6e22e>exp</span> <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>exp</span> <span style=color:#f92672>&amp;</span> <span style=color:#ae81ff>1</span>) <span style=color:#a6e22e>result</span> <span style=color:#f92672>=</span> (<span style=color:#a6e22e>result</span> <span style=color:#f92672>*</span> <span style=color:#a6e22e>base</span>) <span style=color:#f92672>%</span> <span style=color:#a6e22e>MOD</span>;
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>base</span> <span style=color:#f92672>=</span> (<span style=color:#a6e22e>base</span> <span style=color:#f92672>*</span> <span style=color:#a6e22e>base</span>) <span style=color:#f92672>%</span> <span style=color:#a6e22e>MOD</span>;
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>exp</span> <span style=color:#f92672>&gt;&gt;=</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>result</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 核心遞歸：a^[1,5,6,4] = (a^[1,5,6])^10 × a^4
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>function</span> <span style=color:#a6e22e>solve</span>(<span style=color:#a6e22e>idx</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>idx</span> <span style=color:#f92672>&lt;</span> <span style=color:#ae81ff>0</span>) <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 前面部分的結果取 10 次方，再乘上當前位的貢獻
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> (<span style=color:#a6e22e>power</span>(<span style=color:#a6e22e>solve</span>(<span style=color:#a6e22e>idx</span> <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>), <span style=color:#ae81ff>10</span>) <span style=color:#f92672>*</span> <span style=color:#a6e22e>power</span>(<span style=color:#a6e22e>a</span>, <span style=color:#a6e22e>b</span>[<span style=color:#a6e22e>idx</span>])) <span style=color:#f92672>%</span> <span style=color:#a6e22e>MOD</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>solve</span>(<span style=color:#a6e22e>b</span>.<span style=color:#a6e22e>length</span> <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>);
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 測試
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>superPow</span>(<span style=color:#ae81ff>2</span>, [<span style=color:#ae81ff>3</span>]));         <span style=color:#75715e>// 輸出：8（2^3 = 8）
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>superPow</span>(<span style=color:#ae81ff>2</span>, [<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>0</span>]));      <span style=color:#75715e>// 輸出：1024 % 1337 = 1024
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>superPow</span>(<span style=color:#ae81ff>2</span>, [<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>0</span>]));   <span style=color:#75715e>// 輸出：2^100 % 1337 = 1169
+</span></span></span></code></pre></div><p><strong>複雜度：</strong> 時間 O(k log 10)，其中 k 為指數陣列長度，空間 O(k)</p><h4 id=1819-number-of-different-subsequences-gcds>1819. Number of Different Subsequences GCDs</h4><p><strong>難度：</strong> Hard | <strong>方法：</strong> GCD + 枚舉因數</p><p>給定一個正整數陣列 nums，找出所有不同子序列的 GCD 的不同值個數。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>countDifferentSubsequenceGCDs</span>(<span style=color:#a6e22e>nums</span>: <span style=color:#66d9ef>number</span>[])<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 核心思路：枚舉每個可能的 GCD 值 g（從 1 到 max(nums)）
+</span></span></span><span style=display:flex><span>  <span style=color:#75715e>// 對每個 g，檢查是否存在一個子序列的 GCD 恰好為 g
+</span></span></span><span style=display:flex><span>  <span style=color:#75715e>// 等價於：在 nums 中找出所有 g 的倍數，計算它們的 GCD
+</span></span></span><span style=display:flex><span>  <span style=color:#75715e>//         如果結果恰好為 g，則 g 是一個可行的子序列 GCD
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>maxVal</span> <span style=color:#f92672>=</span> Math.<span style=color:#a6e22e>max</span>(...<span style=color:#a6e22e>nums</span>);
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>exists</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>Uint8Array</span>(<span style=color:#a6e22e>maxVal</span> <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>);
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>const</span> <span style=color:#a6e22e>x</span> <span style=color:#66d9ef>of</span> <span style=color:#a6e22e>nums</span>) <span style=color:#a6e22e>exists</span>[<span style=color:#a6e22e>x</span>] <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>count</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>g</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>; <span style=color:#a6e22e>g</span> <span style=color:#f92672>&lt;=</span> <span style=color:#a6e22e>maxVal</span>; <span style=color:#a6e22e>g</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>currentGcd</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 枚舉 g 的所有倍數
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>multiple</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>g</span>; <span style=color:#a6e22e>multiple</span> <span style=color:#f92672>&lt;=</span> <span style=color:#a6e22e>maxVal</span>; <span style=color:#a6e22e>multiple</span> <span style=color:#f92672>+=</span> <span style=color:#a6e22e>g</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>exists</span>[<span style=color:#a6e22e>multiple</span>]) {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>currentGcd</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>gcd</span>(<span style=color:#a6e22e>currentGcd</span>, <span style=color:#a6e22e>multiple</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#75715e>// 提前終止：GCD 已經等於 g，不可能更小
+</span></span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>currentGcd</span> <span style=color:#f92672>===</span> <span style=color:#a6e22e>g</span>) <span style=color:#66d9ef>break</span>;
+</span></span><span style=display:flex><span>      }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>currentGcd</span> <span style=color:#f92672>===</span> <span style=color:#a6e22e>g</span>) <span style=color:#a6e22e>count</span><span style=color:#f92672>++</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>count</span>;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 測試
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>countDifferentSubsequenceGCDs</span>([<span style=color:#ae81ff>6</span>, <span style=color:#ae81ff>10</span>, <span style=color:#ae81ff>3</span>]));
+</span></span><span style=display:flex><span><span style=color:#75715e>// 輸出：5（可能的 GCD：1, 2, 3, 6, 10）
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>countDifferentSubsequenceGCDs</span>([<span style=color:#ae81ff>5</span>, <span style=color:#ae81ff>15</span>, <span style=color:#ae81ff>40</span>, <span style=color:#ae81ff>5</span>, <span style=color:#ae81ff>6</span>]));
+</span></span><span style=display:flex><span><span style=color:#75715e>// 輸出：7
+</span></span></span></code></pre></div><p><strong>複雜度：</strong> 時間 O(M log M)（M 為最大值，調和級數），空間 O(M)</p><hr><h3 id=總結>總結</h3><p>本文從最基礎的 <strong>歐幾里得演算法</strong> 出發，系統性地介紹了數論中最重要的演算法工具：</p><ol><li><strong>GCD / LCM</strong>：輾轉相除法與擴展 GCD，處理整除性問題與線性丟番圖方程</li><li><strong>模運算</strong>：加減乘的模運算性質、負數取模修正、模反元素的三種求法</li><li><strong>質數篩法</strong>：Eratosthenes 篩與線性篩，高效列舉質數與質因數分解</li><li><strong>快速冪</strong>：O(log n) 計算大數次方，搭配模運算處理溢位</li><li><strong>費馬小定理</strong>：質數模下的模反元素速算</li><li><strong>中國剩餘定理</strong>：合併多模數同餘方程式</li><li><strong>進階主題</strong>：Miller-Rabin 素性測試、歐拉函數、Mobius 函數</li></ol><p>這些工具不僅是演算法競賽的標配，更是密碼學、分散式系統、資料結構設計的底層基石。掌握數論思維，能讓你在面對「答案對 10^9+7 取餘」這類題目時游刃有餘。</p><p>在下一篇文章中，我們將進入 <strong>計算幾何（Computational Geometry）</strong> 的世界，探索向量運算、凸包演算法、線段交點判斷等幾何演算法的核心技術。</p><a class="text-blue-500 font-bold no-underline" href=/post/javascript/data-structures-algorithms/032-string-algorithms/ target=_blank>上一篇：032 — 字串演算法</a></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
+</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/javascript/data-structures--algorithms/032-string-algorithms/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">字串演算法完全指南 — KMP、Rabin-Karp、Z-Algorithm 與 Aho-Corasick | 資料結構與演算法</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/15</span>
+</a><a href=https://benzhub.github.io/post/javascript/data-structures--algorithms/031-network-flow/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">網路流完全指南 — Ford-Fulkerson、Dinic 演算法與最大流最小割定理 | 資料結構與演算法</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/14</span>
+</a><a href=https://benzhub.github.io/post/javascript/data-structures--algorithms/030-tree-algorithms/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">樹演算法 — LCA、樹 DP 與重鏈剖分進階技巧 | 資料結構與演算法</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/13</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/javascript/data-structures--algorithms/032-string-algorithms/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+<span class="text-sm font-medium">字串演算法完全指南 — KMP、Rabin-Karp、Z-Algorithm 與 Aho-Corasick | 資料結構與演算法</span></a></div><div><a href=https://benzhub.github.io/post/javascript/data-structures--algorithms/034-computational-geometry/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+<span class="text-sm font-medium">計算幾何完全指南 — 凸包、線段交點與掃描線演算法 | 資料結構與演算法</span></a></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
+</a><a href=/tags/acid><span class=tag-pill>acid</span>
+</a><a href=/tags/aggregate><span class=tag-pill>aggregate</span>
+</a><a href=/tags/ai><span class=tag-pill>ai</span>
+</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
+</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
+</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
+</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
+</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
+</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
+</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
+</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
+</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
+</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
+</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
+</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
+</a><a href=/tags/analytics><span class=tag-pill>analytics</span>
+</a><a href=/tags/api><span class=tag-pill>api</span>
+</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
+</a><a href=/tags/audit><span class=tag-pill>audit</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (41)</span>
+</a><a href=/post/javascript/><span class=tag-pill>JavaScript (96)</span>
+</a><a href=/post/django/><span class=tag-pill>Django (44)</span>
+</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
+</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
+</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
+</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
+</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/postgresql/041-maintenance/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">PostgreSQL 日常維護：REINDEX、pg_repack、Bloat 偵測與健檢腳本 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/17</p></a><a href=/post/javascript/data-structures--algorithms/034-computational-geometry/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">計算幾何完全指南 — 凸包、線段交點與掃描線演算法 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/17</p></a><a href=/post/postgresql/040-installation/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">PostgreSQL 安裝與部署：從套件管理器到 Docker 完整指南 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/16</p></a><a href=/post/javascript/data-structures--algorithms/033-number-theory/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">數論完全指南 — GCD、模運算、質數篩法與中國剩餘定理 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/16</p></a><a href=/post/postgresql/039-other-languages/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">PL/Python、PL/Perl、PL/v8：PostgreSQL 的多語言程序擴展 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/15</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>

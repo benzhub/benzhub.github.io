@@ -1,0 +1,404 @@
+<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>PostgreSQL 安裝與部署：從套件管理器到 Docker 完整指南 | PostgreSQL | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="PostgreSQL 安裝與部署：從套件管理器到 Docker 完整指南 | PostgreSQL | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="PostgreSQL 安裝與部署完整指南，涵蓋 apt/yum/Homebrew 套件管理器安裝、原始碼編譯、Docker 容器部署、initdb 初始化、pg_hba.conf 認證設定與 systemd 服務管理。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="PostgreSQL 安裝與部署完整指南，涵蓋 apt/yum/Homebrew 套件管理器安裝、原始碼編譯、Docker 容器部署、initdb 初始化、pg_hba.conf 認證設定與 systemd 服務管理。"><meta property="og:url" content="https://benzhub.github.io/post/postgresql/040-installation/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/postgresql/040-installation/><meta name=twitter:description content="PostgreSQL 安裝與部署完整指南，涵蓋 apt/yum/Homebrew 套件管理器安裝、原始碼編譯、Docker 容器部署、initdb 初始化、pg_hba.conf 認證設定與 systemd 服務管理。"><meta property="article:published_time" content="2026-07-16T00:00:00+00:00"><meta property="article:updated_time" content="2026-07-16T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/postgresql/040-Installation.png"><meta property="og:image:url" content="https://benzhub.github.io/img/postgresql/040-Installation.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/postgresql/040-installation/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/postgresql/040-installation/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"PostgreSQL 安裝與部署：從套件管理器到 Docker 完整指南 | PostgreSQL\"","description":"\"PostgreSQL 安裝與部署完整指南，涵蓋 apt/yum/Homebrew 套件管理器安裝、原始碼編譯、Docker 容器部署、initdb 初始化、pg_hba.conf 認證設定與 systemd 服務管理。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-07-16T00:00:00\u002b00:00","dateModified":"2026-07-16T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/postgresql\/040-Installation.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/postgresql\/040-installation\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/postgresql\/"},{"@type":"ListItem","position":3,"name":"\"PostgreSQL 安裝與部署：從套件管理器到 Docker 完整指南 | PostgreSQL\""}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">PostgreSQL 安裝與部署：從套件管理器到 Docker 完整指南 | PostgreSQL</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/16</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/postgresql class="tag-pill no-underline">postgresql</a>
+<a href=/tags/installation class="tag-pill no-underline">installation</a>
+<a href=/tags/docker class="tag-pill no-underline">Docker</a>
+<a href=/tags/initdb class="tag-pill no-underline">initdb</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/postgresql/040-Installation.png alt="PostgreSQL 安裝與部署：從套件管理器到 Docker 完整指南 | PostgreSQL"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p>正確的安裝與初始化是 <strong>PostgreSQL</strong> 穩定運行的基礎。本文涵蓋從 <strong>apt/yum/Homebrew</strong> 套件管理器安裝到 <strong>原始碼編譯</strong>、<strong>Docker</strong> 容器部署、<code>initdb</code> 初始化、<code>pg_hba.conf</code> 認證設定與 <strong>systemd</strong> 服務管理的完整流程。</p></blockquote><h3 id=安裝方式比較>安裝方式比較</h3><p>在開始安裝之前，先了解不同安裝方式的優缺點，以選擇最適合你的場景：</p><table><thead><tr><th>方式</th><th>優點</th><th>缺點</th><th>建議場景</th></tr></thead><tbody><tr><td>套件管理器（apt/yum/brew）</td><td>快速、自動處理相依性</td><td>版本可能落後</td><td>裸機 Linux/macOS</td></tr><tr><td>原始碼編譯</td><td>完全控制編譯選項</td><td>耗時、需手動維護升級</td><td>需要特殊編譯選項</td></tr><tr><td>Docker/Container</td><td>隔離性好、易於版本切換</td><td>I/O 效能略低、volume 管理需注意</td><td>開發環境、CI/CD</td></tr><tr><td>雲端託管（Managed）</td><td>零維運、自動備份</td><td>成本較高、客製化受限</td><td>無專職 DBA 的團隊</td></tr></tbody></table><h3 id=部署架構概覽>部署架構概覽</h3><p><strong>PostgreSQL</strong> 支援從開發用單機到生產用高可用叢集的多種部署拓撲：</p><table><thead><tr><th>架構</th><th>描述</th><th>適用場景</th></tr></thead><tbody><tr><td>單機（Standalone）</td><td>單一 Primary 節點，無備援</td><td>開發、測試、小型應用</td></tr><tr><td>主從（Primary/Replica）</td><td>一主多從，支援讀取擴展</td><td>生產環境基本配置</td></tr><tr><td>高可用叢集（HA Cluster）</td><td>Patroni/Repmgr 管理自動故障切換</td><td>關鍵業務、零停機需求</td></tr><tr><td>雲端託管（Managed）</td><td>RDS/Cloud SQL/Aurora 等</td><td>降低維運負擔</td></tr></tbody></table><hr><h3 id=目錄結構>目錄結構</h3><p>安裝完成後，<strong>PostgreSQL</strong> 的檔案分布於以下主要目錄：</p><pre tabindex=0><code>/usr/lib/postgresql/17/          # 二進位檔（Debian/Ubuntu）
+├── bin/                         # 執行檔（postgres, psql, pg_dump...）
+└── lib/                         # 動態函式庫
+
+$PGDATA（例：/var/lib/postgresql/17/main/）
+├── PG_VERSION                   # 主版本號
+├── base/                        # 資料庫資料目錄
+├── global/                      # 叢集全域表（pg_database, pg_authid...）
+├── pg_hba.conf                  # 用戶端認證設定
+├── postgresql.conf              # 主要設定檔
+├── postgresql.auto.conf         # ALTER SYSTEM 寫入的覆蓋設定
+├── pg_wal/                      # Write-Ahead Log
+├── pg_xact/                     # 交易狀態（commit log）
+└── postmaster.pid               # 執行中的 PID 檔
+</code></pre><blockquote><p><strong>PGDATA</strong> 是最重要的環境變數，指向 PostgreSQL 的資料目錄。所有設定檔、資料檔、WAL 都存放於此。</p></blockquote><hr><h3 id=debianubuntu-安裝apt>Debian/Ubuntu 安裝（apt）</h3><p>PostgreSQL Global Development Group（PGDG）維護官方 APT Repository，版本比系統內建更新：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 步驟 1：安裝必要工具</span>
+</span></span><span style=display:flex><span>sudo apt install -y curl ca-certificates
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 步驟 2：新增 PostgreSQL APT Repository</span>
+</span></span><span style=display:flex><span>sudo install -d /usr/share/postgresql-common/pgdg
+</span></span><span style=display:flex><span>sudo curl -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc --fail <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  https://www.postgresql.org/media/keys/ACCC4CF8.asc
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>sudo sh -c <span style=color:#e6db74>&#39;echo &#34;deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] \
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main&#34; \
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  &gt; /etc/apt/sources.list.d/pgdg.list&#39;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 步驟 3：更新並安裝</span>
+</span></span><span style=display:flex><span>sudo apt update
+</span></span><span style=display:flex><span>sudo apt install -y postgresql-17
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 驗證安裝</span>
+</span></span><span style=display:flex><span>psql --version
+</span></span><span style=display:flex><span><span style=color:#75715e># 輸出：postgresql 17.x</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 確認服務狀態</span>
+</span></span><span style=display:flex><span>sudo systemctl status postgresql@17-main
+</span></span></code></pre></div><p>安裝後的重要路徑：</p><pre tabindex=0><code>/etc/postgresql/17/main/         # 設定目錄（postgresql.conf、pg_hba.conf）
+/var/lib/postgresql/17/main/     # 資料目錄（PGDATA）
+/var/log/postgresql/             # 日誌目錄
+/usr/lib/postgresql/17/bin/      # 執行檔目錄
+</code></pre><p>若只需要客戶端工具（不含伺服器）：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 僅安裝 psql 等客戶端工具</span>
+</span></span><span style=display:flex><span>sudo apt install -y postgresql-client-17
+</span></span></code></pre></div><hr><h3 id=rhelcentosrocky-安裝yumdnf>RHEL/CentOS/Rocky 安裝（yum/dnf）</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 步驟 1：停用系統內建的 PostgreSQL 模組（RHEL8+）</span>
+</span></span><span style=display:flex><span>sudo dnf -qy module disable postgresql
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 步驟 2：安裝 PGDG YUM Repository</span>
+</span></span><span style=display:flex><span>sudo dnf install -y <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 步驟 3：安裝 PostgreSQL 17</span>
+</span></span><span style=display:flex><span>sudo dnf install -y postgresql17-server postgresql17-contrib
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 步驟 4：初始化資料庫（YUM 安裝不自動 initdb）</span>
+</span></span><span style=display:flex><span>sudo /usr/pgsql-17/bin/postgresql-17-setup initdb
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 步驟 5：啟動並設定開機自啟</span>
+</span></span><span style=display:flex><span>sudo systemctl enable --now postgresql-17
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 驗證</span>
+</span></span><span style=display:flex><span>sudo -u postgres psql -c <span style=color:#e6db74>&#34;SELECT version();&#34;</span>
+</span></span></code></pre></div><p>RHEL/CentOS 的重要路徑：</p><pre tabindex=0><code>/var/lib/pgsql/17/data/          # 資料目錄（PGDATA）
+/usr/pgsql-17/bin/               # 執行檔目錄
+</code></pre><hr><h3 id=macos-安裝homebrew>macOS 安裝（Homebrew）</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 安裝 PostgreSQL 17</span>
+</span></span><span style=display:flex><span>brew install postgresql@17
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 將執行檔加入 PATH</span>
+</span></span><span style=display:flex><span>echo <span style=color:#e6db74>&#39;export PATH=&#34;/opt/homebrew/opt/postgresql@17/bin:$PATH&#34;&#39;</span> &gt;&gt; ~/.zshrc
+</span></span><span style=display:flex><span>source ~/.zshrc
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 啟動服務（以 launchd 管理）</span>
+</span></span><span style=display:flex><span>brew services start postgresql@17
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 連線（macOS 預設使用 trust 認證本地連線）</span>
+</span></span><span style=display:flex><span>psql postgres
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 確認版本</span>
+</span></span><span style=display:flex><span>psql --version
+</span></span></code></pre></div><p>Homebrew 安裝路徑（Apple Silicon）：</p><pre tabindex=0><code>/opt/homebrew/opt/postgresql@17/     # 軟體目錄
+/opt/homebrew/var/postgresql@17/     # 資料目錄（PGDATA）
+</code></pre><hr><h3 id=原始碼編譯安裝>原始碼編譯安裝</h3><p>從原始碼編譯可以啟用特殊功能或針對硬體最佳化：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 步驟 1：安裝編譯相依套件（Debian/Ubuntu）</span>
+</span></span><span style=display:flex><span>sudo apt install -y <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  build-essential libreadline-dev zlib1g-dev <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  libssl-dev libicu-dev libxml2-dev libxslt1-dev <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  libperl-dev python3-dev pkg-config
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 步驟 2：下載並解壓原始碼</span>
+</span></span><span style=display:flex><span>wget https://ftp.postgresql.org/pub/source/v17.0/postgresql-17.0.tar.bz2
+</span></span><span style=display:flex><span>tar xjf postgresql-17.0.tar.bz2
+</span></span><span style=display:flex><span>cd postgresql-17.0
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 步驟 3：configure（設定編譯選項）</span>
+</span></span><span style=display:flex><span>./configure <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --prefix<span style=color:#f92672>=</span>/usr/local/pgsql <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --with-openssl <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --with-icu <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --with-llvm <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --with-perl <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --with-python <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --enable-debug
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 步驟 4：編譯並安裝</span>
+</span></span><span style=display:flex><span>make -j<span style=color:#66d9ef>$(</span>nproc<span style=color:#66d9ef>)</span>
+</span></span><span style=display:flex><span>make check          <span style=color:#75715e># 執行回歸測試（建議）</span>
+</span></span><span style=display:flex><span>sudo make install
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 步驟 5：建立 postgres 使用者並初始化</span>
+</span></span><span style=display:flex><span>sudo useradd -r -m -d /var/lib/postgresql postgres
+</span></span><span style=display:flex><span>sudo mkdir -p /var/lib/postgresql/17/data
+</span></span><span style=display:flex><span>sudo chown postgres:postgres /var/lib/postgresql/17/data
+</span></span><span style=display:flex><span>sudo -u postgres /usr/local/pgsql/bin/initdb <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  -D /var/lib/postgresql/17/data <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --encoding<span style=color:#f92672>=</span>UTF8 <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --locale<span style=color:#f92672>=</span>en_US.UTF-8 <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --data-checksums
+</span></span></code></pre></div><p>常用編譯選項：</p><table><thead><tr><th>選項</th><th>說明</th></tr></thead><tbody><tr><td><code>--with-openssl</code></td><td>啟用 SSL/TLS 加密連線</td></tr><tr><td><code>--with-icu</code></td><td>啟用 ICU 國際化排序</td></tr><tr><td><code>--with-llvm</code></td><td>啟用 JIT 編譯，加速複雜查詢</td></tr><tr><td><code>--with-perl</code></td><td>啟用 PL/Perl 語言支援</td></tr><tr><td><code>--with-python</code></td><td>啟用 PL/Python 語言支援</td></tr><tr><td><code>--enable-debug</code></td><td>產生除錯符號（勿用於生產）</td></tr></tbody></table><hr><h3 id=docker-部署>Docker 部署</h3><p><strong>Docker</strong> 是快速啟動開發環境的最佳選擇。</p><h4 id=快速啟動>快速啟動</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 啟動 PostgreSQL 17 容器</span>
+</span></span><span style=display:flex><span>docker run -d <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --name pg17 <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  -e POSTGRES_PASSWORD<span style=color:#f92672>=</span>mysecretpassword <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  -e POSTGRES_USER<span style=color:#f92672>=</span>myuser <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  -e POSTGRES_DB<span style=color:#f92672>=</span>mydb <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  -p 5432:5432 <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  -v pgdata:/var/lib/postgresql/data <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  postgres:17
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 連線至容器內的 psql</span>
+</span></span><span style=display:flex><span>docker exec -it pg17 psql -U myuser -d mydb
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 從主機連線</span>
+</span></span><span style=display:flex><span>psql -h localhost -U myuser -d mydb
+</span></span></code></pre></div><h4 id=docker-compose-範例>docker-compose 範例</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#75715e># docker-compose.yml</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>version</span>: <span style=color:#e6db74>&#39;3.9&#39;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>services</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>postgres</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>image</span>: <span style=color:#ae81ff>postgres:17-alpine</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>container_name</span>: <span style=color:#ae81ff>pg17</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>restart</span>: <span style=color:#ae81ff>unless-stopped</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>environment</span>:
+</span></span><span style=display:flex><span>      <span style=color:#f92672>POSTGRES_USER</span>: <span style=color:#ae81ff>${POSTGRES_USER:-admin}</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>POSTGRES_PASSWORD</span>: <span style=color:#ae81ff>${POSTGRES_PASSWORD}      </span> <span style=color:#75715e># 必填</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>POSTGRES_DB</span>: <span style=color:#ae81ff>${POSTGRES_DB:-appdb}</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>PGDATA</span>: <span style=color:#ae81ff>/var/lib/postgresql/data/pgdata</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>ports</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#e6db74>&#34;5432:5432&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>volumes</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>pgdata:/var/lib/postgresql/data</span>
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>./init-scripts:/docker-entrypoint-initdb.d </span> <span style=color:#75715e># 初始化 SQL 腳本</span>
+</span></span><span style=display:flex><span>      - <span style=color:#ae81ff>./postgresql.conf:/etc/postgresql/postgresql.conf</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>command</span>: &gt;<span style=color:#e6db74>
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>      postgres
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>        -c config_file=/etc/postgresql/postgresql.conf
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>        -c log_statement=all</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>healthcheck</span>:
+</span></span><span style=display:flex><span>      <span style=color:#f92672>test</span>: [<span style=color:#e6db74>&#34;CMD-SHELL&#34;</span>, <span style=color:#e6db74>&#34;pg_isready -U ${POSTGRES_USER:-admin}&#34;</span>]
+</span></span><span style=display:flex><span>      <span style=color:#f92672>interval</span>: <span style=color:#ae81ff>10s</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>timeout</span>: <span style=color:#ae81ff>5s</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>retries</span>: <span style=color:#ae81ff>5</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>start_period</span>: <span style=color:#ae81ff>30s</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>volumes</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>pgdata</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>driver</span>: <span style=color:#ae81ff>local</span>
+</span></span></code></pre></div><h4 id=重要的環境變數>重要的環境變數</h4><table><thead><tr><th>變數</th><th>說明</th><th>預設值</th></tr></thead><tbody><tr><td><code>POSTGRES_PASSWORD</code></td><td>superuser 密碼（必填）</td><td>無</td></tr><tr><td><code>POSTGRES_USER</code></td><td>superuser 帳號</td><td><code>postgres</code></td></tr><tr><td><code>POSTGRES_DB</code></td><td>預設建立的資料庫</td><td>同 <code>POSTGRES_USER</code></td></tr><tr><td><code>PGDATA</code></td><td>容器內的資料目錄</td><td><code>/var/lib/postgresql/data</code></td></tr><tr><td><code>POSTGRES_INITDB_ARGS</code></td><td>傳給 initdb 的額外參數</td><td>無</td></tr><tr><td><code>POSTGRES_HOST_AUTH_METHOD</code></td><td>pg_hba.conf 預設認證方式</td><td><code>scram-sha-256</code></td></tr></tbody></table><blockquote><p><strong>安全提醒</strong>：切勿將 <code>POSTGRES_HOST_AUTH_METHOD=trust</code> 用於生產環境。</p></blockquote><hr><h3 id=initdb-初始化>initdb 初始化</h3><p><code>initdb</code> 是建立 PostgreSQL 資料叢集（Database Cluster）的命令。套件管理器安裝通常會自動執行，但理解其參數至關重要：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 完整建議的初始化命令</span>
+</span></span><span style=display:flex><span>sudo -u postgres initdb <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --pgdata<span style=color:#f92672>=</span>/var/lib/postgresql/17/data <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --encoding<span style=color:#f92672>=</span>UTF8 <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --locale<span style=color:#f92672>=</span>en_US.UTF-8 <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --lc-collate<span style=color:#f92672>=</span>en_US.UTF-8 <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --lc-ctype<span style=color:#f92672>=</span>en_US.UTF-8 <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --data-checksums <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --auth-host<span style=color:#f92672>=</span>scram-sha-256 <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --auth-local<span style=color:#f92672>=</span>peer
+</span></span></code></pre></div><h4 id=重要參數>重要參數</h4><table><thead><tr><th>參數</th><th>說明</th><th>建議值</th></tr></thead><tbody><tr><td><code>--encoding</code></td><td>預設字元編碼</td><td><code>UTF8</code></td></tr><tr><td><code>--locale</code></td><td>地區設定（影響排序）</td><td><code>en_US.UTF-8</code> 或 <code>C</code></td></tr><tr><td><code>--lc-collate</code></td><td>字串排序規則</td><td><code>C</code>（最快）或 <code>en_US.UTF-8</code></td></tr><tr><td><code>--data-checksums</code></td><td>啟用資料頁校驗碼</td><td><strong>強烈建議開啟</strong></td></tr><tr><td><code>--auth-host</code></td><td>遠端連線的預設認證</td><td><code>scram-sha-256</code></td></tr><tr><td><code>--auth-local</code></td><td>本地連線的預設認證</td><td><code>peer</code></td></tr></tbody></table><h4 id=資料校驗碼data-checksums>資料校驗碼（Data Checksums）</h4><p><code>--data-checksums</code> 啟用後，PostgreSQL 會對每個資料頁計算 CRC 校驗碼，讀取時自動驗證：</p><ul><li><strong>偵測硬體故障</strong>：磁碟靜默錯誤（Silent Data Corruption）是生產環境的隱形殺手</li><li><strong>偵測儲存系統問題</strong>：SAN/NAS 的韌體 Bug 可能造成資料損壞而不報錯</li><li><strong>代價</strong>：約 1-2% 的寫入效能開銷，保護遠大於代價</li></ul><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 確認是否已啟用 checksums
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SHOW</span> data_checksums;
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 若初始化時未啟用，PostgreSQL 12+ 可離線啟用</span>
+</span></span><span style=display:flex><span>sudo systemctl stop postgresql@17-main
+</span></span><span style=display:flex><span>sudo -u postgres pg_checksums --enable -D /var/lib/postgresql/17/main
+</span></span><span style=display:flex><span>sudo systemctl start postgresql@17-main
+</span></span></code></pre></div><hr><h3 id=pg_hbaconf-認證設定>pg_hba.conf 認證設定</h3><p><code>pg_hba.conf</code>（Host-Based Authentication）是 <strong>PostgreSQL</strong> 的防火牆，控制誰可以從哪裡以什麼方式連線。</p><h4 id=格式>格式</h4><p>每行格式為：</p><pre tabindex=0><code>TYPE  DATABASE  USER  ADDRESS  METHOD  [OPTIONS]
+</code></pre><table><thead><tr><th>欄位</th><th>說明</th><th>範例</th></tr></thead><tbody><tr><td>TYPE</td><td>連線類型</td><td><code>local</code>、<code>host</code>、<code>hostssl</code></td></tr><tr><td>DATABASE</td><td>目標資料庫</td><td><code>all</code>、<code>mydb</code></td></tr><tr><td>USER</td><td>目標使用者</td><td><code>all</code>、<code>myuser</code></td></tr><tr><td>ADDRESS</td><td>來源 IP/網段</td><td><code>127.0.0.1/32</code>、<code>10.10.1.0/24</code></td></tr><tr><td>METHOD</td><td>認證方式</td><td><code>scram-sha-256</code>、<code>peer</code>、<code>cert</code></td></tr></tbody></table><h4 id=認證方法比較>認證方法比較</h4><table><thead><tr><th>方法</th><th>安全等級</th><th>說明</th><th>適用場景</th></tr></thead><tbody><tr><td><code>trust</code></td><td>最低</td><td>無需密碼</td><td><strong>禁止在生產環境使用</strong></td></tr><tr><td><code>md5</code></td><td>低</td><td>MD5 雜湊密碼</td><td>舊版相容</td></tr><tr><td><code>scram-sha-256</code></td><td>高</td><td>SCRAM 挑戰回應</td><td><strong>現代標準，強烈推薦</strong></td></tr><tr><td><code>peer</code></td><td>高</td><td>核對 OS 使用者名稱（僅 local）</td><td>本地連線</td></tr><tr><td><code>cert</code></td><td>最高</td><td>客戶端 SSL 憑證</td><td>高安全需求</td></tr><tr><td><code>ldap</code></td><td>高</td><td>LDAP 目錄服務認證</td><td>企業 AD/LDAP 整合</td></tr></tbody></table><h4 id=生產環境建議設定>生產環境建議設定</h4><pre tabindex=0><code># pg_hba.conf — 生產環境建議
+# TYPE  DATABASE  USER       ADDRESS          METHOD
+
+# 1. local 連線使用 peer 認證
+local   all       postgres                    peer
+local   all       all                         peer
+
+# 2. 本地 TCP 連線
+host    all       all        127.0.0.1/32     scram-sha-256
+host    all       all        ::1/128          scram-sha-256
+
+# 3. 應用伺服器 IP 段
+host    appdb     appuser    10.10.1.0/24     scram-sha-256
+
+# 4. 管理用連線使用 SSL 憑證
+hostssl all       dbaadmin   10.10.0.0/16     cert
+
+# 5. 複製連線
+host    replication replicator 10.10.1.0/24   scram-sha-256
+
+# 注意：規則由上至下匹配，第一條符合的規則生效
+</code></pre><p>修改後需 reload（不需重啟）：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 方法 1：SQL 命令</span>
+</span></span><span style=display:flex><span>sudo -u postgres psql -c <span style=color:#e6db74>&#34;SELECT pg_reload_conf();&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 方法 2：systemd</span>
+</span></span><span style=display:flex><span>sudo systemctl reload postgresql@17-main
+</span></span></code></pre></div><hr><h3 id=postgresqlconf-基礎設定>postgresql.conf 基礎設定</h3><p><code>postgresql.conf</code> 是主設定檔，以下列出安裝後必須確認的初始參數：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-ini data-lang=ini><span style=display:flex><span><span style=color:#75715e># ─── 連線與認證 ───</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>listen_addresses</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;localhost&#39;     # 開發環境</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># listen_addresses = &#39;*&#39;           # 容器環境（配合 pg_hba.conf 限制）</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>port</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>5432</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>max_connections</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>100</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>superuser_reserved_connections</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>3</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># ─── 資源使用 ───</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>shared_buffers</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>256MB             # 通常設為系統 RAM 的 25%</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>work_mem</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>4MB                     # 每個 sort/hash 操作的記憶體</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>maintenance_work_mem</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>64MB        # VACUUM、CREATE INDEX 等</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># ─── WAL ───</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>wal_level</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>replica                # 支援備援（最低設定）</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># ─── 日誌 ───</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>logging_collector</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>on</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>log_directory</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;log&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>log_filename</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;postgresql-%Y-%m-%d_%H%M%S.log&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>log_rotation_age</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>1d</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>log_min_duration_statement</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>1000  # 記錄超過 1 秒的慢查詢</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>log_line_prefix</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;%m [%p] %q%u@%d &#39;</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>log_timezone</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;Asia/Taipei&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>timezone</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;Asia/Taipei&#39;</span>
+</span></span></code></pre></div><hr><h3 id=systemd-服務管理>systemd 服務管理</h3><p>現代 Linux 發行版使用 <strong>systemd</strong> 管理 PostgreSQL 服務：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># Debian/Ubuntu（服務名稱：postgresql@版本-叢集名稱）</span>
+</span></span><span style=display:flex><span>sudo systemctl start postgresql@17-main
+</span></span><span style=display:flex><span>sudo systemctl stop postgresql@17-main
+</span></span><span style=display:flex><span>sudo systemctl restart postgresql@17-main    <span style=color:#75715e># 會中斷所有連線</span>
+</span></span><span style=display:flex><span>sudo systemctl reload postgresql@17-main     <span style=color:#75715e># 僅重載設定，不中斷連線</span>
+</span></span><span style=display:flex><span>sudo systemctl enable postgresql@17-main     <span style=color:#75715e># 開機自啟</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># RHEL/CentOS（服務名稱：postgresql-版本）</span>
+</span></span><span style=display:flex><span>sudo systemctl start postgresql-17
+</span></span><span style=display:flex><span>sudo systemctl enable postgresql-17
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 查看詳細狀態</span>
+</span></span><span style=display:flex><span>sudo systemctl status postgresql@17-main
+</span></span><span style=display:flex><span>sudo journalctl -u postgresql@17-main -f
+</span></span></code></pre></div><h4 id=判斷需要重啟還是-reload>判斷需要重啟還是 Reload</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 查看哪些參數已變更且尚未生效
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> name, setting, pending_restart
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> pg_settings
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span> pending_restart <span style=color:#f92672>=</span> <span style=color:#66d9ef>true</span>;
+</span></span></code></pre></div><table><thead><tr><th>Context 值</th><th>說明</th></tr></thead><tbody><tr><td><code>internal</code></td><td>由 initdb 設定，不可修改</td></tr><tr><td><code>postmaster</code></td><td>需重啟服務</td></tr><tr><td><code>sighup</code></td><td>僅需 reload</td></tr><tr><td><code>superuser</code></td><td>superuser 可在 session 中修改</td></tr><tr><td><code>user</code></td><td>任何使用者可在 session 中修改</td></tr></tbody></table><hr><h3 id=多版本並存>多版本並存</h3><p><strong>Debian/Ubuntu</strong> 的 <code>postgresql-common</code> 套件提供完整的多版本管理工具：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 列出所有已安裝的叢集</span>
+</span></span><span style=display:flex><span>pg_lsclusters
+</span></span><span style=display:flex><span><span style=color:#75715e># Ver Cluster Port Status Owner    Data directory</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 15  main    5433 online postgres /var/lib/postgresql/15/main</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 17  main    5432 online postgres /var/lib/postgresql/17/main</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 建立新叢集</span>
+</span></span><span style=display:flex><span>sudo pg_createcluster <span style=color:#ae81ff>17</span> replica --port <span style=color:#ae81ff>5434</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 啟動/停止特定叢集</span>
+</span></span><span style=display:flex><span>sudo pg_ctlcluster <span style=color:#ae81ff>17</span> main start
+</span></span><span style=display:flex><span>sudo pg_ctlcluster <span style=color:#ae81ff>17</span> main stop
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 刪除叢集（警告：資料遺失）</span>
+</span></span><span style=display:flex><span>sudo pg_dropcluster <span style=color:#ae81ff>15</span> main --stop
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 使用 --cluster 指定版本</span>
+</span></span><span style=display:flex><span>psql --cluster 17/main -U postgres
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 使用環境變數切換</span>
+</span></span><span style=display:flex><span>export PGPORT<span style=color:#f92672>=</span><span style=color:#ae81ff>5433</span>   <span style=color:#75715e># 切換至 15 版叢集</span>
+</span></span><span style=display:flex><span>psql -U postgres
+</span></span></code></pre></div><hr><h3 id=安全加固初始化清單>安全加固初始化清單</h3><p>完成基本安裝後，執行以下安全加固步驟：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 1. 設定 postgres superuser 密碼</span>
+</span></span><span style=display:flex><span>sudo -u postgres psql -c <span style=color:#e6db74>&#34;ALTER USER postgres PASSWORD &#39;strong_password_here&#39;;&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 2. 移除預設的 public schema 寫入權限</span>
+</span></span><span style=display:flex><span>sudo -u postgres psql -c <span style=color:#e6db74>&#34;REVOKE CREATE ON SCHEMA public FROM PUBLIC;&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 3. 移除 template1 的 PUBLIC CONNECT 權限</span>
+</span></span><span style=display:flex><span>sudo -u postgres psql -c <span style=color:#e6db74>&#34;REVOKE CONNECT ON DATABASE template1 FROM PUBLIC;&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 4. 建立應用專用使用者（最小權限原則）</span>
+</span></span><span style=display:flex><span>sudo -u postgres psql <span style=color:#e6db74>&lt;&lt;EOF
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>CREATE USER appuser WITH PASSWORD &#39;app_password&#39;;
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>CREATE DATABASE appdb OWNER appuser;
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>REVOKE ALL ON DATABASE appdb FROM PUBLIC;
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>GRANT CONNECT ON DATABASE appdb TO appuser;
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>EOF</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 5. 確認 pg_hba.conf 無 trust 規則</span>
+</span></span><span style=display:flex><span>grep -v <span style=color:#e6db74>&#39;^#&#39;</span> /etc/postgresql/17/main/pg_hba.conf | grep trust
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 6. 確認 SSL 已啟用</span>
+</span></span><span style=display:flex><span>sudo -u postgres psql -c <span style=color:#e6db74>&#34;SHOW ssl;&#34;</span>
+</span></span></code></pre></div><hr><h3 id=自動化部署>自動化部署</h3><p>生產環境建議使用 Infrastructure as Code 管理部署：</p><h4 id=ansible-範例>Ansible 範例</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-yaml data-lang=yaml><span style=display:flex><span>- <span style=color:#f92672>name</span>: <span style=color:#ae81ff>安裝 PostgreSQL 17</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>hosts</span>: <span style=color:#ae81ff>db_servers</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>roles</span>:
+</span></span><span style=display:flex><span>    - <span style=color:#f92672>role</span>: <span style=color:#ae81ff>geerlingguy.postgresql</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>vars</span>:
+</span></span><span style=display:flex><span>        <span style=color:#f92672>postgresql_version</span>: <span style=color:#e6db74>&#34;17&#34;</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>postgresql_config_options</span>:
+</span></span><span style=display:flex><span>          - <span style=color:#f92672>option</span>: <span style=color:#ae81ff>shared_buffers</span>
+</span></span><span style=display:flex><span>            <span style=color:#f92672>value</span>: <span style=color:#e6db74>&#34;{{ (ansible_memtotal_mb * 0.25) | int }}MB&#34;</span>
+</span></span><span style=display:flex><span>          - <span style=color:#f92672>option</span>: <span style=color:#ae81ff>max_connections</span>
+</span></span><span style=display:flex><span>            <span style=color:#f92672>value</span>: <span style=color:#e6db74>&#34;200&#34;</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>postgresql_hba_entries</span>:
+</span></span><span style=display:flex><span>          - <span style=color:#f92672>type</span>: <span style=color:#ae81ff>local</span>
+</span></span><span style=display:flex><span>            <span style=color:#f92672>database</span>: <span style=color:#ae81ff>all</span>
+</span></span><span style=display:flex><span>            <span style=color:#f92672>user</span>: <span style=color:#ae81ff>postgres</span>
+</span></span><span style=display:flex><span>            <span style=color:#f92672>auth_method</span>: <span style=color:#ae81ff>peer</span>
+</span></span><span style=display:flex><span>          - <span style=color:#f92672>type</span>: <span style=color:#ae81ff>host</span>
+</span></span><span style=display:flex><span>            <span style=color:#f92672>database</span>: <span style=color:#ae81ff>all</span>
+</span></span><span style=display:flex><span>            <span style=color:#f92672>user</span>: <span style=color:#ae81ff>all</span>
+</span></span><span style=display:flex><span>            <span style=color:#f92672>address</span>: <span style=color:#e6db74>&#34;10.10.0.0/16&#34;</span>
+</span></span><span style=display:flex><span>            <span style=color:#f92672>auth_method</span>: <span style=color:#ae81ff>scram-sha-256</span>
+</span></span></code></pre></div><h4 id=terraform-範例aws-rds>Terraform 範例（AWS RDS）</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-hcl data-lang=hcl><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;aws_db_instance&#34; &#34;postgres&#34;</span> {
+</span></span><span style=display:flex><span>  identifier        <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;prod-postgres&#34;</span>
+</span></span><span style=display:flex><span>  engine            <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;postgres&#34;</span>
+</span></span><span style=display:flex><span>  engine_version    <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;17.0&#34;</span>
+</span></span><span style=display:flex><span>  instance_class    <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;db.r6g.xlarge&#34;</span>
+</span></span><span style=display:flex><span>  allocated_storage <span style=color:#f92672>=</span> <span style=color:#ae81ff>100</span>
+</span></span><span style=display:flex><span>  storage_type      <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;gp3&#34;</span>
+</span></span><span style=display:flex><span>  storage_encrypted <span style=color:#f92672>=</span> <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  db_name  <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;appdb&#34;</span>
+</span></span><span style=display:flex><span>  username <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;admin&#34;</span>
+</span></span><span style=display:flex><span>  password <span style=color:#f92672>=</span> <span style=color:#66d9ef>var</span>.<span style=color:#66d9ef>db_password</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  backup_retention_period <span style=color:#f92672>=</span> <span style=color:#ae81ff>7</span>
+</span></span><span style=display:flex><span>  multi_az               <span style=color:#f92672>=</span> <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>  deletion_protection    <span style=color:#f92672>=</span> <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><hr><h3 id=常見陷阱>常見陷阱</h3><table><thead><tr><th>陷阱</th><th>說明</th><th>解法</th></tr></thead><tbody><tr><td>密碼認證失敗</td><td>pg_hba.conf 設定 scram-sha-256 但客戶端不支援</td><td>確認 libpq >= 10</td></tr><tr><td>連線被拒</td><td>來源 IP 不在 pg_hba.conf 允許範圍</td><td>新增規則並 reload</td></tr><tr><td>目錄權限錯誤</td><td>initdb 要求目錄為空且屬於 postgres</td><td><code>chown postgres:postgres</code> + <code>chmod 700</code></td></tr><tr><td>端口被占用</td><td>5432 已被其他程序使用</td><td><code>ss -tlnp | grep 5432</code> 檢查</td></tr><tr><td>locale 不一致</td><td>initdb 時 locale 與系統不符</td><td><code>locale-gen en_US.UTF-8</code></td></tr><tr><td>Docker volume 遺失</td><td>未使用 named volume，容器刪除後資料消失</td><td>使用 named volume 而非 bind mount</td></tr><tr><td>listen_addresses</td><td>預設只監聽 localhost</td><td>容器環境需設為 <code>'*'</code></td></tr><tr><td>未啟用 checksums</td><td>初始化時忘記 <code>--data-checksums</code></td><td>PG12+ 可離線啟用</td></tr></tbody></table><hr><h3 id=版本演進>版本演進</h3><table><thead><tr><th>版本</th><th>年份</th><th>安裝相關特性</th></tr></thead><tbody><tr><td>PostgreSQL 10</td><td>2017</td><td>原生分區表、邏輯複製、SCRAM 認證</td></tr><tr><td>PostgreSQL 12</td><td>2019</td><td><code>pg_checksums</code>（離線啟用 checksums）</td></tr><tr><td>PostgreSQL 14</td><td>2021</td><td>連線效能改進</td></tr><tr><td>PostgreSQL 15</td><td>2022</td><td>public schema 安全變更（REVOKE CREATE）</td></tr><tr><td>PostgreSQL 16</td><td>2023</td><td>pg_hba.conf 支援正規表達式</td></tr><tr><td>PostgreSQL 17</td><td>2024</td><td>增量備份、記憶體最佳化</td></tr></tbody></table><hr><h3 id=總結>總結</h3><p>本文涵蓋了 <strong>PostgreSQL</strong> 安裝與部署的完整流程：</p><ol><li><strong>套件管理器安裝</strong>：Debian/Ubuntu（apt）、RHEL/CentOS（dnf）、macOS（Homebrew）</li><li><strong>原始碼編譯</strong>：<code>configure</code> → <code>make</code> → <code>make install</code> → <code>initdb</code></li><li><strong>Docker 部署</strong>：快速啟動與 docker-compose 生產配置</li><li><strong>initdb 初始化</strong>：編碼、locale、data checksums</li><li><strong>pg_hba.conf 認證</strong>：生產環境建議使用 <code>scram-sha-256</code></li><li><strong>postgresql.conf 基礎設定</strong>：連線、記憶體、日誌</li><li><strong>systemd 服務管理</strong>：start/stop/restart/reload 的差異</li><li><strong>安全加固</strong>：密碼設定、權限收緊、SSL</li></ol><p>下一篇，我們將探討 <strong>PostgreSQL 的日常維護</strong>——從 VACUUM 排程策略、索引重建、日誌輪替到磁碟空間監控的完整維運手冊。</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
+</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/postgresql/039-other-languages/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">PL/Python、PL/Perl、PL/v8：PostgreSQL 的多語言程序擴展 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/15</span>
+</a><a href=https://benzhub.github.io/post/postgresql/038-rules-and-events/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Rules 與 LISTEN/NOTIFY：查詢改寫與即時事件通知 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/14</span>
+</a><a href=https://benzhub.github.io/post/postgresql/037-fdw/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Foreign Data Wrapper（FDW）：跨資料庫查詢的瑞士刀 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/13</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/postgresql/039-other-languages/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+<span class="text-sm font-medium">PL/Python、PL/Perl、PL/v8：PostgreSQL 的多語言程序擴展 | PostgreSQL</span></a></div><div><a href=https://benzhub.github.io/post/postgresql/041-maintenance/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+<span class="text-sm font-medium">PostgreSQL 日常維護：REINDEX、pg_repack、Bloat 偵測與健檢腳本 | PostgreSQL</span></a></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
+</a><a href=/tags/acid><span class=tag-pill>acid</span>
+</a><a href=/tags/aggregate><span class=tag-pill>aggregate</span>
+</a><a href=/tags/ai><span class=tag-pill>ai</span>
+</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
+</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
+</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
+</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
+</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
+</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
+</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
+</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
+</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
+</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
+</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
+</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
+</a><a href=/tags/analytics><span class=tag-pill>analytics</span>
+</a><a href=/tags/api><span class=tag-pill>api</span>
+</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
+</a><a href=/tags/audit><span class=tag-pill>audit</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (41)</span>
+</a><a href=/post/javascript/><span class=tag-pill>JavaScript (96)</span>
+</a><a href=/post/django/><span class=tag-pill>Django (44)</span>
+</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
+</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
+</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
+</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
+</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/postgresql/041-maintenance/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">PostgreSQL 日常維護：REINDEX、pg_repack、Bloat 偵測與健檢腳本 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/17</p></a><a href=/post/javascript/data-structures--algorithms/034-computational-geometry/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">計算幾何完全指南 — 凸包、線段交點與掃描線演算法 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/17</p></a><a href=/post/postgresql/040-installation/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">PostgreSQL 安裝與部署：從套件管理器到 Docker 完整指南 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/16</p></a><a href=/post/javascript/data-structures--algorithms/033-number-theory/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">數論完全指南 — GCD、模運算、質數篩法與中國剩餘定理 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/16</p></a><a href=/post/postgresql/039-other-languages/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">PL/Python、PL/Perl、PL/v8：PostgreSQL 的多語言程序擴展 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/15</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>
