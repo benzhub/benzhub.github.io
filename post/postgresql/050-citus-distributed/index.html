@@ -1,0 +1,1733 @@
+<!DOCTYPE html>
+
+<html lang="zh-TW">
+<head>
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-FSEWPBJMJT');
+</script>
+
+<title>Citus 分散式 PostgreSQL：水平擴展到多節點叢集 | PostgreSQL | BenzHub</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="apple-touch-icon" sizes="180x180" href='/favicon/apple-touch-icon.png'>
+    <link rel="icon" type="image/png" sizes="32x32" href='/favicon/favicon-32x32.png'>
+    <link rel="icon" type="image/png" sizes="16x16" href='/favicon/favicon-16x16.png'>
+    <link rel="manifest" href='/favicon/site.webmanifest' />
+    <link rel="mask-icon" href=' /favicon/safari-pinned-tab.svg' color="#5bbad5" />
+    <link rel="shortcut icon" href='/favicon/favicon.ico' />
+    <meta name="theme-color" content="#fafafa">
+    <meta property="og:title" content="Citus 分散式 PostgreSQL：水平擴展到多節點叢集 | PostgreSQL | BenzHub" />
+    
+    
+    
+    <link rel="stylesheet" href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css" />
+    
+    <link href=' /css/blonde.min.css' rel="stylesheet" type="text/css" media="print"
+        onload="this.media=' all'">
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+
+<meta name="description" content="深入解析 Citus 分散式擴展，從 Coordinator-Workers 架構、分散表與參考表、Hash/Append 分片策略，到 Colocation 共置、Schema-based Sharding、多租戶 SaaS 實戰與時序資料架構，完整掌握 PostgreSQL 水平擴展方案。">
+<meta property="og:site_name" content="BenzHub">
+<meta property="og:description" content="深入解析 Citus 分散式擴展，從 Coordinator-Workers 架構、分散表與參考表、Hash/Append 分片策略，到 Colocation 共置、Schema-based Sharding、多租戶 SaaS 實戰與時序資料架構，完整掌握 PostgreSQL 水平擴展方案。">
+<meta property="og:url" content="https://benzhub.github.io/post/postgresql/050-citus-distributed/">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="zh_TW">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="">
+
+<link rel="canonical" href="https://benzhub.github.io/post/postgresql/050-citus-distributed/">
+
+<meta name="twitter:description" content="深入解析 Citus 分散式擴展，從 Coordinator-Workers 架構、分散表與參考表、Hash/Append 分片策略，到 Colocation 共置、Schema-based Sharding、多租戶 SaaS 實戰與時序資料架構，完整掌握 PostgreSQL 水平擴展方案。">
+<meta property="article:published_time" content="2026-07-26T00:00:00&#43;00:00">
+<meta property="article:updated_time" content="2026-07-26T00:00:00&#43;00:00">
+
+
+
+
+
+    
+<meta property="og:image" content="https://benzhub.github.io/img/postgresql/050-Citus-Distributed.png">
+<meta property="og:image:url" content="https://benzhub.github.io/img/postgresql/050-Citus-Distributed.png">
+    
+
+    
+    <link rel="stylesheet" href='/css/custom.css'>
+    <i class="dark hidden"></i>
+    
+<link rel="alternate" hreflang="zh-TW" href="https://benzhub.github.io/post/postgresql/050-citus-distributed/" />
+
+<link rel="alternate" hreflang="x-default" href="https://benzhub.github.io/post/postgresql/050-citus-distributed/" />
+
+    
+
+
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "\"Citus 分散式 PostgreSQL：水平擴展到多節點叢集 | PostgreSQL\"",
+  "description": "\"深入解析 Citus 分散式擴展，從 Coordinator-Workers 架構、分散表與參考表、Hash/Append 分片策略，到 Colocation 共置、Schema-based Sharding、多租戶 SaaS 實戰與時序資料架構，完整掌握 PostgreSQL 水平擴展方案。\"",
+  "author": {
+    "@type": "Person",
+    "name": "\"BenzHub\"",
+    "url": "https:\/\/benzhub.github.io\/about",
+    "jobTitle": "\"Software Developer\"",
+    "sameAs": [
+      "\"https://github.com/benzhub\""
+    ]
+  },
+  "datePublished": "2026-07-26T00:00:00\u002b00:00",
+  "dateModified": "2026-07-26T00:00:00\u002b00:00",
+  "image": "https:\/\/benzhub.github.io\/img\/postgresql\/050-Citus-Distributed.png",
+  "publisher": {
+    "@type": "Organization",
+    "name": "\"BenzHub\"",
+    "url": "\"https://benzhub.github.io/\"",
+    "sameAs": [
+      "\"https://github.com/benzhub\""
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/benzhub.github.io\/post\/postgresql\/050-citus-distributed\/"
+  },
+  "inLanguage": "zh-TW"
+}
+</script>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "\"BenzHub\"",
+      "item": "https:\/\/benzhub.github.io\/"
+    }
+    
+    
+      
+      
+    ,{
+      "@type": "ListItem",
+      "position": 2,
+      "name": "\"Blog\"",
+      "item": "https:\/\/benzhub.github.io\/post\/postgresql\/"
+    }
+      
+      
+    
+    ,{
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "\"Citus 分散式 PostgreSQL：水平擴展到多節點叢集 | PostgreSQL\""
+    }
+  ]
+}
+</script>
+
+
+
+
+
+
+
+
+
+
+
+</head>
+<body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class="site-nav" id="siteNav">
+    <div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full">
+        
+        <a href="https://benzhub.github.io/" class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">
+            BenzHub
+        </a>
+
+        
+        <div class="hidden md:flex items-center gap-6">
+            
+            <a href="/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                首頁
+            </a>
+            
+            <a href="/about/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                關於
+            </a>
+            
+            <a href="/contact/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                聯絡
+            </a>
+            
+            <a href="/resourses/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                資源
+            </a>
+            
+
+            
+            <div class="flex items-center gap-2">
+                <form class="flex items-center" role="search" method="get" action="https://google.com/search" id="navSearchForm">
+                    <input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50"
+                        type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋" id="navSearchInput">
+                    <input type="hidden" name="sitesearch" value="https://benzhub.github.io/" />
+                </form>
+                <button onclick="toggleNavSearch()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+                    <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                    </svg>
+                </button>
+            </div>
+
+            
+            <span class="text-zinc-200 dark:text-zinc-700">|</span>
+
+            
+            
+
+
+
+
+<div class="lang-switcher relative hidden md:block">
+    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+        <span>🌐</span>
+        <span>繁體中文</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
+        
+            
+            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
+    <div class="flex gap-2">
+        
+            
+            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+            
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon2" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+        </div>
+
+        
+        <div class="flex md:hidden items-center gap-1">
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+            <button id="hamburgerbtn" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Menu">
+                <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    
+    <div class="mobile-menu md:hidden" id="mobileMenu">
+        
+        <a href="/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            首頁
+        </a>
+        
+        <a href="/about/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            關於
+        </a>
+        
+        <a href="/contact/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            聯絡
+        </a>
+        
+        <a href="/resourses/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            資源
+        </a>
+        
+        <form class="mt-2" role="search" method="get" action="https://google.com/search">
+            <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
+            <input type="hidden" name="sitesearch" value="https://benzhub.github.io/" />
+        </form>
+        
+        
+
+
+
+
+<div class="lang-switcher relative hidden md:block">
+    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+        <span>🌐</span>
+        <span>繁體中文</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
+        
+            
+            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
+    <div class="flex gap-2">
+        
+            
+            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+    </div>
+</nav>
+
+<script>
+    
+    document.getElementById('hamburgerbtn').addEventListener('click', function () {
+        document.getElementById('mobileMenu').classList.toggle('active');
+    });
+
+    
+    window.addEventListener('scroll', function () {
+        var nav = document.getElementById('siteNav');
+        if (window.scrollY > 50) {
+            nav.classList.add('scrolled');
+        } else {
+            nav.classList.remove('scrolled');
+        }
+    });
+
+    
+    function toggleNavSearch() {
+        var input = document.getElementById('navSearchInput');
+        input.classList.toggle('expanded');
+        if (input.classList.contains('expanded')) {
+            input.focus();
+        }
+    }
+
+    
+    function toggleLangMenu() {
+        var dropdown = document.getElementById('langDropdown');
+        dropdown.classList.toggle('hidden');
+    }
+
+    
+    document.addEventListener('click', function (e) {
+        
+        var form = document.getElementById('navSearchForm');
+        var input = document.getElementById('navSearchInput');
+        if (form && input && !form.contains(e.target) && !e.target.closest('[aria-label="Toggle Search"]')) {
+            input.classList.remove('expanded');
+        }
+        
+        var langSwitcher = e.target.closest('.lang-switcher');
+        if (!langSwitcher) {
+            var dropdown = document.getElementById('langDropdown');
+            if (dropdown) dropdown.classList.add('hidden');
+        }
+    });
+</script>
+<div class="nav-spacer"></div>
+    <div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id="content">
+        <div class="lg:mx-5">
+<div class="grid grid-cols-3 gap-6">
+  
+  <div class="col-span-3 lg:col-span-2">
+  
+      
+      <div class="post-detail fade-in my-4">
+        <h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Citus 分散式 PostgreSQL：水平擴展到多節點叢集 | PostgreSQL</h1>
+        <div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4">
+            <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/26
+            </span>
+            
+        </div>
+        
+        <div class="flex flex-wrap gap-1.5 mb-5">
+            
+            <a href='/tags/postgresql' class="tag-pill no-underline">postgresql</a>
+            
+            <a href='/tags/citus' class="tag-pill no-underline">Citus</a>
+            
+            <a href='/tags/%E5%88%86%E6%95%A3%E5%BC%8F' class="tag-pill no-underline">分散式</a>
+            
+            <a href='/tags/sharding' class="tag-pill no-underline">Sharding</a>
+            
+            <a href='/tags/scale-out' class="tag-pill no-underline">Scale-Out</a>
+            
+        </div>
+        
+        
+        <img class="py-4 m-auto rounded-lg thumb-img" src="https://benzhub.github.io/img/postgresql/050-Citus-Distributed.png" alt="Citus 分散式 PostgreSQL：水平擴展到多節點叢集 | PostgreSQL">
+        
+        
+        <div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote>
+<p>當單機 <strong>PostgreSQL</strong> 的容量與吞吐量已無法滿足業務成長，<strong>Citus</strong> 分散式擴展提供了一條不換資料庫、不離開 PG 生態的水平擴展之路。本文將從 <strong>Coordinator-Workers</strong> 架構到 <strong>Colocation</strong> 共置機制，從 <strong>Hash 分片</strong>策略到 <strong>Schema-based Sharding</strong>，完整解析如何將 PostgreSQL 擴展為多節點分散式叢集。</p>
+</blockquote>
+<h3 id="系列最終篇為什麼需要分散式">系列最終篇：為什麼需要分散式？</h3>
+<p>在前 49 篇文章中，我們從 PostgreSQL 基礎語法一路走到雲端託管與開發者工具。但有一個問題始終懸而未決——<strong>當資料量超過單機極限，該怎麼辦？</strong></p>
+<p>垂直擴展（Scale-Up）終有天花板：記憶體、CPU、磁碟 I/O 都受限於單一主機的物理規格。當你面對以下場景時，水平擴展（Scale-Out）成為必要選擇：</p>
+<ul>
+<li>資料量超過 <strong>2TB</strong>，單機存儲與備份壓力過大</li>
+<li>寫入吞吐量突破 <strong>單一 Primary</strong> 的瓶頸（讀取副本無法分攤寫入）</li>
+<li><strong>多租戶 SaaS</strong> 需要將租戶資料分散在不同節點以實現隔離</li>
+<li>時序/事件資料持續增長，需要<strong>無限水平擴容</strong></li>
+</ul>
+<p><strong>Citus</strong> 正是解決這類問題的 PostgreSQL 原生方案——它以 Extension 形式存在，不需要換資料庫引擎，所有 PostgreSQL 的 SQL 語法、函數、Extension 都能繼續使用。</p>
+<hr>
+<h3 id="citus-是什麼">Citus 是什麼？</h3>
+<p>Citus 是 PostgreSQL 的<strong>分散式擴展（Distributed Extension）</strong>，透過水平分片（Sharding）機制將單一資料庫擴展為多節點叢集。最初由 Citus Data 公司開發，2019 年被微軟收購，現已完全開源。</p>
+<p><strong>核心定位：</strong></p>
+<table>
+  <thead>
+      <tr>
+          <th>項目</th>
+          <th>說明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>類型</td>
+          <td>PostgreSQL Extension（<code>CREATE EXTENSION citus</code>）</td>
+      </tr>
+      <tr>
+          <td>授權</td>
+          <td>AGPL-3.0（完全開源）</td>
+      </tr>
+      <tr>
+          <td>雲端服務</td>
+          <td>Azure Database for PostgreSQL – Flexible Server</td>
+      </tr>
+      <tr>
+          <td>最新版本</td>
+          <td>Citus 13.x（2025，支援 PG 17）</td>
+      </tr>
+      <tr>
+          <td>適用場景</td>
+          <td>多租戶 SaaS、大規模分析、時序資料</td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<h3 id="coordinator-workers-架構">Coordinator-Workers 架構</h3>
+<p>Citus 採用**協調者-工作者（Coordinator-Workers）**架構，所有節點都是完整的 PostgreSQL 實例：</p>
+<pre tabindex="0"><code>┌─────────────────────────────────────────────────────┐
+│                 應用程式 / Client                      │
+│          （連接 Coordinator，行為與普通 PG 相同）       │
+└────────────────────────┬────────────────────────────┘
+                         │  標準 PostgreSQL 連線
+                         ▼
+┌─────────────────────────────────────────────────────┐
+│                  Coordinator 節點                     │
+│  ┌───────────────────────────────────────────────┐  │
+│  │  Query Planner（分散式查詢計畫器）               │  │
+│  │  ├─ 解析 SQL → 判斷是否涉及分散表               │  │
+│  │  ├─ 產生分散式查詢計畫                          │  │
+│  │  ├─ 路由至對應 Shard 所在 Worker                │  │
+│  │  └─ 合併各 Worker 的結果並回傳                  │  │
+│  ├───────────────────────────────────────────────┤  │
+│  │  Metadata（元資料）                             │  │
+│  │  ├─ pg_dist_node：節點清單                      │  │
+│  │  ├─ pg_dist_shard：Shard 與分片範圍              │  │
+│  │  └─ pg_dist_placement：Shard 在哪個 Worker      │  │
+│  └───────────────────────────────────────────────┘  │
+└──────────┬──────────────┬──────────────┬────────────┘
+           │              │              │
+    ┌──────▼─────┐  ┌─────▼──────┐  ┌───▼──────────┐
+    │  Worker 1  │  │  Worker 2  │  │   Worker N   │
+    │ ┌────────┐ │  │ ┌────────┐ │  │ ┌──────────┐ │
+    │ │Shard 1 │ │  │ │Shard 2 │ │  │ │Shard N-1 │ │
+    │ │Shard 5 │ │  │ │Shard 6 │ │  │ │Shard N   │ │
+    │ └────────┘ │  │ └────────┘ │  │ └──────────┘ │
+    └────────────┘  └────────────┘  └──────────────┘
+</code></pre><h4 id="角色分工">角色分工</h4>
+<p><strong>Coordinator（協調者）：</strong></p>
+<ul>
+<li>接收所有應用程式的 SQL 連線</li>
+<li>解析查詢，判斷哪些 Shard 需要被訪問</li>
+<li>將查詢拆解並**平行下推（Push Down）**至對應 Worker</li>
+<li>合併各 Worker 回傳結果</li>
+<li>維護分散式元資料</li>
+</ul>
+<p><strong>Worker（工作者）：</strong></p>
+<ul>
+<li>儲存實際的 Shard 資料（每個 Shard 是一個普通的 PostgreSQL 表）</li>
+<li>執行 Coordinator 下推的子查詢</li>
+<li>可直接接受其他 Worker 的連線（Shard 間資料移動時）</li>
+</ul>
+<h4 id="重要限制">重要限制</h4>
+<ul>
+<li>應用程式<strong>只連接 Coordinator</strong>，不直接連接 Worker</li>
+<li>Coordinator 本身不儲存分散表資料，只儲存元資料與參考表</li>
+<li><strong>單點故障風險</strong>：Coordinator 不可用時整個叢集無法接受新查詢（需配合 HA 方案）</li>
+</ul>
+<hr>
+<h3 id="分散表distributed-table">分散表（Distributed Table）</h3>
+<p>分散表是 Citus 的核心概念。普通表轉換為分散表後，資料依照**分片鍵（Distribution Column）**分散儲存在各 Worker 的 Shard 中：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 建立普通表
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> orders (
+</span></span><span style="display:flex;"><span>    order_id    BIGINT <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
+</span></span><span style="display:flex;"><span>    customer_id BIGINT <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
+</span></span><span style="display:flex;"><span>    created_at  TIMESTAMPTZ <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
+</span></span><span style="display:flex;"><span>    amount      NUMERIC(<span style="color:#ae81ff">12</span>,<span style="color:#ae81ff">2</span>),
+</span></span><span style="display:flex;"><span>    status      TEXT
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 轉換為分散表，以 customer_id 為分片鍵
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> create_distributed_table(<span style="color:#e6db74">&#39;orders&#39;</span>, <span style="color:#e6db74">&#39;customer_id&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- Citus 自動建立 32 個 Shard（預設值），分布在所有 Worker 上
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">-- orders_102008, orders_102009, ... 每個都是 Worker 上的真實 PG 表
+</span></span></span></code></pre></div><h4 id="分片鍵的選擇原則">分片鍵的選擇原則</h4>
+<p>分片鍵的選擇是 Citus 架構設計中<strong>最重要的決策</strong>：</p>
+<table>
+  <thead>
+      <tr>
+          <th>原則</th>
+          <th>說明</th>
+          <th>範例</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>高基數（High Cardinality）</td>
+          <td>避免資料傾斜</td>
+          <td><code>customer_id</code> 優於 <code>status</code></td>
+      </tr>
+      <tr>
+          <td>查詢對齊</td>
+          <td>大多數查詢應包含分片鍵</td>
+          <td>WHERE 條件常帶 <code>customer_id</code></td>
+      </tr>
+      <tr>
+          <td>JOIN 對齊</td>
+          <td>需 JOIN 的表用相同分片鍵</td>
+          <td>orders 與 order_items 共用 <code>tenant_id</code></td>
+      </tr>
+      <tr>
+          <td>不可變性</td>
+          <td>分片鍵值不可 UPDATE</td>
+          <td>Citus 不支援跨 Shard 的分片鍵更新</td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<h3 id="參考表reference-table">參考表（Reference Table）</h3>
+<p>參考表是完整複製到<strong>每個 Worker</strong>的小型資料集，適合維度資料或頻繁 JOIN 的查詢表：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 建立參考表
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> countries (
+</span></span><span style="display:flex;"><span>    country_code CHAR(<span style="color:#ae81ff">2</span>) <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
+</span></span><span style="display:flex;"><span>    country_name TEXT <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
+</span></span><span style="display:flex;"><span>    region       TEXT
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> create_reference_table(<span style="color:#e6db74">&#39;countries&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 分散表與參考表的 JOIN 在各 Worker 本地完成（零跨節點通訊）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> o.order_id, o.amount, <span style="color:#66d9ef">c</span>.country_name
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> orders o
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">JOIN</span> countries <span style="color:#66d9ef">c</span> <span style="color:#66d9ef">ON</span> o.country_code <span style="color:#f92672">=</span> <span style="color:#66d9ef">c</span>.country_code
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> o.customer_id <span style="color:#f92672">=</span> <span style="color:#ae81ff">12345</span>;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 路由到單一 Worker，JOIN 在本地完成
+</span></span></span></code></pre></div><h4 id="分散表-vs-參考表">分散表 vs 參考表</h4>
+<table>
+  <thead>
+      <tr>
+          <th>特性</th>
+          <th>分散表</th>
+          <th>參考表</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>資料規模</td>
+          <td>百萬至億筆</td>
+          <td>數千至數萬筆</td>
+      </tr>
+      <tr>
+          <td>儲存方式</td>
+          <td>分片，各 Worker 部分資料</td>
+          <td>全量複製，各 Worker 完整資料</td>
+      </tr>
+      <tr>
+          <td>JOIN 效率</td>
+          <td>需分片鍵對齊</td>
+          <td>可與任何表在本地 JOIN</td>
+      </tr>
+      <tr>
+          <td>寫入開銷</td>
+          <td>僅寫入對應 Shard</td>
+          <td>需同步寫入所有 Worker（2PC）</td>
+      </tr>
+      <tr>
+          <td>適用場景</td>
+          <td>主要業務資料表</td>
+          <td>國家/幣別/類別等查詢表</td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<h3 id="shard-策略hash-vs-append">Shard 策略：Hash vs Append</h3>
+<h4 id="hash-distribution預設最常用">Hash Distribution（預設，最常用）</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> create_distributed_table(<span style="color:#e6db74">&#39;orders&#39;</span>, <span style="color:#e6db74">&#39;customer_id&#39;</span>);
+</span></span></code></pre></div><p><strong>運作原理：</strong></p>
+<pre tabindex="0"><code>customer_id = 1001
+     │
+     ▼
+hash(1001) = 394857293
+     │
+     ▼
+394857293 mod 32 = 13   （Shard index）
+     │
+     ▼
+Shard 13 → Worker 2
+</code></pre><p><strong>特點：</strong></p>
+<ul>
+<li>資料均勻分散，避免熱點</li>
+<li>適合 OLTP 工作負載</li>
+<li>支援 <code>=</code> 和 <code>IN</code> 條件的 Shard Pruning</li>
+<li>範圍查詢（<code>BETWEEN</code>、<code>&gt;</code>）需掃描所有 Shard</li>
+</ul>
+<h4 id="append-distribution追加分片">Append Distribution（追加分片）</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> create_distributed_table(<span style="color:#e6db74">&#39;events&#39;</span>, <span style="color:#e6db74">&#39;created_at&#39;</span>, <span style="color:#e6db74">&#39;append&#39;</span>);
+</span></span></code></pre></div><p><strong>特點：</strong></p>
+<ul>
+<li>每個 Shard 儲存特定範圍（如時間區間）</li>
+<li>適合 Append-Only 工作負載（日誌、事件流）</li>
+<li>現代架構中較少使用，多以 Hash 分片 + 時間分割取代</li>
+</ul>
+<h4 id="策略比較">策略比較</h4>
+<table>
+  <thead>
+      <tr>
+          <th>特性</th>
+          <th>Hash</th>
+          <th>Append</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>資料分布</td>
+          <td>均勻雜湊分散</td>
+          <td>依範圍追加</td>
+      </tr>
+      <tr>
+          <td>適用場景</td>
+          <td>OLTP、多租戶</td>
+          <td>時序、批次 ETL</td>
+      </tr>
+      <tr>
+          <td>Shard 管理</td>
+          <td>自動</td>
+          <td>手動</td>
+      </tr>
+      <tr>
+          <td>UPDATE/DELETE</td>
+          <td>支援</td>
+          <td>不建議</td>
+      </tr>
+      <tr>
+          <td>範圍查詢</td>
+          <td>需掃描所有 Shard</td>
+          <td>可利用範圍裁剪</td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<h3 id="分散式查詢路由">分散式查詢路由</h3>
+<p>Citus 的查詢路由分為兩種模式，效能差異巨大：</p>
+<h4 id="router-query路由查詢-最佳路徑">Router Query（路由查詢）— 最佳路徑</h4>
+<p>當查詢包含分片鍵的等值過濾時，Coordinator 精確定位到單一 Shard：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- Router Query：定位到單一 Shard，效能等同單機 PG
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> orders <span style="color:#66d9ef">WHERE</span> customer_id <span style="color:#f92672">=</span> <span style="color:#ae81ff">12345</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">INSERT</span> <span style="color:#66d9ef">INTO</span> orders (order_id, customer_id, amount)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">VALUES</span> (<span style="color:#ae81ff">9001</span>, <span style="color:#ae81ff">12345</span>, <span style="color:#ae81ff">99</span>.<span style="color:#ae81ff">99</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">UPDATE</span> orders <span style="color:#66d9ef">SET</span> status <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;shipped&#39;</span> <span style="color:#66d9ef">WHERE</span> customer_id <span style="color:#f92672">=</span> <span style="color:#ae81ff">12345</span>;
+</span></span></code></pre></div><p><strong>執行計畫：</strong></p>
+<pre tabindex="0"><code>Custom Scan (Citus Router)
+  Task Count: 1
+  -&gt;  Task
+        Node: host=worker1 port=5432
+        -&gt;  Index Scan using orders_pkey on orders_102009
+              Filter: (customer_id = 12345)
+</code></pre><h4 id="real-time-query實時查詢-平行掃描">Real-Time Query（實時查詢）— 平行掃描</h4>
+<p>不包含分片鍵或需要跨 Shard 聚合時，平行下推到所有 Worker：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- Real-Time Query：平行掃描所有 Shard
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> status, <span style="color:#66d9ef">COUNT</span>(<span style="color:#f92672">*</span>), <span style="color:#66d9ef">SUM</span>(amount)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> orders
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">GROUP</span> <span style="color:#66d9ef">BY</span> status;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 沒有分片鍵過濾，需掃描所有 Shard
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> orders <span style="color:#66d9ef">WHERE</span> amount <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">1000</span>;
+</span></span></code></pre></div><p><strong>執行計畫：</strong></p>
+<pre tabindex="0"><code>Custom Scan (Citus Real-Time)
+  Task Count: 32
+  Tasks Shown: One of 32
+  -&gt;  Task
+        Node: host=worker1 port=5432
+        -&gt;  HashAggregate
+              -&gt;  Seq Scan on orders_102008
+</code></pre><h4 id="跨-shard-join-的挑戰">跨 Shard JOIN 的挑戰</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 問題：orders 和 shipments 分片鍵不同，需大量跨節點資料移動
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> o.order_id, s.tracking_number
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> orders o          <span style="color:#75715e">-- 以 customer_id 分片
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">JOIN</span> shipments s <span style="color:#66d9ef">ON</span> o.order_id <span style="color:#f92672">=</span> s.order_id;  <span style="color:#75715e">-- 以 order_id 分片
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 解決方案：加上分片鍵條件 + Subquery Pushdown
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> o.order_id, s.tracking_number
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> orders o
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">JOIN</span> (<span style="color:#66d9ef">SELECT</span> order_id, tracking_number <span style="color:#66d9ef">FROM</span> shipments) s
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">ON</span> o.order_id <span style="color:#f92672">=</span> s.order_id
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> o.customer_id <span style="color:#f92672">=</span> <span style="color:#ae81ff">12345</span>;  <span style="color:#75715e">-- 加上分片鍵
+</span></span></span></code></pre></div><hr>
+<h3 id="colocation資料共置">Colocation（資料共置）</h3>
+<p>Colocation 是 Citus <strong>效能最佳化的核心機制</strong>。當多張分散表使用相同分片鍵與分片數量時，Citus 保證相同鍵值的資料落在同一個 Worker：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 以 tenant_id 為分片鍵，所有表共置
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> create_distributed_table(<span style="color:#e6db74">&#39;orders&#39;</span>,    <span style="color:#e6db74">&#39;tenant_id&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> create_distributed_table(<span style="color:#e6db74">&#39;customers&#39;</span>, <span style="color:#e6db74">&#39;tenant_id&#39;</span>, colocate_with <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">&#39;orders&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> create_distributed_table(<span style="color:#e6db74">&#39;products&#39;</span>,  <span style="color:#e6db74">&#39;tenant_id&#39;</span>, colocate_with <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">&#39;orders&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> create_distributed_table(<span style="color:#e6db74">&#39;invoices&#39;</span>,  <span style="color:#e6db74">&#39;tenant_id&#39;</span>, colocate_with <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">&#39;orders&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 以下 JOIN 完全在本地執行，零跨節點通訊
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#66d9ef">c</span>.name, o.order_id, o.amount, i.invoice_number
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> customers <span style="color:#66d9ef">c</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">JOIN</span> orders o <span style="color:#66d9ef">ON</span> <span style="color:#66d9ef">c</span>.tenant_id <span style="color:#f92672">=</span> o.tenant_id <span style="color:#66d9ef">AND</span> <span style="color:#66d9ef">c</span>.customer_id <span style="color:#f92672">=</span> o.customer_id
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">JOIN</span> invoices i <span style="color:#66d9ef">ON</span> i.tenant_id <span style="color:#f92672">=</span> o.tenant_id <span style="color:#66d9ef">AND</span> i.order_id <span style="color:#f92672">=</span> o.order_id
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> <span style="color:#66d9ef">c</span>.tenant_id <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;tenant_abc&#39;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">AND</span> <span style="color:#66d9ef">c</span>.customer_id <span style="color:#f92672">=</span> <span style="color:#ae81ff">12345</span>;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 路由到單一 Worker，零跨節點通訊
+</span></span></span></code></pre></div><p><strong>Colocation 的資料分布視覺化：</strong></p>
+<pre tabindex="0"><code>Tenant A (tenant_id = &#39;abc&#39;) → Shard Group 5 → Worker 2
+  ├─ orders_102015      （Tenant A 的訂單）
+  ├─ customers_102015   （Tenant A 的客戶）
+  ├─ products_102015    （Tenant A 的產品）
+  └─ invoices_102015    （Tenant A 的發票）
+
+Tenant B (tenant_id = &#39;xyz&#39;) → Shard Group 12 → Worker 1
+  ├─ orders_102022
+  ├─ customers_102022
+  ├─ products_102022
+  └─ invoices_102022
+</code></pre><p><strong>查看 Colocation Group：</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 確認各表的 Colocation Group
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> logicalrelid <span style="color:#66d9ef">AS</span> <span style="color:#66d9ef">table_name</span>, colocationid
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> pg_dist_partition
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> colocationid, logicalrelid;
+</span></span></code></pre></div><hr>
+<h3 id="schema-based-shardingcitus-12">Schema-based Sharding（Citus 12+）</h3>
+<p>Citus 12 引入了<strong>基於 Schema 的分片</strong>機制，這是多租戶 SaaS 的重大改進。每個租戶擁有獨立的 PostgreSQL Schema，Citus 自動將整個 Schema 分配到對應 Worker：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 啟用 Schema-based Sharding
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SET</span> citus.enable_schema_based_sharding <span style="color:#66d9ef">TO</span> <span style="color:#66d9ef">on</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 為每個租戶建立獨立 Schema
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">SCHEMA</span> tenant_abc;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">SCHEMA</span> tenant_xyz;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 在 Schema 內建表（不需要呼叫 create_distributed_table！）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> tenant_abc.orders (
+</span></span><span style="display:flex;"><span>    order_id    BIGINT <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
+</span></span><span style="display:flex;"><span>    amount      NUMERIC(<span style="color:#ae81ff">12</span>,<span style="color:#ae81ff">2</span>),
+</span></span><span style="display:flex;"><span>    created_at  TIMESTAMPTZ <span style="color:#66d9ef">DEFAULT</span> NOW()
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> tenant_abc.customers (
+</span></span><span style="display:flex;"><span>    customer_id BIGINT <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
+</span></span><span style="display:flex;"><span>    name        TEXT <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
+</span></span><span style="display:flex;"><span>    email       TEXT
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- Citus 自動將整個 tenant_abc schema 分配到某個 Worker
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">-- tenant_abc 內的所有表自動 Collocated！
+</span></span></span></code></pre></div><h4 id="column-based-vs-schema-based">Column-based vs Schema-based</h4>
+<table>
+  <thead>
+      <tr>
+          <th>特性</th>
+          <th>Column-based（傳統）</th>
+          <th>Schema-based（Citus 12+）</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>分片單元</td>
+          <td>行（依分片鍵欄位值）</td>
+          <td>Schema（整個 Schema 到一個 Worker）</td>
+      </tr>
+      <tr>
+          <td>設定複雜度</td>
+          <td>每張表需呼叫 <code>create_distributed_table</code></td>
+          <td>只需建立 Schema</td>
+      </tr>
+      <tr>
+          <td>跨表隔離</td>
+          <td>同一表混合多個租戶</td>
+          <td>每個租戶有獨立 Schema</td>
+      </tr>
+      <tr>
+          <td>資料隔離</td>
+          <td>邏輯隔離</td>
+          <td>Schema 級隔離</td>
+      </tr>
+      <tr>
+          <td>適用規模</td>
+          <td>租戶數百萬，每租戶資料少</td>
+          <td>租戶數千，每租戶資料多</td>
+      </tr>
+      <tr>
+          <td>RLS 需求</td>
+          <td>需要額外 RLS 設定</td>
+          <td>Schema 天然隔離</td>
+      </tr>
+      <tr>
+          <td>搬移粒度</td>
+          <td>Shard（行子集）</td>
+          <td>整個 Schema</td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<h3 id="安裝與叢集設定">安裝與叢集設定</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Ubuntu/Debian 安裝 Citus（以 PG 16 為例）</span>
+</span></span><span style="display:flex;"><span>curl https://install.citusdata.com/community/deb.sh | sudo bash
+</span></span><span style="display:flex;"><span>sudo apt-get install -y postgresql-16-citus-12.1
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 設定 shared_preload_libraries（必須，需重啟）</span>
+</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;shared_preload_libraries = &#39;citus&#39;&#34;</span> &gt;&gt; /etc/postgresql/16/main/postgresql.conf
+</span></span><span style="display:flex;"><span>sudo systemctl restart postgresql
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 在每個節點（Coordinator 和所有 Worker）執行
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> EXTENSION citus;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 在 Coordinator 上新增 Worker 節點
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> citus_add_node(<span style="color:#e6db74">&#39;worker1-hostname&#39;</span>, <span style="color:#ae81ff">5432</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> citus_add_node(<span style="color:#e6db74">&#39;worker2-hostname&#39;</span>, <span style="color:#ae81ff">5432</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> citus_add_node(<span style="color:#e6db74">&#39;worker3-hostname&#39;</span>, <span style="color:#ae81ff">5432</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 驗證節點狀態
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> citus_get_active_worker_nodes();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 查看完整節點清單
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> nodeid, nodename, nodeport, isactive, noderole
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> pg_dist_node
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> nodeid;
+</span></span></code></pre></div><hr>
+<h3 id="分散式-ddl-與限制">分散式 DDL 與限制</h3>
+<p>Citus 中的 DDL 會<strong>自動廣播</strong>到所有 Worker：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 自動應用到所有 Shard
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> orders <span style="color:#66d9ef">ADD</span> <span style="color:#66d9ef">COLUMN</span> notes TEXT;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">INDEX</span> CONCURRENTLY idx_orders_status <span style="color:#66d9ef">ON</span> orders(status);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 外鍵約束必須包含分片鍵
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> orders <span style="color:#66d9ef">ADD</span> <span style="color:#66d9ef">CONSTRAINT</span> fk_customer
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">FOREIGN</span> <span style="color:#66d9ef">KEY</span> (tenant_id, customer_id)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">REFERENCES</span> customers(tenant_id, customer_id);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 注意：orders 和 customers 必須 Colocated
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 不允許的操作
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">UPDATE</span> orders <span style="color:#66d9ef">SET</span> customer_id <span style="color:#f92672">=</span> <span style="color:#ae81ff">99999</span> <span style="color:#66d9ef">WHERE</span> order_id <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- ERROR: modifying the partition column of a row is not allowed
+</span></span></span></code></pre></div><p><strong>Shard 管理：</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 查看分散表設定
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> logicalrelid <span style="color:#66d9ef">AS</span> <span style="color:#66d9ef">table_name</span>, partmethod, partkey, colocationid
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> pg_dist_partition
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> logicalrelid;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 查看 Shard 分布
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> s.logicalrelid, s.shardid, sp.nodename, sp.nodeport
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> pg_dist_shard s
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">JOIN</span> pg_dist_shard_placement sp <span style="color:#66d9ef">ON</span> s.shardid <span style="color:#f92672">=</span> sp.shardid
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> s.logicalrelid <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;orders&#39;</span>::regclass
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> s.shardid;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 調整 Shard 數量（建表前設定）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SET</span> citus.shard_count <span style="color:#f92672">=</span> <span style="color:#ae81ff">64</span>;  <span style="color:#75715e">-- 預設 32
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> create_distributed_table(<span style="color:#e6db74">&#39;large_table&#39;</span>, <span style="color:#e6db74">&#39;user_id&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 查詢特定記錄在哪個 Worker
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> get_shard_id_for_distribution_column(<span style="color:#e6db74">&#39;orders&#39;</span>, <span style="color:#ae81ff">12345</span>);
+</span></span></code></pre></div><hr>
+<h3 id="shard-重新平衡">Shard 重新平衡</h3>
+<p>新增 Worker 後，需要重新平衡 Shard 分布：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 自動重新平衡
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> rebalance_table_shards(<span style="color:#e6db74">&#39;orders&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 手動搬移特定 Shard
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> citus_move_shard_placement(
+</span></span><span style="display:flex;"><span>    shardid,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;source_worker&#39;</span>, <span style="color:#ae81ff">5432</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;target_worker&#39;</span>, <span style="color:#ae81ff">5432</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> pg_dist_shard_placement
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> nodename <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;source_worker&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">LIMIT</span> <span style="color:#ae81ff">5</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 查看重新平衡進度
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> get_rebalance_progress();
+</span></span></code></pre></div><hr>
+<h3 id="多租戶-saas-實戰">多租戶 SaaS 實戰</h3>
+<p>Citus 最成熟的使用場景是<strong>多租戶 SaaS</strong>，以 <code>tenant_id</code> 為統一分片鍵：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- === Step 1: 建立分散表並共置 ===
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> create_distributed_table(<span style="color:#e6db74">&#39;tenants&#39;</span>,   <span style="color:#e6db74">&#39;tenant_id&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> create_distributed_table(<span style="color:#e6db74">&#39;users&#39;</span>,     <span style="color:#e6db74">&#39;tenant_id&#39;</span>, colocate_with <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">&#39;tenants&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> create_distributed_table(<span style="color:#e6db74">&#39;orders&#39;</span>,    <span style="color:#e6db74">&#39;tenant_id&#39;</span>, colocate_with <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">&#39;tenants&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> create_distributed_table(<span style="color:#e6db74">&#39;products&#39;</span>,  <span style="color:#e6db74">&#39;tenant_id&#39;</span>, colocate_with <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">&#39;tenants&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- === Step 2: 建立參考表（跨租戶共用資料） ===
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> create_reference_table(<span style="color:#e6db74">&#39;payment_methods&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> create_reference_table(<span style="color:#e6db74">&#39;shipping_zones&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- === Step 3: 設定 Row Level Security ===
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> orders ENABLE <span style="color:#66d9ef">ROW</span> <span style="color:#66d9ef">LEVEL</span> <span style="color:#66d9ef">SECURITY</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> POLICY tenant_isolation <span style="color:#66d9ef">ON</span> orders
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">USING</span> (tenant_id <span style="color:#f92672">=</span> current_setting(<span style="color:#e6db74">&#39;app.current_tenant&#39;</span>)::bigint);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- === Step 4: 應用程式設定租戶 context ===
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SET</span> <span style="color:#66d9ef">LOCAL</span> app.current_tenant <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;12345&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> orders <span style="color:#66d9ef">WHERE</span> status <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;pending&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 自動過濾：只返回 tenant_id = 12345 的訂單
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- === Step 5: 管理員跨租戶查詢 ===
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">RESET</span> app.current_tenant;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> tenant_id, <span style="color:#66d9ef">COUNT</span>(<span style="color:#f92672">*</span>) <span style="color:#66d9ef">AS</span> order_count, <span style="color:#66d9ef">SUM</span>(amount) <span style="color:#66d9ef">AS</span> total
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> orders
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">GROUP</span> <span style="color:#66d9ef">BY</span> tenant_id
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> total <span style="color:#66d9ef">DESC</span>;
+</span></span></code></pre></div><p><strong>架構優勢：</strong></p>
+<pre tabindex="0"><code>┌─ 應用程式 ─┐      ┌─ Coordinator ─┐      ┌─ Workers ──────────┐
+│            │      │               │      │                    │
+│ SET tenant │─────►│ 解析 SQL      │─────►│ Worker 1: Tenant A │
+│ → 查詢    │      │ + 路由到       │      │ Worker 2: Tenant B │
+│            │      │   對應 Worker  │      │ Worker 3: Tenant C │
+└────────────┘      └───────────────┘      └────────────────────┘
+
+每個租戶的所有表資料（orders, customers, products）
+都在同一個 Worker 上 → 零跨節點通訊
+</code></pre><hr>
+<h3 id="時序資料架構citus--分割表">時序資料架構（Citus + 分割表）</h3>
+<p>Citus 可與 PostgreSQL 原生分割表結合，實現<strong>分散式時序架構</strong>——同時利用 Partition Pruning 和 Shard Pruning 的雙重裁剪：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 建立時序分散表（先分散後分割）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> metrics (
+</span></span><span style="display:flex;"><span>    device_id   BIGINT <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
+</span></span><span style="display:flex;"><span>    recorded_at TIMESTAMPTZ <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
+</span></span><span style="display:flex;"><span>    metric_name TEXT <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
+</span></span><span style="display:flex;"><span>    value       DOUBLE <span style="color:#66d9ef">PRECISION</span>,
+</span></span><span style="display:flex;"><span>    tags        JSONB
+</span></span><span style="display:flex;"><span>) PARTITION <span style="color:#66d9ef">BY</span> RANGE (recorded_at);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 將父表設為分散表
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> create_distributed_table(<span style="color:#e6db74">&#39;metrics&#39;</span>, <span style="color:#e6db74">&#39;device_id&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 建立時間分割子表
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> metrics_2026_05 PARTITION <span style="color:#66d9ef">OF</span> metrics
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">FOR</span> <span style="color:#66d9ef">VALUES</span> <span style="color:#66d9ef">FROM</span> (<span style="color:#e6db74">&#39;2026-05-01&#39;</span>) <span style="color:#66d9ef">TO</span> (<span style="color:#e6db74">&#39;2026-06-01&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> metrics_2026_06 PARTITION <span style="color:#66d9ef">OF</span> metrics
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">FOR</span> <span style="color:#66d9ef">VALUES</span> <span style="color:#66d9ef">FROM</span> (<span style="color:#e6db74">&#39;2026-06-01&#39;</span>) <span style="color:#66d9ef">TO</span> (<span style="color:#e6db74">&#39;2026-07-01&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 查詢效率極高：Partition Pruning + Shard Pruning 雙重裁剪
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#66d9ef">AVG</span>(value)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> metrics
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> device_id <span style="color:#f92672">=</span> <span style="color:#ae81ff">1001</span>                                    <span style="color:#75715e">-- Shard Pruning
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">AND</span> recorded_at <span style="color:#66d9ef">BETWEEN</span> <span style="color:#e6db74">&#39;2026-05-01&#39;</span> <span style="color:#66d9ef">AND</span> <span style="color:#e6db74">&#39;2026-05-31&#39;</span>;  <span style="color:#75715e">-- Partition Pruning
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">-- 只訪問 metrics_2026_05 分割，且只在 device_id=1001 所在的 Worker 上執行
+</span></span></span></code></pre></div><hr>
+<h3 id="分散式交易">分散式交易</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- Citus 支援分散式交易（透過兩階段提交 2PC）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">BEGIN</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">INSERT</span> <span style="color:#66d9ef">INTO</span> orders (tenant_id, order_id, amount)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">VALUES</span> (<span style="color:#ae81ff">100</span>, <span style="color:#ae81ff">9001</span>, <span style="color:#ae81ff">150</span>.<span style="color:#ae81ff">00</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">INSERT</span> <span style="color:#66d9ef">INTO</span> order_items (tenant_id, order_id, product_id, qty)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">VALUES</span> (<span style="color:#ae81ff">100</span>, <span style="color:#ae81ff">9001</span>, <span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">2</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">COMMIT</span>;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 若 Colocated，此交易在單一 Worker 本地執行（效能最佳）
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 涉及多個 Worker 時自動使用 2PC
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">BEGIN</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">UPDATE</span> orders <span style="color:#66d9ef">SET</span> status <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;cancelled&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> order_id <span style="color:#66d9ef">IN</span> (<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">5</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 若這些 order_id 分布在不同 Worker，Citus 自動 2PC
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">COMMIT</span>;
+</span></span></code></pre></div><p><strong>不支援的操作：</strong></p>
+<ol>
+<li>跨分片鍵的 UPDATE（無法在分片間移動行）</li>
+<li>修改分散表的分片鍵欄位值</li>
+<li>涉及多個非共置分散表的 <code>FOR UPDATE</code> 鎖</li>
+</ol>
+<hr>
+<h3 id="效能調優">效能調優</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 1. 啟用 Repartition Joins
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SET</span> citus.enable_repartition_joins <span style="color:#f92672">=</span> <span style="color:#66d9ef">on</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 2. 調整平行查詢
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SET</span> citus.max_adaptive_executor_pool_size <span style="color:#f92672">=</span> <span style="color:#ae81ff">16</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 3. 分析查詢計畫，識別跨節點資料移動
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">EXPLAIN</span> (<span style="color:#66d9ef">ANALYZE</span>, <span style="color:#66d9ef">VERBOSE</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> customer_id, <span style="color:#66d9ef">SUM</span>(amount)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> orders
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">GROUP</span> <span style="color:#66d9ef">BY</span> customer_id
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">HAVING</span> <span style="color:#66d9ef">SUM</span>(amount) <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">10000</span>;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 觀察是否有 Repartition 或 Broadcast 步驟
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 4. Worker 內部平行度（各 Worker 的 postgresql.conf）
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">-- max_parallel_workers_per_gather = 4
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 5. 複合索引策略（分片鍵必須在索引中）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">INDEX</span> idx_orders_customer_created
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ON</span> orders (customer_id, created_at <span style="color:#66d9ef">DESC</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 6. Coordinator 前端建議使用 PgBouncer 做連線池
+</span></span></span></code></pre></div><hr>
+<h3 id="監控與除錯">監控與除錯</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 查看分散式查詢的執行計畫
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">EXPLAIN</span> <span style="color:#66d9ef">SELECT</span> <span style="color:#66d9ef">COUNT</span>(<span style="color:#f92672">*</span>) <span style="color:#66d9ef">FROM</span> orders <span style="color:#66d9ef">WHERE</span> customer_id <span style="color:#f92672">=</span> <span style="color:#ae81ff">12345</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 查看 Coordinator 活躍連線
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> citus_dist_stat_activity;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 查看 Worker 任務執行
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> citus_worker_stat_activity;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 查看各 Shard 資料大小
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#66d9ef">table_name</span>, shard_id, shard_size
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> citus_shards
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> <span style="color:#66d9ef">table_name</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;orders&#39;</span>::regclass
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> shard_size <span style="color:#66d9ef">DESC</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 慢查詢分析
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> citus_stat_statements
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> total_time <span style="color:#66d9ef">DESC</span> <span style="color:#66d9ef">LIMIT</span> <span style="color:#ae81ff">20</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 節點健康狀態
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> nodename, nodeport, isactive, shouldhaveshards
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> pg_dist_node;
+</span></span></code></pre></div><hr>
+<h3 id="高可用架構">高可用架構</h3>
+<p>Citus 本身不提供節點層面的高可用，需整合 PostgreSQL 複寫與故障轉移工具：</p>
+<pre tabindex="0"><code>┌──────────────────────────────────────────────────────────┐
+│                     Citus HA 架構                         │
+├──────────────────────────────────────────────────────────┤
+│                                                          │
+│  Coordinator Primary ──Streaming Replication──► Standby  │
+│       │                                                  │
+│  (Patroni / pg_auto_failover 管理 Coordinator HA)        │
+│                                                          │
+│  Worker 1 Primary ──► Worker 1 Standby                   │
+│  Worker 2 Primary ──► Worker 2 Standby   （各自獨立 HA）  │
+│  Worker N Primary ──► Worker N Standby                   │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 查看各節點健康
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> nodename, nodeport, isactive <span style="color:#66d9ef">FROM</span> pg_dist_node;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- Worker 故障後標記為不活躍
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> citus_disable_node(<span style="color:#e6db74">&#39;failed_worker&#39;</span>, <span style="color:#ae81ff">5432</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 恢復後重新啟用
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> citus_activate_node(<span style="color:#e6db74">&#39;recovered_worker&#39;</span>, <span style="color:#ae81ff">5432</span>);
+</span></span></code></pre></div><hr>
+<h3 id="citus-vs-其他方案">Citus vs 其他方案</h3>
+<h4 id="citus-vs-cloud-sql--alloydb">Citus vs Cloud SQL / AlloyDB</h4>
+<table>
+  <thead>
+      <tr>
+          <th>維度</th>
+          <th>Citus</th>
+          <th>Cloud SQL / AlloyDB</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>擴展模式</td>
+          <td>水平分片（Scale-Out）</td>
+          <td>垂直擴展 + 讀取副本</td>
+      </tr>
+      <tr>
+          <td>PG 相容性</td>
+          <td>高度相容，有分散式限制</td>
+          <td>完全相容</td>
+      </tr>
+      <tr>
+          <td>管理複雜度</td>
+          <td>高（需設計分片策略）</td>
+          <td>低（全託管）</td>
+      </tr>
+      <tr>
+          <td>最大資料量</td>
+          <td>近乎無限（加 Worker）</td>
+          <td>受單機規格限制</td>
+      </tr>
+      <tr>
+          <td>寫入擴展</td>
+          <td>是（多 Writer）</td>
+          <td>否（單 Primary）</td>
+      </tr>
+      <tr>
+          <td>跨節點 JOIN</td>
+          <td>受限（需 Colocation）</td>
+          <td>完全支援</td>
+      </tr>
+      <tr>
+          <td>適用場景</td>
+          <td>超大規模多租戶、分析</td>
+          <td>一般 OLTP</td>
+      </tr>
+  </tbody>
+</table>
+<h4 id="citus-vs-google-spanner">Citus vs Google Spanner</h4>
+<table>
+  <thead>
+      <tr>
+          <th>維度</th>
+          <th>Citus</th>
+          <th>Spanner</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>全球分散</td>
+          <td>需額外設計</td>
+          <td>原生全球分散</td>
+      </tr>
+      <tr>
+          <td>強一致性</td>
+          <td>本地強一致</td>
+          <td>全球強一致（TrueTime）</td>
+      </tr>
+      <tr>
+          <td>SQL 相容性</td>
+          <td>PostgreSQL SQL</td>
+          <td>Spanner SQL</td>
+      </tr>
+      <tr>
+          <td>自動 Sharding</td>
+          <td>半自動（需設計分片鍵）</td>
+          <td>完全自動</td>
+      </tr>
+      <tr>
+          <td>費用</td>
+          <td>較低（可自建）</td>
+          <td>極高</td>
+      </tr>
+      <tr>
+          <td>生態系</td>
+          <td>PostgreSQL 完整生態</td>
+          <td>獨立生態</td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<h3 id="選擇決策流程">選擇決策流程</h3>
+<pre tabindex="0"><code>需要分散式資料庫？
+├─ 否 → 單機 PostgreSQL（+ HA 複寫）
+└─ 是
+    ├─ 需要全球強一致性？
+    │   ├─ 是 → Google Spanner
+    │   └─ 否
+    │       ├─ 有明確的 tenant_id 或分片鍵？
+    │       │   ├─ 是 → Citus（效能最佳）
+    │       │   └─ 否 → AlloyDB 或重新設計 Schema
+    │       ├─ 可接受 PG 相容性限制？
+    │       │   ├─ 是 → Citus
+    │       │   └─ 否 → AlloyDB 或升級單機規格
+    │       └─ 預算有限且可自建？
+    │           ├─ 是 → 自建 Citus
+    │           └─ 否 → Azure Cosmos DB for PostgreSQL
+</code></pre><hr>
+<h3 id="版本演進">版本演進</h3>
+<table>
+  <thead>
+      <tr>
+          <th>版本</th>
+          <th>年份</th>
+          <th>重要功能</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Citus 5.x</td>
+          <td>2015</td>
+          <td>初始開源版本，基礎 Hash 分片</td>
+      </tr>
+      <tr>
+          <td>Citus 7.x</td>
+          <td>2018</td>
+          <td>分散式 DDL、Append Distribution 改進</td>
+      </tr>
+      <tr>
+          <td>Citus 9.x</td>
+          <td>2019</td>
+          <td>微軟收購，效能大幅提升</td>
+      </tr>
+      <tr>
+          <td>Citus 10.x</td>
+          <td>2021</td>
+          <td>完全開源（含原企業版功能），Columnar Storage</td>
+      </tr>
+      <tr>
+          <td>Citus 11.x</td>
+          <td>2022</td>
+          <td>支援所有節點直連</td>
+      </tr>
+      <tr>
+          <td>Citus 12.x</td>
+          <td>2023</td>
+          <td>Schema-based Sharding</td>
+      </tr>
+      <tr>
+          <td>Citus 13.x</td>
+          <td>2025</td>
+          <td>PG 17 支援、分散式查詢效能提升</td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<h3 id="總結">總結</h3>
+<p>Citus 作為 PostgreSQL 的分散式擴展，提供了一條<strong>不離開 PG 生態的水平擴展之路</strong>。掌握以下核心觀念，就能駕馭 Citus 的分散式威力：</p>
+<ol>
+<li><strong>分片鍵決定一切</strong>——選對分片鍵（通常是 <code>tenant_id</code>），Router Query 的效能等同單機 PG</li>
+<li><strong>Colocation 是效能關鍵</strong>——共置的表可以在本地 JOIN，避免跨節點資料移動</li>
+<li><strong>參考表解決維度 JOIN</strong>——小型查詢表複製到每個 Worker，與任何表本地 JOIN</li>
+<li><strong>Schema-based Sharding（Citus 12+）</strong>——多租戶 SaaS 的更直覺選擇，Schema 級隔離</li>
+<li><strong>不是所有場景都需要分散式</strong>——資料量 &lt; 2TB 時，單機 PG + HA 通常是更好的選擇</li>
+</ol>
+<hr>
+<p>至此，<strong>PostgreSQL 完全指南 50 篇系列</strong>全部完成。從第 1 篇的安裝與基礎 SQL，到這一篇的分散式擴展，我們走過了 PostgreSQL 從入門到精通的完整旅程。希望這個系列能成為你在 PostgreSQL 世界中持續前行的堅實基礎。</p></div>
+        
+        
+
+        
+        <div class="mt-8">
+          
+<div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose">
+  <div>
+    <div class="flex items-center gap-2 mb-1">
+      <a href="/about" class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">
+        BenZ
+      </a>
+      
+      <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span>
+      
+    </div>
+    <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">
+      熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。
+    </p>
+    <div class="flex items-center gap-3">
+      
+      <a href="https://github.com/benzhub" target="_blank" rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label="GitHub">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      
+      
+      
+    </div>
+  </div>
+</div>
+
+        </div>
+      </div>
+
+      
+      
+<div class="subscribe-widget max-w-xl mx-auto my-10 px-6 py-8 text-center rounded-xl bg-zinc-50 dark:bg-zinc-800">
+  <h3 class="text-lg font-bold mb-1">訂閱 BenzHub 電子報</h3>
+  <p class="text-sm text-zinc-600 dark:text-zinc-300 mb-4">每週 AI 賺錢實戰 + 免費工具地圖</p>
+  <form class="subscribe-form flex flex-col sm:flex-row gap-3 justify-center"
+        data-worker="https://benzhub-newsletter.PLACEHOLDER.workers.dev" data-source="footer-widget">
+    <input type="email" required placeholder="你的 Email"
+           class="px-4 py-2 rounded-lg border border-zinc-300 dark:bg-zinc-900 dark:border-zinc-600" />
+    <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700">訂閱</button>
+  </form>
+  <div class="cf-turnstile mt-3 flex justify-center" data-sitekey="PLACEHOLDER_TURNSTILE_SITE_KEY"></div>
+  <p class="subscribe-status text-sm text-zinc-500 mt-2"></p>
+</div>
+
+
+
+      
+      <div class="post-detail fade-in my-4">
+        
+
+
+<div>
+  <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3>
+  <div class="grid gap-2">
+    
+    <a href="https://benzhub.github.io/post/postgresql/049-devtools/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">PostgreSQL 開發者工具鏈：psql、pgAdmin、pgbench、pgTAP 完整指南 | PostgreSQL</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/25</span>
+    </a>
+    
+    <a href="https://benzhub.github.io/post/postgresql/048-cloud-managed/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">雲端託管 PostgreSQL：AWS RDS、Aurora、Cloud SQL、Supabase、Neon 全面比較 | PostgreSQL</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/24</span>
+    </a>
+    
+    <a href="https://benzhub.github.io/post/postgresql/047-orm-integration/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">ORM 整合實戰：TypeORM、Prisma、SQLAlchemy、Django ORM 與 PostgreSQL 進階型別映射 | PostgreSQL</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/23</span>
+    </a>
+    
+  </div>
+</div>
+
+
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            
+            <a href="https://benzhub.github.io/post/postgresql/049-devtools/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+                <span class="text-sm font-medium">PostgreSQL 開發者工具鏈：psql、pgAdmin、pgbench、pgTAP 完整指南 | PostgreSQL</span>
+            </a>
+            
+          </div>
+          <div>
+            
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        
+<script src="https://giscus.app/client.js"
+        data-repo="benzhub/benzhub.github.io"
+        data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM="
+        data-category="Announcements"
+        data-category-id="MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme="preferred_color_scheme"
+        data-lang="zh-TW"
+        crossorigin="anonymous"
+        async>
+</script>
+
+
+      </div>
+    </div>
+    
+    <div class="hidden lg:block lg:col-span-1 mt-4">
+    
+    
+            
+            <div class="widget fade-in">
+    <p class="widget-title">搜尋</p>
+    <form role="search" method="get" action="https://google.com/search">
+        <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
+        <input type="hidden" name="sitesearch" value="https://benzhub.github.io/" />
+    </form>
+</div>
+
+        
+            
+            
+
+        
+            
+            
+<div class="widget fade-in">
+    <p class="widget-title">標籤</p>
+    <div class="flex flex-wrap gap-1.5">
+        <a href='/tags/80/20-%E6%B3%95%E5%89%87'>
+            <span class="tag-pill">80/20 法則</span>
+        </a>
+        <a href='/tags/acid'>
+            <span class="tag-pill">acid</span>
+        </a>
+        <a href='/tags/aggregate'>
+            <span class="tag-pill">aggregate</span>
+        </a>
+        <a href='/tags/ai'>
+            <span class="tag-pill">ai</span>
+        </a>
+        <a href='/tags/ai-agent'>
+            <span class="tag-pill">ai agent</span>
+        </a>
+        <a href='/tags/ai-workflow'>
+            <span class="tag-pill">ai workflow</span>
+        </a>
+        <a href='/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE'>
+            <span class="tag-pill">ai 工具焦慮</span>
+        </a>
+        <a href='/tags/ai-%E6%8E%A5%E5%96%AE'>
+            <span class="tag-pill">ai 接單</span>
+        </a>
+        <a href='/tags/ai-%E7%B9%AA%E5%9C%96'>
+            <span class="tag-pill">ai 繪圖</span>
+        </a>
+        <a href='/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA'>
+            <span class="tag-pill">ai 虛擬人</span>
+        </a>
+        <a href='/tags/ai-%E8%A1%8C%E9%8A%B7'>
+            <span class="tag-pill">ai 行銷</span>
+        </a>
+        <a href='/tags/ai-%E8%A8%AD%E8%A8%88'>
+            <span class="tag-pill">ai 設計</span>
+        </a>
+        <a href='/tags/ai-%E8%AE%8A%E7%8F%BE'>
+            <span class="tag-pill">ai 變現</span>
+        </a>
+        <a href='/tags/ai-%E8%B3%BA%E9%8C%A2'>
+            <span class="tag-pill">ai 賺錢</span>
+        </a>
+        <a href='/tags/ai-income'>
+            <span class="tag-pill">ai-income</span>
+        </a>
+        <a href='/tags/ai-insights'>
+            <span class="tag-pill">ai-insights</span>
+        </a>
+        <a href='/tags/analytics'>
+            <span class="tag-pill">analytics</span>
+        </a>
+        <a href='/tags/api'>
+            <span class="tag-pill">api</span>
+        </a>
+        <a href='/tags/architecture'>
+            <span class="tag-pill">architecture</span>
+        </a>
+        <a href='/tags/audit'>
+            <span class="tag-pill">audit</span>
+        </a>
+    </div>
+</div>
+
+
+        
+            
+            
+<div class="widget fade-in">
+    <p class="widget-title">文章系列</p>
+    <div class="flex flex-wrap gap-1.5">
+        
+        
+        
+        
+        <a href='/post/postgresql/'>
+            <span class="tag-pill">PostgreSQL (50)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/javascript/'>
+            <span class="tag-pill">JavaScript (109)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/django/'>
+            <span class="tag-pill">Django (44)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/python/'>
+            <span class="tag-pill">Python (37)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/htmlcss/'>
+            <span class="tag-pill">HTML &amp; CSS (23)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/linux/'>
+            <span class="tag-pill">Linux (22)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/git/'>
+            <span class="tag-pill">Git (18)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/ai-insights/'>
+            <span class="tag-pill">AI Insights (13)</span>
+        </a>
+        
+        
+    </div>
+</div>
+
+
+        
+            
+            
+
+<div class="widget fade-in">
+    <p class="widget-title">最新文章</p>
+    <div class="flex flex-col gap-1">
+        <a href="/post/javascript/data-structures--algorithms/047-load-balancer/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計負載均衡器 — Round Robin、一致性雜湊與健康檢查實戰 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/30
+            </p>
+        </a>
+        <a href="/post/javascript/data-structures--algorithms/046-text-diff/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計文本差異比對 — LCS、Myers Diff 演算法與 Patch 生成實戰 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/29
+            </p>
+        </a>
+        <a href="/post/javascript/data-structures--algorithms/045-recommendation/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計推薦系統 — 協同過濾、內容推薦與矩陣分解實戰 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/28
+            </p>
+        </a>
+        <a href="/post/javascript/data-structures--algorithms/044-url-shortener/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計短網址系統 — Base62 編碼、分散式 ID 生成與重導向架構 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/27
+            </p>
+        </a>
+        <a href="/post/postgresql/050-citus-distributed/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Citus 分散式 PostgreSQL：水平擴展到多節點叢集 | PostgreSQL</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/26
+            </p>
+        </a>
+    </div>
+</div>
+
+        
+    
+</div>
+
+    
+</div>
+
+        </div>
+    </div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]">
+    
+    <p>&copy; 2026 <a href="https://benzhub.github.io/" class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p>
+</footer>
+
+
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script src="/js/subscribe.js" defer></script>
+
+
+
+<script>
+    (function (window, document) {
+        function main() {
+            var ad = document.createElement('script');
+            ad.async = true;
+            ad.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606';
+            ad.crossOrigin = "anonymous";
+            var sc = document.getElementsByTagName('script')[0];
+            sc.parentNode.insertBefore(ad, sc);
+        }
+        var lazyLoad = false;
+        function onLazyLoad() {
+            if (lazyLoad === false) {
+                lazyLoad = true;
+                window.removeEventListener('scroll', onLazyLoad);
+                window.removeEventListener('mousemove', onLazyLoad);
+                window.removeEventListener('mousedown', onLazyLoad);
+                window.removeEventListener('touchstart', onLazyLoad);
+                window.removeEventListener('keydown', onLazyLoad);
+                main();
+            }
+        }
+        window.addEventListener('scroll', onLazyLoad);
+        window.addEventListener('mousemove', onLazyLoad);
+        window.addEventListener('mousedown', onLazyLoad);
+        window.addEventListener('touchstart', onLazyLoad);
+        window.addEventListener('keydown', onLazyLoad);
+        window.addEventListener('load', function () {
+            if (window.pageYOffset) {
+                onLazyLoad();
+                window.setTimeout(onLazyLoad, 3000);
+            }
+        });
+    })(window, document);
+</script>
+
+
+<script>
+    
+    var icon = document.getElementById("icon");
+    var icon2 = document.getElementById("icon2");
+    if (document.documentElement.classList.contains("dark") || localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+        if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+    function toggleDarkMode() {
+        if (document.documentElement.classList.contains('dark')) {
+            if (icon) { icon.classList.remove("icon-sun"); icon.classList.add("icon-moon"); }
+            if (icon2) { icon2.classList.remove("icon-sun"); icon2.classList.add("icon-moon"); }
+            document.documentElement.classList.remove('dark');
+            localStorage.theme = 'light';
+        } else {
+            if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+            if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+            document.documentElement.classList.add('dark');
+            localStorage.theme = 'dark';
+        }
+    }
+
+    
+    document.addEventListener('DOMContentLoaded', function () {
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0 });
+
+        document.querySelectorAll('.fade-in').forEach(function (el) {
+            observer.observe(el);
+        });
+    });
+</script>
+</body>
+
+</html>

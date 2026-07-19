@@ -1,0 +1,955 @@
+<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>隨機演算法完全指南 — QuickSelect、Reservoir Sampling 與 Fisher-Yates 洗牌 | 資料結構與演算法 | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="隨機演算法完全指南 — QuickSelect、Reservoir Sampling 與 Fisher-Yates 洗牌 | 資料結構與演算法 | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="深入解析隨機演算法核心技術，掌握 Las Vegas 與 Monte Carlo 演算法差異、QuickSelect 第 k 小元素、Reservoir Sampling 蓄水池抽樣、Fisher-Yates 洗牌與 Skip List，搭配 JavaScript/TypeScript 與 C++ 完整實作"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="深入解析隨機演算法核心技術，掌握 Las Vegas 與 Monte Carlo 演算法差異、QuickSelect 第 k 小元素、Reservoir Sampling 蓄水池抽樣、Fisher-Yates 洗牌與 Skip List，搭配 JavaScript/TypeScript 與 C++ 完整實作"><meta property="og:url" content="https://benzhub.github.io/post/javascript/data-structures--algorithms/036-randomized/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/javascript/data-structures--algorithms/036-randomized/><meta name=twitter:description content="深入解析隨機演算法核心技術，掌握 Las Vegas 與 Monte Carlo 演算法差異、QuickSelect 第 k 小元素、Reservoir Sampling 蓄水池抽樣、Fisher-Yates 洗牌與 Skip List，搭配 JavaScript/TypeScript 與 C++ 完整實作"><meta property="article:published_time" content="2026-07-19T00:00:00+00:00"><meta property="article:updated_time" content="2026-07-19T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/javascript/Data%20Structures%20&%20Algorithms/036-Randomized.png"><meta property="og:image:url" content="https://benzhub.github.io/img/javascript/Data%20Structures%20&%20Algorithms/036-Randomized.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/javascript/data-structures--algorithms/036-randomized/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/javascript/data-structures--algorithms/036-randomized/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"隨機演算法完全指南 — QuickSelect、Reservoir Sampling 與 Fisher-Yates 洗牌 | 資料結構與演算法\"","description":"\"深入解析隨機演算法核心技術，掌握 Las Vegas 與 Monte Carlo 演算法差異、QuickSelect 第 k 小元素、Reservoir Sampling 蓄水池抽樣、Fisher-Yates 洗牌與 Skip List，搭配 JavaScript/TypeScript 與 C++ 完整實作\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-07-19T00:00:00\u002b00:00","dateModified":"2026-07-19T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/javascript\/Data%20Structures%20\u0026%20Algorithms\/036-Randomized.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/javascript\/data-structures--algorithms\/036-randomized\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/javascript\/"},{"@type":"ListItem","position":3,"name":"\"隨機演算法完全指南 — QuickSelect、Reservoir Sampling 與 Fisher-Yates 洗牌 | 資料結構與演算法\""}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"\"Las Vegas 演算法和 Monte Carlo 演算法有什麼差別？\"","acceptedAnswer":{"@type":"Answer","text":"\"兩者最關鍵的差異在於「正確性」與「時間」的取捨。Las Vegas 演算法保證結果 100% 正確，但執行時間是隨機變數（期望有界），例如 Randomized QuickSort 和 Reservoir Sampling。Monte Carlo 演算法在固定時間內完成，但答案有一定機率出錯，例如 Miller-Rabin 素數測試。簡單記法：Las Vegas 賭時間、Monte Carlo 賭正確性。選擇哪種取決於應用場景——若不容許任何錯誤（如排序），用 Las Vegas；若可接受微小錯誤機率（如素數判定），用 Monte Carlo。\""}},{"@type":"Question","name":"\"Fisher-Yates 洗牌為什麼能保證均勻隨機？Naive Shuffle 錯在哪裡？\"","acceptedAnswer":{"@type":"Answer","text":"\"Fisher-Yates Shuffle 從後向前遍歷，第 i 步從 [0, i] 中隨機選一個位置與 i 交換。這產生 n × (n-1) × ... × 1 = n! 種等機率的執行路徑，恰好對應 n! 種排列，因此每種排列出現的機率都是 1/n!。而 Naive Shuffle（每步從 [0, n-1] 隨機選）產生 n^n 種執行路徑，由於 n^n 通常不能被 n! 整除，某些排列被映射到的路徑數更多，導致分布不均勻。例如 n=3 時，n^n=27 不能被 n!=6 整除，必然有些排列出現機率偏高。\""}},{"@type":"Question","name":"\"Reservoir Sampling 如何在不知道資料總量的情況下實現等機率抽樣？\"","acceptedAnswer":{"@type":"Answer","text":"\"Reservoir Sampling 的精妙之處在於：前 k 個元素直接放入水庫，之後第 i 個元素以 k/i 的機率替換水庫中的某個元素。透過數學歸納法可以證明，每個元素最終被選入樣本的機率都是 k/n。直觀理解：第 i 個元素被選入的機率為 k/i，之後每一步它不被替換的機率為 (i+1-1)/(i+1)，將所有這些機率相乘會發生望遠鏡式消去，最終得到 k/n。這個演算法只需 O(k) 空間，特別適合串流資料或資料量未知的場景。\""}}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">隨機演算法完全指南 — QuickSelect、Reservoir Sampling 與 Fisher-Yates 洗牌 | 資料結構與演算法</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/19</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/javascript class="tag-pill no-underline">javascript</a>
+<a href=/tags/%E8%B3%87%E6%96%99%E7%B5%90%E6%A7%8B%E6%BC%94%E7%AE%97%E6%B3%95 class="tag-pill no-underline">資料結構&演算法</a>
+<a href=/tags/%E9%9A%A8%E6%A9%9F%E6%BC%94%E7%AE%97%E6%B3%95 class="tag-pill no-underline">隨機演算法</a>
+<a href=/tags/randomized class="tag-pill no-underline">Randomized</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/javascript/Data%20Structures%20&%20Algorithms/036-Randomized.png alt="隨機演算法完全指南 — QuickSelect、Reservoir Sampling 與 Fisher-Yates 洗牌 | 資料結構與演算法"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p><strong>隨機演算法（Randomized Algorithms）</strong> 是在執行過程中引入隨機決策的演算法，透過 <strong>「擲骰子」</strong> 來換取更簡單的實作與更好的平均效能。核心分為兩大類型：保證正確但時間隨機的 <strong>Las Vegas</strong> 演算法（如 Randomized QuickSort、Reservoir Sampling），以及固定時間但答案可能有誤的 <strong>Monte Carlo</strong> 演算法（如 Miller-Rabin 素數測試）。本文將帶你從理論基礎出發，完整掌握 <strong>QuickSelect</strong>、<strong>Fisher-Yates 洗牌</strong>、<strong>Skip List</strong> 等經典技術，搭配 JavaScript/TypeScript 與 C++ 雙語言實作。</p></blockquote><h3 id=前言>前言</h3><p>想像你面對一副 52 張的撲克牌，需要將它們完全洗亂。你會怎麼做？直覺的做法可能是「每張牌隨機和另一張交換」——但這個看似合理的方法，其實無法產生真正均勻的隨機排列。正確的做法是 1938 年由 Ronald Fisher 和 Frank Yates 提出的 <strong>Fisher-Yates Shuffle</strong>，它用數學嚴格保證每種排列出現的機率完全相等。</p><p>這就是隨機演算法的魅力所在——看似簡單的「加入隨機性」背後，蘊含著精密的數學分析與機率保證。</p><p>隨機演算法在現代軟體工程中無處不在：</p><ul><li><strong>排序與選擇</strong>：Randomized QuickSort 與 QuickSelect 避免對抗性最壞情況</li><li><strong>串流處理</strong>：Reservoir Sampling 從即時資料流中等機率抽樣</li><li><strong>資料結構</strong>：Skip List 用隨機層數替代複雜的平衡樹旋轉（Redis Sorted Set 的核心）</li><li><strong>密碼學與安全</strong>：Miller-Rabin 素數測試是 RSA 金鑰生成的基礎</li><li><strong>推薦系統</strong>：Epsilon-Greedy 策略在探索與利用之間取得平衡</li></ul><p>學習本文後，你將能夠：</p><ul><li>區分 <strong>Las Vegas</strong> 與 <strong>Monte Carlo</strong> 兩大隨機演算法類型</li><li>實作 <strong>Randomized QuickSort</strong> 與 <strong>QuickSelect</strong> 避免最壞情況</li><li>掌握 <strong>Reservoir Sampling</strong> 處理串流資料的等機率抽樣</li><li>正確實作 <strong>Fisher-Yates Shuffle</strong> 並理解 Naive Shuffle 的錯誤</li><li>建構完整的 <strong>Skip List</strong> 資料結構</li><li>理解 <strong>Miller-Rabin</strong> 隨機化素數測試的原理</li></ul><hr><h3 id=核心概念>核心概念</h3><h4 id=las-vegas-vs-monte-carlo-演算法>Las Vegas vs Monte Carlo 演算法</h4><p>隨機演算法依據「正確性」與「時間」的取捨，分為兩大類型：</p><pre tabindex=0><code>隨機化演算法
+├── Las Vegas（拉斯維加斯）
+│   ├── 定義：答案保證正確，但執行時間是隨機變數
+│   ├── 特性：正確，但偶爾很慢（期望時間有界）
+│   ├── 應用：Randomized QuickSort、QuickSelect、Reservoir Sampling、Skip List
+│   └── 類比：在拉斯維加斯的賭場賭「時間」——你一定會拿到正確答案，只是不確定要等多久
+│
+└── Monte Carlo（蒙地卡羅）
+    ├── 定義：固定時間內完成，但答案有一定機率錯誤
+    ├── 特性：快速，但可能給出錯誤答案
+    ├── 應用：Miller-Rabin 素數測試、近似計算 π、Bloom Filter
+    └── 類比：在蒙地卡羅的賭場賭「正確性」——快速拿到答案，但有機率猜錯
+</code></pre><table><thead><tr><th>特性</th><th>Las Vegas</th><th>Monte Carlo</th></tr></thead><tbody><tr><td>正確性</td><td>100% 正確</td><td>有機率錯誤</td></tr><tr><td>時間</td><td>隨機（期望有界）</td><td>確定（固定上限）</td></tr><tr><td>核心取捨</td><td>賭時間</td><td>賭正確性</td></tr><tr><td>典型範例</td><td>Randomized QuickSort</td><td>Miller-Rabin</td></tr><tr><td>適用場景</td><td>不容許任何錯誤</td><td>可接受微小誤差</td></tr></tbody></table><h4 id=為什麼需要隨機化>為什麼需要隨機化？</h4><pre tabindex=0><code>問題一：確定性演算法存在對抗性最壞情況
+  QuickSort 固定選首元素為 Pivot → 攻擊者可構造已排序輸入使其退化到 O(n²)
+  Randomized QuickSort → 隨機選 Pivot，任何輸入下期望 O(n log n)
+
+問題二：某些問題需要處理未知大小的串流資料
+  串流資料：無法儲存所有資料，Reservoir Sampling 以 O(k) 空間抽樣
+  線上演算法：資料即時到達，Fisher-Yates 提供均勻隨機保證
+
+問題三：平衡樹實作複雜，維護代價高
+  Red-Black Tree：插入/刪除需要複雜旋轉邏輯，實作易出錯
+  Skip List：用隨機層數替代確定性平衡，期望 O(log n)，實作直觀
+</code></pre><h4 id=期望複雜度-vs-最壞情況複雜度>期望複雜度 vs 最壞情況複雜度</h4><p>理解隨機演算法的關鍵在於區分 <strong>期望複雜度（Expected Complexity）</strong> 與 <strong>最壞情況複雜度（Worst-case Complexity）</strong>：</p><ul><li><strong>期望複雜度</strong>：對所有可能的隨機選擇取平均。例如 Randomized QuickSort 的期望時間為 O(n log n)，無論輸入是什麼。</li><li><strong>最壞情況複雜度</strong>：最不幸的隨機選擇下的時間。例如 Randomized QuickSort 最壞仍為 O(n^2)，但發生的機率極低（約 1/n!）。</li><li><strong>高機率保證</strong>：許多隨機演算法可以證明「以至少 1 - 1/n^c 的機率在 O(f(n)) 內完成」，c 可以任意大。</li></ul><p>這與確定性演算法的「平均情況分析」不同——後者假設輸入的分布，而隨機演算法的期望是對 <strong>演算法自身的隨機選擇</strong> 取平均，不依賴輸入分布。</p><hr><h3 id=javascript--typescript-實作>JavaScript / TypeScript 實作</h3><h4 id=randomized-quicksort>Randomized QuickSort</h4><p>Randomized QuickSort 是 Las Vegas 演算法的代表：答案保證正確（排序結果一定對），但執行時間因隨機 pivot 選擇而有波動。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// ─── Randomized QuickSort — Las Vegas 演算法 ─────────────────
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>randomizedQuickSort</span>(<span style=color:#a6e22e>arr</span>: <span style=color:#66d9ef>number</span>[], <span style=color:#a6e22e>lo</span>: <span style=color:#66d9ef>number</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>, <span style=color:#a6e22e>hi</span>: <span style=color:#66d9ef>number</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>arr</span>.<span style=color:#a6e22e>length</span> <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>void</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>lo</span> <span style=color:#f92672>&gt;=</span> <span style=color:#a6e22e>hi</span>) <span style=color:#66d9ef>return</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 隨機選 pivot，避免對抗性最壞情況
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>pivotIdx</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>lo</span> <span style=color:#f92672>+</span> Math.<span style=color:#a6e22e>floor</span>(Math.<span style=color:#a6e22e>random</span>() <span style=color:#f92672>*</span> (<span style=color:#a6e22e>hi</span> <span style=color:#f92672>-</span> <span style=color:#a6e22e>lo</span> <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>));
+</span></span><span style=display:flex><span>  [<span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>pivotIdx</span>], <span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>hi</span>]] <span style=color:#f92672>=</span> [<span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>hi</span>], <span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>pivotIdx</span>]]; <span style=color:#75715e>// 將 pivot 移到末尾
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// Lomuto Partition
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>pivot</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>hi</span>];
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>lo</span> <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>j</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>lo</span>; <span style=color:#a6e22e>j</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>hi</span>; <span style=color:#a6e22e>j</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>j</span>] <span style=color:#f92672>&lt;=</span> <span style=color:#a6e22e>pivot</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span>;
+</span></span><span style=display:flex><span>      [<span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>i</span>], <span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>j</span>]] <span style=color:#f92672>=</span> [<span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>j</span>], <span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>i</span>]];
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>  [<span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>i</span> <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>], <span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>hi</span>]] <span style=color:#f92672>=</span> [<span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>hi</span>], <span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>i</span> <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>]];
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>p</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>randomizedQuickSort</span>(<span style=color:#a6e22e>arr</span>, <span style=color:#a6e22e>lo</span>, <span style=color:#a6e22e>p</span> <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>);
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>randomizedQuickSort</span>(<span style=color:#a6e22e>arr</span>, <span style=color:#a6e22e>p</span> <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>, <span style=color:#a6e22e>hi</span>);
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 測試
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>data</span> <span style=color:#f92672>=</span> [<span style=color:#ae81ff>5</span>, <span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>8</span>, <span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>9</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>7</span>, <span style=color:#ae81ff>4</span>, <span style=color:#ae81ff>6</span>];
+</span></span><span style=display:flex><span><span style=color:#a6e22e>randomizedQuickSort</span>(<span style=color:#a6e22e>data</span>);
+</span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>data</span>); <span style=color:#75715e>// 輸出：[1, 2, 3, 4, 5, 6, 7, 8, 9]
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 對抗性測試：已排序輸入不會退化
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>sorted</span> <span style=color:#f92672>=</span> Array.<span style=color:#66d9ef>from</span>({ <span style=color:#a6e22e>length</span>: <span style=color:#66d9ef>10000</span> }, (<span style=color:#a6e22e>_</span>, <span style=color:#a6e22e>i</span>) <span style=color:#f92672>=&gt;</span> <span style=color:#a6e22e>i</span>);
+</span></span><span style=display:flex><span><span style=color:#a6e22e>randomizedQuickSort</span>(<span style=color:#a6e22e>sorted</span>); <span style=color:#75715e>// 期望 O(n log n)，不會退化到 O(n²)
+</span></span></span></code></pre></div><h4 id=quickselect第-k-小元素>QuickSelect——第 k 小元素</h4><p><strong>QuickSelect</strong> 基於相同的 partition 思想，但每次只遞迴一側，期望時間 O(n)，比排序後取第 k 個元素更高效。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// ─── QuickSelect — 期望 O(n) 找第 k 小元素 ─────────────────
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>quickSelect</span>(<span style=color:#a6e22e>arr</span>: <span style=color:#66d9ef>number</span>[], <span style=color:#a6e22e>k</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// k 為 1-indexed（第 k 小）
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>_quickSelect</span>(<span style=color:#a6e22e>arr</span>, <span style=color:#ae81ff>0</span>, <span style=color:#a6e22e>arr</span>.<span style=color:#a6e22e>length</span> <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>, <span style=color:#a6e22e>k</span> <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>);
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>_quickSelect</span>(<span style=color:#a6e22e>arr</span>: <span style=color:#66d9ef>number</span>[], <span style=color:#a6e22e>lo</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>hi</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>k</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>lo</span> <span style=color:#f92672>===</span> <span style=color:#a6e22e>hi</span>) <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>lo</span>];
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 隨機選 pivot
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>pivotIdx</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>lo</span> <span style=color:#f92672>+</span> Math.<span style=color:#a6e22e>floor</span>(Math.<span style=color:#a6e22e>random</span>() <span style=color:#f92672>*</span> (<span style=color:#a6e22e>hi</span> <span style=color:#f92672>-</span> <span style=color:#a6e22e>lo</span> <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>));
+</span></span><span style=display:flex><span>  [<span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>pivotIdx</span>], <span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>hi</span>]] <span style=color:#f92672>=</span> [<span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>hi</span>], <span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>pivotIdx</span>]];
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// Lomuto Partition
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>pivot</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>hi</span>];
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>lo</span> <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>j</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>lo</span>; <span style=color:#a6e22e>j</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>hi</span>; <span style=color:#a6e22e>j</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>j</span>] <span style=color:#f92672>&lt;=</span> <span style=color:#a6e22e>pivot</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span>;
+</span></span><span style=display:flex><span>      [<span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>i</span>], <span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>j</span>]] <span style=color:#f92672>=</span> [<span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>j</span>], <span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>i</span>]];
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>  [<span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>i</span> <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>], <span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>hi</span>]] <span style=color:#f92672>=</span> [<span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>hi</span>], <span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>i</span> <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>]];
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>p</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>k</span> <span style=color:#f92672>===</span> <span style=color:#a6e22e>p</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>p</span>];
+</span></span><span style=display:flex><span>  } <span style=color:#66d9ef>else</span> <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>k</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>p</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>_quickSelect</span>(<span style=color:#a6e22e>arr</span>, <span style=color:#a6e22e>lo</span>, <span style=color:#a6e22e>p</span> <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>, <span style=color:#a6e22e>k</span>);   <span style=color:#75715e>// 只遞迴左半
+</span></span></span><span style=display:flex><span>  } <span style=color:#66d9ef>else</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>_quickSelect</span>(<span style=color:#a6e22e>arr</span>, <span style=color:#a6e22e>p</span> <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>, <span style=color:#a6e22e>hi</span>, <span style=color:#a6e22e>k</span>);   <span style=color:#75715e>// 只遞迴右半
+</span></span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 測試
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>quickSelect</span>([<span style=color:#ae81ff>7</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>5</span>, <span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>8</span>, <span style=color:#ae81ff>3</span>], <span style=color:#ae81ff>3</span>)); <span style=color:#75715e>// 輸出：3（第 3 小的元素）
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>quickSelect</span>([<span style=color:#ae81ff>7</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>5</span>, <span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>8</span>, <span style=color:#ae81ff>3</span>], <span style=color:#ae81ff>1</span>)); <span style=color:#75715e>// 輸出：1（最小元素）
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>quickSelect</span>([<span style=color:#ae81ff>7</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>5</span>, <span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>8</span>, <span style=color:#ae81ff>3</span>], <span style=color:#ae81ff>6</span>)); <span style=color:#75715e>// 輸出：8（最大元素）
+</span></span></span></code></pre></div><p><strong>QuickSelect vs Sort + Index</strong>：</p><pre tabindex=0><code>找第 k 小元素：
+  排序 + 取索引：O(n log n)
+  QuickSelect：  O(n) 期望
+
+差異原因：
+  排序需要遞迴兩側 → T(n) = 2T(n/2) + O(n) → O(n log n)
+  QuickSelect 只遞迴一側 → T(n) = T(n/2) + O(n) → O(n)
+</code></pre><h4 id=reservoir-sampling蓄水池抽樣>Reservoir Sampling——蓄水池抽樣</h4><p><strong>Reservoir Sampling</strong> 解決一個經典問題：從大小未知的串流資料中，等機率地抽取 k 個樣本，且只使用 O(k) 空間。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// ─── Reservoir Sampling — 串流等機率抽樣 ─────────────────────
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ReservoirSampler</span>&lt;<span style=color:#f92672>T</span>&gt; {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>reservoir</span>: <span style=color:#66d9ef>T</span>[];
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>count</span>: <span style=color:#66d9ef>number</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>k</span>: <span style=color:#66d9ef>number</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>constructor</span>(<span style=color:#a6e22e>k</span>: <span style=color:#66d9ef>number</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>k</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>k</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>reservoir</span> <span style=color:#f92672>=</span> [];
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 處理串流中的每個元素（O(1) per element）
+</span></span></span><span style=display:flex><span>  <span style=color:#a6e22e>add</span>(<span style=color:#a6e22e>item</span>: <span style=color:#66d9ef>T</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>void</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>count</span><span style=color:#f92672>++</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>reservoir</span>.<span style=color:#a6e22e>length</span> <span style=color:#f92672>&lt;</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>k</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#75715e>// 前 k 個元素直接放入水庫
+</span></span></span><span style=display:flex><span>      <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>reservoir</span>.<span style=color:#a6e22e>push</span>(<span style=color:#a6e22e>item</span>);
+</span></span><span style=display:flex><span>    } <span style=color:#66d9ef>else</span> {
+</span></span><span style=display:flex><span>      <span style=color:#75715e>// 以 k/count 機率替換水庫中的某個元素
+</span></span></span><span style=display:flex><span>      <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>j</span> <span style=color:#f92672>=</span> Math.<span style=color:#a6e22e>floor</span>(Math.<span style=color:#a6e22e>random</span>() <span style=color:#f92672>*</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>count</span>);
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>j</span> <span style=color:#f92672>&lt;</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>k</span>) {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>reservoir</span>[<span style=color:#a6e22e>j</span>] <span style=color:#f92672>=</span> <span style=color:#a6e22e>item</span>;
+</span></span><span style=display:flex><span>      }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>getSample</span>()<span style=color:#f92672>:</span> <span style=color:#a6e22e>T</span>[] {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> [...<span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>reservoir</span>];
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 測試：從 1~1000 中隨機取 5 個
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>sampler</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>ReservoirSampler</span>&lt;<span style=color:#f92672>number</span>&gt;(<span style=color:#ae81ff>5</span>);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>; <span style=color:#a6e22e>i</span> <span style=color:#f92672>&lt;=</span> <span style=color:#ae81ff>1000</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>sampler</span>.<span style=color:#a6e22e>add</span>(<span style=color:#a6e22e>i</span>);
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>sampler</span>.<span style=color:#a6e22e>getSample</span>()); <span style=color:#75715e>// 從 1~1000 中隨機取 5 個，每個被選機率 = 5/1000
+</span></span></span></code></pre></div><pre tabindex=0><code>Reservoir Sampling 圖解（k=3，串流 [1, 2, 3, 4, 5, 6, 7, 8]）：
+
+初始化：reservoir = [1, 2, 3]  （前 k 個直接放入）
+
+處理第 4 個元素（i=4）：
+  隨機選 j = rand(0, 3)，若 j &lt; 3 → 替換 reservoir[j]
+  假設 j=1 → reservoir = [1, 4, 3]
+
+處理第 5 個元素（i=5）：
+  隨機選 j = rand(0, 4)，若 j &lt; 3 → 替換
+  假設 j=4 → 不替換 → reservoir = [1, 4, 3]
+
+...持續處理到第 8 個元素
+
+數學保證：每個元素被選入最終樣本的機率 = k/n = 3/8
+
+正確性證明（歸納法）：
+  第 n 個元素：以 k/n 機率選入 → 正確 ✓
+  第 i 個元素（i ≤ n-1）：
+    被選入水庫的機率 × 不被後續元素替換的機率
+    = k/i × (i/(i+1)) × ((i+1)/(i+2)) × ... × ((n-1)/n)
+    = k/n ✓（望遠鏡式消去）
+</code></pre><p><strong>LeetCode 382 變體——Linked List Random Node（k=1 特例）</strong>：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// ─── Reservoir Sampling k=1：鏈結串列隨機節點 ────────────────
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ListNode</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>val</span>: <span style=color:#66d9ef>number</span>;
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>next</span>: <span style=color:#66d9ef>ListNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>null</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>constructor</span>(<span style=color:#a6e22e>val</span>: <span style=color:#66d9ef>number</span>) { <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>val</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>val</span>; }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Solution382</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>head</span>: <span style=color:#66d9ef>ListNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>constructor</span>(<span style=color:#a6e22e>head</span>: <span style=color:#66d9ef>ListNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>head</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>head</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>getRandom</span>()<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>result</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>head</span><span style=color:#f92672>!</span>.<span style=color:#a6e22e>val</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>count</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>curr</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>head</span><span style=color:#f92672>!</span>.<span style=color:#a6e22e>next</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>while</span> (<span style=color:#a6e22e>curr</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>count</span><span style=color:#f92672>++</span>;
+</span></span><span style=display:flex><span>      <span style=color:#75715e>// 以 1/count 機率用當前節點替換結果
+</span></span></span><span style=display:flex><span>      <span style=color:#66d9ef>if</span> (Math.<span style=color:#a6e22e>floor</span>(Math.<span style=color:#a6e22e>random</span>() <span style=color:#f92672>*</span> <span style=color:#a6e22e>count</span>) <span style=color:#f92672>===</span> <span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>result</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>val</span>;
+</span></span><span style=display:flex><span>      }
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>curr</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>next</span>;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>result</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 驗證均勻性
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>head</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>ListNode</span>(<span style=color:#ae81ff>1</span>);
+</span></span><span style=display:flex><span><span style=color:#a6e22e>head</span>.<span style=color:#a6e22e>next</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>ListNode</span>(<span style=color:#ae81ff>2</span>);
+</span></span><span style=display:flex><span><span style=color:#a6e22e>head</span>.<span style=color:#a6e22e>next</span>.<span style=color:#a6e22e>next</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>ListNode</span>(<span style=color:#ae81ff>3</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>sol</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>Solution382</span>(<span style=color:#a6e22e>head</span>);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>freq</span>: <span style=color:#66d9ef>Record</span>&lt;<span style=color:#f92672>number</span>, <span style=color:#a6e22e>number</span>&gt; <span style=color:#f92672>=</span> { <span style=color:#a6e22e>1</span>: <span style=color:#66d9ef>0</span>, <span style=color:#a6e22e>2</span>: <span style=color:#66d9ef>0</span>, <span style=color:#a6e22e>3</span>: <span style=color:#66d9ef>0</span> };
+</span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>trials</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>30000</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>i</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>trials</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>freq</span>[<span style=color:#a6e22e>sol</span>.<span style=color:#a6e22e>getRandom</span>()]<span style=color:#f92672>++</span>;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>Object.<span style=color:#a6e22e>entries</span>(<span style=color:#a6e22e>freq</span>).<span style=color:#a6e22e>forEach</span>(([<span style=color:#a6e22e>val</span>, <span style=color:#a6e22e>cnt</span>]) <span style=color:#f92672>=&gt;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#e6db74>`節點</span><span style=color:#e6db74>${</span><span style=color:#a6e22e>val</span><span style=color:#e6db74>}</span><span style=color:#e6db74>：</span><span style=color:#e6db74>${</span>(<span style=color:#a6e22e>cnt</span> <span style=color:#f92672>/</span> <span style=color:#a6e22e>trials</span> <span style=color:#f92672>*</span> <span style=color:#ae81ff>100</span>).<span style=color:#a6e22e>toFixed</span>(<span style=color:#ae81ff>1</span>)<span style=color:#e6db74>}</span><span style=color:#e6db74>%（期望 33.3%）`</span>);
+</span></span><span style=display:flex><span>});
+</span></span><span style=display:flex><span><span style=color:#75715e>// 輸出：每個節點約 33.3%（±1% 隨機誤差）
+</span></span></span></code></pre></div><h4 id=fisher-yates-shuffle均勻洗牌>Fisher-Yates Shuffle——均勻洗牌</h4><p><strong>Fisher-Yates Shuffle</strong> 是唯一正確的 O(n) 原地洗牌演算法，能保證 n! 種排列各以 1/n! 的機率出現。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// ─── Fisher-Yates Shuffle — 正確的均勻洗牌 ──────────────────
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>fisherYatesShuffle</span>&lt;<span style=color:#f92672>T</span>&gt;(<span style=color:#a6e22e>arr</span>: <span style=color:#66d9ef>T</span>[])<span style=color:#f92672>:</span> <span style=color:#a6e22e>T</span>[] {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>result</span> <span style=color:#f92672>=</span> [...<span style=color:#a6e22e>arr</span>]; <span style=color:#75715e>// 不修改原陣列
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>n</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>result</span>.<span style=color:#a6e22e>length</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 從後向前遍歷，每步從 [0, i] 中隨機選一個位置與 i 交換
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>n</span> <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>; <span style=color:#a6e22e>i</span> <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>--</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>j</span> <span style=color:#f92672>=</span> Math.<span style=color:#a6e22e>floor</span>(Math.<span style=color:#a6e22e>random</span>() <span style=color:#f92672>*</span> (<span style=color:#a6e22e>i</span> <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>));
+</span></span><span style=display:flex><span>    [<span style=color:#a6e22e>result</span>[<span style=color:#a6e22e>i</span>], <span style=color:#a6e22e>result</span>[<span style=color:#a6e22e>j</span>]] <span style=color:#f92672>=</span> [<span style=color:#a6e22e>result</span>[<span style=color:#a6e22e>j</span>], <span style=color:#a6e22e>result</span>[<span style=color:#a6e22e>i</span>]];
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>result</span>;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 測試
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>fisherYatesShuffle</span>([<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>4</span>, <span style=color:#ae81ff>5</span>]));
+</span></span><span style=display:flex><span><span style=color:#75715e>// 輸出：[1, 2, 3, 4, 5] 的某個隨機排列
+</span></span></span></code></pre></div><pre tabindex=0><code>Fisher-Yates Shuffle 過程圖解：
+
+陣列 [1, 2, 3, 4, 5]，從後向前交換
+
+步驟1（i=4）：j = rand(0~4)，假設 j=2
+  [1, 2, 5, 4, 3]  ← 位置 4 與位置 2 交換
+                ↑固定
+
+步驟2（i=3）：j = rand(0~3)，假設 j=0
+  [4, 2, 5, 1, 3]  ← 位置 3 與位置 0 交換
+             ↑固定
+
+步驟3（i=2）：j = rand(0~2)，假設 j=2（不動）
+  [4, 2, 5, 1, 3]
+          ↑固定
+
+步驟4（i=1）：j = rand(0~1)，假設 j=0
+  [2, 4, 5, 1, 3]
+       ↑固定
+
+最終結果：[2, 4, 5, 1, 3]
+
+為何正確？
+  執行路徑數 = 5 × 4 × 3 × 2 × 1 = 5! = 120
+  每條路徑機率相等 → 120 種排列各以 1/120 出現 ✓
+</code></pre><p><strong>Naive Shuffle 為什麼錯誤？</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// ─── 錯誤示範：Naive Shuffle（不均勻！）────────────────────
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>naiveShuffle</span>&lt;<span style=color:#f92672>T</span>&gt;(<span style=color:#a6e22e>arr</span>: <span style=color:#66d9ef>T</span>[])<span style=color:#f92672>:</span> <span style=color:#a6e22e>T</span>[] {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>result</span> <span style=color:#f92672>=</span> [...<span style=color:#a6e22e>arr</span>];
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>n</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>result</span>.<span style=color:#a6e22e>length</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 錯誤：每步都從 [0, n-1] 中隨機選
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>i</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>n</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>j</span> <span style=color:#f92672>=</span> Math.<span style=color:#a6e22e>floor</span>(Math.<span style=color:#a6e22e>random</span>() <span style=color:#f92672>*</span> <span style=color:#a6e22e>n</span>); <span style=color:#75715e>// 應該是 rand(0, i) 而非 rand(0, n-1)
+</span></span></span><span style=display:flex><span>    [<span style=color:#a6e22e>result</span>[<span style=color:#a6e22e>i</span>], <span style=color:#a6e22e>result</span>[<span style=color:#a6e22e>j</span>]] <span style=color:#f92672>=</span> [<span style=color:#a6e22e>result</span>[<span style=color:#a6e22e>j</span>], <span style=color:#a6e22e>result</span>[<span style=color:#a6e22e>i</span>]];
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>result</span>;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 驗證不均勻性
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>compareShuffles</span>()<span style=color:#f92672>:</span> <span style=color:#66d9ef>void</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>n</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>3</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>trials</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>600000</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>fisherCounts</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>Map</span>&lt;<span style=color:#f92672>string</span>, <span style=color:#a6e22e>number</span>&gt;();
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>naiveCounts</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>Map</span>&lt;<span style=color:#f92672>string</span>, <span style=color:#a6e22e>number</span>&gt;();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>t</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>t</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>trials</span>; <span style=color:#a6e22e>t</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>arr1</span> <span style=color:#f92672>=</span> [<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>];
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>arr2</span> <span style=color:#f92672>=</span> [<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>];
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>s1</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>fisherYatesShuffle</span>(<span style=color:#a6e22e>arr1</span>).<span style=color:#a6e22e>join</span>(<span style=color:#e6db74>&#39;,&#39;</span>);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>s2</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>naiveShuffle</span>(<span style=color:#a6e22e>arr2</span>).<span style=color:#a6e22e>join</span>(<span style=color:#e6db74>&#39;,&#39;</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>fisherCounts</span>.<span style=color:#66d9ef>set</span>(<span style=color:#a6e22e>s1</span>, (<span style=color:#a6e22e>fisherCounts</span>.<span style=color:#66d9ef>get</span>(<span style=color:#a6e22e>s1</span>) <span style=color:#f92672>??</span> <span style=color:#ae81ff>0</span>) <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>);
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>naiveCounts</span>.<span style=color:#66d9ef>set</span>(<span style=color:#a6e22e>s2</span>, (<span style=color:#a6e22e>naiveCounts</span>.<span style=color:#66d9ef>get</span>(<span style=color:#a6e22e>s2</span>) <span style=color:#f92672>??</span> <span style=color:#ae81ff>0</span>) <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#e6db74>&#39;Fisher-Yates（期望每種 100000 次）：&#39;</span>);
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>const</span> [<span style=color:#a6e22e>perm</span>, <span style=color:#a6e22e>cnt</span>] <span style=color:#66d9ef>of</span> [...<span style=color:#a6e22e>fisherCounts</span>].<span style=color:#a6e22e>sort</span>()) {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#e6db74>`  </span><span style=color:#e6db74>${</span><span style=color:#a6e22e>perm</span><span style=color:#e6db74>}</span><span style=color:#e6db74>: </span><span style=color:#e6db74>${</span><span style=color:#a6e22e>cnt</span><span style=color:#e6db74>}</span><span style=color:#e6db74>`</span>);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#e6db74>&#39;Naive Shuffle（分布不均勻）：&#39;</span>);
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>const</span> [<span style=color:#a6e22e>perm</span>, <span style=color:#a6e22e>cnt</span>] <span style=color:#66d9ef>of</span> [...<span style=color:#a6e22e>naiveCounts</span>].<span style=color:#a6e22e>sort</span>()) {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#e6db74>`  </span><span style=color:#e6db74>${</span><span style=color:#a6e22e>perm</span><span style=color:#e6db74>}</span><span style=color:#e6db74>: </span><span style=color:#e6db74>${</span><span style=color:#a6e22e>cnt</span><span style=color:#e6db74>}</span><span style=color:#e6db74>`</span>);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#75715e>// Fisher-Yates：6 種排列各約 100000 次
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// Naive Shuffle：某些排列出現次數明顯偏多或偏少
+</span></span></span></code></pre></div><pre tabindex=0><code>為什麼 Naive Shuffle 不均勻？
+
+n = 3 時：
+  Fisher-Yates 路徑數 = 3 × 2 × 1 = 6 → 對應 3! = 6 種排列 → 均勻 ✓
+  Naive Shuffle 路徑數 = 3 × 3 × 3 = 27 → 27 / 6 = 4.5 → 無法整除 → 不均勻 ✗
+
+路徑數 n^n 無法被 n! 整除，因此某些排列被映射到更多路徑，機率偏高。
+</code></pre><p><strong>LeetCode 384——Shuffle an Array</strong>：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// ─── LeetCode 384：設計可重置洗牌的資料結構 ─────────────────
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ShuffleArray</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>original</span>: <span style=color:#66d9ef>number</span>[];
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>current</span>: <span style=color:#66d9ef>number</span>[];
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>constructor</span>(<span style=color:#a6e22e>nums</span>: <span style=color:#66d9ef>number</span>[]) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>original</span> <span style=color:#f92672>=</span> [...<span style=color:#a6e22e>nums</span>];
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>current</span> <span style=color:#f92672>=</span> [...<span style=color:#a6e22e>nums</span>];
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>reset</span>()<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span>[] {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>current</span> <span style=color:#f92672>=</span> [...<span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>original</span>];
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>current</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>shuffle</span>()<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span>[] {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>n</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>current</span>.<span style=color:#a6e22e>length</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>n</span> <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>; <span style=color:#a6e22e>i</span> <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>--</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>j</span> <span style=color:#f92672>=</span> Math.<span style=color:#a6e22e>floor</span>(Math.<span style=color:#a6e22e>random</span>() <span style=color:#f92672>*</span> (<span style=color:#a6e22e>i</span> <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>));
+</span></span><span style=display:flex><span>      [<span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>current</span>[<span style=color:#a6e22e>i</span>], <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>current</span>[<span style=color:#a6e22e>j</span>]] <span style=color:#f92672>=</span> [<span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>current</span>[<span style=color:#a6e22e>j</span>], <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>current</span>[<span style=color:#a6e22e>i</span>]];
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>current</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 測試
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>sa</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>ShuffleArray</span>([<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>]);
+</span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>sa</span>.<span style=color:#a6e22e>shuffle</span>()); <span style=color:#75715e>// 輸出：某個隨機排列
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>sa</span>.<span style=color:#a6e22e>reset</span>());   <span style=color:#75715e>// 輸出：[1, 2, 3]
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>sa</span>.<span style=color:#a6e22e>shuffle</span>()); <span style=color:#75715e>// 輸出：另一個隨機排列
+</span></span></span></code></pre></div><h4 id=skip-list隨機化有序字典>Skip List——隨機化有序字典</h4><p><strong>Skip List（跳表）</strong> 是用隨機層數替代確定性平衡的有序資料結構，期望 O(log n) 搜索/插入/刪除，實作遠比 Red-Black Tree 簡單。Redis Sorted Set 和 LevelDB MemTable 都採用 Skip List。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// ─── Skip List — 隨機化有序字典 ─────────────────────────────
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>MAX_LEVEL</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>16</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>PROBABILITY</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0.5</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>SkipListNode</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>val</span>: <span style=color:#66d9ef>number</span>;
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>forward</span><span style=color:#f92672>:</span> (<span style=color:#a6e22e>SkipListNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span>)[];
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>constructor</span>(<span style=color:#a6e22e>val</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>level</span>: <span style=color:#66d9ef>number</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>val</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>val</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>forward</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> Array(<span style=color:#a6e22e>level</span>).<span style=color:#a6e22e>fill</span>(<span style=color:#66d9ef>null</span>);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>SkipList</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>head</span>: <span style=color:#66d9ef>SkipListNode</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>level</span>: <span style=color:#66d9ef>number</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>size</span>: <span style=color:#66d9ef>number</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>constructor</span>() {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>head</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>SkipListNode</span>(<span style=color:#f92672>-</span><span style=color:#66d9ef>Infinity</span>, <span style=color:#a6e22e>MAX_LEVEL</span>);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 隨機生成層數（幾何分佈）
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>randomLevel</span>()<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>lvl</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>while</span> (Math.<span style=color:#a6e22e>random</span>() <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>PROBABILITY</span> <span style=color:#f92672>&amp;&amp;</span> <span style=color:#a6e22e>lvl</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>MAX_LEVEL</span>) <span style=color:#a6e22e>lvl</span><span style=color:#f92672>++</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>lvl</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 搜索：O(log n) 期望
+</span></span></span><span style=display:flex><span>  <span style=color:#a6e22e>search</span>(<span style=color:#a6e22e>target</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>boolean</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>curr</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>head</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>level</span> <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>; <span style=color:#a6e22e>i</span> <span style=color:#f92672>&gt;=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>--</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>while</span> (<span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>forward</span>[<span style=color:#a6e22e>i</span>] <span style=color:#f92672>&amp;&amp;</span> <span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>forward</span>[<span style=color:#a6e22e>i</span>]<span style=color:#f92672>!</span>.<span style=color:#a6e22e>val</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>target</span>) {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>curr</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>forward</span>[<span style=color:#a6e22e>i</span>]<span style=color:#f92672>!</span>;
+</span></span><span style=display:flex><span>      }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>curr</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>forward</span>[<span style=color:#ae81ff>0</span>]<span style=color:#f92672>!</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>curr</span> <span style=color:#f92672>!==</span> <span style=color:#66d9ef>null</span> <span style=color:#f92672>&amp;&amp;</span> <span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>val</span> <span style=color:#f92672>===</span> <span style=color:#a6e22e>target</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 插入：O(log n) 期望
+</span></span></span><span style=display:flex><span>  <span style=color:#a6e22e>insert</span>(<span style=color:#a6e22e>val</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>void</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>update</span><span style=color:#f92672>:</span> (<span style=color:#a6e22e>SkipListNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span>)[] <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> Array(<span style=color:#a6e22e>MAX_LEVEL</span>).<span style=color:#a6e22e>fill</span>(<span style=color:#66d9ef>null</span>);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>curr</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>head</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>level</span> <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>; <span style=color:#a6e22e>i</span> <span style=color:#f92672>&gt;=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>--</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>while</span> (<span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>forward</span>[<span style=color:#a6e22e>i</span>] <span style=color:#f92672>&amp;&amp;</span> <span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>forward</span>[<span style=color:#a6e22e>i</span>]<span style=color:#f92672>!</span>.<span style=color:#a6e22e>val</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>val</span>) {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>curr</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>forward</span>[<span style=color:#a6e22e>i</span>]<span style=color:#f92672>!</span>;
+</span></span><span style=display:flex><span>      }
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>update</span>[<span style=color:#a6e22e>i</span>] <span style=color:#f92672>=</span> <span style=color:#a6e22e>curr</span>;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>newLevel</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>randomLevel</span>();
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>newLevel</span> <span style=color:#f92672>&gt;</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>level</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>level</span>; <span style=color:#a6e22e>i</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>newLevel</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span>) <span style=color:#a6e22e>update</span>[<span style=color:#a6e22e>i</span>] <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>head</span>;
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>level</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>newLevel</span>;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>newNode</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>SkipListNode</span>(<span style=color:#a6e22e>val</span>, <span style=color:#a6e22e>newLevel</span>);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>i</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>newLevel</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>newNode</span>.<span style=color:#a6e22e>forward</span>[<span style=color:#a6e22e>i</span>] <span style=color:#f92672>=</span> <span style=color:#a6e22e>update</span>[<span style=color:#a6e22e>i</span>]<span style=color:#f92672>!</span>.<span style=color:#a6e22e>forward</span>[<span style=color:#a6e22e>i</span>];
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>update</span>[<span style=color:#a6e22e>i</span>]<span style=color:#f92672>!</span>.<span style=color:#a6e22e>forward</span>[<span style=color:#a6e22e>i</span>] <span style=color:#f92672>=</span> <span style=color:#a6e22e>newNode</span>;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>size</span><span style=color:#f92672>++</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 刪除：O(log n) 期望
+</span></span></span><span style=display:flex><span>  <span style=color:#a6e22e>erase</span>(<span style=color:#a6e22e>val</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>boolean</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>update</span><span style=color:#f92672>:</span> (<span style=color:#a6e22e>SkipListNode</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>null</span>)[] <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> Array(<span style=color:#a6e22e>MAX_LEVEL</span>).<span style=color:#a6e22e>fill</span>(<span style=color:#66d9ef>null</span>);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>curr</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>head</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>level</span> <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>; <span style=color:#a6e22e>i</span> <span style=color:#f92672>&gt;=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>--</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>while</span> (<span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>forward</span>[<span style=color:#a6e22e>i</span>] <span style=color:#f92672>&amp;&amp;</span> <span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>forward</span>[<span style=color:#a6e22e>i</span>]<span style=color:#f92672>!</span>.<span style=color:#a6e22e>val</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>val</span>) {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>curr</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>forward</span>[<span style=color:#a6e22e>i</span>]<span style=color:#f92672>!</span>;
+</span></span><span style=display:flex><span>      }
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>update</span>[<span style=color:#a6e22e>i</span>] <span style=color:#f92672>=</span> <span style=color:#a6e22e>curr</span>;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>target</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>curr</span>.<span style=color:#a6e22e>forward</span>[<span style=color:#ae81ff>0</span>];
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span><span style=color:#a6e22e>target</span> <span style=color:#f92672>||</span> <span style=color:#a6e22e>target</span>.<span style=color:#a6e22e>val</span> <span style=color:#f92672>!==</span> <span style=color:#a6e22e>val</span>) <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>false</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>i</span> <span style=color:#f92672>&lt;</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>level</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>update</span>[<span style=color:#a6e22e>i</span>]<span style=color:#f92672>!</span>.<span style=color:#a6e22e>forward</span>[<span style=color:#a6e22e>i</span>] <span style=color:#f92672>!==</span> <span style=color:#a6e22e>target</span>) <span style=color:#66d9ef>break</span>;
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>update</span>[<span style=color:#a6e22e>i</span>]<span style=color:#f92672>!</span>.<span style=color:#a6e22e>forward</span>[<span style=color:#a6e22e>i</span>] <span style=color:#f92672>=</span> <span style=color:#a6e22e>target</span>.<span style=color:#a6e22e>forward</span>[<span style=color:#a6e22e>i</span>];
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>while</span> (<span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>level</span> <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>1</span> <span style=color:#f92672>&amp;&amp;</span> <span style=color:#f92672>!</span><span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>head</span>.<span style=color:#a6e22e>forward</span>[<span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>level</span> <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>]) {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>level</span><span style=color:#f92672>--</span>;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>size</span><span style=color:#f92672>--</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>true</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 測試
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>sl</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>SkipList</span>();
+</span></span><span style=display:flex><span>[<span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>6</span>, <span style=color:#ae81ff>7</span>, <span style=color:#ae81ff>9</span>, <span style=color:#ae81ff>12</span>, <span style=color:#ae81ff>17</span>, <span style=color:#ae81ff>19</span>, <span style=color:#ae81ff>21</span>, <span style=color:#ae81ff>25</span>].<span style=color:#a6e22e>forEach</span>(<span style=color:#a6e22e>v</span> <span style=color:#f92672>=&gt;</span> <span style=color:#a6e22e>sl</span>.<span style=color:#a6e22e>insert</span>(<span style=color:#a6e22e>v</span>));
+</span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>sl</span>.<span style=color:#a6e22e>search</span>(<span style=color:#ae81ff>7</span>));  <span style=color:#75715e>// 輸出：true
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>sl</span>.<span style=color:#a6e22e>search</span>(<span style=color:#ae81ff>8</span>));  <span style=color:#75715e>// 輸出：false
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>sl</span>.<span style=color:#a6e22e>erase</span>(<span style=color:#ae81ff>7</span>);
+</span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>sl</span>.<span style=color:#a6e22e>search</span>(<span style=color:#ae81ff>7</span>));  <span style=color:#75715e>// 輸出：false
+</span></span></span></code></pre></div><pre tabindex=0><code>Skip List 結構圖解：
+
+Level 3: HEAD ─────────────────────── 50 ──── nil
+Level 2: HEAD ──────── 20 ─────────── 50 ──── nil
+Level 1: HEAD ── 10 ── 20 ── 30 ────── 50 ──── nil
+Level 0: HEAD ── 10 ── 20 ── 30 ── 40 ── 50 ── nil
+
+搜索 35 的過程：
+  Level3: HEAD → 50（太大，下降）
+  Level2: HEAD → 20 → 50（太大，從 20 下降）
+  Level1: 20 → 30 → 50（太大，從 30 下降）
+  Level0: 30 → 40（35 &lt; 40，不存在）
+
+插入新節點時，隨機生成層數：
+  每層以 p=0.5 機率繼續向上
+  期望層數 = 1/(1-p) = 2 層
+  最大層數 ≈ log₂(n)
+</code></pre><h4 id=miller-rabin-隨機化素數測試>Miller-Rabin 隨機化素數測試</h4><p><strong>Miller-Rabin</strong> 是 Monte Carlo 演算法的經典代表：在固定時間內完成，但有微小機率將合數誤判為素數。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// ─── Miller-Rabin 素數測試 — Monte Carlo 演算法 ──────────────
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>millerRabin</span>(<span style=color:#a6e22e>n</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>k</span>: <span style=color:#66d9ef>number</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>10</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>boolean</span> {
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 處理邊界情況
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>n</span> <span style=color:#f92672>&lt;</span> <span style=color:#ae81ff>2</span>) <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>false</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>n</span> <span style=color:#f92672>===</span> <span style=color:#ae81ff>2</span> <span style=color:#f92672>||</span> <span style=color:#a6e22e>n</span> <span style=color:#f92672>===</span> <span style=color:#ae81ff>3</span>) <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>true</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>n</span> <span style=color:#f92672>%</span> <span style=color:#ae81ff>2</span> <span style=color:#f92672>===</span> <span style=color:#ae81ff>0</span>) <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>false</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 將 n-1 寫成 2^r × d 的形式
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>r</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>d</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>n</span> <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>while</span> (<span style=color:#a6e22e>d</span> <span style=color:#f92672>%</span> <span style=color:#ae81ff>2</span> <span style=color:#f92672>===</span> <span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>r</span><span style=color:#f92672>++</span>;
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>d</span> <span style=color:#f92672>=</span> Math.<span style=color:#a6e22e>floor</span>(<span style=color:#a6e22e>d</span> <span style=color:#f92672>/</span> <span style=color:#ae81ff>2</span>);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 進行 k 輪測試
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>i</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>k</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 隨機選取 a ∈ [2, n-2]
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>a</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>2</span> <span style=color:#f92672>+</span> Math.<span style=color:#a6e22e>floor</span>(Math.<span style=color:#a6e22e>random</span>() <span style=color:#f92672>*</span> (<span style=color:#a6e22e>n</span> <span style=color:#f92672>-</span> <span style=color:#ae81ff>3</span>));
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>x</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>modPow</span>(<span style=color:#a6e22e>a</span>, <span style=color:#a6e22e>d</span>, <span style=color:#a6e22e>n</span>); <span style=color:#75715e>// a^d mod n
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>x</span> <span style=color:#f92672>===</span> <span style=color:#ae81ff>1</span> <span style=color:#f92672>||</span> <span style=color:#a6e22e>x</span> <span style=color:#f92672>===</span> <span style=color:#a6e22e>n</span> <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>) <span style=color:#66d9ef>continue</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>composite</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>true</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>j</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>j</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>r</span> <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>; <span style=color:#a6e22e>j</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>x</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>modPow</span>(<span style=color:#a6e22e>x</span>, <span style=color:#ae81ff>2</span>, <span style=color:#a6e22e>n</span>); <span style=color:#75715e>// x = x² mod n
+</span></span></span><span style=display:flex><span>      <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>x</span> <span style=color:#f92672>===</span> <span style=color:#a6e22e>n</span> <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>) {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>composite</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>false</span>;
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>break</span>;
+</span></span><span style=display:flex><span>      }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>composite</span>) <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>false</span>; <span style=color:#75715e>// 確定是合數
+</span></span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>true</span>; <span style=color:#75715e>// 可能是素數（誤判率 ≤ 4^-k）
+</span></span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 快速冪取模
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>modPow</span>(<span style=color:#a6e22e>base</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>exp</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>mod</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>result</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>base</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>base</span> <span style=color:#f92672>%</span> <span style=color:#a6e22e>mod</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>while</span> (<span style=color:#a6e22e>exp</span> <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>exp</span> <span style=color:#f92672>%</span> <span style=color:#ae81ff>2</span> <span style=color:#f92672>===</span> <span style=color:#ae81ff>1</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>result</span> <span style=color:#f92672>=</span> (<span style=color:#a6e22e>result</span> <span style=color:#f92672>*</span> <span style=color:#a6e22e>base</span>) <span style=color:#f92672>%</span> <span style=color:#a6e22e>mod</span>;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>exp</span> <span style=color:#f92672>=</span> Math.<span style=color:#a6e22e>floor</span>(<span style=color:#a6e22e>exp</span> <span style=color:#f92672>/</span> <span style=color:#ae81ff>2</span>);
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>base</span> <span style=color:#f92672>=</span> (<span style=color:#a6e22e>base</span> <span style=color:#f92672>*</span> <span style=color:#a6e22e>base</span>) <span style=color:#f92672>%</span> <span style=color:#a6e22e>mod</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>result</span>;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 測試
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>millerRabin</span>(<span style=color:#ae81ff>97</span>));    <span style=color:#75715e>// 輸出：true（97 是素數）
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>millerRabin</span>(<span style=color:#ae81ff>100</span>));   <span style=color:#75715e>// 輸出：false（100 不是素數）
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>millerRabin</span>(<span style=color:#ae81ff>7919</span>));  <span style=color:#75715e>// 輸出：true（7919 是素數）
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>millerRabin</span>(<span style=color:#ae81ff>561</span>));   <span style=color:#75715e>// 輸出：false（561 是 Carmichael 數）
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// k=10 時，將合數誤判為素數的機率 ≤ 4^-10 ≈ 0.000001
+</span></span></span></code></pre></div><hr><h3 id=c-對照實作>C++ 對照實作</h3><h4 id=randomized-quicksort-與-quickselect>Randomized QuickSort 與 QuickSelect</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-cpp data-lang=cpp><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;vector&gt;</span><span style=color:#75715e>
+</span></span></span><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;random&gt;</span><span style=color:#75715e>
+</span></span></span><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;algorithm&gt;</span><span style=color:#75715e>
+</span></span></span><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> std;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>mt19937 <span style=color:#a6e22e>rng</span>(random_device{}());
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── Randomized QuickSort ───────────────────────────────────
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>partition</span>(vector<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;&amp;</span> arr, <span style=color:#66d9ef>int</span> lo, <span style=color:#66d9ef>int</span> hi) {
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 隨機選 pivot
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>int</span> pivotIdx <span style=color:#f92672>=</span> lo <span style=color:#f92672>+</span> rng() <span style=color:#f92672>%</span> (hi <span style=color:#f92672>-</span> lo <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>);
+</span></span><span style=display:flex><span>    swap(arr[pivotIdx], arr[hi]);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>int</span> pivot <span style=color:#f92672>=</span> arr[hi], i <span style=color:#f92672>=</span> lo <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> j <span style=color:#f92672>=</span> lo; j <span style=color:#f92672>&lt;</span> hi; j<span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> (arr[j] <span style=color:#f92672>&lt;=</span> pivot) swap(arr[<span style=color:#f92672>++</span>i], arr[j]);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    swap(arr[i <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>], arr[hi]);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> i <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>void</span> <span style=color:#a6e22e>randomizedQuickSort</span>(vector<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;&amp;</span> arr, <span style=color:#66d9ef>int</span> lo, <span style=color:#66d9ef>int</span> hi) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (lo <span style=color:#f92672>&gt;=</span> hi) <span style=color:#66d9ef>return</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>int</span> p <span style=color:#f92672>=</span> partition(arr, lo, hi);
+</span></span><span style=display:flex><span>    randomizedQuickSort(arr, lo, p <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>);
+</span></span><span style=display:flex><span>    randomizedQuickSort(arr, p <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>, hi);
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── QuickSelect ────────────────────────────────────────────
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>quickSelect</span>(vector<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;&amp;</span> arr, <span style=color:#66d9ef>int</span> lo, <span style=color:#66d9ef>int</span> hi, <span style=color:#66d9ef>int</span> k) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (lo <span style=color:#f92672>==</span> hi) <span style=color:#66d9ef>return</span> arr[lo];
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>int</span> p <span style=color:#f92672>=</span> partition(arr, lo, hi);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (k <span style=color:#f92672>==</span> p) <span style=color:#66d9ef>return</span> arr[p];
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>else</span> <span style=color:#66d9ef>if</span> (k <span style=color:#f92672>&lt;</span> p) <span style=color:#66d9ef>return</span> quickSelect(arr, lo, p <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>, k);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>else</span> <span style=color:#66d9ef>return</span> quickSelect(arr, p <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>, hi, k);
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>    vector<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;</span> data <span style=color:#f92672>=</span> {<span style=color:#ae81ff>5</span>, <span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>8</span>, <span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>9</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>7</span>, <span style=color:#ae81ff>4</span>, <span style=color:#ae81ff>6</span>};
+</span></span><span style=display:flex><span>    randomizedQuickSort(data, <span style=color:#ae81ff>0</span>, data.size() <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> x : data) cout <span style=color:#f92672>&lt;&lt;</span> x <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34; &#34;</span>;
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 輸出：1 2 3 4 5 6 7 8 9
+</span></span></span><span style=display:flex><span>    cout <span style=color:#f92672>&lt;&lt;</span> endl;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    vector<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;</span> arr <span style=color:#f92672>=</span> {<span style=color:#ae81ff>7</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>5</span>, <span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>8</span>, <span style=color:#ae81ff>3</span>};
+</span></span><span style=display:flex><span>    cout <span style=color:#f92672>&lt;&lt;</span> quickSelect(arr, <span style=color:#ae81ff>0</span>, arr.size() <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>2</span>) <span style=color:#f92672>&lt;&lt;</span> endl;
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 輸出：3（第 3 小，0-indexed 為 2）
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h4 id=reservoir-sampling-與-fisher-yates-shuffle>Reservoir Sampling 與 Fisher-Yates Shuffle</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-cpp data-lang=cpp><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;vector&gt;</span><span style=color:#75715e>
+</span></span></span><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;random&gt;</span><span style=color:#75715e>
+</span></span></span><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> std;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── Reservoir Sampling ─────────────────────────────────────
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>template</span><span style=color:#f92672>&lt;</span><span style=color:#66d9ef>typename</span> T<span style=color:#f92672>&gt;</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ReservoirSampler</span> {
+</span></span><span style=display:flex><span>    vector<span style=color:#f92672>&lt;</span>T<span style=color:#f92672>&gt;</span> reservoir;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>int</span> count <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>int</span> k;
+</span></span><span style=display:flex><span>    mt19937 rng{random_device{}()};
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>public</span><span style=color:#f92672>:</span>
+</span></span><span style=display:flex><span>    ReservoirSampler(<span style=color:#66d9ef>int</span> k) <span style=color:#f92672>:</span> k(k) {}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>add</span>(<span style=color:#66d9ef>const</span> T<span style=color:#f92672>&amp;</span> item) {
+</span></span><span style=display:flex><span>        count<span style=color:#f92672>++</span>;
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> ((<span style=color:#66d9ef>int</span>)reservoir.size() <span style=color:#f92672>&lt;</span> k) {
+</span></span><span style=display:flex><span>            reservoir.push_back(item);
+</span></span><span style=display:flex><span>        } <span style=color:#66d9ef>else</span> {
+</span></span><span style=display:flex><span>            uniform_int_distribution<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;</span> dist(<span style=color:#ae81ff>0</span>, count <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>);
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>int</span> j <span style=color:#f92672>=</span> dist(rng);
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>if</span> (j <span style=color:#f92672>&lt;</span> k) reservoir[j] <span style=color:#f92672>=</span> item;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    vector<span style=color:#f92672>&lt;</span>T<span style=color:#f92672>&gt;</span> getSample() <span style=color:#66d9ef>const</span> { <span style=color:#66d9ef>return</span> reservoir; }
+</span></span><span style=display:flex><span>};
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ─── Fisher-Yates Shuffle ───────────────────────────────────
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>void</span> <span style=color:#a6e22e>fisherYatesShuffle</span>(vector<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;&amp;</span> arr) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>int</span> n <span style=color:#f92672>=</span> arr.size();
+</span></span><span style=display:flex><span>    mt19937 rng(random_device{}());
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> n <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>; i <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>; i<span style=color:#f92672>--</span>) {
+</span></span><span style=display:flex><span>        uniform_int_distribution<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;</span> dist(<span style=color:#ae81ff>0</span>, i);
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>int</span> j <span style=color:#f92672>=</span> dist(rng);
+</span></span><span style=display:flex><span>        swap(arr[i], arr[j]);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// C++ STL 提供的 std::shuffle 底層即 Fisher-Yates
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>void</span> <span style=color:#a6e22e>stdShuffle</span>(vector<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;&amp;</span> arr) {
+</span></span><span style=display:flex><span>    mt19937 rng(random_device{}());
+</span></span><span style=display:flex><span>    shuffle(arr.begin(), arr.end(), rng);
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// Reservoir Sampling 測試
+</span></span></span><span style=display:flex><span>    ReservoirSampler<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;</span> sampler(<span style=color:#ae81ff>3</span>);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>; i <span style=color:#f92672>&lt;=</span> <span style=color:#ae81ff>1000</span>; i<span style=color:#f92672>++</span>) sampler.add(i);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>auto</span> sample <span style=color:#f92672>=</span> sampler.getSample();
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> x : sample) cout <span style=color:#f92672>&lt;&lt;</span> x <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34; &#34;</span>;
+</span></span><span style=display:flex><span>    cout <span style=color:#f92672>&lt;&lt;</span> endl;
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 輸出：從 1~1000 中隨機取 3 個
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// Fisher-Yates Shuffle 測試
+</span></span></span><span style=display:flex><span>    vector<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>int</span><span style=color:#f92672>&gt;</span> arr <span style=color:#f92672>=</span> {<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>4</span>, <span style=color:#ae81ff>5</span>};
+</span></span><span style=display:flex><span>    fisherYatesShuffle(arr);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> x : arr) cout <span style=color:#f92672>&lt;&lt;</span> x <span style=color:#f92672>&lt;&lt;</span> <span style=color:#e6db74>&#34; &#34;</span>;
+</span></span><span style=display:flex><span>    cout <span style=color:#f92672>&lt;&lt;</span> endl;
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 輸出：某個隨機排列
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h4 id=skip-list>Skip List</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-cpp data-lang=cpp><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;vector&gt;</span><span style=color:#75715e>
+</span></span></span><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;random&gt;</span><span style=color:#75715e>
+</span></span></span><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;climits&gt;</span><span style=color:#75715e>
+</span></span></span><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;iostream&gt;</span><span style=color:#75715e>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>using</span> <span style=color:#66d9ef>namespace</span> std;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>struct</span> <span style=color:#a6e22e>SkipNode</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>int</span> val;
+</span></span><span style=display:flex><span>    vector<span style=color:#f92672>&lt;</span>SkipNode<span style=color:#f92672>*&gt;</span> forward;
+</span></span><span style=display:flex><span>    SkipNode(<span style=color:#66d9ef>int</span> v, <span style=color:#66d9ef>int</span> lvl) <span style=color:#f92672>:</span> val(v), forward(lvl, <span style=color:#66d9ef>nullptr</span>) {}
+</span></span><span style=display:flex><span>};
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>SkipList</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>static</span> <span style=color:#66d9ef>const</span> <span style=color:#66d9ef>int</span> MAX_LEVEL <span style=color:#f92672>=</span> <span style=color:#ae81ff>16</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>static</span> <span style=color:#66d9ef>constexpr</span> <span style=color:#66d9ef>double</span> P <span style=color:#f92672>=</span> <span style=color:#ae81ff>0.5</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    SkipNode<span style=color:#f92672>*</span> head;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>int</span> level <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>    mt19937 rng{random_device{}()};
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>randomLevel</span>() {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>int</span> lvl <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>        uniform_real_distribution<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>double</span><span style=color:#f92672>&gt;</span> dist(<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>1</span>);
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>while</span> (dist(rng) <span style=color:#f92672>&lt;</span> P <span style=color:#f92672>&amp;&amp;</span> lvl <span style=color:#f92672>&lt;</span> MAX_LEVEL) lvl<span style=color:#f92672>++</span>;
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> lvl;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>public</span><span style=color:#f92672>:</span>
+</span></span><span style=display:flex><span>    SkipList() <span style=color:#f92672>:</span> head(<span style=color:#66d9ef>new</span> SkipNode(INT_MIN, MAX_LEVEL)) {}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>bool</span> <span style=color:#a6e22e>search</span>(<span style=color:#66d9ef>int</span> target) {
+</span></span><span style=display:flex><span>        SkipNode<span style=color:#f92672>*</span> curr <span style=color:#f92672>=</span> head;
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> level <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>; i <span style=color:#f92672>&gt;=</span> <span style=color:#ae81ff>0</span>; i<span style=color:#f92672>--</span>)
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>while</span> (curr<span style=color:#f92672>-&gt;</span>forward[i] <span style=color:#f92672>&amp;&amp;</span> curr<span style=color:#f92672>-&gt;</span>forward[i]<span style=color:#f92672>-&gt;</span>val <span style=color:#f92672>&lt;</span> target)
+</span></span><span style=display:flex><span>                curr <span style=color:#f92672>=</span> curr<span style=color:#f92672>-&gt;</span>forward[i];
+</span></span><span style=display:flex><span>        curr <span style=color:#f92672>=</span> curr<span style=color:#f92672>-&gt;</span>forward[<span style=color:#ae81ff>0</span>];
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> curr <span style=color:#f92672>&amp;&amp;</span> curr<span style=color:#f92672>-&gt;</span>val <span style=color:#f92672>==</span> target;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>insert</span>(<span style=color:#66d9ef>int</span> val) {
+</span></span><span style=display:flex><span>        vector<span style=color:#f92672>&lt;</span>SkipNode<span style=color:#f92672>*&gt;</span> update(MAX_LEVEL, <span style=color:#66d9ef>nullptr</span>);
+</span></span><span style=display:flex><span>        SkipNode<span style=color:#f92672>*</span> curr <span style=color:#f92672>=</span> head;
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> level <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>; i <span style=color:#f92672>&gt;=</span> <span style=color:#ae81ff>0</span>; i<span style=color:#f92672>--</span>) {
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>while</span> (curr<span style=color:#f92672>-&gt;</span>forward[i] <span style=color:#f92672>&amp;&amp;</span> curr<span style=color:#f92672>-&gt;</span>forward[i]<span style=color:#f92672>-&gt;</span>val <span style=color:#f92672>&lt;</span> val)
+</span></span><span style=display:flex><span>                curr <span style=color:#f92672>=</span> curr<span style=color:#f92672>-&gt;</span>forward[i];
+</span></span><span style=display:flex><span>            update[i] <span style=color:#f92672>=</span> curr;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>int</span> newLvl <span style=color:#f92672>=</span> randomLevel();
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> (newLvl <span style=color:#f92672>&gt;</span> level) {
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> level; i <span style=color:#f92672>&lt;</span> newLvl; i<span style=color:#f92672>++</span>) update[i] <span style=color:#f92672>=</span> head;
+</span></span><span style=display:flex><span>            level <span style=color:#f92672>=</span> newLvl;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>        SkipNode<span style=color:#f92672>*</span> node <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> SkipNode(val, newLvl);
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> newLvl; i<span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>            node<span style=color:#f92672>-&gt;</span>forward[i] <span style=color:#f92672>=</span> update[i]<span style=color:#f92672>-&gt;</span>forward[i];
+</span></span><span style=display:flex><span>            update[i]<span style=color:#f92672>-&gt;</span>forward[i] <span style=color:#f92672>=</span> node;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>bool</span> <span style=color:#a6e22e>erase</span>(<span style=color:#66d9ef>int</span> val) {
+</span></span><span style=display:flex><span>        vector<span style=color:#f92672>&lt;</span>SkipNode<span style=color:#f92672>*&gt;</span> update(MAX_LEVEL, <span style=color:#66d9ef>nullptr</span>);
+</span></span><span style=display:flex><span>        SkipNode<span style=color:#f92672>*</span> curr <span style=color:#f92672>=</span> head;
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> level <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>; i <span style=color:#f92672>&gt;=</span> <span style=color:#ae81ff>0</span>; i<span style=color:#f92672>--</span>) {
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>while</span> (curr<span style=color:#f92672>-&gt;</span>forward[i] <span style=color:#f92672>&amp;&amp;</span> curr<span style=color:#f92672>-&gt;</span>forward[i]<span style=color:#f92672>-&gt;</span>val <span style=color:#f92672>&lt;</span> val)
+</span></span><span style=display:flex><span>                curr <span style=color:#f92672>=</span> curr<span style=color:#f92672>-&gt;</span>forward[i];
+</span></span><span style=display:flex><span>            update[i] <span style=color:#f92672>=</span> curr;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>        SkipNode<span style=color:#f92672>*</span> target <span style=color:#f92672>=</span> curr<span style=color:#f92672>-&gt;</span>forward[<span style=color:#ae81ff>0</span>];
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span>target <span style=color:#f92672>||</span> target<span style=color:#f92672>-&gt;</span>val <span style=color:#f92672>!=</span> val) <span style=color:#66d9ef>return</span> false;
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; i <span style=color:#f92672>&lt;</span> level; i<span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>if</span> (update[i]<span style=color:#f92672>-&gt;</span>forward[i] <span style=color:#f92672>!=</span> target) <span style=color:#66d9ef>break</span>;
+</span></span><span style=display:flex><span>            update[i]<span style=color:#f92672>-&gt;</span>forward[i] <span style=color:#f92672>=</span> target<span style=color:#f92672>-&gt;</span>forward[i];
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>while</span> (level <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>1</span> <span style=color:#f92672>&amp;&amp;</span> <span style=color:#f92672>!</span>head<span style=color:#f92672>-&gt;</span>forward[level <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>]) level<span style=color:#f92672>--</span>;
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>delete</span> target;
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> true;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>~</span>SkipList() {
+</span></span><span style=display:flex><span>        SkipNode<span style=color:#f92672>*</span> curr <span style=color:#f92672>=</span> head;
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>while</span> (curr) {
+</span></span><span style=display:flex><span>            SkipNode<span style=color:#f92672>*</span> next <span style=color:#f92672>=</span> curr<span style=color:#f92672>-&gt;</span>forward[<span style=color:#ae81ff>0</span>];
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>delete</span> curr;
+</span></span><span style=display:flex><span>            curr <span style=color:#f92672>=</span> next;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>};
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>    SkipList sl;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> v : {<span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>6</span>, <span style=color:#ae81ff>7</span>, <span style=color:#ae81ff>9</span>, <span style=color:#ae81ff>12</span>, <span style=color:#ae81ff>17</span>, <span style=color:#ae81ff>19</span>, <span style=color:#ae81ff>21</span>, <span style=color:#ae81ff>25</span>}) sl.insert(v);
+</span></span><span style=display:flex><span>    cout <span style=color:#f92672>&lt;&lt;</span> boolalpha;
+</span></span><span style=display:flex><span>    cout <span style=color:#f92672>&lt;&lt;</span> sl.search(<span style=color:#ae81ff>7</span>) <span style=color:#f92672>&lt;&lt;</span> endl;   <span style=color:#75715e>// 輸出：true
+</span></span></span><span style=display:flex><span>    cout <span style=color:#f92672>&lt;&lt;</span> sl.search(<span style=color:#ae81ff>8</span>) <span style=color:#f92672>&lt;&lt;</span> endl;   <span style=color:#75715e>// 輸出：false
+</span></span></span><span style=display:flex><span>    sl.erase(<span style=color:#ae81ff>7</span>);
+</span></span><span style=display:flex><span>    cout <span style=color:#f92672>&lt;&lt;</span> sl.search(<span style=color:#ae81ff>7</span>) <span style=color:#f92672>&lt;&lt;</span> endl;   <span style=color:#75715e>// 輸出：false
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><hr><h3 id=複雜度分析>複雜度分析</h3><table><thead><tr><th>演算法</th><th>時間複雜度</th><th>空間複雜度</th><th>類型</th></tr></thead><tbody><tr><td>Randomized QuickSort</td><td>O(n log n) 期望</td><td>O(log n) 期望</td><td>Las Vegas</td></tr><tr><td>QuickSelect</td><td>O(n) 期望</td><td>O(1)</td><td>Las Vegas</td></tr><tr><td>Reservoir Sampling</td><td>O(n)</td><td>O(k)</td><td>Las Vegas</td></tr><tr><td>Fisher-Yates Shuffle</td><td>O(n)</td><td>O(1) 原地 / O(n) 副本</td><td>Las Vegas</td></tr><tr><td>Skip List 搜索/插入/刪除</td><td>O(log n) 期望</td><td>O(n log n) 期望</td><td>Las Vegas</td></tr><tr><td>Random Pick with Weight</td><td>O(n) 建構, O(log n) 查詢</td><td>O(n)</td><td>確定性（前綴和）</td></tr><tr><td>Miller-Rabin 素數測試</td><td>O(k log² n)</td><td>O(1)</td><td>Monte Carlo（誤判率 ≤ 4^-k）</td></tr></tbody></table><p><strong>關鍵觀察</strong>：</p><ul><li><strong>QuickSelect 為何是 O(n)？</strong> 每次 partition 後只遞迴一側，遞迴式為 T(n) = T(n/2) + O(n)，解為 O(n)。相比之下，QuickSort 遞迴兩側，T(n) = 2T(n/2) + O(n) = O(n log n)。</li><li><strong>Skip List 為何是 O(log n)？</strong> 每層期望跳過一半的節點（因為每個節點以 p=0.5 機率晉升到上一層），搜索路徑長度期望為 O(log n)。</li><li><strong>Miller-Rabin 的 4^-k</strong>：每輪測試有至多 1/4 的機率誤判，k 輪獨立測試後誤判率降至 (1/4)^k。k=20 時誤判率約 10^-12，實務上足夠可靠。</li></ul><hr><h3 id=變體與延伸>變體與延伸</h3><h4 id=1-weighted-reservoir-sampling>1. Weighted Reservoir Sampling</h4><p>當串流中每個元素有不同權重，需要按權重比例抽樣：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// ─── Weighted Reservoir Sampling（Efraimidis-Spirakis 算法）───
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>WeightedReservoirSampler</span>&lt;<span style=color:#f92672>T</span>&gt; {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>reservoir</span><span style=color:#f92672>:</span> { <span style=color:#a6e22e>item</span>: <span style=color:#66d9ef>T</span>; <span style=color:#a6e22e>key</span>: <span style=color:#66d9ef>number</span> }[];
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>k</span>: <span style=color:#66d9ef>number</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>constructor</span>(<span style=color:#a6e22e>k</span>: <span style=color:#66d9ef>number</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>k</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>k</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>reservoir</span> <span style=color:#f92672>=</span> [];
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>add</span>(<span style=color:#a6e22e>item</span>: <span style=color:#66d9ef>T</span>, <span style=color:#a6e22e>weight</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>void</span> {
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 計算隨機鍵：key = random^(1/weight)
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>key</span> <span style=color:#f92672>=</span> Math.<span style=color:#a6e22e>pow</span>(Math.<span style=color:#a6e22e>random</span>(), <span style=color:#ae81ff>1</span> <span style=color:#f92672>/</span> <span style=color:#a6e22e>weight</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>reservoir</span>.<span style=color:#a6e22e>length</span> <span style=color:#f92672>&lt;</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>k</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>reservoir</span>.<span style=color:#a6e22e>push</span>({ <span style=color:#a6e22e>item</span>, <span style=color:#a6e22e>key</span> });
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>if</span> (<span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>reservoir</span>.<span style=color:#a6e22e>length</span> <span style=color:#f92672>===</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>k</span>) {
+</span></span><span style=display:flex><span>        <span style=color:#75715e>// 建立最小堆（以 key 排序）
+</span></span></span><span style=display:flex><span>        <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>reservoir</span>.<span style=color:#a6e22e>sort</span>((<span style=color:#a6e22e>a</span>, <span style=color:#a6e22e>b</span>) <span style=color:#f92672>=&gt;</span> <span style=color:#a6e22e>a</span>.<span style=color:#a6e22e>key</span> <span style=color:#f92672>-</span> <span style=color:#a6e22e>b</span>.<span style=color:#a6e22e>key</span>);
+</span></span><span style=display:flex><span>      }
+</span></span><span style=display:flex><span>    } <span style=color:#66d9ef>else</span> <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>key</span> <span style=color:#f92672>&gt;</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>reservoir</span>[<span style=color:#ae81ff>0</span>].<span style=color:#a6e22e>key</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#75715e>// 替換最小 key 的元素
+</span></span></span><span style=display:flex><span>      <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>reservoir</span>[<span style=color:#ae81ff>0</span>] <span style=color:#f92672>=</span> { <span style=color:#a6e22e>item</span>, <span style=color:#a6e22e>key</span> };
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>reservoir</span>.<span style=color:#a6e22e>sort</span>((<span style=color:#a6e22e>a</span>, <span style=color:#a6e22e>b</span>) <span style=color:#f92672>=&gt;</span> <span style=color:#a6e22e>a</span>.<span style=color:#a6e22e>key</span> <span style=color:#f92672>-</span> <span style=color:#a6e22e>b</span>.<span style=color:#a6e22e>key</span>);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>getSample</span>()<span style=color:#f92672>:</span> <span style=color:#a6e22e>T</span>[] {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>reservoir</span>.<span style=color:#a6e22e>map</span>(<span style=color:#a6e22e>r</span> <span style=color:#f92672>=&gt;</span> <span style=color:#a6e22e>r</span>.<span style=color:#a6e22e>item</span>);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h4 id=2-concurrent-skip-list>2. Concurrent Skip List</h4><p>Skip List 的一大優勢是天然適合並發操作。與平衡樹不同，Skip List 的插入/刪除只修改局部指標，不需要全局旋轉：</p><pre tabindex=0><code>並發 Skip List 的關鍵設計：
+  1. 每個節點有獨立的鎖（Fine-grained Locking）
+  2. 插入只鎖定待修改的前驅節點
+  3. 搜索完全無鎖（Lock-free Read）
+  4. Java ConcurrentSkipListMap 即為此設計
+
+vs 平衡樹的並發困難：
+  AVL/RBT 旋轉可能涉及祖父節點 → 需要鎖定更大範圍
+  最壞情況下旋轉傳播到根節點 → 需全域鎖
+</code></pre><h4 id=3-randomized-binary-search-tree-treap>3. Randomized Binary Search Tree (Treap)</h4><p><strong>Treap</strong> 結合了 BST 和 Heap，每個節點有隨機優先級，透過旋轉維護 Heap 性質：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// ─── Treap 基本概念 ─────────────────────────────────────────
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// Treap = Tree + Heap
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 每個節點有兩個值：
+</span></span></span><span style=display:flex><span><span style=color:#75715e>//   - key：遵守 BST 性質（左小右大）
+</span></span></span><span style=display:flex><span><span style=color:#75715e>//   - priority：隨機值，遵守 Max-Heap 性質（父大於子）
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 兩個性質聯合保證樹的期望高度為 O(log n)
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 插入時：先按 BST 規則插入，再按 priority 旋轉上浮
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 刪除時：將節點旋轉到葉子再刪除
+</span></span></span></code></pre></div><hr><h3 id=面試考點>面試考點</h3><h4 id=常見面試問題>常見面試問題</h4><table><thead><tr><th>問題</th><th>關鍵思路</th></tr></thead><tbody><tr><td>如何從串流中等機率抽取一個元素？</td><td>Reservoir Sampling（k=1），每個元素以 1/i 機率替換</td></tr><tr><td>Fisher-Yates 和 Naive Shuffle 的差別？</td><td>路徑數 n! vs n^n，後者無法均勻映射到所有排列</td></tr><tr><td>QuickSort 如何避免最壞情況？</td><td>隨機選 pivot，或使用 Median-of-3 策略</td></tr><tr><td>Skip List vs Red-Black Tree？</td><td>Skip List 實作簡單、並發友好；RBT 最壞情況保證更強</td></tr><tr><td>如何在 O(n) 內找中位數？</td><td>QuickSelect，期望 O(n)</td></tr><tr><td>Math.random() 是否適用於密碼學？</td><td>不適用，需用 <code>crypto.getRandomValues()</code></td></tr></tbody></table><h4 id=常見陷阱>常見陷阱</h4><table><thead><tr><th>陷阱</th><th>說明</th><th>解決方式</th></tr></thead><tbody><tr><td><code>Math.random()</code> 不是真隨機</td><td>偽隨機數生成器（PRNG），有週期性</td><td>密碼學場景改用 <code>crypto.getRandomValues()</code></td></tr><tr><td>Naive Shuffle 不均勻</td><td><code>rand(0, n-1)</code> 產生 n^n 種路徑</td><td>嚴格使用 Fisher-Yates（從後往前，<code>rand(0, i)</code>）</td></tr><tr><td>Reservoir Sampling 下標混淆</td><td>1-indexed 與 0-indexed 導致機率偏差</td><td>統一使用 <code>rand(0, count-1)</code>，等於 0 時替換</td></tr><tr><td>QuickSort 固定 pivot</td><td>已排序輸入退化 O(n^2)</td><td>隨機選 pivot 或用 IntroSort</td></tr><tr><td>Skip List 記憶體洩漏</td><td>C++ 不刪除節點</td><td>在析構函數中逐節點 <code>delete</code></td></tr><tr><td>前綴和整數溢出</td><td>權重之和超過 <code>INT_MAX</code></td><td>改用 <code>long long</code> 或 <code>BigInt</code></td></tr></tbody></table><hr><h3 id=leetcode-練習題>LeetCode 練習題</h3><h4 id=382-linked-list-random-nodemedium>382. Linked List Random Node（Medium）</h4><p>從鏈結串列中隨機回傳一個節點值，不允許事先知道長度。使用 Reservoir Sampling（k=1）。完整實作見上方。</p><h4 id=384-shuffle-an-arraymedium>384. Shuffle an Array（Medium）</h4><p>設計支援 <code>reset()</code> 和 <code>shuffle()</code> 的資料結構。使用 Fisher-Yates Shuffle。完整實作見上方。</p><h4 id=398-random-pick-indexmedium>398. Random Pick Index（Medium）</h4><p>陣列中某值可能重複，隨機回傳該值的某個索引（等機率）。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// ─── LeetCode 398：Reservoir Sampling 變體 ──────────────────
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Solution398</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>nums</span>: <span style=color:#66d9ef>number</span>[];
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>constructor</span>(<span style=color:#a6e22e>nums</span>: <span style=color:#66d9ef>number</span>[]) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>nums</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>nums</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>pick</span>(<span style=color:#a6e22e>target</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>result</span> <span style=color:#f92672>=</span> <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>count</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>i</span> <span style=color:#f92672>&lt;</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>nums</span>.<span style=color:#a6e22e>length</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>if</span> (<span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>nums</span>[<span style=color:#a6e22e>i</span>] <span style=color:#f92672>===</span> <span style=color:#a6e22e>target</span>) {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>count</span><span style=color:#f92672>++</span>;
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> (Math.<span style=color:#a6e22e>floor</span>(Math.<span style=color:#a6e22e>random</span>() <span style=color:#f92672>*</span> <span style=color:#a6e22e>count</span>) <span style=color:#f92672>===</span> <span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>          <span style=color:#a6e22e>result</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>i</span>;
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>      }
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>result</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 時間：O(n) per pick，空間：O(1)
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 比預先建 HashMap 省空間，適用於記憶體受限場景
+</span></span></span></code></pre></div><h4 id=528-random-pick-with-weightmedium>528. Random Pick with Weight（Medium）</h4><p>根據權重陣列按比例隨機回傳索引。使用前綴和 + 二分搜索。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// ─── LeetCode 528：前綴和 + 二分搜索 ────────────────────────
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>WeightedRandom</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>prefixSum</span>: <span style=color:#66d9ef>number</span>[];
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>total</span>: <span style=color:#66d9ef>number</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>constructor</span>(<span style=color:#a6e22e>w</span>: <span style=color:#66d9ef>number</span>[]) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>prefixSum</span> <span style=color:#f92672>=</span> [];
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>sum</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>const</span> <span style=color:#a6e22e>weight</span> <span style=color:#66d9ef>of</span> <span style=color:#a6e22e>w</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>sum</span> <span style=color:#f92672>+=</span> <span style=color:#a6e22e>weight</span>;
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>prefixSum</span>.<span style=color:#a6e22e>push</span>(<span style=color:#a6e22e>sum</span>);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>total</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>sum</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>pickIndex</span>()<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>target</span> <span style=color:#f92672>=</span> Math.<span style=color:#a6e22e>floor</span>(Math.<span style=color:#a6e22e>random</span>() <span style=color:#f92672>*</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>total</span>) <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>lo</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>, <span style=color:#a6e22e>hi</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>prefixSum</span>.<span style=color:#a6e22e>length</span> <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>while</span> (<span style=color:#a6e22e>lo</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>hi</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>mid</span> <span style=color:#f92672>=</span> (<span style=color:#a6e22e>lo</span> <span style=color:#f92672>+</span> <span style=color:#a6e22e>hi</span>) <span style=color:#f92672>&gt;&gt;</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>if</span> (<span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>prefixSum</span>[<span style=color:#a6e22e>mid</span>] <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>target</span>) <span style=color:#a6e22e>lo</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>mid</span> <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>else</span> <span style=color:#a6e22e>hi</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>mid</span>;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>lo</span>;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 直覺圖解：
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// w = [1, 3, 2]，total = 6，prefixSum = [1, 4, 6]
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 數軸：[1] [2,3,4] [5,6]
+</span></span></span><span style=display:flex><span><span style=color:#75715e>//        ↑    ↑       ↑
+</span></span></span><span style=display:flex><span><span style=color:#75715e>//      索引0  索引1    索引2
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 隨機選 1~6，二分找第一個 prefixSum[i] &gt;= target
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 時間：建構 O(n)，查詢 O(log n)
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 空間：O(n)
+</span></span></span></code></pre></div><h4 id=215-kth-largest-element-in-an-arraymedium>215. Kth Largest Element in an Array（Medium）</h4><p>找陣列中第 k 大的元素。直接使用 QuickSelect。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-typescript data-lang=typescript><span style=display:flex><span><span style=color:#75715e>// ─── LeetCode 215：QuickSelect 找第 k 大 ────────────────────
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>findKthLargest</span>(<span style=color:#a6e22e>nums</span>: <span style=color:#66d9ef>number</span>[], <span style=color:#a6e22e>k</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 第 k 大 = 第 (n - k + 1) 小 → 0-indexed 為 n - k
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>target</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>nums</span>.<span style=color:#a6e22e>length</span> <span style=color:#f92672>-</span> <span style=color:#a6e22e>k</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>_select</span>(<span style=color:#a6e22e>nums</span>, <span style=color:#ae81ff>0</span>, <span style=color:#a6e22e>nums</span>.<span style=color:#a6e22e>length</span> <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>, <span style=color:#a6e22e>target</span>);
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>_select</span>(<span style=color:#a6e22e>arr</span>: <span style=color:#66d9ef>number</span>[], <span style=color:#a6e22e>lo</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>hi</span>: <span style=color:#66d9ef>number</span>, <span style=color:#a6e22e>k</span>: <span style=color:#66d9ef>number</span>)<span style=color:#f92672>:</span> <span style=color:#66d9ef>number</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>lo</span> <span style=color:#f92672>===</span> <span style=color:#a6e22e>hi</span>) <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>lo</span>];
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>pivotIdx</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>lo</span> <span style=color:#f92672>+</span> Math.<span style=color:#a6e22e>floor</span>(Math.<span style=color:#a6e22e>random</span>() <span style=color:#f92672>*</span> (<span style=color:#a6e22e>hi</span> <span style=color:#f92672>-</span> <span style=color:#a6e22e>lo</span> <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>));
+</span></span><span style=display:flex><span>  [<span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>pivotIdx</span>], <span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>hi</span>]] <span style=color:#f92672>=</span> [<span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>hi</span>], <span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>pivotIdx</span>]];
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>pivot</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>hi</span>];
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>let</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>lo</span> <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>let</span> <span style=color:#a6e22e>j</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>lo</span>; <span style=color:#a6e22e>j</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>hi</span>; <span style=color:#a6e22e>j</span><span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>j</span>] <span style=color:#f92672>&lt;=</span> <span style=color:#a6e22e>pivot</span>) {
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span>;
+</span></span><span style=display:flex><span>      [<span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>i</span>], <span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>j</span>]] <span style=color:#f92672>=</span> [<span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>j</span>], <span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>i</span>]];
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>  [<span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>i</span> <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>], <span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>hi</span>]] <span style=color:#f92672>=</span> [<span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>hi</span>], <span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>i</span> <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>]];
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>p</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>k</span> <span style=color:#f92672>===</span> <span style=color:#a6e22e>p</span>) <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>arr</span>[<span style=color:#a6e22e>p</span>];
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>else</span> <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>k</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>p</span>) <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>_select</span>(<span style=color:#a6e22e>arr</span>, <span style=color:#a6e22e>lo</span>, <span style=color:#a6e22e>p</span> <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span>, <span style=color:#a6e22e>k</span>);
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>else</span> <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>_select</span>(<span style=color:#a6e22e>arr</span>, <span style=color:#a6e22e>p</span> <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>, <span style=color:#a6e22e>hi</span>, <span style=color:#a6e22e>k</span>);
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 測試
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>findKthLargest</span>([<span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>5</span>, <span style=color:#ae81ff>6</span>, <span style=color:#ae81ff>4</span>], <span style=color:#ae81ff>2</span>)); <span style=color:#75715e>// 輸出：5
+</span></span></span><span style=display:flex><span><span style=color:#a6e22e>console</span>.<span style=color:#a6e22e>log</span>(<span style=color:#a6e22e>findKthLargest</span>([<span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>4</span>, <span style=color:#ae81ff>5</span>, <span style=color:#ae81ff>5</span>, <span style=color:#ae81ff>6</span>], <span style=color:#ae81ff>4</span>)); <span style=color:#75715e>// 輸出：4
+</span></span></span><span style=display:flex><span><span style=color:#75715e>// 期望時間：O(n)，空間：O(1)
+</span></span></span></code></pre></div><hr><h3 id=總結>總結</h3><p>隨機演算法是演算法設計中一個獨特而強大的範式——透過引入「可控的隨機性」，我們能夠在許多場景中獲得比確定性演算法更簡單、更高效的解法。</p><p>本文涵蓋了隨機演算法的核心知識：</p><ol><li><strong>兩大類型</strong>：Las Vegas（賭時間，保證正確）與 Monte Carlo（賭正確性，保證時間）</li><li><strong>排序與選擇</strong>：Randomized QuickSort 避免對抗性最壞情況，QuickSelect 以期望 O(n) 找第 k 小元素</li><li><strong>串流抽樣</strong>：Reservoir Sampling 在 O(k) 空間內實現未知大小串流的等機率抽樣</li><li><strong>均勻洗牌</strong>：Fisher-Yates Shuffle 是唯一正確的 O(n) 洗牌算法，Naive Shuffle 因路徑數不匹配而不均勻</li><li><strong>隨機化資料結構</strong>：Skip List 用隨機層數替代平衡樹的複雜旋轉，被 Redis 和 LevelDB 採用</li><li><strong>素數測試</strong>：Miller-Rabin 以極低的錯誤機率在多項式時間內判定素數</li></ol><p>記住核心原則：<strong>隨機化不是猜測，而是有數學保證的策略</strong>。每個隨機演算法的背後都有嚴格的機率分析，確保其正確性或效能達到預期。</p><p>下一篇文章，我們將探討 <strong>近似與線上演算法（Approximation & Online Algorithms）</strong>，學習如何在無法獲得最優解的情況下，找到「足夠好」的解答——這在真實世界的大規模系統中尤其重要。</p><a class="text-blue-500 font-bold no-underline" href=/post/javascript/data-structures-algorithms/035-game-theory/ target=_blank>上一篇：博弈論完全指南</a></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
+</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="subscribe-widget max-w-xl mx-auto my-10 px-6 py-8 text-center rounded-xl bg-zinc-50 dark:bg-zinc-800"><h3 class="text-lg font-bold mb-1">訂閱 BenzHub 電子報</h3><p class="text-sm text-zinc-600 dark:text-zinc-300 mb-4">每週 AI 賺錢實戰 + 免費工具地圖</p><form class="subscribe-form flex flex-col sm:flex-row gap-3 justify-center" data-worker=https://benzhub-newsletter.benzhub.workers.dev data-source=footer-widget><input type=email required placeholder="你的 Email" class="px-4 py-2 rounded-lg border border-zinc-300 dark:bg-zinc-900 dark:border-zinc-600"><div class="cf-turnstile mt-3 flex justify-center" data-sitekey=0x4AAAAAAD4_sR6pI3UknZVz></div><button type=submit class="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700">訂閱</button></form><p class="subscribe-status text-sm text-zinc-500 mt-2"></p></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/javascript/data-structures--algorithms/035-game-theory/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">博弈論完全指南 — Nim 遊戲、Sprague-Grundy 定理與組合賽局分析 | 資料結構與演算法</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/18</span>
+</a><a href=https://benzhub.github.io/post/javascript/data-structures--algorithms/034-computational-geometry/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">計算幾何完全指南 — 凸包、線段交點與掃描線演算法 | 資料結構與演算法</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/17</span>
+</a><a href=https://benzhub.github.io/post/javascript/data-structures--algorithms/033-number-theory/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">數論完全指南 — GCD、模運算、質數篩法與中國剩餘定理 | 資料結構與演算法</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/16</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/javascript/data-structures--algorithms/035-game-theory/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+<span class="text-sm font-medium">博弈論完全指南 — Nim 遊戲、Sprague-Grundy 定理與組合賽局分析 | 資料結構與演算法</span></a></div><div></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
+</a><a href=/tags/acid><span class=tag-pill>acid</span>
+</a><a href=/tags/aggregate><span class=tag-pill>aggregate</span>
+</a><a href=/tags/ai><span class=tag-pill>ai</span>
+</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
+</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
+</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
+</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
+</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
+</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
+</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
+</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
+</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
+</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
+</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span>
+</a><a href=/tags/ai-insights><span class=tag-pill>ai-insights</span>
+</a><a href=/tags/analytics><span class=tag-pill>analytics</span>
+</a><a href=/tags/api><span class=tag-pill>api</span>
+</a><a href=/tags/architecture><span class=tag-pill>architecture</span>
+</a><a href=/tags/audit><span class=tag-pill>audit</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (43)</span>
+</a><a href=/post/javascript/><span class=tag-pill>JavaScript (98)</span>
+</a><a href=/post/django/><span class=tag-pill>Django (44)</span>
+</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
+</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
+</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
+</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
+</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (13)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/postgresql/043-pgvector/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">pgvector 向量搜尋：從 Embedding 到 RAG 的完整實戰 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/19</p></a><a href=/post/javascript/data-structures--algorithms/036-randomized/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">隨機演算法完全指南 — QuickSelect、Reservoir Sampling 與 Fisher-Yates 洗牌 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/19</p></a><a href=/post/postgresql/042-upgrade/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">PostgreSQL 版本升級：pg_upgrade 與邏輯複寫滾動升級完整攻略 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/18</p></a><a href=/post/javascript/data-structures--algorithms/035-game-theory/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">博弈論完全指南 — Nim 遊戲、Sprague-Grundy 定理與組合賽局分析 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/18</p></a><a href=/post/postgresql/041-maintenance/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">PostgreSQL 日常維護：REINDEX、pg_repack、Bloat 偵測與健檢腳本 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/17</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script src=https://challenges.cloudflare.com/turnstile/v0/api.js async defer></script><script src=/js/subscribe.js defer></script><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>

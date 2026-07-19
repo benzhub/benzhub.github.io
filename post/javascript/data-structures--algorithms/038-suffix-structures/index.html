@@ -1,0 +1,1886 @@
+<!DOCTYPE html>
+
+<html lang="zh-TW">
+<head>
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-FSEWPBJMJT');
+</script>
+
+<title>後綴結構完全指南 — Suffix Array、Suffix Tree 與 LCP 陣列 | 資料結構與演算法 | BenzHub</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="apple-touch-icon" sizes="180x180" href='/favicon/apple-touch-icon.png'>
+    <link rel="icon" type="image/png" sizes="32x32" href='/favicon/favicon-32x32.png'>
+    <link rel="icon" type="image/png" sizes="16x16" href='/favicon/favicon-16x16.png'>
+    <link rel="manifest" href='/favicon/site.webmanifest' />
+    <link rel="mask-icon" href=' /favicon/safari-pinned-tab.svg' color="#5bbad5" />
+    <link rel="shortcut icon" href='/favicon/favicon.ico' />
+    <meta name="theme-color" content="#fafafa">
+    <meta property="og:title" content="後綴結構完全指南 — Suffix Array、Suffix Tree 與 LCP 陣列 | 資料結構與演算法 | BenzHub" />
+    
+    
+    
+    <link rel="stylesheet" href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css" />
+    
+    <link href=' /css/blonde.min.css' rel="stylesheet" type="text/css" media="print"
+        onload="this.media=' all'">
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+
+<meta name="description" content="深入解析後綴結構核心技術，掌握 Suffix Array 建構（SA-IS 演算法）、Suffix Tree、LCP 陣列與其在模式匹配、最長重複子字串等問題的應用，搭配 JavaScript/TypeScript 與 C&#43;&#43; 完整實作">
+<meta property="og:site_name" content="BenzHub">
+<meta property="og:description" content="深入解析後綴結構核心技術，掌握 Suffix Array 建構（SA-IS 演算法）、Suffix Tree、LCP 陣列與其在模式匹配、最長重複子字串等問題的應用，搭配 JavaScript/TypeScript 與 C&#43;&#43; 完整實作">
+<meta property="og:url" content="https://benzhub.github.io/post/javascript/data-structures--algorithms/038-suffix-structures/">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="zh_TW">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="">
+
+<link rel="canonical" href="https://benzhub.github.io/post/javascript/data-structures--algorithms/038-suffix-structures/">
+
+<meta name="twitter:description" content="深入解析後綴結構核心技術，掌握 Suffix Array 建構（SA-IS 演算法）、Suffix Tree、LCP 陣列與其在模式匹配、最長重複子字串等問題的應用，搭配 JavaScript/TypeScript 與 C&#43;&#43; 完整實作">
+<meta property="article:published_time" content="2026-07-21T00:00:00&#43;00:00">
+<meta property="article:updated_time" content="2026-07-21T00:00:00&#43;00:00">
+
+
+
+
+
+    
+<meta property="og:image" content="https://benzhub.github.io/img/javascript/Data%20Structures%20&amp;%20Algorithms/038-Suffix-Structures.png">
+<meta property="og:image:url" content="https://benzhub.github.io/img/javascript/Data%20Structures%20&amp;%20Algorithms/038-Suffix-Structures.png">
+    
+
+    
+    <link rel="stylesheet" href='/css/custom.css'>
+    <i class="dark hidden"></i>
+    
+<link rel="alternate" hreflang="zh-TW" href="https://benzhub.github.io/post/javascript/data-structures--algorithms/038-suffix-structures/" />
+
+<link rel="alternate" hreflang="x-default" href="https://benzhub.github.io/post/javascript/data-structures--algorithms/038-suffix-structures/" />
+
+    
+
+
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "\"後綴結構完全指南 — Suffix Array、Suffix Tree 與 LCP 陣列 | 資料結構與演算法\"",
+  "description": "\"深入解析後綴結構核心技術，掌握 Suffix Array 建構（SA-IS 演算法）、Suffix Tree、LCP 陣列與其在模式匹配、最長重複子字串等問題的應用，搭配 JavaScript/TypeScript 與 C++ 完整實作\"",
+  "author": {
+    "@type": "Person",
+    "name": "\"BenzHub\"",
+    "url": "https:\/\/benzhub.github.io\/about",
+    "jobTitle": "\"Software Developer\"",
+    "sameAs": [
+      "\"https://github.com/benzhub\""
+    ]
+  },
+  "datePublished": "2026-07-21T00:00:00\u002b00:00",
+  "dateModified": "2026-07-21T00:00:00\u002b00:00",
+  "image": "https:\/\/benzhub.github.io\/img\/javascript\/Data%20Structures%20\u0026%20Algorithms\/038-Suffix-Structures.png",
+  "publisher": {
+    "@type": "Organization",
+    "name": "\"BenzHub\"",
+    "url": "\"https://benzhub.github.io/\"",
+    "sameAs": [
+      "\"https://github.com/benzhub\""
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/benzhub.github.io\/post\/javascript\/data-structures--algorithms\/038-suffix-structures\/"
+  },
+  "inLanguage": "zh-TW"
+}
+</script>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "\"BenzHub\"",
+      "item": "https:\/\/benzhub.github.io\/"
+    }
+    
+    
+      
+      
+    ,{
+      "@type": "ListItem",
+      "position": 2,
+      "name": "\"Blog\"",
+      "item": "https:\/\/benzhub.github.io\/post\/javascript\/"
+    }
+      
+      
+    
+    ,{
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "\"後綴結構完全指南 — Suffix Array、Suffix Tree 與 LCP 陣列 | 資料結構與演算法\""
+    }
+  ]
+}
+</script>
+
+
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    
+    
+    {
+      "@type": "Question",
+      "name": "\"Suffix Array 和 Suffix Tree 有什麼差別？該選哪個？\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Suffix Tree 是將字串所有後綴建成一棵壓縮的 Trie，支援 O(m) 模式匹配與豐富的查詢，但空間需求較大（每個節點需要多個指標，通常需要 20n 以上的空間）。Suffix Array 則是將後綴按字典序排列後僅保存起始下標的整數陣列，搭配 LCP 陣列後可實現幾乎所有 Suffix Tree 能做的事，且空間僅需 4n~8n bytes。在實務中，Suffix Array + LCP 是更常用的選擇，因為實作較簡潔、快取效率更好，且在競賽和面試中更容易書寫。只有在需要線上（Online）建構或非常特殊的樹操作時，才會考慮使用 Suffix Tree。\""
+      }
+    }
+    
+    ,
+    {
+      "@type": "Question",
+      "name": "\"Kasai's Algorithm 為什麼能在 O(n) 時間建構 LCP 陣列？\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Kasai's Algorithm 的核心觀察是：若後綴 s[i..] 與其在 Suffix Array 中的前一個後綴的 LCP 長度為 h，則後綴 s[i+1..] 與其前一個後綴的 LCP 長度至少為 h-1。直覺上，去掉兩個字串各自的第一個字元後，公共前綴最多減少 1。因此變數 h 在整個演算法中最多遞增 n 次（每次比較成功加 1），而每次處理新位置時最多遞減 1，所以 h 的總變化量為 O(n)，整體時間複雜度即為 O(n)。\""
+      }
+    }
+    
+    ,
+    {
+      "@type": "Question",
+      "name": "\"後綴結構在前端開發或日常工程中有哪些實際應用？\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"後綴結構在日常工程中的應用比想像中廣泛。典型場景包括：(1) 文字編輯器的全文搜尋——VS Code 的搜尋功能底層使用類似的索引技術來實現高效子字串匹配；(2) 自動補全——輸入法和 IDE 的自動補全需要快速查找所有以特定前綴開頭的字串，Suffix Array 的二分搜尋恰好適合此場景；(3) 資料壓縮——BWT（Burrows-Wheeler Transform）基於 Suffix Array 排列字元，是 bzip2 壓縮算法的核心；(4) 生物資訊學——DNA 序列比對工具（如 BWA、Bowtie）都以 Suffix Array / FM-Index 為核心索引。\""
+      }
+    }
+    
+  ]
+}
+</script>
+
+
+
+
+
+</head>
+<body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class="site-nav" id="siteNav">
+    <div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full">
+        
+        <a href="https://benzhub.github.io/" class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">
+            BenzHub
+        </a>
+
+        
+        <div class="hidden md:flex items-center gap-6">
+            
+            <a href="/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                首頁
+            </a>
+            
+            <a href="/about/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                關於
+            </a>
+            
+            <a href="/contact/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                聯絡
+            </a>
+            
+            <a href="/resourses/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                資源
+            </a>
+            
+
+            
+            <div class="flex items-center gap-2">
+                <form class="flex items-center" role="search" method="get" action="https://google.com/search" id="navSearchForm">
+                    <input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50"
+                        type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋" id="navSearchInput">
+                    <input type="hidden" name="sitesearch" value="https://benzhub.github.io/" />
+                </form>
+                <button onclick="toggleNavSearch()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+                    <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                    </svg>
+                </button>
+            </div>
+
+            
+            <span class="text-zinc-200 dark:text-zinc-700">|</span>
+
+            
+            
+
+
+
+
+<div class="lang-switcher relative hidden md:block">
+    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+        <span>🌐</span>
+        <span>繁體中文</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
+        
+            
+            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
+    <div class="flex gap-2">
+        
+            
+            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+            
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon2" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+        </div>
+
+        
+        <div class="flex md:hidden items-center gap-1">
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+            <button id="hamburgerbtn" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Menu">
+                <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    
+    <div class="mobile-menu md:hidden" id="mobileMenu">
+        
+        <a href="/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            首頁
+        </a>
+        
+        <a href="/about/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            關於
+        </a>
+        
+        <a href="/contact/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            聯絡
+        </a>
+        
+        <a href="/resourses/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            資源
+        </a>
+        
+        <form class="mt-2" role="search" method="get" action="https://google.com/search">
+            <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
+            <input type="hidden" name="sitesearch" value="https://benzhub.github.io/" />
+        </form>
+        
+        
+
+
+
+
+<div class="lang-switcher relative hidden md:block">
+    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+        <span>🌐</span>
+        <span>繁體中文</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
+        
+            
+            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
+    <div class="flex gap-2">
+        
+            
+            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+    </div>
+</nav>
+
+<script>
+    
+    document.getElementById('hamburgerbtn').addEventListener('click', function () {
+        document.getElementById('mobileMenu').classList.toggle('active');
+    });
+
+    
+    window.addEventListener('scroll', function () {
+        var nav = document.getElementById('siteNav');
+        if (window.scrollY > 50) {
+            nav.classList.add('scrolled');
+        } else {
+            nav.classList.remove('scrolled');
+        }
+    });
+
+    
+    function toggleNavSearch() {
+        var input = document.getElementById('navSearchInput');
+        input.classList.toggle('expanded');
+        if (input.classList.contains('expanded')) {
+            input.focus();
+        }
+    }
+
+    
+    function toggleLangMenu() {
+        var dropdown = document.getElementById('langDropdown');
+        dropdown.classList.toggle('hidden');
+    }
+
+    
+    document.addEventListener('click', function (e) {
+        
+        var form = document.getElementById('navSearchForm');
+        var input = document.getElementById('navSearchInput');
+        if (form && input && !form.contains(e.target) && !e.target.closest('[aria-label="Toggle Search"]')) {
+            input.classList.remove('expanded');
+        }
+        
+        var langSwitcher = e.target.closest('.lang-switcher');
+        if (!langSwitcher) {
+            var dropdown = document.getElementById('langDropdown');
+            if (dropdown) dropdown.classList.add('hidden');
+        }
+    });
+</script>
+<div class="nav-spacer"></div>
+    <div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id="content">
+        <div class="lg:mx-5">
+<div class="grid grid-cols-3 gap-6">
+  
+  <div class="col-span-3 lg:col-span-2">
+  
+      
+      <div class="post-detail fade-in my-4">
+        <h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">後綴結構完全指南 — Suffix Array、Suffix Tree 與 LCP 陣列 | 資料結構與演算法</h1>
+        <div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4">
+            <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/21
+            </span>
+            
+        </div>
+        
+        <div class="flex flex-wrap gap-1.5 mb-5">
+            
+            <a href='/tags/javascript' class="tag-pill no-underline">javascript</a>
+            
+            <a href='/tags/%E8%B3%87%E6%96%99%E7%B5%90%E6%A7%8B%E6%BC%94%E7%AE%97%E6%B3%95' class="tag-pill no-underline">資料結構&amp;演算法</a>
+            
+            <a href='/tags/suffix-array' class="tag-pill no-underline">Suffix Array</a>
+            
+            <a href='/tags/%E5%BE%8C%E7%B6%B4%E7%B5%90%E6%A7%8B' class="tag-pill no-underline">後綴結構</a>
+            
+        </div>
+        
+        
+        <img class="py-4 m-auto rounded-lg thumb-img" src="https://benzhub.github.io/img/javascript/Data%20Structures%20&amp;%20Algorithms/038-Suffix-Structures.png" alt="後綴結構完全指南 — Suffix Array、Suffix Tree 與 LCP 陣列 | 資料結構與演算法">
+        
+        
+        <div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote>
+<p><strong>後綴結構（Suffix Structures）</strong> 是字串演算法中最強大的索引家族，涵蓋 <strong>Suffix Array（後綴陣列）</strong>、<strong>LCP Array（最長公共前綴陣列）</strong> 與 <strong>Suffix Tree（後綴樹）</strong> 三大核心。透過對字串所有後綴建立有序索引，我們能在 <strong>O(m log n)</strong> 時間內完成模式匹配、求解 <strong>最長重複子字串</strong>、計算 <strong>不同子字串數量</strong>，甚至支援全文搜尋引擎的底層索引。本文將從基礎概念出發，逐步掌握 <strong>倍增法</strong>、<strong>SA-IS 線性建構</strong>、<strong>Kasai&rsquo;s Algorithm</strong> 等核心技術，搭配 JavaScript/TypeScript 與 C++ 雙語言完整實作。</p>
+</blockquote>
+<h3 id="前言">前言</h3>
+<p>在前一篇文章中，我們探討了近似與線上演算法如何在 NP-hard 問題與即時決策場景下找到「足夠好」的解。本篇我們將進入字串演算法的深水區—— <strong>後綴結構（Suffix Structures）</strong>。</p>
+<p>字串處理是程式開發中無處不在的需求：從搜尋引擎的全文檢索、IDE 的自動補全、到生物資訊學中的 DNA 序列比對，都仰賴高效的字串索引技術。暴力的子字串搜尋需要 O(nm) 時間，而 KMP、Z-Algorithm 等單模式匹配演算法雖然將複雜度降至 O(n+m)，卻無法高效處理「在同一文字上重複搜尋多個模式」的場景。</p>
+<p><strong>後綴結構</strong> 的核心思想是：對一個字串預先建立索引，之後每次查詢只需 O(m log n) 甚至 O(m) 的時間。這就像是為一本書建立「所有可能關鍵字」的索引——一旦索引建好，任何查詢都能快速完成。</p>
+<p>學習本文後，你將能夠：</p>
+<ul>
+<li>理解 <strong>Suffix Array</strong>、<strong>LCP Array</strong>、<strong>Suffix Tree</strong> 的定義與關聯</li>
+<li>實作 <strong>倍增法</strong> O(n log²n) 與 <strong>SA-IS</strong> O(n) 兩種 Suffix Array 建構法</li>
+<li>使用 <strong>Kasai&rsquo;s Algorithm</strong> 在 O(n) 時間建構 LCP 陣列</li>
+<li>應用 Suffix Array 解決 <strong>模式匹配</strong>、<strong>最長重複子字串</strong>、<strong>最長公共子字串</strong> 等經典問題</li>
+<li>認識 <strong>後綴自動機（SAM）</strong>、<strong>DC3 演算法</strong> 等進階變體</li>
+</ul>
+<hr>
+<h3 id="核心概念">核心概念</h3>
+<h4 id="後綴suffix的基本概念">後綴（Suffix）的基本概念</h4>
+<p>一個長度為 n 的字串 <code>s</code>，共有 n 個後綴。後綴 <code>s[i..]</code> 表示從位置 i 開始到字串結尾的子字串。</p>
+<pre tabindex="0"><code>字串 s = &#34;banana&#34;（長度 n = 6，下標從 0 開始）
+
+所有後綴：
+  i=0: &#34;banana&#34;
+  i=1: &#34;anana&#34;
+  i=2: &#34;nana&#34;
+  i=3: &#34;ana&#34;
+  i=4: &#34;na&#34;
+  i=5: &#34;a&#34;
+
+觀察：任何子字串都是某個後綴的前綴
+  例如 &#34;nan&#34; = 後綴 &#34;nana&#34; 的前 3 個字元
+  → 這就是後綴結構能支援子字串查詢的根本原因
+</code></pre><h4 id="suffix-array後綴陣列">Suffix Array（後綴陣列）</h4>
+<p><strong>Suffix Array（SA）</strong> 是將字串所有後綴按 <strong>字典序</strong> 排列後，記錄各後綴的 <strong>起始下標</strong> 所形成的整數陣列。</p>
+<pre tabindex="0"><code>s = &#34;banana&#34;
+
+按字典序排列所有後綴：
+  SA[0] = 5  →  &#34;a&#34;
+  SA[1] = 3  →  &#34;ana&#34;
+  SA[2] = 1  →  &#34;anana&#34;
+  SA[3] = 0  →  &#34;banana&#34;
+  SA[4] = 4  →  &#34;na&#34;
+  SA[5] = 2  →  &#34;nana&#34;
+
+Suffix Array: SA = [5, 3, 1, 0, 4, 2]
+
+Rank Array（SA 的反函數）：rank[i] = 後綴 i 在 SA 中的位置
+  rank[0]=3, rank[1]=2, rank[2]=5
+  rank[3]=1, rank[4]=4, rank[5]=0
+</code></pre><p>SA 的核心價值在於：後綴按字典序排列後，所有以相同子字串開頭的後綴會 <strong>聚集在一起</strong>，因此可以用 <strong>二分搜尋</strong> 在 O(m log n) 時間內找到任意模式。</p>
+<h4 id="lcp-array最長公共前綴陣列">LCP Array（最長公共前綴陣列）</h4>
+<p><strong>LCP Array</strong> 記錄 Suffix Array 中 <strong>相鄰兩個後綴</strong> 的最長公共前綴（Longest Common Prefix）長度。<code>lcp[i]</code> 表示 <code>SA[i]</code> 和 <code>SA[i-1]</code> 對應後綴的 LCP 長度。</p>
+<pre tabindex="0"><code>s = &#34;banana&#34;，SA = [5, 3, 1, 0, 4, 2]
+
+相鄰後綴比較：
+  SA[0]=5: &#34;a&#34;
+  SA[1]=3: &#34;ana&#34;     → LCP(&#34;a&#34;, &#34;ana&#34;)     = 1  → lcp[1] = 1
+  SA[2]=1: &#34;anana&#34;   → LCP(&#34;ana&#34;, &#34;anana&#34;)  = 3  → lcp[2] = 3
+  SA[3]=0: &#34;banana&#34;  → LCP(&#34;anana&#34;, &#34;banana&#34;) = 0  → lcp[3] = 0
+  SA[4]=4: &#34;na&#34;      → LCP(&#34;banana&#34;, &#34;na&#34;)  = 0  → lcp[4] = 0
+  SA[5]=2: &#34;nana&#34;    → LCP(&#34;na&#34;, &#34;nana&#34;)    = 2  → lcp[5] = 2
+
+LCP Array = [-, 1, 3, 0, 0, 2]
+（lcp[0] 未定義，通常設為 0）
+</code></pre><p>LCP 陣列的威力在於：</p>
+<ol>
+<li><strong>最長重複子字串</strong> = <code>max(lcp[i])</code>，對應位置為 <code>sa[argmax]</code></li>
+<li><strong>不同子字串數量</strong> = <code>n(n+1)/2 - sum(lcp[i])</code></li>
+<li>搭配 <strong>Sparse Table</strong>（RMQ）預處理後，可在 <strong>O(1)</strong> 時間查詢任意兩個後綴的 LCP</li>
+</ol>
+<h4 id="suffix-tree後綴樹概覽">Suffix Tree（後綴樹）概覽</h4>
+<p><strong>Suffix Tree</strong> 是一棵壓縮的 Trie（Compressed Trie），將字串所有後綴插入後，合併僅有單一子節點的路徑。它在理論上非常優美：</p>
+<pre tabindex="0"><code>Suffix Tree vs Suffix Array 對比：
+
+特性            | Suffix Tree        | Suffix Array + LCP
+───────────────|────────────────────|──────────────────────
+建構時間         | O(n)（Ukkonen）     | O(n)（SA-IS）
+空間             | ~20n bytes         | ~8n bytes（SA + LCP）
+模式匹配         | O(m)               | O(m log n)
+實作難度         | 極高               | 中等
+快取效率         | 差（指標跳躍多）     | 好（連續陣列）
+競賽/面試常用     | 少                 | 多
+
+結論：Suffix Array + LCP 幾乎可以替代 Suffix Tree，
+     且實作更簡潔、空間更少、快取更友善。
+     本文以 Suffix Array + LCP 為主軸。
+</code></pre><p><strong>Ukkonen&rsquo;s Algorithm</strong> 可在 O(n) 時間線上建構 Suffix Tree，但其實作極為複雜（需要處理 Active Point、Suffix Link、End Leaf 等機制），在面試和競賽中鮮少被要求手寫。因此本文將重點放在 Suffix Array + LCP 的實作與應用。</p>
+<hr>
+<h3 id="javascript--typescript-實作">JavaScript / TypeScript 實作</h3>
+<h4 id="naive-suffix-array-建構">Naive Suffix Array 建構</h4>
+<p>最直覺的做法是直接排序所有後綴。雖然時間複雜度較高（O(n² log n)，因為字串比較本身需要 O(n)），但有助於理解 SA 的本質：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-typescript" data-lang="typescript"><span style="display:flex;"><span><span style="color:#75715e">// ─── Naive Suffix Array 建構 O(n² log n) ──────────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">buildSuffixArrayNaive</span>(<span style="color:#a6e22e">s</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">number</span>[] {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">length</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 建立 (後綴起始下標, 後綴字串) 的配對
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">suffixes</span> <span style="color:#f92672">=</span> Array.<span style="color:#66d9ef">from</span>({ <span style="color:#a6e22e">length</span>: <span style="color:#66d9ef">n</span> }, (<span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">i</span>) <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">i</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 直接按後綴字串的字典序排序
+</span></span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">suffixes</span>.<span style="color:#a6e22e">sort</span>((<span style="color:#a6e22e">a</span>, <span style="color:#a6e22e">b</span>) <span style="color:#f92672">=&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 逐字元比較後綴 s[a..] 和 s[b..]
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">k</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">k</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">-</span> Math.<span style="color:#a6e22e">min</span>(<span style="color:#a6e22e">a</span>, <span style="color:#a6e22e">b</span>); <span style="color:#a6e22e">k</span><span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">a</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">k</span> <span style="color:#f92672">&gt;=</span> <span style="color:#a6e22e">n</span>) <span style="color:#66d9ef">return</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>; <span style="color:#75715e">// 較短的後綴排前面
+</span></span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">b</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">k</span> <span style="color:#f92672">&gt;=</span> <span style="color:#a6e22e">n</span>) <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">s</span>[<span style="color:#a6e22e">a</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">k</span>] <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">s</span>[<span style="color:#a6e22e">b</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">k</span>]) <span style="color:#66d9ef">return</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">s</span>[<span style="color:#a6e22e">a</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">k</span>] <span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">s</span>[<span style="color:#a6e22e">b</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">k</span>]) <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>  });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">suffixes</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 測試
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">s1</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;banana&#34;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;Naive SA:&#34;</span>, <span style="color:#a6e22e">buildSuffixArrayNaive</span>(<span style="color:#a6e22e">s1</span>));
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 輸出：Naive SA: [5, 3, 1, 0, 4, 2]
+</span></span></span></code></pre></div><h4 id="倍增法建構-suffix-array--on-logn">倍增法建構 Suffix Array — O(n log²n)</h4>
+<p><strong>倍增法（Prefix Doubling）</strong> 是競賽與面試中最實用的 SA 建構法，核心思想是：迭代地對「長度 2^k 的子字串」排序，每輪倍增子字串長度，利用上一輪的排名作為比較鍵。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-typescript" data-lang="typescript"><span style="display:flex;"><span><span style="color:#75715e">// ─── 倍增法建構 Suffix Array O(n log²n) ──────────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">buildSuffixArray</span>(<span style="color:#a6e22e">s</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">number</span>[] {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">length</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// sa[i] = 字典序第 i 小的後綴的起始下標
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">sa</span> <span style="color:#f92672">=</span> Array.<span style="color:#66d9ef">from</span>({ <span style="color:#a6e22e">length</span>: <span style="color:#66d9ef">n</span> }, (<span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">i</span>) <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">i</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// rank[i] = 後綴 i 的當前排名（初始為字元編碼）
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">rank</span> <span style="color:#f92672">=</span> Array.<span style="color:#66d9ef">from</span>({ <span style="color:#a6e22e">length</span>: <span style="color:#66d9ef">n</span> }, (<span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">i</span>) <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">charCodeAt</span>(<span style="color:#a6e22e">i</span>));
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">tmp</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Array(<span style="color:#a6e22e">n</span>).<span style="color:#a6e22e">fill</span>(<span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">gap</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>; <span style="color:#a6e22e">gap</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">n</span>; <span style="color:#a6e22e">gap</span> <span style="color:#f92672">&lt;&lt;=</span> <span style="color:#ae81ff">1</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 比較函數：按 (rank[i], rank[i+gap]) 二元組排序
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">compare</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">a</span>: <span style="color:#66d9ef">number</span>, <span style="color:#a6e22e">b</span>: <span style="color:#66d9ef">number</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">number</span> <span style="color:#f92672">=&gt;</span> {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">rank</span>[<span style="color:#a6e22e">a</span>] <span style="color:#f92672">!==</span> <span style="color:#a6e22e">rank</span>[<span style="color:#a6e22e">b</span>]) <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">rank</span>[<span style="color:#a6e22e">a</span>] <span style="color:#f92672">-</span> <span style="color:#a6e22e">rank</span>[<span style="color:#a6e22e">b</span>];
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">ra</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">a</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">gap</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">?</span> <span style="color:#a6e22e">rank</span>[<span style="color:#a6e22e">a</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">gap</span>] <span style="color:#f92672">:</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">rb</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">b</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">gap</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">?</span> <span style="color:#a6e22e">rank</span>[<span style="color:#a6e22e">b</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">gap</span>] <span style="color:#f92672">:</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">ra</span> <span style="color:#f92672">-</span> <span style="color:#a6e22e">rb</span>;
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">sa</span>.<span style="color:#a6e22e">sort</span>(<span style="color:#a6e22e">compare</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 根據新的排序更新 rank
+</span></span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">tmp</span>[<span style="color:#a6e22e">sa</span>[<span style="color:#ae81ff">0</span>]] <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">n</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">tmp</span>[<span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">i</span>]] <span style="color:#f92672">=</span> <span style="color:#a6e22e">tmp</span>[<span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">i</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>]];
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">compare</span>(<span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">i</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>], <span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">i</span>]) <span style="color:#f92672">!==</span> <span style="color:#ae81ff">0</span>) <span style="color:#a6e22e">tmp</span>[<span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">i</span>]]<span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">rank</span> <span style="color:#f92672">=</span> [...<span style="color:#a6e22e">tmp</span>];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 如果所有排名已唯一，提前結束
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">rank</span>[<span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">n</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>]] <span style="color:#f92672">===</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>) <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">sa</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 測試
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">s2</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;banana&#34;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">sa2</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">buildSuffixArray</span>(<span style="color:#a6e22e">s2</span>);
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;SA:&#34;</span>, <span style="color:#a6e22e">sa2</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 輸出：SA: [5, 3, 1, 0, 4, 2]
+</span></span></span></code></pre></div><p><strong>演算法解析：</strong></p>
+<ol>
+<li><strong>初始化</strong>：將每個字元的 ASCII 碼作為初始排名</li>
+<li><strong>倍增迭代</strong>：每輪將 gap 翻倍（1, 2, 4, 8&hellip;），使用 <code>(rank[i], rank[i+gap])</code> 作為排序鍵</li>
+<li><strong>更新排名</strong>：排序後根據相鄰元素是否相同來更新 rank</li>
+<li><strong>提前終止</strong>：當所有排名都唯一時，SA 已確定</li>
+</ol>
+<p>共 O(log n) 輪，每輪使用比較排序 O(n log n)，整體 O(n log²n)。若改用基數排序（Radix Sort），可優化至 O(n log n)。</p>
+<h4 id="sa-is-線性建構--on">SA-IS 線性建構 — O(n)</h4>
+<p><strong>SA-IS（Suffix Array by Induced Sorting）</strong> 是目前最先進的線性 SA 建構演算法。其核心思想是將後綴分為 S 型（Smaller）和 L 型（Larger），找出 LMS（Left-Most S-type）後綴，遞迴求解子問題，再透過 <strong>Induced Sorting</strong> 推導完整 SA。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-typescript" data-lang="typescript"><span style="display:flex;"><span><span style="color:#75715e">// ─── SA-IS 線性建構 Suffix Array O(n) ──────────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">buildSuffixArraySAIS</span>(<span style="color:#a6e22e">s</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">number</span>[] {
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 將字串轉為整數陣列，加入哨兵字元 0（字典序最小）
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">arr</span> <span style="color:#f92672">=</span> Array.<span style="color:#66d9ef">from</span>(<span style="color:#a6e22e">s</span>, (<span style="color:#a6e22e">c</span>) <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">charCodeAt</span>(<span style="color:#ae81ff">0</span>) <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">arr</span>.<span style="color:#a6e22e">push</span>(<span style="color:#ae81ff">0</span>); <span style="color:#75715e">// 哨兵
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">sa</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">sais</span>(<span style="color:#a6e22e">arr</span>, Math.<span style="color:#a6e22e">max</span>(...<span style="color:#a6e22e">arr</span>) <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 移除哨兵對應的位置（SA[0] 固定是哨兵）
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">sa</span>.<span style="color:#a6e22e">slice</span>(<span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">sais</span>(<span style="color:#a6e22e">T</span>: <span style="color:#66d9ef">number</span>[], <span style="color:#a6e22e">alphabetSize</span>: <span style="color:#66d9ef">number</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">number</span>[] {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">T</span>.<span style="color:#a6e22e">length</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">n</span> <span style="color:#f92672">===</span> <span style="color:#ae81ff">1</span>) <span style="color:#66d9ef">return</span> [<span style="color:#ae81ff">0</span>];
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">n</span> <span style="color:#f92672">===</span> <span style="color:#ae81ff">2</span>) <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">T</span>[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">T</span>[<span style="color:#ae81ff">1</span>] <span style="color:#f92672">?</span> [<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">1</span>] <span style="color:#f92672">:</span> [<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">0</span>];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Step 1: 分類每個後綴為 S 型或 L 型
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">isS</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Uint8Array</span>(<span style="color:#a6e22e">n</span>); <span style="color:#75715e">// 1 = S型, 0 = L型
+</span></span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">isS</span>[<span style="color:#a6e22e">n</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>] <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>; <span style="color:#75715e">// 哨兵為 S 型
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">2</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">--</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">T</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">T</span>[<span style="color:#a6e22e">i</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>]) <span style="color:#a6e22e">isS</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">T</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">T</span>[<span style="color:#a6e22e">i</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>]) <span style="color:#a6e22e">isS</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span> <span style="color:#a6e22e">isS</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">isS</span>[<span style="color:#a6e22e">i</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>];
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 找出 LMS（Left-Most S-type）位置
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">isLMS</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">i</span>: <span style="color:#66d9ef">number</span>) <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">isS</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">!</span><span style="color:#a6e22e">isS</span>[<span style="color:#a6e22e">i</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>];
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">lmsPositions</span>: <span style="color:#66d9ef">number</span>[] <span style="color:#f92672">=</span> [];
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">n</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">isLMS</span>(<span style="color:#a6e22e">i</span>)) <span style="color:#a6e22e">lmsPositions</span>.<span style="color:#a6e22e">push</span>(<span style="color:#a6e22e">i</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Step 2: 計算桶（Bucket）邊界
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">getBuckets</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">end</span>: <span style="color:#66d9ef">boolean</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">number</span>[] <span style="color:#f92672">=&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">count</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Array(<span style="color:#a6e22e">alphabetSize</span>).<span style="color:#a6e22e">fill</span>(<span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">c</span> <span style="color:#66d9ef">of</span> <span style="color:#a6e22e">T</span>) <span style="color:#a6e22e">count</span>[<span style="color:#a6e22e">c</span>]<span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">buckets</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Array(<span style="color:#a6e22e">alphabetSize</span>).<span style="color:#a6e22e">fill</span>(<span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">sum</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">alphabetSize</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">sum</span> <span style="color:#f92672">+=</span> <span style="color:#a6e22e">count</span>[<span style="color:#a6e22e">i</span>];
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">buckets</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">end</span> <span style="color:#f92672">?</span> <span style="color:#a6e22e">sum</span> <span style="color:#f92672">-</span> <span style="color:#a6e22e">1</span> : <span style="color:#66d9ef">sum</span> <span style="color:#f92672">-</span> <span style="color:#a6e22e">count</span>[<span style="color:#a6e22e">i</span>];
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">buckets</span>;
+</span></span><span style="display:flex;"><span>  };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Induced Sort 核心函數
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">inducedSort</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">lms</span>: <span style="color:#66d9ef">number</span>[])<span style="color:#f92672">:</span> <span style="color:#66d9ef">number</span>[] <span style="color:#f92672">=&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">sa</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Array(<span style="color:#a6e22e">n</span>).<span style="color:#a6e22e">fill</span>(<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 放置 LMS 後綴到桶的末端
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">buckets</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">getBuckets</span>(<span style="color:#66d9ef">true</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">lms</span>.<span style="color:#a6e22e">length</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">--</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">buckets</span>[<span style="color:#a6e22e">T</span>[<span style="color:#a6e22e">lms</span>[<span style="color:#a6e22e">i</span>]]]<span style="color:#f92672">--</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">lms</span>[<span style="color:#a6e22e">i</span>];
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 從左到右掃描，放置 L 型後綴
+</span></span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">buckets</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">getBuckets</span>(<span style="color:#66d9ef">false</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">n</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">!</span><span style="color:#a6e22e">isS</span>[<span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>]) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">buckets</span>[<span style="color:#a6e22e">T</span>[<span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>]]<span style="color:#f92672">++</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 從右到左掃描，放置 S 型後綴
+</span></span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">buckets</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">getBuckets</span>(<span style="color:#66d9ef">true</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">--</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">isS</span>[<span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>]) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">buckets</span>[<span style="color:#a6e22e">T</span>[<span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>]]<span style="color:#f92672">--</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">sa</span>;
+</span></span><span style="display:flex;"><span>  };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Step 3: 第一次 Induced Sort（粗略排序 LMS）
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">sa</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">inducedSort</span>(<span style="color:#a6e22e">lmsPositions</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Step 4: 為 LMS 子字串命名
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">lmsNames</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Map</span>&lt;<span style="color:#f92672">number</span>, <span style="color:#a6e22e">number</span>&gt;();
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">name</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">prev</span> <span style="color:#f92672">=</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 比較兩個 LMS 子字串是否相同
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">lmsEqual</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">a</span>: <span style="color:#66d9ef">number</span>, <span style="color:#a6e22e">b</span>: <span style="color:#66d9ef">number</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">boolean</span> <span style="color:#f92672">=&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; ; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">aEnd</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">isLMS</span>(<span style="color:#a6e22e">a</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">i</span>);
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">bEnd</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">isLMS</span>(<span style="color:#a6e22e">b</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">i</span>);
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">aEnd</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">bEnd</span>) <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">true</span>;
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">aEnd</span> <span style="color:#f92672">!==</span> <span style="color:#a6e22e">bEnd</span> <span style="color:#f92672">||</span> <span style="color:#a6e22e">T</span>[<span style="color:#a6e22e">a</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">i</span>] <span style="color:#f92672">!==</span> <span style="color:#a6e22e">T</span>[<span style="color:#a6e22e">b</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">i</span>]) <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">false</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">pos</span> <span style="color:#66d9ef">of</span> <span style="color:#a6e22e">sa</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">isLMS</span>(<span style="color:#a6e22e">pos</span>)) <span style="color:#66d9ef">continue</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">prev</span> <span style="color:#f92672">===</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span> <span style="color:#f92672">||</span> <span style="color:#f92672">!</span><span style="color:#a6e22e">lmsEqual</span>(<span style="color:#a6e22e">prev</span>, <span style="color:#a6e22e">pos</span>)) <span style="color:#a6e22e">name</span><span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">lmsNames</span>.<span style="color:#66d9ef">set</span>(<span style="color:#a6e22e">pos</span>, <span style="color:#a6e22e">name</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">prev</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">pos</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Step 5: 若名稱不唯一，遞迴求解子問題
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">name</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">lmsPositions</span>.<span style="color:#a6e22e">length</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">reducedT</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">lmsPositions</span>.<span style="color:#a6e22e">map</span>((<span style="color:#a6e22e">p</span>) <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">lmsNames</span>.<span style="color:#66d9ef">get</span>(<span style="color:#a6e22e">p</span>)<span style="color:#f92672">!</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">reducedSA</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">sais</span>(<span style="color:#a6e22e">reducedT</span>, <span style="color:#a6e22e">name</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 用遞迴結果的排序順序重新排列 LMS 位置
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">sortedLMS</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">reducedSA</span>.<span style="color:#a6e22e">map</span>((<span style="color:#a6e22e">i</span>) <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">lmsPositions</span>[<span style="color:#a6e22e">i</span>]);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">sa</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">inducedSort</span>(<span style="color:#a6e22e">sortedLMS</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">sa</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 測試
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">s3</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;banana&#34;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;SA-IS:&#34;</span>, <span style="color:#a6e22e">buildSuffixArraySAIS</span>(<span style="color:#a6e22e">s3</span>));
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 輸出：SA-IS: [5, 3, 1, 0, 4, 2]
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 驗證與倍增法結果一致
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">s4</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;mississippi&#34;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;SA-IS:&#34;</span>, <span style="color:#a6e22e">buildSuffixArraySAIS</span>(<span style="color:#a6e22e">s4</span>));
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 輸出：SA-IS: [10, 7, 4, 1, 0, 9, 8, 6, 3, 5, 2]
+</span></span></span></code></pre></div><p>SA-IS 的優勢在於 <strong>嚴格 O(n)</strong> 時間與空間複雜度，適用於超長字串（如基因組序列，長度可達數十億）。</p>
+<h4 id="kasais-algorithm--on-建構-lcp-陣列">Kasai&rsquo;s Algorithm — O(n) 建構 LCP 陣列</h4>
+<p><strong>Kasai&rsquo;s Algorithm</strong> 利用一個關鍵觀察來實現線性時間的 LCP 建構。</p>
+<p><strong>核心引理（LCP Lemma）</strong>：若後綴 <code>s[i..]</code> 與其在 SA 中前一個後綴的 LCP 長度為 h，則後綴 <code>s[i+1..]</code> 與其前一個後綴的 LCP 長度 &gt;= h-1。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-typescript" data-lang="typescript"><span style="display:flex;"><span><span style="color:#75715e">// ─── Kasai&#39;s Algorithm：O(n) 建構 LCP Array ──────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">buildLCPArray</span>(<span style="color:#a6e22e">s</span>: <span style="color:#66d9ef">string</span>, <span style="color:#a6e22e">sa</span>: <span style="color:#66d9ef">number</span>[])<span style="color:#f92672">:</span> <span style="color:#66d9ef">number</span>[] {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">length</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 建立 rank 陣列（SA 的反函數）
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">rank</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Array(<span style="color:#a6e22e">n</span>).<span style="color:#a6e22e">fill</span>(<span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">n</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) <span style="color:#a6e22e">rank</span>[<span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">i</span>]] <span style="color:#f92672">=</span> <span style="color:#a6e22e">i</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">lcp</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Array(<span style="color:#a6e22e">n</span>).<span style="color:#a6e22e">fill</span>(<span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">h</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; <span style="color:#75715e">// 當前 LCP 長度
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">n</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">rank</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">j</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">rank</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>]; <span style="color:#75715e">// SA 中排在 s[i..] 前面的後綴
+</span></span></span><span style="display:flex;"><span>      <span style="color:#75715e">// 逐字元比較擴展 LCP
+</span></span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">while</span> (<span style="color:#a6e22e">i</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">h</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">j</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">h</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">s</span>[<span style="color:#a6e22e">i</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">h</span>] <span style="color:#f92672">===</span> <span style="color:#a6e22e">s</span>[<span style="color:#a6e22e">j</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">h</span>]) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">h</span><span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">lcp</span>[<span style="color:#a6e22e">rank</span>[<span style="color:#a6e22e">i</span>]] <span style="color:#f92672">=</span> <span style="color:#a6e22e">h</span>;
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">h</span> <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>) <span style="color:#a6e22e">h</span><span style="color:#f92672">--</span>; <span style="color:#75715e">// 關鍵：h 最多遞減 1
+</span></span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">lcp</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 測試
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">s5</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;banana&#34;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">sa5</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">buildSuffixArray</span>(<span style="color:#a6e22e">s5</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">lcp5</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">buildLCPArray</span>(<span style="color:#a6e22e">s5</span>, <span style="color:#a6e22e">sa5</span>);
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;字串:&#34;</span>, <span style="color:#a6e22e">s5</span>);
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;SA:&#34;</span>, <span style="color:#a6e22e">sa5</span>);   <span style="color:#75715e">// [5, 3, 1, 0, 4, 2]
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;LCP:&#34;</span>, <span style="color:#a6e22e">lcp5</span>); <span style="color:#75715e">// [0, 1, 3, 0, 0, 2]
+</span></span></span></code></pre></div><p><strong>為何 O(n)？</strong> 變數 h 在整個迴圈中最多遞增 n 次（每次 while 迴圈成功匹配一個字元）、每次外迴圈最多遞減 1（共 n 次），因此 h 的總變化量為 O(n)。</p>
+<h4 id="模式匹配--sa--二分搜尋">模式匹配 — SA + 二分搜尋</h4>
+<p>利用 SA 的有序性質，可以用二分搜尋在 O(m log n) 時間內找到模式串 pattern 的所有出現位置。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-typescript" data-lang="typescript"><span style="display:flex;"><span><span style="color:#75715e">// ─── SA + 二分搜尋模式匹配 O(m log n) ──────────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">searchPattern</span>(<span style="color:#a6e22e">text</span>: <span style="color:#66d9ef">string</span>, <span style="color:#a6e22e">pattern</span>: <span style="color:#66d9ef">string</span>, <span style="color:#a6e22e">sa</span>: <span style="color:#66d9ef">number</span>[])<span style="color:#f92672">:</span> <span style="color:#66d9ef">number</span>[] {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">text</span>.<span style="color:#a6e22e">length</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">m</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">pattern</span>.<span style="color:#a6e22e">length</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 比較後綴 text[sa[mid]..] 的前 m 個字元與 pattern
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">cmp</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">mid</span>: <span style="color:#66d9ef">number</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">number</span> <span style="color:#f92672">=&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">m</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">mid</span>] <span style="color:#f92672">+</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">n</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">text</span>[<span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">mid</span>] <span style="color:#f92672">+</span> <span style="color:#a6e22e">i</span>] <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">pattern</span>[<span style="color:#a6e22e">i</span>]) <span style="color:#66d9ef">return</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">text</span>[<span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">mid</span>] <span style="color:#f92672">+</span> <span style="color:#a6e22e">i</span>] <span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">pattern</span>[<span style="color:#a6e22e">i</span>]) <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">mid</span>] <span style="color:#f92672">+</span> <span style="color:#a6e22e">m</span> <span style="color:#f92672">&lt;=</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">?</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">:</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>  };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 二分搜尋左邊界（第一個匹配位置）
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">lo</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>, <span style="color:#a6e22e">hi</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>, <span style="color:#a6e22e">left</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">n</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">while</span> (<span style="color:#a6e22e">lo</span> <span style="color:#f92672">&lt;=</span> <span style="color:#a6e22e">hi</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">mid</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">lo</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">hi</span>) <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">cmp</span>(<span style="color:#a6e22e">mid</span>) <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>) { <span style="color:#a6e22e">left</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">mid</span>; <span style="color:#a6e22e">hi</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">mid</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>; }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span> <span style="color:#a6e22e">lo</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">mid</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 二分搜尋右邊界（最後一個匹配位置）
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">right</span> <span style="color:#f92672">=</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">lo</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">hi</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">while</span> (<span style="color:#a6e22e">lo</span> <span style="color:#f92672">&lt;=</span> <span style="color:#a6e22e">hi</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">mid</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">lo</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">hi</span>) <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">cmp</span>(<span style="color:#a6e22e">mid</span>) <span style="color:#f92672">&lt;=</span> <span style="color:#ae81ff">0</span>) { <span style="color:#a6e22e">right</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">mid</span>; <span style="color:#a6e22e">lo</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">mid</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>; }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span> <span style="color:#a6e22e">hi</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">mid</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">left</span> <span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">right</span>) <span style="color:#66d9ef">return</span> []; <span style="color:#75715e">// 未找到
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">sa</span>.<span style="color:#a6e22e">slice</span>(<span style="color:#a6e22e">left</span>, <span style="color:#a6e22e">right</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>).<span style="color:#a6e22e">sort</span>((<span style="color:#a6e22e">a</span>, <span style="color:#a6e22e">b</span>) <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">a</span> <span style="color:#f92672">-</span> <span style="color:#a6e22e">b</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 測試
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">text1</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;mississippi&#34;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">saText1</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">buildSuffixArray</span>(<span style="color:#a6e22e">text1</span>);
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;&#34;issi&#34; 出現位置:&#39;</span>, <span style="color:#a6e22e">searchPattern</span>(<span style="color:#a6e22e">text1</span>, <span style="color:#e6db74">&#34;issi&#34;</span>, <span style="color:#a6e22e">saText1</span>));
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 輸出：&#34;issi&#34; 出現位置: [1, 4]
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;&#34;ssi&#34; 出現位置:&#39;</span>, <span style="color:#a6e22e">searchPattern</span>(<span style="color:#a6e22e">text1</span>, <span style="color:#e6db74">&#34;ssi&#34;</span>, <span style="color:#a6e22e">saText1</span>));
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 輸出：&#34;ssi&#34; 出現位置: [2, 5]
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;&#34;xyz&#34; 出現位置:&#39;</span>, <span style="color:#a6e22e">searchPattern</span>(<span style="color:#a6e22e">text1</span>, <span style="color:#e6db74">&#34;xyz&#34;</span>, <span style="color:#a6e22e">saText1</span>));
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 輸出：&#34;xyz&#34; 出現位置: []
+</span></span></span></code></pre></div><h4 id="最長重複子字串longest-repeated-substring">最長重複子字串（Longest Repeated Substring）</h4>
+<p>LCP 陣列的最大值即為最長重複子字串的長度，這是 SA + LCP 最經典的應用。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-typescript" data-lang="typescript"><span style="display:flex;"><span><span style="color:#75715e">// ─── 最長重複子字串 ──────────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">longestRepeatedSubstring</span>(<span style="color:#a6e22e">s</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">string</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">length</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">n</span> <span style="color:#f92672">===</span> <span style="color:#ae81ff">0</span>) <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;&#34;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">sa</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">buildSuffixArray</span>(<span style="color:#a6e22e">s</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">lcp</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">buildLCPArray</span>(<span style="color:#a6e22e">s</span>, <span style="color:#a6e22e">sa</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">maxLen</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">maxIdx</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">n</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">lcp</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">maxLen</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">maxLen</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">lcp</span>[<span style="color:#a6e22e">i</span>];
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">maxIdx</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">i</span>];
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">substring</span>(<span style="color:#a6e22e">maxIdx</span>, <span style="color:#a6e22e">maxIdx</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">maxLen</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 測試
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">longestRepeatedSubstring</span>(<span style="color:#e6db74">&#34;banana&#34;</span>));   <span style="color:#75715e">// &#34;ana&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">longestRepeatedSubstring</span>(<span style="color:#e6db74">&#34;abcabc&#34;</span>));   <span style="color:#75715e">// &#34;abc&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">longestRepeatedSubstring</span>(<span style="color:#e6db74">&#34;aaaaaa&#34;</span>));   <span style="color:#75715e">// &#34;aaaaa&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">longestRepeatedSubstring</span>(<span style="color:#e6db74">&#34;abcdef&#34;</span>));   <span style="color:#75715e">// &#34;&#34;（無重複）
+</span></span></span></code></pre></div><h4 id="兩字串的最長公共子字串longest-common-substring">兩字串的最長公共子字串（Longest Common Substring）</h4>
+<p>將兩個字串用特殊分隔符拼接後建構 SA + LCP，再從 LCP 中找出分屬不同字串的相鄰後綴的最大 LCP 值。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-typescript" data-lang="typescript"><span style="display:flex;"><span><span style="color:#75715e">// ─── 兩字串的最長公共子字串 ──────────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">longestCommonSubstring</span>(<span style="color:#a6e22e">s1</span>: <span style="color:#66d9ef">string</span>, <span style="color:#a6e22e">s2</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">string</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 用不出現在兩字串中的字元作為分隔符
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">separator</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;#&#34;</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">combined</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">s1</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">separator</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">s2</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">combined</span>.<span style="color:#a6e22e">length</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">boundary</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">s1</span>.<span style="color:#a6e22e">length</span>; <span style="color:#75715e">// 分隔符位置
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">sa</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">buildSuffixArray</span>(<span style="color:#a6e22e">combined</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">lcp</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">buildLCPArray</span>(<span style="color:#a6e22e">combined</span>, <span style="color:#a6e22e">sa</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">maxLen</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">maxIdx</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">n</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 檢查相鄰後綴是否分屬不同字串
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">fromS1_curr</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">boundary</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">fromS1_prev</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">i</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>] <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">boundary</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">fromS1_curr</span> <span style="color:#f92672">!==</span> <span style="color:#a6e22e">fromS1_prev</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">lcp</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">maxLen</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">maxLen</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">lcp</span>[<span style="color:#a6e22e">i</span>];
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">maxIdx</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">i</span>];
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">combined</span>.<span style="color:#a6e22e">substring</span>(<span style="color:#a6e22e">maxIdx</span>, <span style="color:#a6e22e">maxIdx</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">maxLen</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 測試
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">longestCommonSubstring</span>(<span style="color:#e6db74">&#34;abcdef&#34;</span>, <span style="color:#e6db74">&#34;xbcdey&#34;</span>));  <span style="color:#75715e">// &#34;bcde&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">longestCommonSubstring</span>(<span style="color:#e6db74">&#34;ABABC&#34;</span>, <span style="color:#e6db74">&#34;BABCBA&#34;</span>));   <span style="color:#75715e">// &#34;BABC&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">longestCommonSubstring</span>(<span style="color:#e6db74">&#34;hello&#34;</span>, <span style="color:#e6db74">&#34;world&#34;</span>));    <span style="color:#75715e">// &#34;l&#34;
+</span></span></span></code></pre></div><hr>
+<h3 id="c-對照">C++ 對照</h3>
+<p>以下提供 C++ 版本的 Suffix Array + LCP 核心實作，方便需要在競賽或系統層面使用的讀者：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;bits/stdc++.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">using</span> <span style="color:#66d9ef">namespace</span> std;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ─── O(n log²n) 倍增法建構 Suffix Array ──────────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> buildSuffixArray(<span style="color:#66d9ef">const</span> string<span style="color:#f92672">&amp;</span> s) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> n <span style="color:#f92672">=</span> s.size();
+</span></span><span style="display:flex;"><span>    vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> sa(n), rank_(n), tmp(n);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    iota(sa.begin(), sa.end(), <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> n; i<span style="color:#f92672">++</span>) rank_[i] <span style="color:#f92672">=</span> s[i];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> gap <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>; gap <span style="color:#f92672">&lt;</span> n; gap <span style="color:#f92672">&lt;&lt;=</span> <span style="color:#ae81ff">1</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">auto</span> cmp <span style="color:#f92672">=</span> [<span style="color:#f92672">&amp;</span>](<span style="color:#66d9ef">int</span> a, <span style="color:#66d9ef">int</span> b) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (rank_[a] <span style="color:#f92672">!=</span> rank_[b]) <span style="color:#66d9ef">return</span> rank_[a] <span style="color:#f92672">&lt;</span> rank_[b];
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">int</span> ra <span style="color:#f92672">=</span> (a <span style="color:#f92672">+</span> gap <span style="color:#f92672">&lt;</span> n) <span style="color:#f92672">?</span> rank_[a <span style="color:#f92672">+</span> gap] <span style="color:#f92672">:</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">int</span> rb <span style="color:#f92672">=</span> (b <span style="color:#f92672">+</span> gap <span style="color:#f92672">&lt;</span> n) <span style="color:#f92672">?</span> rank_[b <span style="color:#f92672">+</span> gap] <span style="color:#f92672">:</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> ra <span style="color:#f92672">&lt;</span> rb;
+</span></span><span style="display:flex;"><span>        };
+</span></span><span style="display:flex;"><span>        sort(sa.begin(), sa.end(), cmp);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        tmp[sa[<span style="color:#ae81ff">0</span>]] <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>; i <span style="color:#f92672">&lt;</span> n; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>            tmp[sa[i]] <span style="color:#f92672">=</span> tmp[sa[i<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]] <span style="color:#f92672">+</span> (cmp(sa[i<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>], sa[i]) <span style="color:#f92672">?</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">:</span> <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        rank_ <span style="color:#f92672">=</span> tmp;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (rank_[sa[n<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]] <span style="color:#f92672">==</span> n<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>) <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> sa;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ─── Kasai&#39;s Algorithm：O(n) 建構 LCP Array ──────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> buildLCP(<span style="color:#66d9ef">const</span> string<span style="color:#f92672">&amp;</span> s, <span style="color:#66d9ef">const</span> vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;&amp;</span> sa) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> n <span style="color:#f92672">=</span> s.size();
+</span></span><span style="display:flex;"><span>    vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> rank_(n), lcp(n, <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> n; i<span style="color:#f92672">++</span>) rank_[sa[i]] <span style="color:#f92672">=</span> i;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>, h <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> n; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (rank_[i] <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> sa[rank_[i] <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>];
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">while</span> (i <span style="color:#f92672">+</span> h <span style="color:#f92672">&lt;</span> n <span style="color:#f92672">&amp;&amp;</span> j <span style="color:#f92672">+</span> h <span style="color:#f92672">&lt;</span> n <span style="color:#f92672">&amp;&amp;</span> s[i<span style="color:#f92672">+</span>h] <span style="color:#f92672">==</span> s[j<span style="color:#f92672">+</span>h]) h<span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>            lcp[rank_[i]] <span style="color:#f92672">=</span> h;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (h) h<span style="color:#f92672">--</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> lcp;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ─── 模式匹配（二分搜尋）──────────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> searchPattern(<span style="color:#66d9ef">const</span> string<span style="color:#f92672">&amp;</span> text, <span style="color:#66d9ef">const</span> string<span style="color:#f92672">&amp;</span> pat,
+</span></span><span style="display:flex;"><span>                          <span style="color:#66d9ef">const</span> vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;&amp;</span> sa) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> n <span style="color:#f92672">=</span> text.size(), m <span style="color:#f92672">=</span> pat.size();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">auto</span> cmp <span style="color:#f92672">=</span> [<span style="color:#f92672">&amp;</span>](<span style="color:#66d9ef">int</span> mid) <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">int</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> text.compare(sa[mid], min(m, n <span style="color:#f92672">-</span> sa[mid]), pat);
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 左邊界
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> lo <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>, hi <span style="color:#f92672">=</span> n <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>, left <span style="color:#f92672">=</span> n;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> (lo <span style="color:#f92672">&lt;=</span> hi) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> mid <span style="color:#f92672">=</span> (lo <span style="color:#f92672">+</span> hi) <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (cmp(mid) <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>) { left <span style="color:#f92672">=</span> mid; hi <span style="color:#f92672">=</span> mid <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>; }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span> lo <span style="color:#f92672">=</span> mid <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 右邊界
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> right <span style="color:#f92672">=</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    lo <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; hi <span style="color:#f92672">=</span> n <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> (lo <span style="color:#f92672">&lt;=</span> hi) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> mid <span style="color:#f92672">=</span> (lo <span style="color:#f92672">+</span> hi) <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (cmp(mid) <span style="color:#f92672">&lt;=</span> <span style="color:#ae81ff">0</span>) { right <span style="color:#f92672">=</span> mid; lo <span style="color:#f92672">=</span> mid <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>; }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span> hi <span style="color:#f92672">=</span> mid <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> result;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (left <span style="color:#f92672">&lt;=</span> right) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> left; i <span style="color:#f92672">&lt;=</span> right; i<span style="color:#f92672">++</span>) result.push_back(sa[i]);
+</span></span><span style="display:flex;"><span>        sort(result.begin(), result.end());
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> result;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ─── 最長重複子字串 ──────────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>string <span style="color:#a6e22e">longestDupSubstring</span>(<span style="color:#66d9ef">const</span> string<span style="color:#f92672">&amp;</span> s) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">auto</span> sa <span style="color:#f92672">=</span> buildSuffixArray(s);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">auto</span> lcp <span style="color:#f92672">=</span> buildLCP(s, sa);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> maxLen <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>, maxIdx <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>; i <span style="color:#f92672">&lt;</span> (<span style="color:#66d9ef">int</span>)s.size(); i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (lcp[i] <span style="color:#f92672">&gt;</span> maxLen) {
+</span></span><span style="display:flex;"><span>            maxLen <span style="color:#f92672">=</span> lcp[i];
+</span></span><span style="display:flex;"><span>            maxIdx <span style="color:#f92672">=</span> sa[i];
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> s.substr(maxIdx, maxLen);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>    string s <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;banana&#34;</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">auto</span> sa <span style="color:#f92672">=</span> buildSuffixArray(s);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">auto</span> lcp <span style="color:#f92672">=</span> buildLCP(s, sa);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;SA: &#34;</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> x : sa) cout <span style="color:#f92672">&lt;&lt;</span> x <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; &#34;</span>;
+</span></span><span style="display:flex;"><span>    cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">LCP: &#34;</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> x : lcp) cout <span style="color:#f92672">&lt;&lt;</span> x <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; &#34;</span>;
+</span></span><span style="display:flex;"><span>    cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">最長重複子串: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> longestDupSubstring(s) <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 輸出：
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75715e">// SA: 5 3 1 0 4 2
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75715e">// LCP: 0 1 3 0 0 2
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 最長重複子串: ana
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 模式匹配
+</span></span></span><span style="display:flex;"><span>    string text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;mississippi&#34;</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">auto</span> sa2 <span style="color:#f92672">=</span> buildSuffixArray(text);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">auto</span> pos <span style="color:#f92672">=</span> searchPattern(text, <span style="color:#e6db74">&#34;issi&#34;</span>, sa2);
+</span></span><span style="display:flex;"><span>    cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\&#34;</span><span style="color:#e6db74">issi</span><span style="color:#ae81ff">\&#34;</span><span style="color:#e6db74"> 出現位置: &#34;</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> p : pos) cout <span style="color:#f92672">&lt;&lt;</span> p <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; &#34;</span>;
+</span></span><span style="display:flex;"><span>    cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 輸出：&#34;issi&#34; 出現位置: 1 4
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><hr>
+<h3 id="複雜度分析">複雜度分析</h3>
+<table>
+  <thead>
+      <tr>
+          <th>結構 / 操作</th>
+          <th>建構時間</th>
+          <th>查詢時間</th>
+          <th>空間</th>
+          <th>備註</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>SA（Naive）</td>
+          <td>O(n² log n)</td>
+          <td>O(m log n)</td>
+          <td>O(n)</td>
+          <td>僅用於教學</td>
+      </tr>
+      <tr>
+          <td>SA（倍增法）</td>
+          <td>O(n log²n)</td>
+          <td>O(m log n)</td>
+          <td>O(n)</td>
+          <td>競賽/面試首選</td>
+      </tr>
+      <tr>
+          <td>SA（SA-IS）</td>
+          <td>O(n)</td>
+          <td>O(m log n)</td>
+          <td>O(n)</td>
+          <td>超長字串使用</td>
+      </tr>
+      <tr>
+          <td>LCP（Kasai）</td>
+          <td>O(n)</td>
+          <td>—</td>
+          <td>O(n)</td>
+          <td>需先有 SA</td>
+      </tr>
+      <tr>
+          <td>RMQ（Sparse Table）</td>
+          <td>O(n log n)</td>
+          <td>O(1)</td>
+          <td>O(n log n)</td>
+          <td>任意兩後綴 LCP</td>
+      </tr>
+      <tr>
+          <td>Suffix Tree（Ukkonen）</td>
+          <td>O(n)</td>
+          <td>O(m)</td>
+          <td>O(n)，常數大</td>
+          <td>實作極複雜</td>
+      </tr>
+      <tr>
+          <td>後綴自動機（SAM）</td>
+          <td>O(n)</td>
+          <td>O(m)</td>
+          <td>O(n)</td>
+          <td>線上建構</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>關鍵觀察：</strong></p>
+<ul>
+<li><strong>倍增法</strong> O(n log²n) 在 n &lt;= 10^5 時綽綽有餘，是性價比最高的選擇</li>
+<li><strong>SA-IS</strong> O(n) 在 n &gt; 10^6 時才有明顯優勢，但實作複雜度顯著增加</li>
+<li><strong>LCP 陣列</strong> 搭配 <strong>Sparse Table</strong> 後可在 O(1) 時間查詢任意兩個後綴的 LCP，是許多進階應用的基礎</li>
+</ul>
+<hr>
+<h3 id="變體與延伸">變體與延伸</h3>
+<h4 id="後綴自動機suffix-automaton-sam">後綴自動機（Suffix Automaton, SAM）</h4>
+<p><strong>後綴自動機</strong> 是識別字串所有子字串的 <strong>最小有限自動機</strong>，節點數 O(n)、邊數 O(n)，可線上（逐字元）建構。</p>
+<pre tabindex="0"><code>SAM 核心概念：
+
+節點 = endpos 等價類
+  endpos(t) = {t 在 s 中出現的所有結束位置}
+  endpos 相同的子字串歸為同一節點
+
+例：s = &#34;abbc&#34;
+  &#34;b&#34;  → endpos = {2, 3}
+  &#34;bb&#34; → endpos = {3}
+
+Suffix Link：每個節點指向最長真後綴所在節點，形成一棵樹
+
+典型應用：
+  1. 不同子字串數量：O(n) — 遍歷所有節點，加總 (len - link.len)
+  2. 最長公共子字串：O(n+m) — 在 SAM 上跑另一字串
+  3. 子字串出現次數：O(n) — endpos 集合大小
+  4. 最短唯一子字串：O(n)
+</code></pre><h4 id="enhanced-suffix-array增強後綴陣列">Enhanced Suffix Array（增強後綴陣列）</h4>
+<p><strong>Enhanced Suffix Array</strong> 是指 SA + LCP 再加上額外的輔助陣列（如 child table、suffix link table），使其功能完全等價於 Suffix Tree，而空間僅需約 8n bytes（相比 Suffix Tree 的 20n+）。</p>
+<h4 id="dc3--skew-algorithm">DC3 / Skew Algorithm</h4>
+<p><strong>DC3（Difference Cover of 3）</strong> 也稱 <strong>Skew Algorithm</strong>，是另一種 O(n) 的 SA 建構法。其核心思想是：</p>
+<ol>
+<li>將後綴分為三組：位置 mod 3 = 0, 1, 2</li>
+<li>先遞迴排序 mod 3 != 0 的後綴（佔 2/3）</li>
+<li>再利用結果推導 mod 3 = 0 的後綴排序</li>
+<li>最後合併三組結果</li>
+</ol>
+<p>DC3 的優勢在於概念比 SA-IS 更直覺，且同樣達到 O(n) 時間。在並行計算（Parallel Computing）場景下，DC3 比 SA-IS 更容易並行化。</p>
+<hr>
+<h3 id="面試考點">面試考點</h3>
+<p>後綴結構在面試中的考察重點集中在以下幾個方面：</p>
+<pre tabindex="0"><code>面試高頻考點：
+
+1. Suffix Array 建構原理
+   → 倍增法的時間複雜度分析
+   → 為何每輪可以利用上一輪的排名？
+
+2. LCP Array 應用
+   → 最長重複子字串 = max(LCP)
+   → 不同子字串數量 = n(n+1)/2 - Σlcp[i]
+   → 任意兩後綴 LCP = RMQ on LCP Array
+
+3. 模式匹配
+   → 為何可以用二分搜尋？（SA 的有序性質）
+   → 時間複雜度：O(m log n)
+
+4. 與其他字串演算法的比較
+   → SA vs KMP：SA 適合多次查詢，KMP 適合單次匹配
+   → SA vs Trie：SA 更省空間，Trie 更適合前綴查詢
+   → SA vs Hash：SA 無碰撞風險，Hash 更簡單
+
+5. 實際應用場景
+   → 全文搜尋引擎索引
+   → DNA 序列比對
+   → 資料壓縮（BWT）
+   → 防抄襲偵測（Longest Common Substring）
+</code></pre><hr>
+<h3 id="leetcode-實戰">LeetCode 實戰</h3>
+<h4 id="leetcode-1044--longest-duplicate-substring困難">LeetCode 1044 — Longest Duplicate Substring（困難）</h4>
+<p><strong>題目</strong>：給定字串 <code>s</code>，找出最長的重複子字串（至少出現兩次）。若不存在返回空字串。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-typescript" data-lang="typescript"><span style="display:flex;"><span><span style="color:#75715e">// ─── LeetCode 1044：Suffix Array + LCP 解法 ──────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">longestDupSubstring</span>(<span style="color:#a6e22e">s</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">string</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">length</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 建構 Suffix Array（倍增法）
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">sa</span> <span style="color:#f92672">=</span> Array.<span style="color:#66d9ef">from</span>({ <span style="color:#a6e22e">length</span>: <span style="color:#66d9ef">n</span> }, (<span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">i</span>) <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">i</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">rank</span> <span style="color:#f92672">=</span> Array.<span style="color:#66d9ef">from</span>({ <span style="color:#a6e22e">length</span>: <span style="color:#66d9ef">n</span> }, (<span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">i</span>) <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">charCodeAt</span>(<span style="color:#a6e22e">i</span>));
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">tmp</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Array(<span style="color:#a6e22e">n</span>).<span style="color:#a6e22e">fill</span>(<span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">gap</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>; <span style="color:#a6e22e">gap</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">n</span>; <span style="color:#a6e22e">gap</span> <span style="color:#f92672">&lt;&lt;=</span> <span style="color:#ae81ff">1</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">cmp</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">a</span>: <span style="color:#66d9ef">number</span>, <span style="color:#a6e22e">b</span>: <span style="color:#66d9ef">number</span>) <span style="color:#f92672">=&gt;</span> {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">rank</span>[<span style="color:#a6e22e">a</span>] <span style="color:#f92672">!==</span> <span style="color:#a6e22e">rank</span>[<span style="color:#a6e22e">b</span>]) <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">rank</span>[<span style="color:#a6e22e">a</span>] <span style="color:#f92672">-</span> <span style="color:#a6e22e">rank</span>[<span style="color:#a6e22e">b</span>];
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">ra</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">a</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">gap</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">?</span> <span style="color:#a6e22e">rank</span>[<span style="color:#a6e22e">a</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">gap</span>] <span style="color:#f92672">:</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">rb</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">b</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">gap</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">?</span> <span style="color:#a6e22e">rank</span>[<span style="color:#a6e22e">b</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">gap</span>] <span style="color:#f92672">:</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">ra</span> <span style="color:#f92672">-</span> <span style="color:#a6e22e">rb</span>;
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">sa</span>.<span style="color:#a6e22e">sort</span>(<span style="color:#a6e22e">cmp</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">tmp</span>[<span style="color:#a6e22e">sa</span>[<span style="color:#ae81ff">0</span>]] <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">n</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">tmp</span>[<span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">i</span>]] <span style="color:#f92672">=</span> <span style="color:#a6e22e">tmp</span>[<span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">i</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>]] <span style="color:#f92672">+</span> (<span style="color:#a6e22e">cmp</span>(<span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">i</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>], <span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">i</span>]) <span style="color:#f92672">!==</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">?</span> <span style="color:#a6e22e">1</span> : <span style="color:#66d9ef">0</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">rank</span> <span style="color:#f92672">=</span> [...<span style="color:#a6e22e">tmp</span>];
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">rank</span>[<span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">n</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>]] <span style="color:#f92672">===</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>) <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 建構 LCP Array（Kasai&#39;s Algorithm）
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">rankArr</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Array(<span style="color:#a6e22e">n</span>).<span style="color:#a6e22e">fill</span>(<span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">n</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) <span style="color:#a6e22e">rankArr</span>[<span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">i</span>]] <span style="color:#f92672">=</span> <span style="color:#a6e22e">i</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">lcp</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Array(<span style="color:#a6e22e">n</span>).<span style="color:#a6e22e">fill</span>(<span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">h</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">n</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">rankArr</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">j</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">rankArr</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>];
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">while</span> (<span style="color:#a6e22e">i</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">h</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">j</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">h</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">s</span>[<span style="color:#a6e22e">i</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">h</span>] <span style="color:#f92672">===</span> <span style="color:#a6e22e">s</span>[<span style="color:#a6e22e">j</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">h</span>]) <span style="color:#a6e22e">h</span><span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">lcp</span>[<span style="color:#a6e22e">rankArr</span>[<span style="color:#a6e22e">i</span>]] <span style="color:#f92672">=</span> <span style="color:#a6e22e">h</span>;
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">h</span> <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>) <span style="color:#a6e22e">h</span><span style="color:#f92672">--</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 找 LCP 最大值
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">maxLen</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>, <span style="color:#a6e22e">maxIdx</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">n</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">lcp</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">maxLen</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">maxLen</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">lcp</span>[<span style="color:#a6e22e">i</span>];
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">maxIdx</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">i</span>];
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">substring</span>(<span style="color:#a6e22e">maxIdx</span>, <span style="color:#a6e22e">maxIdx</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">maxLen</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 測試
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">longestDupSubstring</span>(<span style="color:#e6db74">&#34;banana&#34;</span>));  <span style="color:#75715e">// &#34;ana&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">longestDupSubstring</span>(<span style="color:#e6db74">&#34;abcd&#34;</span>));    <span style="color:#75715e">// &#34;&#34;
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/*
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  時間：O(n log²n)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  空間：O(n)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">*/</span>
+</span></span></code></pre></div><h4 id="leetcode-1316--distinct-echo-substrings困難">LeetCode 1316 — Distinct Echo Substrings（困難）</h4>
+<p><strong>題目</strong>：找出字串中所有 Echo 子字串的數量。Echo 子字串定義為長度為偶數 2k，且前半等於後半。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-typescript" data-lang="typescript"><span style="display:flex;"><span><span style="color:#75715e">// ─── LeetCode 1316：SA + LCP + RMQ 解法 ──────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">distinctEchoSubstrings</span>(<span style="color:#a6e22e">s</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">number</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">length</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">sa</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">buildSuffixArray</span>(<span style="color:#a6e22e">s</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">lcp</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">buildLCPArray</span>(<span style="color:#a6e22e">s</span>, <span style="color:#a6e22e">sa</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">rankArr</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Array(<span style="color:#a6e22e">n</span>).<span style="color:#a6e22e">fill</span>(<span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">n</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) <span style="color:#a6e22e">rankArr</span>[<span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">i</span>]] <span style="color:#f92672">=</span> <span style="color:#a6e22e">i</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Sparse Table 預處理 RMQ
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">LOG</span> <span style="color:#f92672">=</span> Math.<span style="color:#a6e22e">floor</span>(Math.<span style="color:#a6e22e">log2</span>(<span style="color:#a6e22e">n</span>)) <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">sparse</span>: <span style="color:#66d9ef">number</span>[][] <span style="color:#f92672">=</span> Array.<span style="color:#66d9ef">from</span>(
+</span></span><span style="display:flex;"><span>    { <span style="color:#a6e22e">length</span>: <span style="color:#66d9ef">LOG</span> }, () <span style="color:#f92672">=&gt;</span> <span style="color:#66d9ef">new</span> Array(<span style="color:#a6e22e">n</span>).<span style="color:#a6e22e">fill</span>(<span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>  );
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">n</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) <span style="color:#a6e22e">sparse</span>[<span style="color:#ae81ff">0</span>][<span style="color:#a6e22e">i</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">lcp</span>[<span style="color:#a6e22e">i</span>];
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">j</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>; <span style="color:#a6e22e">j</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">LOG</span>; <span style="color:#a6e22e">j</span><span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">+</span> (<span style="color:#ae81ff">1</span> <span style="color:#f92672">&lt;&lt;</span> <span style="color:#a6e22e">j</span>) <span style="color:#f92672">&lt;=</span> <span style="color:#a6e22e">n</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">sparse</span>[<span style="color:#a6e22e">j</span>][<span style="color:#a6e22e">i</span>] <span style="color:#f92672">=</span> Math.<span style="color:#a6e22e">min</span>(
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">sparse</span>[<span style="color:#a6e22e">j</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>][<span style="color:#a6e22e">i</span>],
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">sparse</span>[<span style="color:#a6e22e">j</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>][<span style="color:#a6e22e">i</span> <span style="color:#f92672">+</span> (<span style="color:#ae81ff">1</span> <span style="color:#f92672">&lt;&lt;</span> (<span style="color:#a6e22e">j</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>))]
+</span></span><span style="display:flex;"><span>      );
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// O(1) 查詢兩後綴的 LCP
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">queryLCP</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">a</span>: <span style="color:#66d9ef">number</span>, <span style="color:#a6e22e">b</span>: <span style="color:#66d9ef">number</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">number</span> <span style="color:#f92672">=&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">ra</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">rankArr</span>[<span style="color:#a6e22e">a</span>], <span style="color:#a6e22e">rb</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">rankArr</span>[<span style="color:#a6e22e">b</span>];
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">ra</span> <span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">rb</span>) [<span style="color:#a6e22e">ra</span>, <span style="color:#a6e22e">rb</span>] <span style="color:#f92672">=</span> [<span style="color:#a6e22e">rb</span>, <span style="color:#a6e22e">ra</span>];
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">ra</span> <span style="color:#f92672">===</span> <span style="color:#a6e22e">rb</span>) <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">-</span> <span style="color:#a6e22e">a</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">k</span> <span style="color:#f92672">=</span> Math.<span style="color:#a6e22e">floor</span>(Math.<span style="color:#a6e22e">log2</span>(<span style="color:#a6e22e">rb</span> <span style="color:#f92672">-</span> <span style="color:#a6e22e">ra</span>));
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> Math.<span style="color:#a6e22e">min</span>(<span style="color:#a6e22e">sparse</span>[<span style="color:#a6e22e">k</span>][<span style="color:#a6e22e">ra</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>], <span style="color:#a6e22e">sparse</span>[<span style="color:#a6e22e">k</span>][<span style="color:#a6e22e">rb</span> <span style="color:#f92672">-</span> (<span style="color:#ae81ff">1</span> <span style="color:#f92672">&lt;&lt;</span> <span style="color:#a6e22e">k</span>) <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>]);
+</span></span><span style="display:flex;"><span>  };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 用 Set 去重（透過滾動雜湊）
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">MOD</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">BigInt</span>(<span style="color:#e6db74">&#34;1000000000000000009&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">BASE</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">131</span><span style="color:#a6e22e">n</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">pow</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Array(<span style="color:#a6e22e">n</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>).<span style="color:#a6e22e">fill</span>(<span style="color:#ae81ff">0</span><span style="color:#a6e22e">n</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">pow</span>[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span><span style="color:#a6e22e">n</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;=</span> <span style="color:#a6e22e">n</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) <span style="color:#a6e22e">pow</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">=</span> (<span style="color:#a6e22e">pow</span>[<span style="color:#a6e22e">i</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>] <span style="color:#f92672">*</span> <span style="color:#a6e22e">BASE</span>) <span style="color:#f92672">%</span> <span style="color:#a6e22e">MOD</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">ph</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Array(<span style="color:#a6e22e">n</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>).<span style="color:#a6e22e">fill</span>(<span style="color:#ae81ff">0</span><span style="color:#a6e22e">n</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">n</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">ph</span>[<span style="color:#a6e22e">i</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>] <span style="color:#f92672">=</span> (<span style="color:#a6e22e">ph</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">*</span> <span style="color:#a6e22e">BASE</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">BigInt</span>(<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">charCodeAt</span>(<span style="color:#a6e22e">i</span>))) <span style="color:#f92672">%</span> <span style="color:#a6e22e">MOD</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">getHash</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">l</span>: <span style="color:#66d9ef">number</span>, <span style="color:#a6e22e">r</span>: <span style="color:#66d9ef">number</span>) <span style="color:#f92672">=&gt;</span>
+</span></span><span style="display:flex;"><span>    ((<span style="color:#a6e22e">ph</span>[<span style="color:#a6e22e">r</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>] <span style="color:#f92672">-</span> <span style="color:#a6e22e">ph</span>[<span style="color:#a6e22e">l</span>] <span style="color:#f92672">*</span> <span style="color:#a6e22e">pow</span>[<span style="color:#a6e22e">r</span> <span style="color:#f92672">-</span> <span style="color:#a6e22e">l</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>]) <span style="color:#f92672">%</span> <span style="color:#a6e22e">MOD</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">MOD</span>) <span style="color:#f92672">%</span> <span style="color:#a6e22e">MOD</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">seen</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Set</span>&lt;<span style="color:#f92672">bigint</span>&gt;();
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">count</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">k</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>; <span style="color:#a6e22e">k</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">&lt;=</span> <span style="color:#a6e22e">n</span>; <span style="color:#a6e22e">k</span><span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">k</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">&lt;=</span> <span style="color:#a6e22e">n</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">queryLCP</span>(<span style="color:#a6e22e">i</span>, <span style="color:#a6e22e">i</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">k</span>) <span style="color:#f92672">&gt;=</span> <span style="color:#a6e22e">k</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">h</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">getHash</span>(<span style="color:#a6e22e">i</span>, <span style="color:#a6e22e">i</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">*</span> <span style="color:#a6e22e">k</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">seen</span>.<span style="color:#a6e22e">has</span>(<span style="color:#a6e22e">h</span>)) {
+</span></span><span style="display:flex;"><span>          <span style="color:#a6e22e">seen</span>.<span style="color:#a6e22e">add</span>(<span style="color:#a6e22e">h</span>);
+</span></span><span style="display:flex;"><span>          <span style="color:#a6e22e">count</span><span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">count</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 測試
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">distinctEchoSubstrings</span>(<span style="color:#e6db74">&#34;abcabcabc&#34;</span>));     <span style="color:#75715e">// 3
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">distinctEchoSubstrings</span>(<span style="color:#e6db74">&#34;leetcodeleetcode&#34;</span>)); <span style="color:#75715e">// 2
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/*
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  時間：O(n²)（枚舉所有半長 k 和起始位置 i）
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  空間：O(n log n)（Sparse Table）
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">*/</span>
+</span></span></code></pre></div><h4 id="leetcode-1698--number-of-distinct-substrings-in-a-string中等">LeetCode 1698 — Number of Distinct Substrings in a String（中等）</h4>
+<p><strong>題目</strong>：計算字串中不同子字串的數量。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-typescript" data-lang="typescript"><span style="display:flex;"><span><span style="color:#75715e">// ─── LeetCode 1698：SA + LCP 計算不同子字串數量 ──────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">countDistinctSubstrings</span>(<span style="color:#a6e22e">s</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">number</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">length</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">sa</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">buildSuffixArray</span>(<span style="color:#a6e22e">s</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">lcp</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">buildLCPArray</span>(<span style="color:#a6e22e">s</span>, <span style="color:#a6e22e">sa</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 不同子字串數量 = 所有子字串數量 - 重複的部分
+</span></span></span><span style="display:flex;"><span>  <span style="color:#75715e">// = n(n+1)/2 - Σlcp[i]
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">total</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">n</span> <span style="color:#f92672">*</span> (<span style="color:#a6e22e">n</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>)) <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">n</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">total</span> <span style="color:#f92672">-=</span> <span style="color:#a6e22e">lcp</span>[<span style="color:#a6e22e">i</span>];
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">total</span>; <span style="color:#75715e">// 不含空字串；若需含空字串，return total + 1
+</span></span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 測試
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">countDistinctSubstrings</span>(<span style="color:#e6db74">&#34;banana&#34;</span>));  <span style="color:#75715e">// 15
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">countDistinctSubstrings</span>(<span style="color:#e6db74">&#34;aaa&#34;</span>));     <span style="color:#75715e">// 3（&#34;a&#34;, &#34;aa&#34;, &#34;aaa&#34;）
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">countDistinctSubstrings</span>(<span style="color:#e6db74">&#34;abcd&#34;</span>));    <span style="color:#75715e">// 10
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/*
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  公式推導：
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">    每個後綴 sa[i] 貢獻 (n - sa[i]) 個子字串
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">    但與前一個後綴重複了 lcp[i] 個
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">    淨貢獻 = (n - sa[i]) - lcp[i]
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">    加總 = Σ(n - sa[i]) - Σlcp[i]
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">         = n(n+1)/2 - Σlcp[i]
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  時間：O(n log²n)（SA 建構）
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">  空間：O(n)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">*/</span>
+</span></span></code></pre></div><h4 id="leetcode-5--longest-palindromic-substring中等">LeetCode 5 — Longest Palindromic Substring（中等）</h4>
+<p>雖然此題更常用 <strong>Manacher&rsquo;s Algorithm</strong> 或 DP 解法，但也可以用 SA + LCP 的思路：最長回文子字串等於原字串與其反轉字串的最長公共子字串（加上位置約束）。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-typescript" data-lang="typescript"><span style="display:flex;"><span><span style="color:#75715e">// ─── LeetCode 5：SA + LCP 思路（概念示範）──────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">longestPalindromeSA</span>(<span style="color:#a6e22e">s</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">string</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">length</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 拼接：s + &#34;#&#34; + reverse(s)
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">rev</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">split</span>(<span style="color:#e6db74">&#34;&#34;</span>).<span style="color:#a6e22e">reverse</span>().<span style="color:#a6e22e">join</span>(<span style="color:#e6db74">&#34;&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">combined</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">s</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;#&#34;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">rev</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">totalLen</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">combined</span>.<span style="color:#a6e22e">length</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">sa</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">buildSuffixArray</span>(<span style="color:#a6e22e">combined</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">lcp</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">buildLCPArray</span>(<span style="color:#a6e22e">combined</span>, <span style="color:#a6e22e">sa</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">maxLen</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">start</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">totalLen</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 相鄰後綴必須一個來自 s、一個來自 reverse(s)
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">pos1</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">i</span>], <span style="color:#a6e22e">pos2</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">sa</span>[<span style="color:#a6e22e">i</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>];
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">from1</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">pos1</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">n</span>, <span style="color:#a6e22e">from2</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">pos2</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">n</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">from1</span> <span style="color:#f92672">===</span> <span style="color:#a6e22e">from2</span>) <span style="color:#66d9ef">continue</span>; <span style="color:#75715e">// 來自同一字串，跳過
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">lcpVal</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">lcp</span>[<span style="color:#a6e22e">i</span>];
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">lcpVal</span> <span style="color:#f92672">&lt;=</span> <span style="color:#a6e22e">maxLen</span>) <span style="color:#66d9ef">continue</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 驗證是否形成回文（位置約束）
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">origPos</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">from1</span> <span style="color:#f92672">?</span> <span style="color:#a6e22e">pos1</span> : <span style="color:#66d9ef">pos2</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">revPos</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">from1</span> <span style="color:#f92672">?</span> <span style="color:#a6e22e">pos2</span> : <span style="color:#66d9ef">pos1</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// revPos 在反轉字串中的對應原始位置
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">origEnd</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">totalLen</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">-</span> <span style="color:#a6e22e">revPos</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 奇數長度回文：origPos + lcpVal - 1 == origEnd
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 偶數長度回文：origPos + lcpVal == origEnd + 1
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">origPos</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">lcpVal</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">===</span> <span style="color:#a6e22e">origEnd</span> <span style="color:#f92672">||</span> <span style="color:#a6e22e">origPos</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">lcpVal</span> <span style="color:#f92672">===</span> <span style="color:#a6e22e">origEnd</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">lcpVal</span> <span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">maxLen</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">maxLen</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">lcpVal</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">start</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">origPos</span>;
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">substring</span>(<span style="color:#a6e22e">start</span>, <span style="color:#a6e22e">start</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">maxLen</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 注意：此方法需要更精細的位置檢查。
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// 面試中回文問題建議優先使用 Manacher&#39;s Algorithm 或 DP。
+</span></span></span></code></pre></div><hr>
+<h3 id="總結">總結</h3>
+<p>本文深入介紹了 <strong>後綴結構</strong> 這一字串演算法中最強大的索引家族：</p>
+<ol>
+<li><strong>Suffix Array</strong> 是後綴結構的核心，將所有後綴按字典序排列後記錄起始下標，支援 O(m log n) 模式匹配</li>
+<li><strong>LCP Array</strong> 記錄相鄰後綴的最長公共前綴長度，是求解最長重複子字串、計算不同子字串數量的關鍵</li>
+<li><strong>倍增法</strong> O(n log²n) 是建構 SA 的最佳性價比選擇，平衡了實作難度與效率</li>
+<li><strong>SA-IS</strong> O(n) 適用於超長字串場景，但實作複雜度顯著增加</li>
+<li><strong>Kasai&rsquo;s Algorithm</strong> 利用 LCP Lemma 在 O(n) 時間建構 LCP 陣列</li>
+<li><strong>Suffix Tree</strong> 在理論上功能最豐富，但 SA + LCP 幾乎可以完全替代，且空間與實作更優</li>
+</ol>
+<p>後綴結構的核心思維是 <strong>「預處理換查詢」</strong>——花一次 O(n log n) 或 O(n) 的建構成本，換取無限次 O(m log n) 的高效查詢。這種以空間和預處理時間換取查詢效率的設計理念，在資料庫索引、搜尋引擎、壓縮算法等領域都有廣泛應用。</p>
+<p>下一篇文章，我們將探討 <strong>持久化資料結構（Persistent Data Structures）</strong>——如何在不修改原始資料結構的情況下保存每次操作的歷史版本，實現高效的「時間旅行」功能。</p>
+
+<br>
+
+<p><strong>系列導覽：</strong></p>
+<p>
+  <a class="text-blue-500 font-bold no-underline" href="/post/javascript/data-structures-algorithms/037-approximation-online/" target="_blank">上一篇：037 — 近似與線上演算法</a>
+
+|
+
+  <a class="text-blue-500 font-bold no-underline" href="/post/javascript/data-structures-algorithms/039-persistent-data-structures/" target="_blank">下一篇：039 — 持久化資料結構</a>
+</p></div>
+        
+        
+
+        
+        <div class="mt-8">
+          
+<div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose">
+  <div>
+    <div class="flex items-center gap-2 mb-1">
+      <a href="/about" class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">
+        BenZ
+      </a>
+      
+      <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span>
+      
+    </div>
+    <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">
+      熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。
+    </p>
+    <div class="flex items-center gap-3">
+      
+      <a href="https://github.com/benzhub" target="_blank" rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label="GitHub">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      
+      
+      
+    </div>
+  </div>
+</div>
+
+        </div>
+      </div>
+
+      
+      
+<div class="subscribe-widget max-w-xl mx-auto my-10 px-6 py-8 text-center rounded-xl bg-zinc-50 dark:bg-zinc-800">
+  <h3 class="text-lg font-bold mb-1">訂閱 BenzHub 電子報</h3>
+  <p class="text-sm text-zinc-600 dark:text-zinc-300 mb-4">每週 AI 賺錢實戰 + 免費工具地圖</p>
+  <form class="subscribe-form flex flex-col sm:flex-row gap-3 justify-center"
+        data-worker="https://benzhub-newsletter.PLACEHOLDER.workers.dev" data-source="footer-widget">
+    <input type="email" required placeholder="你的 Email"
+           class="px-4 py-2 rounded-lg border border-zinc-300 dark:bg-zinc-900 dark:border-zinc-600" />
+    <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700">訂閱</button>
+  </form>
+  <div class="cf-turnstile mt-3 flex justify-center" data-sitekey="PLACEHOLDER_TURNSTILE_SITE_KEY"></div>
+  <p class="subscribe-status text-sm text-zinc-500 mt-2"></p>
+</div>
+
+
+
+      
+      <div class="post-detail fade-in my-4">
+        
+
+
+<div>
+  <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3>
+  <div class="grid gap-2">
+    
+    <a href="https://benzhub.github.io/post/javascript/data-structures--algorithms/037-approximation-online/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">近似與線上演算法完全指南 — 頂點覆蓋、集合覆蓋與秘書問題 | 資料結構與演算法</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/20</span>
+    </a>
+    
+    <a href="https://benzhub.github.io/post/javascript/data-structures--algorithms/036-randomized/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">隨機演算法完全指南 — QuickSelect、Reservoir Sampling 與 Fisher-Yates 洗牌 | 資料結構與演算法</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/19</span>
+    </a>
+    
+    <a href="https://benzhub.github.io/post/javascript/data-structures--algorithms/035-game-theory/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">博弈論完全指南 — Nim 遊戲、Sprague-Grundy 定理與組合賽局分析 | 資料結構與演算法</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/18</span>
+    </a>
+    
+  </div>
+</div>
+
+
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            
+            <a href="https://benzhub.github.io/post/javascript/data-structures--algorithms/037-approximation-online/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+                <span class="text-sm font-medium">近似與線上演算法完全指南 — 頂點覆蓋、集合覆蓋與秘書問題 | 資料結構與演算法</span>
+            </a>
+            
+          </div>
+          <div>
+            
+            <a href="https://benzhub.github.io/post/javascript/data-structures--algorithms/039-persistent-ds/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+                <span class="text-sm font-medium">持久化資料結構完全指南 — 路徑複製、Fat Node 與持久化線段樹 | 資料結構與演算法</span>
+            </a>
+            
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        
+<script src="https://giscus.app/client.js"
+        data-repo="benzhub/benzhub.github.io"
+        data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM="
+        data-category="Announcements"
+        data-category-id="MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme="preferred_color_scheme"
+        data-lang="zh-TW"
+        crossorigin="anonymous"
+        async>
+</script>
+
+
+      </div>
+    </div>
+    
+    <div class="hidden lg:block lg:col-span-1 mt-4">
+    
+    
+            
+            <div class="widget fade-in">
+    <p class="widget-title">搜尋</p>
+    <form role="search" method="get" action="https://google.com/search">
+        <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
+        <input type="hidden" name="sitesearch" value="https://benzhub.github.io/" />
+    </form>
+</div>
+
+        
+            
+            
+
+        
+            
+            
+<div class="widget fade-in">
+    <p class="widget-title">標籤</p>
+    <div class="flex flex-wrap gap-1.5">
+        <a href='/tags/80/20-%E6%B3%95%E5%89%87'>
+            <span class="tag-pill">80/20 法則</span>
+        </a>
+        <a href='/tags/acid'>
+            <span class="tag-pill">acid</span>
+        </a>
+        <a href='/tags/aggregate'>
+            <span class="tag-pill">aggregate</span>
+        </a>
+        <a href='/tags/ai'>
+            <span class="tag-pill">ai</span>
+        </a>
+        <a href='/tags/ai-agent'>
+            <span class="tag-pill">ai agent</span>
+        </a>
+        <a href='/tags/ai-workflow'>
+            <span class="tag-pill">ai workflow</span>
+        </a>
+        <a href='/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE'>
+            <span class="tag-pill">ai 工具焦慮</span>
+        </a>
+        <a href='/tags/ai-%E6%8E%A5%E5%96%AE'>
+            <span class="tag-pill">ai 接單</span>
+        </a>
+        <a href='/tags/ai-%E7%B9%AA%E5%9C%96'>
+            <span class="tag-pill">ai 繪圖</span>
+        </a>
+        <a href='/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA'>
+            <span class="tag-pill">ai 虛擬人</span>
+        </a>
+        <a href='/tags/ai-%E8%A1%8C%E9%8A%B7'>
+            <span class="tag-pill">ai 行銷</span>
+        </a>
+        <a href='/tags/ai-%E8%A8%AD%E8%A8%88'>
+            <span class="tag-pill">ai 設計</span>
+        </a>
+        <a href='/tags/ai-%E8%AE%8A%E7%8F%BE'>
+            <span class="tag-pill">ai 變現</span>
+        </a>
+        <a href='/tags/ai-%E8%B3%BA%E9%8C%A2'>
+            <span class="tag-pill">ai 賺錢</span>
+        </a>
+        <a href='/tags/ai-income'>
+            <span class="tag-pill">ai-income</span>
+        </a>
+        <a href='/tags/ai-insights'>
+            <span class="tag-pill">ai-insights</span>
+        </a>
+        <a href='/tags/analytics'>
+            <span class="tag-pill">analytics</span>
+        </a>
+        <a href='/tags/api'>
+            <span class="tag-pill">api</span>
+        </a>
+        <a href='/tags/architecture'>
+            <span class="tag-pill">architecture</span>
+        </a>
+        <a href='/tags/audit'>
+            <span class="tag-pill">audit</span>
+        </a>
+    </div>
+</div>
+
+
+        
+            
+            
+<div class="widget fade-in">
+    <p class="widget-title">文章系列</p>
+    <div class="flex flex-wrap gap-1.5">
+        
+        
+        
+        
+        <a href='/post/postgresql/'>
+            <span class="tag-pill">PostgreSQL (50)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/javascript/'>
+            <span class="tag-pill">JavaScript (109)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/django/'>
+            <span class="tag-pill">Django (44)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/python/'>
+            <span class="tag-pill">Python (37)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/htmlcss/'>
+            <span class="tag-pill">HTML &amp; CSS (23)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/linux/'>
+            <span class="tag-pill">Linux (22)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/git/'>
+            <span class="tag-pill">Git (18)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/ai-insights/'>
+            <span class="tag-pill">AI Insights (13)</span>
+        </a>
+        
+        
+    </div>
+</div>
+
+
+        
+            
+            
+
+<div class="widget fade-in">
+    <p class="widget-title">最新文章</p>
+    <div class="flex flex-col gap-1">
+        <a href="/post/javascript/data-structures--algorithms/047-load-balancer/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計負載均衡器 — Round Robin、一致性雜湊與健康檢查實戰 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/30
+            </p>
+        </a>
+        <a href="/post/javascript/data-structures--algorithms/046-text-diff/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計文本差異比對 — LCS、Myers Diff 演算法與 Patch 生成實戰 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/29
+            </p>
+        </a>
+        <a href="/post/javascript/data-structures--algorithms/045-recommendation/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計推薦系統 — 協同過濾、內容推薦與矩陣分解實戰 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/28
+            </p>
+        </a>
+        <a href="/post/javascript/data-structures--algorithms/044-url-shortener/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計短網址系統 — Base62 編碼、分散式 ID 生成與重導向架構 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/27
+            </p>
+        </a>
+        <a href="/post/postgresql/050-citus-distributed/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Citus 分散式 PostgreSQL：水平擴展到多節點叢集 | PostgreSQL</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/26
+            </p>
+        </a>
+    </div>
+</div>
+
+        
+    
+</div>
+
+    
+</div>
+
+        </div>
+    </div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]">
+    
+    <p>&copy; 2026 <a href="https://benzhub.github.io/" class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p>
+</footer>
+
+
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script src="/js/subscribe.js" defer></script>
+
+
+
+<script>
+    (function (window, document) {
+        function main() {
+            var ad = document.createElement('script');
+            ad.async = true;
+            ad.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606';
+            ad.crossOrigin = "anonymous";
+            var sc = document.getElementsByTagName('script')[0];
+            sc.parentNode.insertBefore(ad, sc);
+        }
+        var lazyLoad = false;
+        function onLazyLoad() {
+            if (lazyLoad === false) {
+                lazyLoad = true;
+                window.removeEventListener('scroll', onLazyLoad);
+                window.removeEventListener('mousemove', onLazyLoad);
+                window.removeEventListener('mousedown', onLazyLoad);
+                window.removeEventListener('touchstart', onLazyLoad);
+                window.removeEventListener('keydown', onLazyLoad);
+                main();
+            }
+        }
+        window.addEventListener('scroll', onLazyLoad);
+        window.addEventListener('mousemove', onLazyLoad);
+        window.addEventListener('mousedown', onLazyLoad);
+        window.addEventListener('touchstart', onLazyLoad);
+        window.addEventListener('keydown', onLazyLoad);
+        window.addEventListener('load', function () {
+            if (window.pageYOffset) {
+                onLazyLoad();
+                window.setTimeout(onLazyLoad, 3000);
+            }
+        });
+    })(window, document);
+</script>
+
+
+<script>
+    
+    var icon = document.getElementById("icon");
+    var icon2 = document.getElementById("icon2");
+    if (document.documentElement.classList.contains("dark") || localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+        if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+    function toggleDarkMode() {
+        if (document.documentElement.classList.contains('dark')) {
+            if (icon) { icon.classList.remove("icon-sun"); icon.classList.add("icon-moon"); }
+            if (icon2) { icon2.classList.remove("icon-sun"); icon2.classList.add("icon-moon"); }
+            document.documentElement.classList.remove('dark');
+            localStorage.theme = 'light';
+        } else {
+            if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+            if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+            document.documentElement.classList.add('dark');
+            localStorage.theme = 'dark';
+        }
+    }
+
+    
+    document.addEventListener('DOMContentLoaded', function () {
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0 });
+
+        document.querySelectorAll('.fade-in').forEach(function (el) {
+            observer.observe(el);
+        });
+    });
+</script>
+</body>
+
+</html>

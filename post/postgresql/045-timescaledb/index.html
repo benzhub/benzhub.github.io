@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+
+<html lang="zh-TW">
+<head>
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-FSEWPBJMJT');
+</script>
+
+<title>TimescaleDB 時序資料庫完全指南：從 Hypertable 到連續聚合與壓縮策略 | PostgreSQL | BenzHub</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="apple-touch-icon" sizes="180x180" href='/favicon/apple-touch-icon.png'>
+    <link rel="icon" type="image/png" sizes="32x32" href='/favicon/favicon-32x32.png'>
+    <link rel="icon" type="image/png" sizes="16x16" href='/favicon/favicon-16x16.png'>
+    <link rel="manifest" href='/favicon/site.webmanifest' />
+    <link rel="mask-icon" href=' /favicon/safari-pinned-tab.svg' color="#5bbad5" />
+    <link rel="shortcut icon" href='/favicon/favicon.ico' />
+    <meta name="theme-color" content="#fafafa">
+    <meta property="og:title" content="TimescaleDB 時序資料庫完全指南：從 Hypertable 到連續聚合與壓縮策略 | PostgreSQL | BenzHub" />
+    
+    
+    
+    <link rel="stylesheet" href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css" />
+    
+    <link href=' /css/blonde.min.css' rel="stylesheet" type="text/css" media="print"
+        onload="this.media=' all'">
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+
+<meta name="description" content="深入介紹 TimescaleDB 時序資料庫擴展套件，涵蓋 Hypertable 自動分區、time_bucket 聚合函數、Continuous Aggregates 即時物化視圖、自動壓縮與資料保留策略，搭配 IoT 感測器、APM 監控、金融 OHLCV 三大實戰場景。">
+<meta property="og:site_name" content="BenzHub">
+<meta property="og:description" content="深入介紹 TimescaleDB 時序資料庫擴展套件，涵蓋 Hypertable 自動分區、time_bucket 聚合函數、Continuous Aggregates 即時物化視圖、自動壓縮與資料保留策略，搭配 IoT 感測器、APM 監控、金融 OHLCV 三大實戰場景。">
+<meta property="og:url" content="https://benzhub.github.io/post/postgresql/045-timescaledb/">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="zh_TW">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="">
+
+<link rel="canonical" href="https://benzhub.github.io/post/postgresql/045-timescaledb/">
+
+<meta name="twitter:description" content="深入介紹 TimescaleDB 時序資料庫擴展套件，涵蓋 Hypertable 自動分區、time_bucket 聚合函數、Continuous Aggregates 即時物化視圖、自動壓縮與資料保留策略，搭配 IoT 感測器、APM 監控、金融 OHLCV 三大實戰場景。">
+<meta property="article:published_time" content="2026-07-21T00:00:00&#43;00:00">
+<meta property="article:updated_time" content="2026-07-21T00:00:00&#43;00:00">
+
+
+
+
+
+    
+<meta property="og:image" content="https://benzhub.github.io/img/postgresql/045-TimescaleDB.png">
+<meta property="og:image:url" content="https://benzhub.github.io/img/postgresql/045-TimescaleDB.png">
+    
+
+    
+    <link rel="stylesheet" href='/css/custom.css'>
+    <i class="dark hidden"></i>
+    
+<link rel="alternate" hreflang="zh-TW" href="https://benzhub.github.io/post/postgresql/045-timescaledb/" />
+
+<link rel="alternate" hreflang="x-default" href="https://benzhub.github.io/post/postgresql/045-timescaledb/" />
+
+    
+
+
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "\"TimescaleDB 時序資料庫完全指南：從 Hypertable 到連續聚合與壓縮策略 | PostgreSQL\"",
+  "description": "\"深入介紹 TimescaleDB 時序資料庫擴展套件，涵蓋 Hypertable 自動分區、time_bucket 聚合函數、Continuous Aggregates 即時物化視圖、自動壓縮與資料保留策略，搭配 IoT 感測器、APM 監控、金融 OHLCV 三大實戰場景。\"",
+  "author": {
+    "@type": "Person",
+    "name": "\"BenzHub\"",
+    "url": "https:\/\/benzhub.github.io\/about",
+    "jobTitle": "\"Software Developer\"",
+    "sameAs": [
+      "\"https://github.com/benzhub\""
+    ]
+  },
+  "datePublished": "2026-07-21T00:00:00\u002b00:00",
+  "dateModified": "2026-07-21T00:00:00\u002b00:00",
+  "image": "https:\/\/benzhub.github.io\/img\/postgresql\/045-TimescaleDB.png",
+  "publisher": {
+    "@type": "Organization",
+    "name": "\"BenzHub\"",
+    "url": "\"https://benzhub.github.io/\"",
+    "sameAs": [
+      "\"https://github.com/benzhub\""
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/benzhub.github.io\/post\/postgresql\/045-timescaledb\/"
+  },
+  "inLanguage": "zh-TW"
+}
+</script>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "\"BenzHub\"",
+      "item": "https:\/\/benzhub.github.io\/"
+    }
+    
+    
+      
+      
+    ,{
+      "@type": "ListItem",
+      "position": 2,
+      "name": "\"Blog\"",
+      "item": "https:\/\/benzhub.github.io\/post\/postgresql\/"
+    }
+      
+      
+    
+    ,{
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "\"TimescaleDB 時序資料庫完全指南：從 Hypertable 到連續聚合與壓縮策略 | PostgreSQL\""
+    }
+  ]
+}
+</script>
+
+
+
+
+
+
+
+
+
+
+
+</head>
+<body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class="site-nav" id="siteNav">
+    <div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full">
+        
+        <a href="https://benzhub.github.io/" class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">
+            BenzHub
+        </a>
+
+        
+        <div class="hidden md:flex items-center gap-6">
+            
+            <a href="/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                首頁
+            </a>
+            
+            <a href="/about/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                關於
+            </a>
+            
+            <a href="/contact/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                聯絡
+            </a>
+            
+            <a href="/resourses/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                資源
+            </a>
+            
+
+            
+            <div class="flex items-center gap-2">
+                <form class="flex items-center" role="search" method="get" action="https://google.com/search" id="navSearchForm">
+                    <input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50"
+                        type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋" id="navSearchInput">
+                    <input type="hidden" name="sitesearch" value="https://benzhub.github.io/" />
+                </form>
+                <button onclick="toggleNavSearch()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+                    <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                    </svg>
+                </button>
+            </div>
+
+            
+            <span class="text-zinc-200 dark:text-zinc-700">|</span>
+
+            
+            
+
+
+
+
+<div class="lang-switcher relative hidden md:block">
+    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+        <span>🌐</span>
+        <span>繁體中文</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
+        
+            
+            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
+    <div class="flex gap-2">
+        
+            
+            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+            
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon2" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+        </div>
+
+        
+        <div class="flex md:hidden items-center gap-1">
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+            <button id="hamburgerbtn" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Menu">
+                <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    
+    <div class="mobile-menu md:hidden" id="mobileMenu">
+        
+        <a href="/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            首頁
+        </a>
+        
+        <a href="/about/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            關於
+        </a>
+        
+        <a href="/contact/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            聯絡
+        </a>
+        
+        <a href="/resourses/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            資源
+        </a>
+        
+        <form class="mt-2" role="search" method="get" action="https://google.com/search">
+            <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
+            <input type="hidden" name="sitesearch" value="https://benzhub.github.io/" />
+        </form>
+        
+        
+
+
+
+
+<div class="lang-switcher relative hidden md:block">
+    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+        <span>🌐</span>
+        <span>繁體中文</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
+        
+            
+            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
+    <div class="flex gap-2">
+        
+            
+            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+    </div>
+</nav>
+
+<script>
+    
+    document.getElementById('hamburgerbtn').addEventListener('click', function () {
+        document.getElementById('mobileMenu').classList.toggle('active');
+    });
+
+    
+    window.addEventListener('scroll', function () {
+        var nav = document.getElementById('siteNav');
+        if (window.scrollY > 50) {
+            nav.classList.add('scrolled');
+        } else {
+            nav.classList.remove('scrolled');
+        }
+    });
+
+    
+    function toggleNavSearch() {
+        var input = document.getElementById('navSearchInput');
+        input.classList.toggle('expanded');
+        if (input.classList.contains('expanded')) {
+            input.focus();
+        }
+    }
+
+    
+    function toggleLangMenu() {
+        var dropdown = document.getElementById('langDropdown');
+        dropdown.classList.toggle('hidden');
+    }
+
+    
+    document.addEventListener('click', function (e) {
+        
+        var form = document.getElementById('navSearchForm');
+        var input = document.getElementById('navSearchInput');
+        if (form && input && !form.contains(e.target) && !e.target.closest('[aria-label="Toggle Search"]')) {
+            input.classList.remove('expanded');
+        }
+        
+        var langSwitcher = e.target.closest('.lang-switcher');
+        if (!langSwitcher) {
+            var dropdown = document.getElementById('langDropdown');
+            if (dropdown) dropdown.classList.add('hidden');
+        }
+    });
+</script>
+<div class="nav-spacer"></div>
+    <div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id="content">
+        <div class="lg:mx-5">
+<div class="grid grid-cols-3 gap-6">
+  
+  <div class="col-span-3 lg:col-span-2">
+  
+      
+      <div class="post-detail fade-in my-4">
+        <h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">TimescaleDB 時序資料庫完全指南：從 Hypertable 到連續聚合與壓縮策略 | PostgreSQL</h1>
+        <div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4">
+            <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/21
+            </span>
+            
+        </div>
+        
+        <div class="flex flex-wrap gap-1.5 mb-5">
+            
+            <a href='/tags/postgresql' class="tag-pill no-underline">postgresql</a>
+            
+            <a href='/tags/timescaledb' class="tag-pill no-underline">TimescaleDB</a>
+            
+            <a href='/tags/%E6%99%82%E5%BA%8F%E8%B3%87%E6%96%99%E5%BA%AB' class="tag-pill no-underline">時序資料庫</a>
+            
+            <a href='/tags/iot' class="tag-pill no-underline">IoT</a>
+            
+        </div>
+        
+        
+        <img class="py-4 m-auto rounded-lg thumb-img" src="https://benzhub.github.io/img/postgresql/045-TimescaleDB.png" alt="TimescaleDB 時序資料庫完全指南：從 Hypertable 到連續聚合與壓縮策略 | PostgreSQL">
+        
+        
+        <div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote>
+<p><strong>TimescaleDB</strong> 是建構在 <strong>PostgreSQL</strong> 之上的時序資料庫擴展套件，讓你用熟悉的 <strong>SQL</strong> 語法處理大規模時間序列資料。從 <strong>Hypertable</strong> 自動分區、<strong>time_bucket</strong> 聚合函數到 <strong>Continuous Aggregates</strong> 即時物化與自動 <strong>壓縮</strong> 策略，本文帶你完整掌握 TimescaleDB 的核心功能與實戰技巧。</p>
+</blockquote>
+<h3 id="為什麼需要-timescaledb">為什麼需要 TimescaleDB？</h3>
+<p>時間序列資料（Time-Series Data）無處不在——IoT 感測器每秒回傳溫濕度、應用程式每分鐘記錄回應時間、金融市場每毫秒產生價格變動。這類資料有幾個共同特徵：</p>
+<table>
+  <thead>
+      <tr>
+          <th>特徵</th>
+          <th>說明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>以時間為主軸</td>
+          <td>資料依時間戳排序，幾乎只有 INSERT，極少 UPDATE</td>
+      </tr>
+      <tr>
+          <td>寫入量極大</td>
+          <td>每秒數千到數十萬筆</td>
+      </tr>
+      <tr>
+          <td>查詢以時間範圍為主</td>
+          <td>「最近 1 小時」「過去 7 天」是典型查詢模式</td>
+      </tr>
+      <tr>
+          <td>需要降取樣聚合</td>
+          <td>原始資料太多，需聚合成分鐘/小時/天粒度</td>
+      </tr>
+      <tr>
+          <td>舊資料逐漸降級</td>
+          <td>熱資料保留原始精度，冷資料壓縮或刪除</td>
+      </tr>
+  </tbody>
+</table>
+<p>原生 PostgreSQL 可以存時序資料，但當資料量達到數億筆時，單一大表的索引維護、VACUUM 成本、查詢延遲都會急劇上升。<strong>TimescaleDB</strong> 解決了這些問題：</p>
+<pre tabindex="0"><code>┌─────────────────────────────────────────────┐
+│            TimescaleDB 架構                  │
+│                                             │
+│  ┌─────────────────────────────────┐        │
+│  │        Hypertable（虛擬表）      │        │
+│  │   CREATE TABLE metrics (...)    │        │
+│  └────────────┬────────────────────┘        │
+│               │ 自動分區                     │
+│  ┌────────┬───┴────┬────────┬────────┐      │
+│  │Chunk 1 │Chunk 2 │Chunk 3 │Chunk 4 │      │
+│  │ 1月    │ 2月    │ 3月    │ 4月    │      │
+│  │(熱資料) │(溫資料) │(壓縮)  │(壓縮)  │      │
+│  └────────┴────────┴────────┴────────┘      │
+│                                             │
+│  + Continuous Aggregates（即時物化視圖）       │
+│  + 自動壓縮（90%+ 壓縮比）                    │
+│  + 資料保留策略（自動刪除過期資料）              │
+└─────────────────────────────────────────────┘
+</code></pre><h3 id="安裝與啟用">安裝與啟用</h3>
+<h4 id="ubuntudebian">Ubuntu/Debian</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 加入 TimescaleDB APT 來源</span>
+</span></span><span style="display:flex;"><span>sudo apt install -y gnupg postgresql-common
+</span></span><span style="display:flex;"><span>sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
+</span></span><span style="display:flex;"><span>sudo sh -c <span style="color:#e6db74">&#34;echo &#39;deb https://packagecloud.io/timescale/timescaledb/ubuntu/ </span><span style="color:#66d9ef">$(</span>lsb_release -cs<span style="color:#66d9ef">)</span><span style="color:#e6db74"> main&#39; &gt; /etc/apt/sources.list.d/timescaledb.list&#34;</span>
+</span></span><span style="display:flex;"><span>wget --quiet -O - https://packagecloud.io/timescale/timescaledb/gpgkey | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/timescaledb.gpg
+</span></span><span style="display:flex;"><span>sudo apt update
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 安裝（PostgreSQL 16 版本）</span>
+</span></span><span style="display:flex;"><span>sudo apt install -y timescaledb-2-postgresql-16
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 執行調校精靈</span>
+</span></span><span style="display:flex;"><span>sudo timescaledb-tune --quiet --yes
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 重啟 PostgreSQL</span>
+</span></span><span style="display:flex;"><span>sudo systemctl restart postgresql
+</span></span></code></pre></div><h4 id="docker">Docker</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>docker run -d --name timescaledb <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  -p 5432:5432 <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  -e POSTGRES_PASSWORD<span style="color:#f92672">=</span>password <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  timescale/timescaledb:latest-pg16
+</span></span></code></pre></div><h4 id="啟用擴展">啟用擴展</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 在目標資料庫中啟用
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> EXTENSION <span style="color:#66d9ef">IF</span> <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">EXISTS</span> timescaledb;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 確認版本
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> extversion <span style="color:#66d9ef">FROM</span> pg_extension <span style="color:#66d9ef">WHERE</span> extname <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;timescaledb&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 2.17.2
+</span></span></span></code></pre></div><h3 id="hypertable自動分區的核心">Hypertable：自動分區的核心</h3>
+<p><strong>Hypertable</strong> 是 TimescaleDB 的核心概念——它看起來像一張普通的 PostgreSQL 表，但底層會自動按時間維度切割成多個 <strong>Chunk</strong>（分區）：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- Step 1：建立普通表
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> sensor_data (
+</span></span><span style="display:flex;"><span>    time        TIMESTAMPTZ <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
+</span></span><span style="display:flex;"><span>    device_id   TEXT        <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
+</span></span><span style="display:flex;"><span>    temperature DOUBLE <span style="color:#66d9ef">PRECISION</span>,
+</span></span><span style="display:flex;"><span>    humidity    DOUBLE <span style="color:#66d9ef">PRECISION</span>,
+</span></span><span style="display:flex;"><span>    battery     DOUBLE <span style="color:#66d9ef">PRECISION</span>
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- Step 2：轉換為 Hypertable
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">-- chunk_time_interval 決定每個 Chunk 涵蓋的時間範圍
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> create_hypertable(
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;sensor_data&#39;</span>,
+</span></span><span style="display:flex;"><span>    by_range(<span style="color:#e6db74">&#39;time&#39;</span>, INTERVAL <span style="color:#e6db74">&#39;1 day&#39;</span>)
+</span></span><span style="display:flex;"><span>);
+</span></span></code></pre></div><h4 id="chunk-時間間隔選擇">Chunk 時間間隔選擇</h4>
+<table>
+  <thead>
+      <tr>
+          <th>資料寫入速率</th>
+          <th>建議 chunk_time_interval</th>
+          <th>理由</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>&lt; 1,000 筆/秒</td>
+          <td>1 week</td>
+          <td>減少 Chunk 數量，降低管理成本</td>
+      </tr>
+      <tr>
+          <td>1,000-10,000 筆/秒</td>
+          <td>1 day</td>
+          <td>平衡查詢效能與管理成本</td>
+      </tr>
+      <tr>
+          <td>&gt; 10,000 筆/秒</td>
+          <td>數小時</td>
+          <td>確保單一 Chunk 不會太大</td>
+      </tr>
+  </tbody>
+</table>
+<h4 id="多維度分區">多維度分區</h4>
+<p>除了時間維度，還可以加入空間維度（如 device_id）做 Hash 分區：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> create_hypertable(
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;sensor_data&#39;</span>,
+</span></span><span style="display:flex;"><span>    by_range(<span style="color:#e6db74">&#39;time&#39;</span>, INTERVAL <span style="color:#e6db74">&#39;1 day&#39;</span>),
+</span></span><span style="display:flex;"><span>    by_hash(<span style="color:#e6db74">&#39;device_id&#39;</span>, <span style="color:#ae81ff">4</span>)  <span style="color:#75715e">-- 4 個 Hash 分區
+</span></span></span><span style="display:flex;"><span>);
+</span></span></code></pre></div><h4 id="查看-chunk-資訊">查看 Chunk 資訊</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 列出所有 Chunk
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> chunk_name, range_start, range_end,
+</span></span><span style="display:flex;"><span>       pg_size_pretty(total_bytes) <span style="color:#66d9ef">AS</span> <span style="color:#66d9ef">size</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> timescaledb_information.chunks
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> hypertable_name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;sensor_data&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> range_start <span style="color:#66d9ef">DESC</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">LIMIT</span> <span style="color:#ae81ff">10</span>;
+</span></span></code></pre></div><h3 id="time_bucket時間聚合利器">time_bucket：時間聚合利器</h3>
+<p><code>time_bucket</code> 是 TimescaleDB 最常用的函數，將時間戳對齊到指定的時間桶：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 每 5 分鐘平均溫度
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span>
+</span></span><span style="display:flex;"><span>    time_bucket(<span style="color:#e6db74">&#39;5 minutes&#39;</span>, time) <span style="color:#66d9ef">AS</span> bucket,
+</span></span><span style="display:flex;"><span>    device_id,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">AVG</span>(temperature) <span style="color:#66d9ef">AS</span> avg_temp,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">MAX</span>(temperature) <span style="color:#66d9ef">AS</span> max_temp,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">MIN</span>(temperature) <span style="color:#66d9ef">AS</span> min_temp,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">COUNT</span>(<span style="color:#f92672">*</span>) <span style="color:#66d9ef">AS</span> readings
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> sensor_data
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> time <span style="color:#f92672">&gt;</span> NOW() <span style="color:#f92672">-</span> INTERVAL <span style="color:#e6db74">&#39;1 hour&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">GROUP</span> <span style="color:#66d9ef">BY</span> bucket, device_id
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> bucket <span style="color:#66d9ef">DESC</span>;
+</span></span></code></pre></div><h4 id="進階用法">進階用法</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 月度統計（使用 INTERVAL）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span>
+</span></span><span style="display:flex;"><span>    time_bucket(<span style="color:#e6db74">&#39;1 month&#39;</span>, time) <span style="color:#66d9ef">AS</span> <span style="color:#66d9ef">month</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">COUNT</span>(<span style="color:#f92672">*</span>) <span style="color:#66d9ef">AS</span> total_readings,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">AVG</span>(temperature) <span style="color:#66d9ef">AS</span> avg_temp
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> sensor_data
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">GROUP</span> <span style="color:#66d9ef">BY</span> <span style="color:#66d9ef">month</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> <span style="color:#66d9ef">month</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 帶偏移量的時間桶（工廠三班制：08:00 開始）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span>
+</span></span><span style="display:flex;"><span>    time_bucket(<span style="color:#e6db74">&#39;8 hours&#39;</span>, time, <span style="color:#e6db74">&#39;2026-01-01 08:00:00&#39;</span>::timestamptz) <span style="color:#66d9ef">AS</span> shift,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">AVG</span>(temperature) <span style="color:#66d9ef">AS</span> avg_temp
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> sensor_data
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">GROUP</span> <span style="color:#66d9ef">BY</span> shift
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> shift;
+</span></span></code></pre></div><h4 id="其他實用-hyperfunctions">其他實用 Hyperfunctions</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 近似行數（比 COUNT(*) 快 10-100 倍）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> approximate_row_count(<span style="color:#e6db74">&#39;sensor_data&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 第一筆與最後一筆
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span>
+</span></span><span style="display:flex;"><span>    device_id,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">first</span>(temperature, time) <span style="color:#66d9ef">AS</span> first_temp,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">last</span>(temperature, time)  <span style="color:#66d9ef">AS</span> last_temp
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> sensor_data
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">GROUP</span> <span style="color:#66d9ef">BY</span> device_id;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 時間加權平均（處理不規則取樣間隔）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span>
+</span></span><span style="display:flex;"><span>    time_bucket(<span style="color:#e6db74">&#39;1 hour&#39;</span>, time) <span style="color:#66d9ef">AS</span> bucket,
+</span></span><span style="display:flex;"><span>    average(time_weight(<span style="color:#e6db74">&#39;linear&#39;</span>, time, temperature)) <span style="color:#66d9ef">AS</span> tw_avg
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> sensor_data
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> time <span style="color:#f92672">&gt;</span> NOW() <span style="color:#f92672">-</span> INTERVAL <span style="color:#e6db74">&#39;24 hours&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">GROUP</span> <span style="color:#66d9ef">BY</span> bucket
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> bucket;
+</span></span></code></pre></div><h3 id="continuous-aggregates即時物化視圖">Continuous Aggregates：即時物化視圖</h3>
+<p>當你反覆查詢相同的聚合（如「每小時平均溫度」），每次都掃描原始資料非常浪費。<strong>Continuous Aggregates</strong>（連續聚合）會自動將聚合結果物化，並在有新資料時增量更新：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 建立連續聚合：每小時設備統計
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> MATERIALIZED <span style="color:#66d9ef">VIEW</span> sensor_hourly
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WITH</span> (timescaledb.continuous) <span style="color:#66d9ef">AS</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span>
+</span></span><span style="display:flex;"><span>    time_bucket(<span style="color:#e6db74">&#39;1 hour&#39;</span>, time) <span style="color:#66d9ef">AS</span> bucket,
+</span></span><span style="display:flex;"><span>    device_id,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">AVG</span>(temperature)   <span style="color:#66d9ef">AS</span> avg_temp,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">MAX</span>(temperature)   <span style="color:#66d9ef">AS</span> max_temp,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">MIN</span>(temperature)   <span style="color:#66d9ef">AS</span> min_temp,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">AVG</span>(humidity)      <span style="color:#66d9ef">AS</span> avg_humidity,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">COUNT</span>(<span style="color:#f92672">*</span>)           <span style="color:#66d9ef">AS</span> readings
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> sensor_data
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">GROUP</span> <span style="color:#66d9ef">BY</span> bucket, device_id
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WITH</span> <span style="color:#66d9ef">NO</span> <span style="color:#66d9ef">DATA</span>;  <span style="color:#75715e">-- 先不回填歷史資料
+</span></span></span></code></pre></div><h4 id="設定自動刷新策略">設定自動刷新策略</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 自動刷新：每 30 分鐘刷新，範圍為 3 小時前到 1 小時前
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> add_continuous_aggregate_policy(
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;sensor_hourly&#39;</span>,
+</span></span><span style="display:flex;"><span>    start_offset    <span style="color:#f92672">=&gt;</span> INTERVAL <span style="color:#e6db74">&#39;3 hours&#39;</span>,
+</span></span><span style="display:flex;"><span>    end_offset      <span style="color:#f92672">=&gt;</span> INTERVAL <span style="color:#e6db74">&#39;1 hour&#39;</span>,
+</span></span><span style="display:flex;"><span>    schedule_interval <span style="color:#f92672">=&gt;</span> INTERVAL <span style="color:#e6db74">&#39;30 minutes&#39;</span>
+</span></span><span style="display:flex;"><span>);
+</span></span></code></pre></div><pre tabindex="0"><code>時間線：
+                    3h前        1h前       現在
+──────────────────────┤───────────┤──────────┤──→
+                      │← 刷新範圍 →│
+                      │  (物化)   │ (即時)   │
+</code></pre><p><strong>end_offset</strong> 的意義：最近 1 小時的資料可能還有延遲到達的寫入，暫不物化——查詢時 TimescaleDB 會自動合併物化結果與即時資料（Real-Time Aggregation）。</p>
+<h4 id="手動回填歷史">手動回填歷史</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 回填過去 30 天
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CALL</span> refresh_continuous_aggregate(
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;sensor_hourly&#39;</span>,
+</span></span><span style="display:flex;"><span>    NOW() <span style="color:#f92672">-</span> INTERVAL <span style="color:#e6db74">&#39;30 days&#39;</span>,
+</span></span><span style="display:flex;"><span>    NOW() <span style="color:#f92672">-</span> INTERVAL <span style="color:#e6db74">&#39;1 hour&#39;</span>
+</span></span><span style="display:flex;"><span>);
+</span></span></code></pre></div><h4 id="階層式聚合hierarchical">階層式聚合（Hierarchical）</h4>
+<p>可以在連續聚合之上再建連續聚合：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 日粒度（基於小時粒度的 sensor_hourly）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> MATERIALIZED <span style="color:#66d9ef">VIEW</span> sensor_daily
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WITH</span> (timescaledb.continuous) <span style="color:#66d9ef">AS</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span>
+</span></span><span style="display:flex;"><span>    time_bucket(<span style="color:#e6db74">&#39;1 day&#39;</span>, bucket) <span style="color:#66d9ef">AS</span> <span style="color:#66d9ef">day</span>,
+</span></span><span style="display:flex;"><span>    device_id,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">AVG</span>(avg_temp)    <span style="color:#66d9ef">AS</span> avg_temp,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">MAX</span>(max_temp)    <span style="color:#66d9ef">AS</span> max_temp,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">MIN</span>(min_temp)    <span style="color:#66d9ef">AS</span> min_temp,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">SUM</span>(readings)    <span style="color:#66d9ef">AS</span> total_readings
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> sensor_hourly
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">GROUP</span> <span style="color:#66d9ef">BY</span> <span style="color:#66d9ef">day</span>, device_id
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WITH</span> <span style="color:#66d9ef">NO</span> <span style="color:#66d9ef">DATA</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> add_continuous_aggregate_policy(
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;sensor_daily&#39;</span>,
+</span></span><span style="display:flex;"><span>    start_offset    <span style="color:#f92672">=&gt;</span> INTERVAL <span style="color:#e6db74">&#39;3 days&#39;</span>,
+</span></span><span style="display:flex;"><span>    end_offset      <span style="color:#f92672">=&gt;</span> INTERVAL <span style="color:#e6db74">&#39;1 day&#39;</span>,
+</span></span><span style="display:flex;"><span>    schedule_interval <span style="color:#f92672">=&gt;</span> INTERVAL <span style="color:#e6db74">&#39;1 hour&#39;</span>
+</span></span><span style="display:flex;"><span>);
+</span></span></code></pre></div><h3 id="壓縮節省-90-儲存空間">壓縮：節省 90%+ 儲存空間</h3>
+<p>TimescaleDB 的 <strong>列式壓縮（Columnar Compression）</strong> 可以將冷資料壓縮 90-95%，同時保持 SQL 查詢能力：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 啟用壓縮
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> sensor_data <span style="color:#66d9ef">SET</span> (
+</span></span><span style="display:flex;"><span>    timescaledb.compress,
+</span></span><span style="display:flex;"><span>    timescaledb.compress_segmentby <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;device_id&#39;</span>,
+</span></span><span style="display:flex;"><span>    timescaledb.compress_orderby <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;time DESC&#39;</span>
+</span></span><span style="display:flex;"><span>);
+</span></span></code></pre></div><h4 id="參數說明">參數說明</h4>
+<table>
+  <thead>
+      <tr>
+          <th>參數</th>
+          <th>用途</th>
+          <th>選擇指引</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>compress_segmentby</code></td>
+          <td>壓縮段的分組欄位</td>
+          <td>選擇 WHERE 條件常用的低基數欄位（如 device_id）</td>
+      </tr>
+      <tr>
+          <td><code>compress_orderby</code></td>
+          <td>段內的排序方式</td>
+          <td>通常為 <code>time DESC</code>，加速 ORDER BY 查詢</td>
+      </tr>
+  </tbody>
+</table>
+<h4 id="自動壓縮策略">自動壓縮策略</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 超過 7 天的 Chunk 自動壓縮
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> add_compression_policy(
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;sensor_data&#39;</span>,
+</span></span><span style="display:flex;"><span>    compress_after <span style="color:#f92672">=&gt;</span> INTERVAL <span style="color:#e6db74">&#39;7 days&#39;</span>
+</span></span><span style="display:flex;"><span>);
+</span></span></code></pre></div><h4 id="查看壓縮效果">查看壓縮效果</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 壓縮統計
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span>
+</span></span><span style="display:flex;"><span>    pg_size_pretty(before_compression_total_bytes) <span style="color:#66d9ef">AS</span> <span style="color:#66d9ef">before</span>,
+</span></span><span style="display:flex;"><span>    pg_size_pretty(after_compression_total_bytes)  <span style="color:#66d9ef">AS</span> <span style="color:#66d9ef">after</span>,
+</span></span><span style="display:flex;"><span>    ROUND(
+</span></span><span style="display:flex;"><span>        (<span style="color:#ae81ff">1</span> <span style="color:#f92672">-</span> after_compression_total_bytes::numeric <span style="color:#f92672">/</span>
+</span></span><span style="display:flex;"><span>             before_compression_total_bytes::numeric) <span style="color:#f92672">*</span> <span style="color:#ae81ff">100</span>, <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>    ) <span style="color:#66d9ef">AS</span> compression_ratio_pct
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> hypertable_compression_stats(<span style="color:#e6db74">&#39;sensor_data&#39;</span>);
+</span></span></code></pre></div><p>典型結果：</p>
+<pre tabindex="0"><code> before  | after  | compression_ratio_pct
+---------+--------+-----------------------
+ 12 GB   | 980 MB | 91.8
+</code></pre><h4 id="手動壓縮特定-chunk">手動壓縮特定 Chunk</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 壓縮特定時間範圍
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> compress_chunk(<span style="color:#66d9ef">c</span>.chunk_name)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> timescaledb_information.chunks <span style="color:#66d9ef">c</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> <span style="color:#66d9ef">c</span>.hypertable_name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;sensor_data&#39;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">AND</span> <span style="color:#66d9ef">c</span>.range_end <span style="color:#f92672">&lt;</span> NOW() <span style="color:#f92672">-</span> INTERVAL <span style="color:#e6db74">&#39;7 days&#39;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">AND</span> <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">c</span>.is_compressed;
+</span></span></code></pre></div><h3 id="資料保留策略">資料保留策略</h3>
+<p>時序資料不需要永久保存——90 天前的原始秒級資料通常可以刪除（聚合結果保留在 Continuous Aggregate 中）：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 自動刪除 90 天前的原始資料
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> add_retention_policy(
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;sensor_data&#39;</span>,
+</span></span><span style="display:flex;"><span>    drop_after <span style="color:#f92672">=&gt;</span> INTERVAL <span style="color:#e6db74">&#39;90 days&#39;</span>
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 手動刪除（需要時）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> drop_chunks(
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;sensor_data&#39;</span>,
+</span></span><span style="display:flex;"><span>    older_than <span style="color:#f92672">=&gt;</span> INTERVAL <span style="color:#e6db74">&#39;90 days&#39;</span>
+</span></span><span style="display:flex;"><span>);
+</span></span></code></pre></div><h4 id="完整的資料生命週期">完整的資料生命週期</h4>
+<pre tabindex="0"><code>原始資料 sensor_data
+  │
+  ├── 0-7 天：未壓縮（熱資料，高速寫入/查詢）
+  ├── 7-90 天：已壓縮（溫資料，壓縮 90%+）
+  └── 90 天後：自動刪除
+        ↓
+聚合資料 sensor_hourly
+  │
+  ├── 0-180 天：小時粒度物化結果
+  └── 180 天後：自動刪除
+        ↓
+聚合資料 sensor_daily
+  │
+  └── 永久保留：天粒度物化結果
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 為聚合也設定保留策略
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> add_retention_policy(<span style="color:#e6db74">&#39;sensor_hourly&#39;</span>, drop_after <span style="color:#f92672">=&gt;</span> INTERVAL <span style="color:#e6db74">&#39;180 days&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- sensor_daily 永久保留，不設保留策略
+</span></span></span></code></pre></div><h3 id="實戰場景一iot-感測器監控">實戰場景一：IoT 感測器監控</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 完整的 IoT 資料模型
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> devices (
+</span></span><span style="display:flex;"><span>    device_id   TEXT <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">location</span>    TEXT,
+</span></span><span style="display:flex;"><span>    device_type TEXT,
+</span></span><span style="display:flex;"><span>    installed   TIMESTAMPTZ <span style="color:#66d9ef">DEFAULT</span> NOW()
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> sensor_readings (
+</span></span><span style="display:flex;"><span>    time        TIMESTAMPTZ <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
+</span></span><span style="display:flex;"><span>    device_id   TEXT        <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">REFERENCES</span> devices(device_id),
+</span></span><span style="display:flex;"><span>    temperature DOUBLE <span style="color:#66d9ef">PRECISION</span>,
+</span></span><span style="display:flex;"><span>    humidity    DOUBLE <span style="color:#66d9ef">PRECISION</span>,
+</span></span><span style="display:flex;"><span>    pressure    DOUBLE <span style="color:#66d9ef">PRECISION</span>,
+</span></span><span style="display:flex;"><span>    battery     DOUBLE <span style="color:#66d9ef">PRECISION</span>
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> create_hypertable(<span style="color:#e6db74">&#39;sensor_readings&#39;</span>, by_range(<span style="color:#e6db74">&#39;time&#39;</span>, INTERVAL <span style="color:#e6db74">&#39;1 day&#39;</span>));
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 建立索引（Chunk 內的局部索引）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">INDEX</span> idx_readings_device_time
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">ON</span> sensor_readings (device_id, time <span style="color:#66d9ef">DESC</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 啟用壓縮
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> sensor_readings <span style="color:#66d9ef">SET</span> (
+</span></span><span style="display:flex;"><span>    timescaledb.compress,
+</span></span><span style="display:flex;"><span>    timescaledb.compress_segmentby <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;device_id&#39;</span>,
+</span></span><span style="display:flex;"><span>    timescaledb.compress_orderby <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;time DESC&#39;</span>
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> add_compression_policy(<span style="color:#e6db74">&#39;sensor_readings&#39;</span>, compress_after <span style="color:#f92672">=&gt;</span> INTERVAL <span style="color:#e6db74">&#39;7 days&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> add_retention_policy(<span style="color:#e6db74">&#39;sensor_readings&#39;</span>, drop_after <span style="color:#f92672">=&gt;</span> INTERVAL <span style="color:#e6db74">&#39;90 days&#39;</span>);
+</span></span></code></pre></div><h4 id="異常偵測查詢">異常偵測查詢</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 偵測溫度異常：超過該設備近 24 小時平均值 3 個標準差
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">WITH</span> device_stats <span style="color:#66d9ef">AS</span> (
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">SELECT</span>
+</span></span><span style="display:flex;"><span>        device_id,
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">AVG</span>(temperature) <span style="color:#66d9ef">AS</span> avg_temp,
+</span></span><span style="display:flex;"><span>        STDDEV(temperature) <span style="color:#66d9ef">AS</span> std_temp
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">FROM</span> sensor_readings
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">WHERE</span> time <span style="color:#f92672">&gt;</span> NOW() <span style="color:#f92672">-</span> INTERVAL <span style="color:#e6db74">&#39;24 hours&#39;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">GROUP</span> <span style="color:#66d9ef">BY</span> device_id
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span>
+</span></span><span style="display:flex;"><span>    r.time,
+</span></span><span style="display:flex;"><span>    r.device_id,
+</span></span><span style="display:flex;"><span>    r.temperature,
+</span></span><span style="display:flex;"><span>    s.avg_temp,
+</span></span><span style="display:flex;"><span>    ROUND((r.temperature <span style="color:#f92672">-</span> s.avg_temp) <span style="color:#f92672">/</span> <span style="color:#66d9ef">NULLIF</span>(s.std_temp, <span style="color:#ae81ff">0</span>), <span style="color:#ae81ff">2</span>) <span style="color:#66d9ef">AS</span> z_score
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> sensor_readings r
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">JOIN</span> device_stats s <span style="color:#66d9ef">ON</span> r.device_id <span style="color:#f92672">=</span> s.device_id
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> r.time <span style="color:#f92672">&gt;</span> NOW() <span style="color:#f92672">-</span> INTERVAL <span style="color:#e6db74">&#39;1 hour&#39;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">AND</span> <span style="color:#66d9ef">ABS</span>(r.temperature <span style="color:#f92672">-</span> s.avg_temp) <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">3</span> <span style="color:#f92672">*</span> s.std_temp
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> <span style="color:#66d9ef">ABS</span>(r.temperature <span style="color:#f92672">-</span> s.avg_temp) <span style="color:#66d9ef">DESC</span>;
+</span></span></code></pre></div><h4 id="設備電量預警">設備電量預警</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 電量低於 20% 且持續下降的設備
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span>
+</span></span><span style="display:flex;"><span>    device_id,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">last</span>(battery, time) <span style="color:#66d9ef">AS</span> current_battery,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">first</span>(battery, time) <span style="color:#66d9ef">AS</span> battery_1h_ago,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">last</span>(battery, time) <span style="color:#f92672">-</span> <span style="color:#66d9ef">first</span>(battery, time) <span style="color:#66d9ef">AS</span> battery_change
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> sensor_readings
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> time <span style="color:#f92672">&gt;</span> NOW() <span style="color:#f92672">-</span> INTERVAL <span style="color:#e6db74">&#39;1 hour&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">GROUP</span> <span style="color:#66d9ef">BY</span> device_id
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">HAVING</span> <span style="color:#66d9ef">last</span>(battery, time) <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">20</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#66d9ef">AND</span> <span style="color:#66d9ef">last</span>(battery, time) <span style="color:#f92672">&lt;</span> <span style="color:#66d9ef">first</span>(battery, time)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> current_battery <span style="color:#66d9ef">ASC</span>;
+</span></span></code></pre></div><h3 id="實戰場景二apm-應用效能監控">實戰場景二：APM 應用效能監控</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- APM 指標表
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> app_metrics (
+</span></span><span style="display:flex;"><span>    time         TIMESTAMPTZ <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
+</span></span><span style="display:flex;"><span>    service      TEXT        <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
+</span></span><span style="display:flex;"><span>    endpoint     TEXT        <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
+</span></span><span style="display:flex;"><span>    status_code  INT,
+</span></span><span style="display:flex;"><span>    response_ms  DOUBLE <span style="color:#66d9ef">PRECISION</span>,
+</span></span><span style="display:flex;"><span>    error        BOOLEAN <span style="color:#66d9ef">DEFAULT</span> <span style="color:#66d9ef">FALSE</span>
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> create_hypertable(<span style="color:#e6db74">&#39;app_metrics&#39;</span>, by_range(<span style="color:#e6db74">&#39;time&#39;</span>, INTERVAL <span style="color:#e6db74">&#39;1 day&#39;</span>));
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 連續聚合：每分鐘的服務健康摘要
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> MATERIALIZED <span style="color:#66d9ef">VIEW</span> service_health_1m
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WITH</span> (timescaledb.continuous) <span style="color:#66d9ef">AS</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span>
+</span></span><span style="display:flex;"><span>    time_bucket(<span style="color:#e6db74">&#39;1 minute&#39;</span>, time)  <span style="color:#66d9ef">AS</span> bucket,
+</span></span><span style="display:flex;"><span>    service,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">COUNT</span>(<span style="color:#f92672">*</span>)                       <span style="color:#66d9ef">AS</span> total_requests,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">COUNT</span>(<span style="color:#f92672">*</span>) FILTER (<span style="color:#66d9ef">WHERE</span> error)  <span style="color:#66d9ef">AS</span> error_count,
+</span></span><span style="display:flex;"><span>    ROUND(
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">0</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">COUNT</span>(<span style="color:#f92672">*</span>) FILTER (<span style="color:#66d9ef">WHERE</span> error) <span style="color:#f92672">/</span> <span style="color:#66d9ef">COUNT</span>(<span style="color:#f92672">*</span>), <span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>    )                              <span style="color:#66d9ef">AS</span> error_rate,
+</span></span><span style="display:flex;"><span>    PERCENTILE_CONT(<span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">50</span>) WITHIN <span style="color:#66d9ef">GROUP</span> (<span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> response_ms) <span style="color:#66d9ef">AS</span> p50,
+</span></span><span style="display:flex;"><span>    PERCENTILE_CONT(<span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">95</span>) WITHIN <span style="color:#66d9ef">GROUP</span> (<span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> response_ms) <span style="color:#66d9ef">AS</span> p95,
+</span></span><span style="display:flex;"><span>    PERCENTILE_CONT(<span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">99</span>) WITHIN <span style="color:#66d9ef">GROUP</span> (<span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> response_ms) <span style="color:#66d9ef">AS</span> p99
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> app_metrics
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">GROUP</span> <span style="color:#66d9ef">BY</span> bucket, service
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WITH</span> <span style="color:#66d9ef">NO</span> <span style="color:#66d9ef">DATA</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> add_continuous_aggregate_policy(
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;service_health_1m&#39;</span>,
+</span></span><span style="display:flex;"><span>    start_offset    <span style="color:#f92672">=&gt;</span> INTERVAL <span style="color:#e6db74">&#39;10 minutes&#39;</span>,
+</span></span><span style="display:flex;"><span>    end_offset      <span style="color:#f92672">=&gt;</span> INTERVAL <span style="color:#e6db74">&#39;1 minute&#39;</span>,
+</span></span><span style="display:flex;"><span>    schedule_interval <span style="color:#f92672">=&gt;</span> INTERVAL <span style="color:#e6db74">&#39;1 minute&#39;</span>
+</span></span><span style="display:flex;"><span>);
+</span></span></code></pre></div><h4 id="slislo-監控儀表板">SLI/SLO 監控儀表板</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 過去 1 小時的服務 SLI 摘要
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span>
+</span></span><span style="display:flex;"><span>    service,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">SUM</span>(total_requests) <span style="color:#66d9ef">AS</span> requests,
+</span></span><span style="display:flex;"><span>    ROUND(<span style="color:#66d9ef">AVG</span>(error_rate), <span style="color:#ae81ff">2</span>) <span style="color:#66d9ef">AS</span> avg_error_rate,
+</span></span><span style="display:flex;"><span>    ROUND(<span style="color:#66d9ef">AVG</span>(p50), <span style="color:#ae81ff">1</span>) <span style="color:#66d9ef">AS</span> avg_p50_ms,
+</span></span><span style="display:flex;"><span>    ROUND(<span style="color:#66d9ef">AVG</span>(p95), <span style="color:#ae81ff">1</span>) <span style="color:#66d9ef">AS</span> avg_p95_ms,
+</span></span><span style="display:flex;"><span>    ROUND(<span style="color:#66d9ef">AVG</span>(p99), <span style="color:#ae81ff">1</span>) <span style="color:#66d9ef">AS</span> avg_p99_ms,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">CASE</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">WHEN</span> <span style="color:#66d9ef">AVG</span>(error_rate) <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">1</span> <span style="color:#66d9ef">AND</span> <span style="color:#66d9ef">AVG</span>(p99) <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">500</span> <span style="color:#66d9ef">THEN</span> <span style="color:#e6db74">&#39;HEALTHY&#39;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">WHEN</span> <span style="color:#66d9ef">AVG</span>(error_rate) <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">1</span>.<span style="color:#ae81ff">0</span> <span style="color:#66d9ef">AND</span> <span style="color:#66d9ef">AVG</span>(p99) <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">1000</span> <span style="color:#66d9ef">THEN</span> <span style="color:#e6db74">&#39;DEGRADED&#39;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">ELSE</span> <span style="color:#e6db74">&#39;CRITICAL&#39;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">END</span> <span style="color:#66d9ef">AS</span> status
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> service_health_1m
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> bucket <span style="color:#f92672">&gt;</span> NOW() <span style="color:#f92672">-</span> INTERVAL <span style="color:#e6db74">&#39;1 hour&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">GROUP</span> <span style="color:#66d9ef">BY</span> service
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> avg_error_rate <span style="color:#66d9ef">DESC</span>;
+</span></span></code></pre></div><h3 id="實戰場景三金融-ohlcv-k-線">實戰場景三：金融 OHLCV K 線</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 逐筆交易表
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> trades (
+</span></span><span style="display:flex;"><span>    time    TIMESTAMPTZ      <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
+</span></span><span style="display:flex;"><span>    symbol  TEXT             <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
+</span></span><span style="display:flex;"><span>    price   DOUBLE <span style="color:#66d9ef">PRECISION</span> <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
+</span></span><span style="display:flex;"><span>    volume  DOUBLE <span style="color:#66d9ef">PRECISION</span> <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> create_hypertable(<span style="color:#e6db74">&#39;trades&#39;</span>, by_range(<span style="color:#e6db74">&#39;time&#39;</span>, INTERVAL <span style="color:#e6db74">&#39;1 day&#39;</span>));
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 1 分鐘 K 線連續聚合
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> MATERIALIZED <span style="color:#66d9ef">VIEW</span> ohlcv_1m
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WITH</span> (timescaledb.continuous) <span style="color:#66d9ef">AS</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span>
+</span></span><span style="display:flex;"><span>    time_bucket(<span style="color:#e6db74">&#39;1 minute&#39;</span>, time) <span style="color:#66d9ef">AS</span> bucket,
+</span></span><span style="display:flex;"><span>    symbol,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">first</span>(price, time)  <span style="color:#66d9ef">AS</span> <span style="color:#66d9ef">open</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">MAX</span>(price)          <span style="color:#66d9ef">AS</span> high,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">MIN</span>(price)          <span style="color:#66d9ef">AS</span> low,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">last</span>(price, time)   <span style="color:#66d9ef">AS</span> <span style="color:#66d9ef">close</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">SUM</span>(volume)         <span style="color:#66d9ef">AS</span> volume
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> trades
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">GROUP</span> <span style="color:#66d9ef">BY</span> bucket, symbol
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WITH</span> <span style="color:#66d9ef">NO</span> <span style="color:#66d9ef">DATA</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> add_continuous_aggregate_policy(
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;ohlcv_1m&#39;</span>,
+</span></span><span style="display:flex;"><span>    start_offset    <span style="color:#f92672">=&gt;</span> INTERVAL <span style="color:#e6db74">&#39;5 minutes&#39;</span>,
+</span></span><span style="display:flex;"><span>    end_offset      <span style="color:#f92672">=&gt;</span> INTERVAL <span style="color:#e6db74">&#39;1 minute&#39;</span>,
+</span></span><span style="display:flex;"><span>    schedule_interval <span style="color:#f92672">=&gt;</span> INTERVAL <span style="color:#e6db74">&#39;1 minute&#39;</span>
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 在 1 分鐘 K 線上建構 1 小時 K 線
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> MATERIALIZED <span style="color:#66d9ef">VIEW</span> ohlcv_1h
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WITH</span> (timescaledb.continuous) <span style="color:#66d9ef">AS</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span>
+</span></span><span style="display:flex;"><span>    time_bucket(<span style="color:#e6db74">&#39;1 hour&#39;</span>, bucket)  <span style="color:#66d9ef">AS</span> bucket,
+</span></span><span style="display:flex;"><span>    symbol,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">first</span>(<span style="color:#66d9ef">open</span>, bucket)  <span style="color:#66d9ef">AS</span> <span style="color:#66d9ef">open</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">MAX</span>(high)            <span style="color:#66d9ef">AS</span> high,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">MIN</span>(low)             <span style="color:#66d9ef">AS</span> low,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">last</span>(<span style="color:#66d9ef">close</span>, bucket)  <span style="color:#66d9ef">AS</span> <span style="color:#66d9ef">close</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">SUM</span>(volume)          <span style="color:#66d9ef">AS</span> volume
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> ohlcv_1m
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">GROUP</span> <span style="color:#66d9ef">BY</span> time_bucket(<span style="color:#e6db74">&#39;1 hour&#39;</span>, bucket), symbol
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WITH</span> <span style="color:#66d9ef">NO</span> <span style="color:#66d9ef">DATA</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> add_continuous_aggregate_policy(
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;ohlcv_1h&#39;</span>,
+</span></span><span style="display:flex;"><span>    start_offset    <span style="color:#f92672">=&gt;</span> INTERVAL <span style="color:#e6db74">&#39;3 hours&#39;</span>,
+</span></span><span style="display:flex;"><span>    end_offset      <span style="color:#f92672">=&gt;</span> INTERVAL <span style="color:#e6db74">&#39;1 hour&#39;</span>,
+</span></span><span style="display:flex;"><span>    schedule_interval <span style="color:#f92672">=&gt;</span> INTERVAL <span style="color:#e6db74">&#39;30 minutes&#39;</span>
+</span></span><span style="display:flex;"><span>);
+</span></span></code></pre></div><h4 id="移動平均線">移動平均線</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 5 日與 20 日移動平均線
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span>
+</span></span><span style="display:flex;"><span>    bucket <span style="color:#66d9ef">AS</span> date,
+</span></span><span style="display:flex;"><span>    symbol,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">close</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">AVG</span>(<span style="color:#66d9ef">close</span>) OVER (
+</span></span><span style="display:flex;"><span>        PARTITION <span style="color:#66d9ef">BY</span> symbol <span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> bucket
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">ROWS</span> <span style="color:#66d9ef">BETWEEN</span> <span style="color:#ae81ff">4</span> PRECEDING <span style="color:#66d9ef">AND</span> <span style="color:#66d9ef">CURRENT</span> <span style="color:#66d9ef">ROW</span>
+</span></span><span style="display:flex;"><span>    ) <span style="color:#66d9ef">AS</span> ma5,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">AVG</span>(<span style="color:#66d9ef">close</span>) OVER (
+</span></span><span style="display:flex;"><span>        PARTITION <span style="color:#66d9ef">BY</span> symbol <span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> bucket
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">ROWS</span> <span style="color:#66d9ef">BETWEEN</span> <span style="color:#ae81ff">19</span> PRECEDING <span style="color:#66d9ef">AND</span> <span style="color:#66d9ef">CURRENT</span> <span style="color:#66d9ef">ROW</span>
+</span></span><span style="display:flex;"><span>    ) <span style="color:#66d9ef">AS</span> ma20
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> ohlcv_1h
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> symbol <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;AAPL&#39;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">AND</span> bucket <span style="color:#f92672">&gt;</span> NOW() <span style="color:#f92672">-</span> INTERVAL <span style="color:#e6db74">&#39;30 days&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> bucket;
+</span></span></code></pre></div><h3 id="timescaledb-vs-原生-postgresql-分區">TimescaleDB vs 原生 PostgreSQL 分區</h3>
+<table>
+  <thead>
+      <tr>
+          <th>面向</th>
+          <th>原生 PARTITION</th>
+          <th>TimescaleDB Hypertable</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>分區建立</td>
+          <td>手動 <code>CREATE TABLE ... PARTITION OF</code></td>
+          <td>自動按 chunk_time_interval 切割</td>
+      </tr>
+      <tr>
+          <td>分區數量管理</td>
+          <td>需手動建立未來分區</td>
+          <td>自動建立，無需維護</td>
+      </tr>
+      <tr>
+          <td>壓縮</td>
+          <td>無內建壓縮</td>
+          <td>列式壓縮 90%+</td>
+      </tr>
+      <tr>
+          <td>連續聚合</td>
+          <td>需自行實作 ETL pipeline</td>
+          <td>內建 <code>CREATE MATERIALIZED VIEW ... WITH (timescaledb.continuous)</code></td>
+      </tr>
+      <tr>
+          <td>資料保留</td>
+          <td>手動 <code>DROP TABLE partition_name</code></td>
+          <td><code>add_retention_policy</code> 一行搞定</td>
+      </tr>
+      <tr>
+          <td>時間聚合函數</td>
+          <td><code>date_trunc</code> 有限粒度</td>
+          <td><code>time_bucket</code> 任意間隔</td>
+      </tr>
+      <tr>
+          <td>查詢最佳化</td>
+          <td>手動確保分區消除</td>
+          <td>自動 Chunk exclusion</td>
+      </tr>
+      <tr>
+          <td>索引管理</td>
+          <td>每個分區各自管理</td>
+          <td>自動在新 Chunk 建立索引</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="community-vs-licensed-版本">Community vs Licensed 版本</h3>
+<table>
+  <thead>
+      <tr>
+          <th>功能</th>
+          <th>Community（Apache 2）</th>
+          <th>Licensed（TSL）</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Hypertable</td>
+          <td>✅</td>
+          <td>✅</td>
+      </tr>
+      <tr>
+          <td>time_bucket</td>
+          <td>✅</td>
+          <td>✅</td>
+      </tr>
+      <tr>
+          <td>壓縮</td>
+          <td>✅</td>
+          <td>✅</td>
+      </tr>
+      <tr>
+          <td>Continuous Aggregates</td>
+          <td>✅</td>
+          <td>✅</td>
+      </tr>
+      <tr>
+          <td>資料保留策略</td>
+          <td>✅</td>
+          <td>✅</td>
+      </tr>
+      <tr>
+          <td>多節點分散式</td>
+          <td>❌</td>
+          <td>✅</td>
+      </tr>
+      <tr>
+          <td>列式掃描 Skip Scan</td>
+          <td>❌</td>
+          <td>✅</td>
+      </tr>
+      <tr>
+          <td>Tiered Storage（S3）</td>
+          <td>❌</td>
+          <td>✅</td>
+      </tr>
+  </tbody>
+</table>
+<blockquote>
+<p>大部分功能在 Community 版即可使用，只有多節點分散式和進階儲存分層需要 Licensed 版本。</p>
+</blockquote>
+<h3 id="效能調校要點">效能調校要點</h3>
+<h4 id="postgresql-參數調整">PostgreSQL 參數調整</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 記憶體配置（以 64GB RAM 為例）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">SYSTEM</span> <span style="color:#66d9ef">SET</span> shared_buffers <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;16GB&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">SYSTEM</span> <span style="color:#66d9ef">SET</span> effective_cache_size <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;48GB&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">SYSTEM</span> <span style="color:#66d9ef">SET</span> work_mem <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;256MB&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">SYSTEM</span> <span style="color:#66d9ef">SET</span> maintenance_work_mem <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;2GB&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- WAL 調整（高寫入場景）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">SYSTEM</span> <span style="color:#66d9ef">SET</span> wal_buffers <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;64MB&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">SYSTEM</span> <span style="color:#66d9ef">SET</span> max_wal_size <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;8GB&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">SYSTEM</span> <span style="color:#66d9ef">SET</span> checkpoint_completion_target <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">9</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- TimescaleDB 專用
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">SYSTEM</span> <span style="color:#66d9ef">SET</span> timescaledb.max_background_workers <span style="color:#f92672">=</span> <span style="color:#ae81ff">8</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> pg_reload_conf();
+</span></span></code></pre></div><h4 id="批次寫入最佳化">批次寫入最佳化</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> psycopg2
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> psycopg2.extras <span style="color:#f92672">import</span> execute_values
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>conn <span style="color:#f92672">=</span> psycopg2<span style="color:#f92672">.</span>connect(<span style="color:#e6db74">&#34;dbname=iot user=admin&#34;</span>)
+</span></span><span style="display:flex;"><span>cur <span style="color:#f92672">=</span> conn<span style="color:#f92672">.</span>cursor()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 使用 execute_values 批次插入（比逐筆 INSERT 快 10-50 倍）</span>
+</span></span><span style="display:flex;"><span>data <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    (<span style="color:#e6db74">&#39;2026-07-21 10:00:00+08&#39;</span>, <span style="color:#e6db74">&#39;sensor-001&#39;</span>, <span style="color:#ae81ff">25.3</span>, <span style="color:#ae81ff">60.1</span>, <span style="color:#ae81ff">1013.2</span>, <span style="color:#ae81ff">95.0</span>),
+</span></span><span style="display:flex;"><span>    (<span style="color:#e6db74">&#39;2026-07-21 10:00:01+08&#39;</span>, <span style="color:#e6db74">&#39;sensor-002&#39;</span>, <span style="color:#ae81ff">24.8</span>, <span style="color:#ae81ff">62.5</span>, <span style="color:#ae81ff">1013.1</span>, <span style="color:#ae81ff">87.0</span>),
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># ... 數千筆</span>
+</span></span><span style="display:flex;"><span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>execute_values(
+</span></span><span style="display:flex;"><span>    cur,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;INSERT INTO sensor_readings
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">       (time, device_id, temperature, humidity, pressure, battery)
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">       VALUES </span><span style="color:#e6db74">%s</span><span style="color:#e6db74">&#34;&#34;&#34;</span>,
+</span></span><span style="display:flex;"><span>    data,
+</span></span><span style="display:flex;"><span>    page_size<span style="color:#f92672">=</span><span style="color:#ae81ff">1000</span>  <span style="color:#75715e"># 每批 1000 筆</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>conn<span style="color:#f92672">.</span>commit()
+</span></span></code></pre></div><h4 id="copy-高速載入">COPY 高速載入</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 從 CSV 高速載入（最快的方式）</span>
+</span></span><span style="display:flex;"><span>timescaledb-parallel-copy <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>    --connection <span style="color:#e6db74">&#34;host=localhost dbname=iot user=admin&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>    --table sensor_readings <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>    --file sensor_data.csv <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>    --workers <span style="color:#ae81ff">4</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>    --batch-size <span style="color:#ae81ff">10000</span>
+</span></span></code></pre></div><h4 id="監控查詢">監控查詢</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 各 Hypertable 的 Chunk 統計
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span>
+</span></span><span style="display:flex;"><span>    hypertable_name,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">COUNT</span>(<span style="color:#f92672">*</span>) <span style="color:#66d9ef">AS</span> num_chunks,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">COUNT</span>(<span style="color:#f92672">*</span>) FILTER (<span style="color:#66d9ef">WHERE</span> is_compressed) <span style="color:#66d9ef">AS</span> compressed_chunks,
+</span></span><span style="display:flex;"><span>    pg_size_pretty(<span style="color:#66d9ef">SUM</span>(total_bytes)) <span style="color:#66d9ef">AS</span> total_size
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> timescaledb_information.chunks
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">GROUP</span> <span style="color:#66d9ef">BY</span> hypertable_name;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 背景排程任務狀態
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> timescaledb_information.jobs
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> application_name <span style="color:#66d9ef">LIKE</span> <span style="color:#e6db74">&#39;User-Defined%&#39;</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#66d9ef">OR</span> proc_name <span style="color:#66d9ef">IN</span> (<span style="color:#e6db74">&#39;policy_compression&#39;</span>, <span style="color:#e6db74">&#39;policy_retention&#39;</span>, <span style="color:#e6db74">&#39;policy_refresh_continuous_aggregate&#39;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> next_start;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 連續聚合刷新狀態
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span>
+</span></span><span style="display:flex;"><span>    view_name,
+</span></span><span style="display:flex;"><span>    completed_threshold,
+</span></span><span style="display:flex;"><span>    next_start
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> timescaledb_information.continuous_aggregate_stats;
+</span></span></code></pre></div><h3 id="常見問題與解決方案">常見問題與解決方案</h3>
+<table>
+  <thead>
+      <tr>
+          <th>問題</th>
+          <th>原因</th>
+          <th>解決方案</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>寫入變慢</td>
+          <td>單一連線瓶頸</td>
+          <td>使用連線池（PgBouncer）+ 批次寫入</td>
+      </tr>
+      <tr>
+          <td>查詢慢（大範圍）</td>
+          <td>未使用 Continuous Aggregate</td>
+          <td>建立適當粒度的連續聚合</td>
+      </tr>
+      <tr>
+          <td>磁碟空間暴增</td>
+          <td>未啟用壓縮</td>
+          <td><code>add_compression_policy</code> 並回壓歷史 Chunk</td>
+      </tr>
+      <tr>
+          <td>壓縮後查詢慢</td>
+          <td>segmentby 選擇不當</td>
+          <td>確保 WHERE 條件欄位在 <code>compress_segmentby</code> 中</td>
+      </tr>
+      <tr>
+          <td>Chunk 過多</td>
+          <td>chunk_time_interval 太短</td>
+          <td>調大間隔（不影響既有 Chunk）</td>
+      </tr>
+      <tr>
+          <td>連續聚合延遲</td>
+          <td>end_offset 太大</td>
+          <td>縮小 end_offset，接受輕微的 real-time 開銷</td>
+      </tr>
+      <tr>
+          <td>UPDATE/DELETE 壓縮 Chunk</td>
+          <td>壓縮 Chunk 不支援就地修改</td>
+          <td>先 <code>decompress_chunk</code>，修改後重新壓縮</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="總結">總結</h3>
+<p><strong>TimescaleDB</strong> 讓 PostgreSQL 成為一個高效能的時序資料庫，核心優勢在於：</p>
+<ol>
+<li><strong>Hypertable 自動分區</strong>——不需手動管理分區表，按時間自動切割 Chunk</li>
+<li><strong>time_bucket 聚合</strong>——任意時間粒度的降取樣，比 <code>date_trunc</code> 更靈活</li>
+<li><strong>Continuous Aggregates</strong>——增量更新的物化視圖，查詢速度提升 100-1000 倍</li>
+<li><strong>列式壓縮</strong>——冷資料壓縮 90%+，大幅節省儲存成本</li>
+<li><strong>資料保留策略</strong>——一行 SQL 搞定資料生命週期管理</li>
+<li><strong>完整 SQL 相容</strong>——所有 PostgreSQL 功能、工具、生態系都能直接使用</li>
+</ol>
+<p>無論是 IoT 感測器、APM 應用監控還是金融數據分析，TimescaleDB 都是在 PostgreSQL 生態中處理時序資料的首選方案。</p>
+<p>下一篇，我們將探討 <strong>資料庫遷移工具</strong>——從 Flyway、Liquibase 到 golang-migrate，掌握 Schema 版本控制與零停機遷移的實戰技巧。</p></div>
+        
+        
+
+        
+        <div class="mt-8">
+          
+<div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose">
+  <div>
+    <div class="flex items-center gap-2 mb-1">
+      <a href="/about" class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">
+        BenZ
+      </a>
+      
+      <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span>
+      
+    </div>
+    <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">
+      熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。
+    </p>
+    <div class="flex items-center gap-3">
+      
+      <a href="https://github.com/benzhub" target="_blank" rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label="GitHub">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      
+      
+      
+    </div>
+  </div>
+</div>
+
+        </div>
+      </div>
+
+      
+      
+<div class="subscribe-widget max-w-xl mx-auto my-10 px-6 py-8 text-center rounded-xl bg-zinc-50 dark:bg-zinc-800">
+  <h3 class="text-lg font-bold mb-1">訂閱 BenzHub 電子報</h3>
+  <p class="text-sm text-zinc-600 dark:text-zinc-300 mb-4">每週 AI 賺錢實戰 + 免費工具地圖</p>
+  <form class="subscribe-form flex flex-col sm:flex-row gap-3 justify-center"
+        data-worker="https://benzhub-newsletter.PLACEHOLDER.workers.dev" data-source="footer-widget">
+    <input type="email" required placeholder="你的 Email"
+           class="px-4 py-2 rounded-lg border border-zinc-300 dark:bg-zinc-900 dark:border-zinc-600" />
+    <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700">訂閱</button>
+  </form>
+  <div class="cf-turnstile mt-3 flex justify-center" data-sitekey="PLACEHOLDER_TURNSTILE_SITE_KEY"></div>
+  <p class="subscribe-status text-sm text-zinc-500 mt-2"></p>
+</div>
+
+
+
+      
+      <div class="post-detail fade-in my-4">
+        
+
+
+<div>
+  <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3>
+  <div class="grid gap-2">
+    
+    <a href="https://benzhub.github.io/post/postgresql/044-postgis/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">PostGIS 地理空間：從座標系統到空間查詢的完整實戰 | PostgreSQL</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/20</span>
+    </a>
+    
+    <a href="https://benzhub.github.io/post/postgresql/043-pgvector/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">pgvector 向量搜尋：從 Embedding 到 RAG 的完整實戰 | PostgreSQL</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/19</span>
+    </a>
+    
+    <a href="https://benzhub.github.io/post/postgresql/042-upgrade/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">PostgreSQL 版本升級：pg_upgrade 與邏輯複寫滾動升級完整攻略 | PostgreSQL</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/18</span>
+    </a>
+    
+  </div>
+</div>
+
+
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            
+            <a href="https://benzhub.github.io/post/postgresql/044-postgis/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+                <span class="text-sm font-medium">PostGIS 地理空間：從座標系統到空間查詢的完整實戰 | PostgreSQL</span>
+            </a>
+            
+          </div>
+          <div>
+            
+            <a href="https://benzhub.github.io/post/postgresql/046-migration-tools/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+                <span class="text-sm font-medium">Schema 遷移工具完全比較：Flyway、Alembic、Prisma、TypeORM 與零停機遷移策略 | PostgreSQL</span>
+            </a>
+            
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        
+<script src="https://giscus.app/client.js"
+        data-repo="benzhub/benzhub.github.io"
+        data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM="
+        data-category="Announcements"
+        data-category-id="MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme="preferred_color_scheme"
+        data-lang="zh-TW"
+        crossorigin="anonymous"
+        async>
+</script>
+
+
+      </div>
+    </div>
+    
+    <div class="hidden lg:block lg:col-span-1 mt-4">
+    
+    
+            
+            <div class="widget fade-in">
+    <p class="widget-title">搜尋</p>
+    <form role="search" method="get" action="https://google.com/search">
+        <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
+        <input type="hidden" name="sitesearch" value="https://benzhub.github.io/" />
+    </form>
+</div>
+
+        
+            
+            
+
+        
+            
+            
+<div class="widget fade-in">
+    <p class="widget-title">標籤</p>
+    <div class="flex flex-wrap gap-1.5">
+        <a href='/tags/80/20-%E6%B3%95%E5%89%87'>
+            <span class="tag-pill">80/20 法則</span>
+        </a>
+        <a href='/tags/acid'>
+            <span class="tag-pill">acid</span>
+        </a>
+        <a href='/tags/aggregate'>
+            <span class="tag-pill">aggregate</span>
+        </a>
+        <a href='/tags/ai'>
+            <span class="tag-pill">ai</span>
+        </a>
+        <a href='/tags/ai-agent'>
+            <span class="tag-pill">ai agent</span>
+        </a>
+        <a href='/tags/ai-workflow'>
+            <span class="tag-pill">ai workflow</span>
+        </a>
+        <a href='/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE'>
+            <span class="tag-pill">ai 工具焦慮</span>
+        </a>
+        <a href='/tags/ai-%E6%8E%A5%E5%96%AE'>
+            <span class="tag-pill">ai 接單</span>
+        </a>
+        <a href='/tags/ai-%E7%B9%AA%E5%9C%96'>
+            <span class="tag-pill">ai 繪圖</span>
+        </a>
+        <a href='/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA'>
+            <span class="tag-pill">ai 虛擬人</span>
+        </a>
+        <a href='/tags/ai-%E8%A1%8C%E9%8A%B7'>
+            <span class="tag-pill">ai 行銷</span>
+        </a>
+        <a href='/tags/ai-%E8%A8%AD%E8%A8%88'>
+            <span class="tag-pill">ai 設計</span>
+        </a>
+        <a href='/tags/ai-%E8%AE%8A%E7%8F%BE'>
+            <span class="tag-pill">ai 變現</span>
+        </a>
+        <a href='/tags/ai-%E8%B3%BA%E9%8C%A2'>
+            <span class="tag-pill">ai 賺錢</span>
+        </a>
+        <a href='/tags/ai-income'>
+            <span class="tag-pill">ai-income</span>
+        </a>
+        <a href='/tags/ai-insights'>
+            <span class="tag-pill">ai-insights</span>
+        </a>
+        <a href='/tags/analytics'>
+            <span class="tag-pill">analytics</span>
+        </a>
+        <a href='/tags/api'>
+            <span class="tag-pill">api</span>
+        </a>
+        <a href='/tags/architecture'>
+            <span class="tag-pill">architecture</span>
+        </a>
+        <a href='/tags/audit'>
+            <span class="tag-pill">audit</span>
+        </a>
+    </div>
+</div>
+
+
+        
+            
+            
+<div class="widget fade-in">
+    <p class="widget-title">文章系列</p>
+    <div class="flex flex-wrap gap-1.5">
+        
+        
+        
+        
+        <a href='/post/postgresql/'>
+            <span class="tag-pill">PostgreSQL (50)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/javascript/'>
+            <span class="tag-pill">JavaScript (109)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/django/'>
+            <span class="tag-pill">Django (44)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/python/'>
+            <span class="tag-pill">Python (37)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/htmlcss/'>
+            <span class="tag-pill">HTML &amp; CSS (23)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/linux/'>
+            <span class="tag-pill">Linux (22)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/git/'>
+            <span class="tag-pill">Git (18)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/ai-insights/'>
+            <span class="tag-pill">AI Insights (13)</span>
+        </a>
+        
+        
+    </div>
+</div>
+
+
+        
+            
+            
+
+<div class="widget fade-in">
+    <p class="widget-title">最新文章</p>
+    <div class="flex flex-col gap-1">
+        <a href="/post/javascript/data-structures--algorithms/047-load-balancer/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計負載均衡器 — Round Robin、一致性雜湊與健康檢查實戰 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/30
+            </p>
+        </a>
+        <a href="/post/javascript/data-structures--algorithms/046-text-diff/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計文本差異比對 — LCS、Myers Diff 演算法與 Patch 生成實戰 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/29
+            </p>
+        </a>
+        <a href="/post/javascript/data-structures--algorithms/045-recommendation/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計推薦系統 — 協同過濾、內容推薦與矩陣分解實戰 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/28
+            </p>
+        </a>
+        <a href="/post/javascript/data-structures--algorithms/044-url-shortener/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計短網址系統 — Base62 編碼、分散式 ID 生成與重導向架構 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/27
+            </p>
+        </a>
+        <a href="/post/postgresql/050-citus-distributed/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Citus 分散式 PostgreSQL：水平擴展到多節點叢集 | PostgreSQL</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/26
+            </p>
+        </a>
+    </div>
+</div>
+
+        
+    
+</div>
+
+    
+</div>
+
+        </div>
+    </div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]">
+    
+    <p>&copy; 2026 <a href="https://benzhub.github.io/" class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p>
+</footer>
+
+
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script src="/js/subscribe.js" defer></script>
+
+
+
+<script>
+    (function (window, document) {
+        function main() {
+            var ad = document.createElement('script');
+            ad.async = true;
+            ad.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606';
+            ad.crossOrigin = "anonymous";
+            var sc = document.getElementsByTagName('script')[0];
+            sc.parentNode.insertBefore(ad, sc);
+        }
+        var lazyLoad = false;
+        function onLazyLoad() {
+            if (lazyLoad === false) {
+                lazyLoad = true;
+                window.removeEventListener('scroll', onLazyLoad);
+                window.removeEventListener('mousemove', onLazyLoad);
+                window.removeEventListener('mousedown', onLazyLoad);
+                window.removeEventListener('touchstart', onLazyLoad);
+                window.removeEventListener('keydown', onLazyLoad);
+                main();
+            }
+        }
+        window.addEventListener('scroll', onLazyLoad);
+        window.addEventListener('mousemove', onLazyLoad);
+        window.addEventListener('mousedown', onLazyLoad);
+        window.addEventListener('touchstart', onLazyLoad);
+        window.addEventListener('keydown', onLazyLoad);
+        window.addEventListener('load', function () {
+            if (window.pageYOffset) {
+                onLazyLoad();
+                window.setTimeout(onLazyLoad, 3000);
+            }
+        });
+    })(window, document);
+</script>
+
+
+<script>
+    
+    var icon = document.getElementById("icon");
+    var icon2 = document.getElementById("icon2");
+    if (document.documentElement.classList.contains("dark") || localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+        if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+    function toggleDarkMode() {
+        if (document.documentElement.classList.contains('dark')) {
+            if (icon) { icon.classList.remove("icon-sun"); icon.classList.add("icon-moon"); }
+            if (icon2) { icon2.classList.remove("icon-sun"); icon2.classList.add("icon-moon"); }
+            document.documentElement.classList.remove('dark');
+            localStorage.theme = 'light';
+        } else {
+            if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+            if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+            document.documentElement.classList.add('dark');
+            localStorage.theme = 'dark';
+        }
+    }
+
+    
+    document.addEventListener('DOMContentLoaded', function () {
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0 });
+
+        document.querySelectorAll('.fade-in').forEach(function (el) {
+            observer.observe(el);
+        });
+    });
+</script>
+</body>
+
+</html>

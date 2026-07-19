@@ -1,0 +1,1629 @@
+<!DOCTYPE html>
+
+<html lang="zh-TW">
+<head>
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-FSEWPBJMJT');
+</script>
+
+<title>Schema 遷移工具完全比較：Flyway、Alembic、Prisma、TypeORM 與零停機遷移策略 | PostgreSQL | BenzHub</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="apple-touch-icon" sizes="180x180" href='/favicon/apple-touch-icon.png'>
+    <link rel="icon" type="image/png" sizes="32x32" href='/favicon/favicon-32x32.png'>
+    <link rel="icon" type="image/png" sizes="16x16" href='/favicon/favicon-16x16.png'>
+    <link rel="manifest" href='/favicon/site.webmanifest' />
+    <link rel="mask-icon" href=' /favicon/safari-pinned-tab.svg' color="#5bbad5" />
+    <link rel="shortcut icon" href='/favicon/favicon.ico' />
+    <meta name="theme-color" content="#fafafa">
+    <meta property="og:title" content="Schema 遷移工具完全比較：Flyway、Alembic、Prisma、TypeORM 與零停機遷移策略 | PostgreSQL | BenzHub" />
+    
+    
+    
+    <link rel="stylesheet" href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css" />
+    
+    <link href=' /css/blonde.min.css' rel="stylesheet" type="text/css" media="print"
+        onload="this.media=' all'">
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+
+<meta name="description" content="完整比較七大 Schema 遷移工具（Flyway、Liquibase、Alembic、Django Migrations、TypeORM、Prisma Migrate、sqitch），涵蓋版本化遷移與狀態比對兩大策略、Expand-Contract 零停機遷移模式、DDL 鎖管理最佳實踐與多人協作衝突解決方案。">
+<meta property="og:site_name" content="BenzHub">
+<meta property="og:description" content="完整比較七大 Schema 遷移工具（Flyway、Liquibase、Alembic、Django Migrations、TypeORM、Prisma Migrate、sqitch），涵蓋版本化遷移與狀態比對兩大策略、Expand-Contract 零停機遷移模式、DDL 鎖管理最佳實踐與多人協作衝突解決方案。">
+<meta property="og:url" content="https://benzhub.github.io/post/postgresql/046-migration-tools/">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="zh_TW">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="">
+
+<link rel="canonical" href="https://benzhub.github.io/post/postgresql/046-migration-tools/">
+
+<meta name="twitter:description" content="完整比較七大 Schema 遷移工具（Flyway、Liquibase、Alembic、Django Migrations、TypeORM、Prisma Migrate、sqitch），涵蓋版本化遷移與狀態比對兩大策略、Expand-Contract 零停機遷移模式、DDL 鎖管理最佳實踐與多人協作衝突解決方案。">
+<meta property="article:published_time" content="2026-07-22T00:00:00&#43;00:00">
+<meta property="article:updated_time" content="2026-07-22T00:00:00&#43;00:00">
+
+
+
+
+
+    
+<meta property="og:image" content="https://benzhub.github.io/img/postgresql/046-Migration-Tools.png">
+<meta property="og:image:url" content="https://benzhub.github.io/img/postgresql/046-Migration-Tools.png">
+    
+
+    
+    <link rel="stylesheet" href='/css/custom.css'>
+    <i class="dark hidden"></i>
+    
+<link rel="alternate" hreflang="zh-TW" href="https://benzhub.github.io/post/postgresql/046-migration-tools/" />
+
+<link rel="alternate" hreflang="x-default" href="https://benzhub.github.io/post/postgresql/046-migration-tools/" />
+
+    
+
+
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "\"Schema 遷移工具完全比較：Flyway、Alembic、Prisma、TypeORM 與零停機遷移策略 | PostgreSQL\"",
+  "description": "\"完整比較七大 Schema 遷移工具（Flyway、Liquibase、Alembic、Django Migrations、TypeORM、Prisma Migrate、sqitch），涵蓋版本化遷移與狀態比對兩大策略、Expand-Contract 零停機遷移模式、DDL 鎖管理最佳實踐與多人協作衝突解決方案。\"",
+  "author": {
+    "@type": "Person",
+    "name": "\"BenzHub\"",
+    "url": "https:\/\/benzhub.github.io\/about",
+    "jobTitle": "\"Software Developer\"",
+    "sameAs": [
+      "\"https://github.com/benzhub\""
+    ]
+  },
+  "datePublished": "2026-07-22T00:00:00\u002b00:00",
+  "dateModified": "2026-07-22T00:00:00\u002b00:00",
+  "image": "https:\/\/benzhub.github.io\/img\/postgresql\/046-Migration-Tools.png",
+  "publisher": {
+    "@type": "Organization",
+    "name": "\"BenzHub\"",
+    "url": "\"https://benzhub.github.io/\"",
+    "sameAs": [
+      "\"https://github.com/benzhub\""
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/benzhub.github.io\/post\/postgresql\/046-migration-tools\/"
+  },
+  "inLanguage": "zh-TW"
+}
+</script>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "\"BenzHub\"",
+      "item": "https:\/\/benzhub.github.io\/"
+    }
+    
+    
+      
+      
+    ,{
+      "@type": "ListItem",
+      "position": 2,
+      "name": "\"Blog\"",
+      "item": "https:\/\/benzhub.github.io\/post\/postgresql\/"
+    }
+      
+      
+    
+    ,{
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "\"Schema 遷移工具完全比較：Flyway、Alembic、Prisma、TypeORM 與零停機遷移策略 | PostgreSQL\""
+    }
+  ]
+}
+</script>
+
+
+
+
+
+
+
+
+
+
+
+</head>
+<body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class="site-nav" id="siteNav">
+    <div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full">
+        
+        <a href="https://benzhub.github.io/" class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">
+            BenzHub
+        </a>
+
+        
+        <div class="hidden md:flex items-center gap-6">
+            
+            <a href="/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                首頁
+            </a>
+            
+            <a href="/about/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                關於
+            </a>
+            
+            <a href="/contact/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                聯絡
+            </a>
+            
+            <a href="/resourses/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                資源
+            </a>
+            
+
+            
+            <div class="flex items-center gap-2">
+                <form class="flex items-center" role="search" method="get" action="https://google.com/search" id="navSearchForm">
+                    <input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50"
+                        type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋" id="navSearchInput">
+                    <input type="hidden" name="sitesearch" value="https://benzhub.github.io/" />
+                </form>
+                <button onclick="toggleNavSearch()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+                    <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                    </svg>
+                </button>
+            </div>
+
+            
+            <span class="text-zinc-200 dark:text-zinc-700">|</span>
+
+            
+            
+
+
+
+
+<div class="lang-switcher relative hidden md:block">
+    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+        <span>🌐</span>
+        <span>繁體中文</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
+        
+            
+            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
+    <div class="flex gap-2">
+        
+            
+            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+            
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon2" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+        </div>
+
+        
+        <div class="flex md:hidden items-center gap-1">
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+            <button id="hamburgerbtn" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Menu">
+                <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    
+    <div class="mobile-menu md:hidden" id="mobileMenu">
+        
+        <a href="/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            首頁
+        </a>
+        
+        <a href="/about/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            關於
+        </a>
+        
+        <a href="/contact/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            聯絡
+        </a>
+        
+        <a href="/resourses/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            資源
+        </a>
+        
+        <form class="mt-2" role="search" method="get" action="https://google.com/search">
+            <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
+            <input type="hidden" name="sitesearch" value="https://benzhub.github.io/" />
+        </form>
+        
+        
+
+
+
+
+<div class="lang-switcher relative hidden md:block">
+    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+        <span>🌐</span>
+        <span>繁體中文</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
+        
+            
+            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
+    <div class="flex gap-2">
+        
+            
+            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+    </div>
+</nav>
+
+<script>
+    
+    document.getElementById('hamburgerbtn').addEventListener('click', function () {
+        document.getElementById('mobileMenu').classList.toggle('active');
+    });
+
+    
+    window.addEventListener('scroll', function () {
+        var nav = document.getElementById('siteNav');
+        if (window.scrollY > 50) {
+            nav.classList.add('scrolled');
+        } else {
+            nav.classList.remove('scrolled');
+        }
+    });
+
+    
+    function toggleNavSearch() {
+        var input = document.getElementById('navSearchInput');
+        input.classList.toggle('expanded');
+        if (input.classList.contains('expanded')) {
+            input.focus();
+        }
+    }
+
+    
+    function toggleLangMenu() {
+        var dropdown = document.getElementById('langDropdown');
+        dropdown.classList.toggle('hidden');
+    }
+
+    
+    document.addEventListener('click', function (e) {
+        
+        var form = document.getElementById('navSearchForm');
+        var input = document.getElementById('navSearchInput');
+        if (form && input && !form.contains(e.target) && !e.target.closest('[aria-label="Toggle Search"]')) {
+            input.classList.remove('expanded');
+        }
+        
+        var langSwitcher = e.target.closest('.lang-switcher');
+        if (!langSwitcher) {
+            var dropdown = document.getElementById('langDropdown');
+            if (dropdown) dropdown.classList.add('hidden');
+        }
+    });
+</script>
+<div class="nav-spacer"></div>
+    <div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id="content">
+        <div class="lg:mx-5">
+<div class="grid grid-cols-3 gap-6">
+  
+  <div class="col-span-3 lg:col-span-2">
+  
+      
+      <div class="post-detail fade-in my-4">
+        <h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">Schema 遷移工具完全比較：Flyway、Alembic、Prisma、TypeORM 與零停機遷移策略 | PostgreSQL</h1>
+        <div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4">
+            <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/22
+            </span>
+            
+        </div>
+        
+        <div class="flex flex-wrap gap-1.5 mb-5">
+            
+            <a href='/tags/postgresql' class="tag-pill no-underline">postgresql</a>
+            
+            <a href='/tags/migration' class="tag-pill no-underline">Migration</a>
+            
+            <a href='/tags/schema' class="tag-pill no-underline">Schema</a>
+            
+            <a href='/tags/devops' class="tag-pill no-underline">DevOps</a>
+            
+        </div>
+        
+        
+        <img class="py-4 m-auto rounded-lg thumb-img" src="https://benzhub.github.io/img/postgresql/046-Migration-Tools.png" alt="Schema 遷移工具完全比較：Flyway、Alembic、Prisma、TypeORM 與零停機遷移策略 | PostgreSQL">
+        
+        
+        <div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote>
+<p><strong>Schema 遷移工具</strong> 是管理資料庫結構版本演進的核心基礎設施。本文完整比較 <strong>Flyway</strong>、<strong>Liquibase</strong>、<strong>Alembic</strong>、<strong>Django Migrations</strong>、<strong>TypeORM</strong>、<strong>Prisma Migrate</strong>、<strong>sqitch</strong> 七大工具，深入解析 <strong>版本化遷移</strong> 與 <strong>狀態比對</strong> 兩大策略，並以 <strong>Expand-Contract</strong> 模式實戰 <strong>零停機遷移</strong>。</p>
+</blockquote>
+<h3 id="為什麼需要-schema-遷移工具">為什麼需要 Schema 遷移工具？</h3>
+<p>手動在資料庫上執行 DDL（Data Definition Language）語句有五大風險：</p>
+<table>
+  <thead>
+      <tr>
+          <th>風險</th>
+          <th>說明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>狀態不一致</td>
+          <td>開發機與生產環境的 Schema 悄悄分歧</td>
+      </tr>
+      <tr>
+          <td>無法回滾</td>
+          <td>不知道上一個版本的 Schema 長什麼樣</td>
+      </tr>
+      <tr>
+          <td>無法審計</td>
+          <td>不知道誰、在何時做了哪個變更</td>
+      </tr>
+      <tr>
+          <td>並行衝突</td>
+          <td>多位工程師同時修改 Schema 互相干擾</td>
+      </tr>
+      <tr>
+          <td>環境差異</td>
+          <td>新人搭建環境時需要手動猜測正確順序</td>
+      </tr>
+  </tbody>
+</table>
+<p>Schema 遷移工具通過「版本化變更」解決以上問題：每次 Schema 變更被捕捉為一個有序的遷移檔案，工具追蹤哪些遷移已被執行，並能按順序應用或回滾。</p>
+<h3 id="兩大遷移策略">兩大遷移策略</h3>
+<table>
+  <thead>
+      <tr>
+          <th>策略</th>
+          <th>代表工具</th>
+          <th>核心概念</th>
+          <th>優點</th>
+          <th>缺點</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>版本化遷移</td>
+          <td>Flyway、Liquibase、sqitch</td>
+          <td>每次變更是有序的遷移腳本，按版本號依序執行</td>
+          <td>完整歷史、精確控制、可回滾</td>
+          <td>遷移檔案累積、合併衝突需手動解決</td>
+      </tr>
+      <tr>
+          <td>狀態比對</td>
+          <td>Prisma Migrate</td>
+          <td>比對「目標 Schema 定義」與「目前資料庫狀態」的差異，自動產生 SQL</td>
+          <td>開發便捷、Schema 定義即文件</td>
+          <td>複雜變更（如資料遷移）難以自動化</td>
+      </tr>
+      <tr>
+          <td>混合模式</td>
+          <td>Alembic、TypeORM、Django</td>
+          <td>提供兩種模式或自動產生後允許手動編輯</td>
+          <td>靈活度高</td>
+          <td>學習曲線較陡</td>
+      </tr>
+  </tbody>
+</table>
+<p>所有工具都在資料庫中維護一個「遷移歷史表」（如 <code>flyway_schema_history</code>、<code>alembic_version</code>），記錄已執行的遷移版本。</p>
+<h3 id="flywayjava-生態首選">Flyway（Java 生態首選）</h3>
+<p><strong>Flyway</strong> 是 Java 生態最廣泛使用的遷移工具，以 SQL 腳本為核心，版本化命名規則嚴格。</p>
+<h4 id="檔案命名規則">檔案命名規則</h4>
+<pre tabindex="0"><code>V{版本}__{描述}.sql      — 版本化遷移（不可修改）
+U{版本}__{描述}.sql      — 復原腳本（Undo，付費功能）
+R__{描述}.sql            — 可重複遷移（每次內容改變時重新執行）
+
+範例：
+  V1__create_users_table.sql
+  V2__add_email_to_users.sql
+  V2.1__add_email_index.sql
+  R__create_reporting_views.sql
+</code></pre><h4 id="典型遷移腳本">典型遷移腳本</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- V1__create_users_table.sql
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> users (
+</span></span><span style="display:flex;"><span>    id          BIGSERIAL <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
+</span></span><span style="display:flex;"><span>    username    VARCHAR(<span style="color:#ae81ff">50</span>) <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">UNIQUE</span>,
+</span></span><span style="display:flex;"><span>    email       VARCHAR(<span style="color:#ae81ff">255</span>) <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">UNIQUE</span>,
+</span></span><span style="display:flex;"><span>    created_at  TIMESTAMPTZ <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">DEFAULT</span> NOW(),
+</span></span><span style="display:flex;"><span>    updated_at  TIMESTAMPTZ <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">DEFAULT</span> NOW()
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">INDEX</span> idx_users_email <span style="color:#66d9ef">ON</span> users (email);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">COMMENT</span> <span style="color:#66d9ef">ON</span> <span style="color:#66d9ef">TABLE</span> users <span style="color:#66d9ef">IS</span> <span style="color:#e6db74">&#39;使用者帳號主表&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- V2__add_user_profile.sql
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> users
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">ADD</span> <span style="color:#66d9ef">COLUMN</span> display_name  VARCHAR(<span style="color:#ae81ff">100</span>),
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">ADD</span> <span style="color:#66d9ef">COLUMN</span> avatar_url    TEXT,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">ADD</span> <span style="color:#66d9ef">COLUMN</span> is_active     BOOLEAN <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">DEFAULT</span> <span style="color:#66d9ef">TRUE</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- V3__create_posts_table.sql
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> posts (
+</span></span><span style="display:flex;"><span>    id          BIGSERIAL <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
+</span></span><span style="display:flex;"><span>    author_id   BIGINT <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">REFERENCES</span> users(id) <span style="color:#66d9ef">ON</span> <span style="color:#66d9ef">DELETE</span> <span style="color:#66d9ef">CASCADE</span>,
+</span></span><span style="display:flex;"><span>    title       VARCHAR(<span style="color:#ae81ff">500</span>) <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
+</span></span><span style="display:flex;"><span>    content     TEXT,
+</span></span><span style="display:flex;"><span>    status      VARCHAR(<span style="color:#ae81ff">20</span>) <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">DEFAULT</span> <span style="color:#e6db74">&#39;draft&#39;</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">CHECK</span> (status <span style="color:#66d9ef">IN</span> (<span style="color:#e6db74">&#39;draft&#39;</span>, <span style="color:#e6db74">&#39;published&#39;</span>, <span style="color:#e6db74">&#39;archived&#39;</span>)),
+</span></span><span style="display:flex;"><span>    published_at TIMESTAMPTZ,
+</span></span><span style="display:flex;"><span>    created_at  TIMESTAMPTZ <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">DEFAULT</span> NOW()
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">INDEX</span> idx_posts_author_id <span style="color:#66d9ef">ON</span> posts (author_id);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">INDEX</span> idx_posts_status <span style="color:#66d9ef">ON</span> posts (status) <span style="color:#66d9ef">WHERE</span> status <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;published&#39;</span>;
+</span></span></code></pre></div><h4 id="spring-boot-整合">Spring Boot 整合</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e"># application.yml</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spring</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">flyway</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">enabled</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">locations</span>: <span style="color:#ae81ff">classpath:db/migration</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">baseline-on-migrate</span>: <span style="color:#66d9ef">false</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">validate-on-migrate</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">out-of-order</span>: <span style="color:#66d9ef">false</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">table</span>: <span style="color:#ae81ff">flyway_schema_history</span>
+</span></span></code></pre></div><h4 id="常用命令">常用命令</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>flyway migrate   <span style="color:#75715e"># 執行所有待執行的遷移</span>
+</span></span><span style="display:flex;"><span>flyway info      <span style="color:#75715e"># 查看遷移狀態</span>
+</span></span><span style="display:flex;"><span>flyway validate  <span style="color:#75715e"># 驗證已執行遷移的 checksum</span>
+</span></span><span style="display:flex;"><span>flyway repair    <span style="color:#75715e"># 修復失敗的遷移記錄</span>
+</span></span><span style="display:flex;"><span>flyway clean     <span style="color:#75715e"># 清空整個資料庫（危險！僅用於開發）</span>
+</span></span></code></pre></div><p><strong>核心限制：</strong> 已執行的遷移腳本不可修改（checksum 驗證會失敗），Undo 腳本屬付費功能。</p>
+<h3 id="liquibase跨資料庫首選">Liquibase（跨資料庫首選）</h3>
+<p><strong>Liquibase</strong> 支援 SQL、XML、YAML、JSON 四種格式撰寫 Changeset（變更集），對跨資料庫支援更好。</p>
+<h4 id="yaml-格式範例">YAML 格式範例</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e"># db/changelog/001-create-users.yaml</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">databaseChangeLog</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">changeSet</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">id</span>: <span style="color:#ae81ff">001</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">author</span>: <span style="color:#ae81ff">alice</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">comment</span>: <span style="color:#e6db74">&#34;建立使用者主表&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">changes</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">createTable</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">tableName</span>: <span style="color:#ae81ff">users</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">columns</span>:
+</span></span><span style="display:flex;"><span>              - <span style="color:#f92672">column</span>:
+</span></span><span style="display:flex;"><span>                  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">id</span>
+</span></span><span style="display:flex;"><span>                  <span style="color:#f92672">type</span>: <span style="color:#ae81ff">BIGINT</span>
+</span></span><span style="display:flex;"><span>                  <span style="color:#f92672">autoIncrement</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>                  <span style="color:#f92672">constraints</span>:
+</span></span><span style="display:flex;"><span>                    <span style="color:#f92672">primaryKey</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#f92672">nullable</span>: <span style="color:#66d9ef">false</span>
+</span></span><span style="display:flex;"><span>              - <span style="color:#f92672">column</span>:
+</span></span><span style="display:flex;"><span>                  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">username</span>
+</span></span><span style="display:flex;"><span>                  <span style="color:#f92672">type</span>: <span style="color:#ae81ff">VARCHAR(50)</span>
+</span></span><span style="display:flex;"><span>                  <span style="color:#f92672">constraints</span>:
+</span></span><span style="display:flex;"><span>                    <span style="color:#f92672">nullable</span>: <span style="color:#66d9ef">false</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#f92672">unique</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>              - <span style="color:#f92672">column</span>:
+</span></span><span style="display:flex;"><span>                  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">email</span>
+</span></span><span style="display:flex;"><span>                  <span style="color:#f92672">type</span>: <span style="color:#ae81ff">VARCHAR(255)</span>
+</span></span><span style="display:flex;"><span>                  <span style="color:#f92672">constraints</span>:
+</span></span><span style="display:flex;"><span>                    <span style="color:#f92672">nullable</span>: <span style="color:#66d9ef">false</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#f92672">unique</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">changeSet</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">id</span>: <span style="color:#ae81ff">003</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">author</span>: <span style="color:#ae81ff">bob</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">comment</span>: <span style="color:#e6db74">&#34;新增個人資料欄位&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">changes</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">addColumn</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">tableName</span>: <span style="color:#ae81ff">users</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">columns</span>:
+</span></span><span style="display:flex;"><span>              - <span style="color:#f92672">column</span>:
+</span></span><span style="display:flex;"><span>                  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">display_name</span>
+</span></span><span style="display:flex;"><span>                  <span style="color:#f92672">type</span>: <span style="color:#ae81ff">VARCHAR(100)</span>
+</span></span><span style="display:flex;"><span>              - <span style="color:#f92672">column</span>:
+</span></span><span style="display:flex;"><span>                  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">is_active</span>
+</span></span><span style="display:flex;"><span>                  <span style="color:#f92672">type</span>: <span style="color:#ae81ff">BOOLEAN</span>
+</span></span><span style="display:flex;"><span>                  <span style="color:#f92672">defaultValueBoolean</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>                  <span style="color:#f92672">constraints</span>:
+</span></span><span style="display:flex;"><span>                    <span style="color:#f92672">nullable</span>: <span style="color:#66d9ef">false</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">rollback</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">dropColumn</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">tableName</span>: <span style="color:#ae81ff">users</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">columnName</span>: <span style="color:#ae81ff">display_name</span>
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">dropColumn</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">tableName</span>: <span style="color:#ae81ff">users</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">columnName</span>: <span style="color:#ae81ff">is_active</span>
+</span></span></code></pre></div><table>
+  <thead>
+      <tr>
+          <th>特性</th>
+          <th>Flyway</th>
+          <th>Liquibase</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>格式支援</td>
+          <td>主要 SQL</td>
+          <td>SQL、YAML、XML、JSON</td>
+      </tr>
+      <tr>
+          <td>Rollback</td>
+          <td>付費功能</td>
+          <td>免費支援（需手動定義）</td>
+      </tr>
+      <tr>
+          <td>跨 DB 支援</td>
+          <td>中等</td>
+          <td>優秀（抽象化 DDL）</td>
+      </tr>
+      <tr>
+          <td>學習曲線</td>
+          <td>較低</td>
+          <td>較高</td>
+      </tr>
+      <tr>
+          <td>命名方式</td>
+          <td>版本號排序</td>
+          <td>Changeset ID（不需排序）</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="alembicpython--sqlalchemy">Alembic（Python / SQLAlchemy）</h3>
+<p><strong>Alembic</strong> 是 Python SQLAlchemy ORM 官方推薦的遷移工具，提供 <code>autogenerate</code> 自動偵測 Schema 差異。</p>
+<h4 id="初始化與配置">初始化與配置</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>pip install alembic sqlalchemy psycopg2-binary
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 初始化</span>
+</span></span><span style="display:flex;"><span>alembic init alembic
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># alembic/env.py（關鍵配置）</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> myapp.models <span style="color:#f92672">import</span> Base
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>target_metadata <span style="color:#f92672">=</span> Base<span style="color:#f92672">.</span>metadata
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">run_migrations_online</span>():
+</span></span><span style="display:flex;"><span>    connectable <span style="color:#f92672">=</span> engine_from_config(
+</span></span><span style="display:flex;"><span>        config<span style="color:#f92672">.</span>get_section(config<span style="color:#f92672">.</span>config_ini_section),
+</span></span><span style="display:flex;"><span>        prefix<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;sqlalchemy.&#34;</span>,
+</span></span><span style="display:flex;"><span>        poolclass<span style="color:#f92672">=</span>pool<span style="color:#f92672">.</span>NullPool,
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">with</span> connectable<span style="color:#f92672">.</span>connect() <span style="color:#66d9ef">as</span> connection:
+</span></span><span style="display:flex;"><span>        context<span style="color:#f92672">.</span>configure(
+</span></span><span style="display:flex;"><span>            connection<span style="color:#f92672">=</span>connection,
+</span></span><span style="display:flex;"><span>            target_metadata<span style="color:#f92672">=</span>target_metadata,
+</span></span><span style="display:flex;"><span>            compare_type<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>,           <span style="color:#75715e"># 偵測欄位型別變更</span>
+</span></span><span style="display:flex;"><span>            compare_server_default<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>   <span style="color:#75715e"># 偵測預設值變更</span>
+</span></span><span style="display:flex;"><span>        )
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">with</span> context<span style="color:#f92672">.</span>begin_transaction():
+</span></span><span style="display:flex;"><span>            context<span style="color:#f92672">.</span>run_migrations()
+</span></span></code></pre></div><h4 id="常用命令-1">常用命令</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 自動比對模型與資料庫，生成遷移腳本</span>
+</span></span><span style="display:flex;"><span>alembic revision --autogenerate -m <span style="color:#e6db74">&#34;add posts table&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 執行所有待執行的遷移</span>
+</span></span><span style="display:flex;"><span>alembic upgrade head
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 回滾一個版本</span>
+</span></span><span style="display:flex;"><span>alembic downgrade -1
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 查看當前版本</span>
+</span></span><span style="display:flex;"><span>alembic current
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 查看遷移歷史</span>
+</span></span><span style="display:flex;"><span>alembic history --verbose
+</span></span></code></pre></div><h4 id="遷移腳本範例含資料遷移">遷移腳本範例（含資料遷移）</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#e6db74">&#34;&#34;&#34;add posts table
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">Revision ID: ae1027a6acf
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">Revises: 1234567890ab
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> alembic <span style="color:#f92672">import</span> op
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> sqlalchemy <span style="color:#66d9ef">as</span> sa
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>revision <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;ae1027a6acf&#39;</span>
+</span></span><span style="display:flex;"><span>down_revision <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;1234567890ab&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">upgrade</span>() <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span>    op<span style="color:#f92672">.</span>create_table(
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;posts&#39;</span>,
+</span></span><span style="display:flex;"><span>        sa<span style="color:#f92672">.</span>Column(<span style="color:#e6db74">&#39;id&#39;</span>, sa<span style="color:#f92672">.</span>BigInteger(), autoincrement<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>, nullable<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>),
+</span></span><span style="display:flex;"><span>        sa<span style="color:#f92672">.</span>Column(<span style="color:#e6db74">&#39;author_id&#39;</span>, sa<span style="color:#f92672">.</span>BigInteger(), nullable<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>),
+</span></span><span style="display:flex;"><span>        sa<span style="color:#f92672">.</span>Column(<span style="color:#e6db74">&#39;title&#39;</span>, sa<span style="color:#f92672">.</span>String(<span style="color:#ae81ff">500</span>), nullable<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>),
+</span></span><span style="display:flex;"><span>        sa<span style="color:#f92672">.</span>Column(<span style="color:#e6db74">&#39;content&#39;</span>, sa<span style="color:#f92672">.</span>Text(), nullable<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>),
+</span></span><span style="display:flex;"><span>        sa<span style="color:#f92672">.</span>Column(<span style="color:#e6db74">&#39;status&#39;</span>, sa<span style="color:#f92672">.</span>String(<span style="color:#ae81ff">20</span>), nullable<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>, server_default<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;draft&#39;</span>),
+</span></span><span style="display:flex;"><span>        sa<span style="color:#f92672">.</span>Column(<span style="color:#e6db74">&#39;created_at&#39;</span>, sa<span style="color:#f92672">.</span>TIMESTAMP(timezone<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>),
+</span></span><span style="display:flex;"><span>                  server_default<span style="color:#f92672">=</span>sa<span style="color:#f92672">.</span>text(<span style="color:#e6db74">&#39;NOW()&#39;</span>), nullable<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>),
+</span></span><span style="display:flex;"><span>        sa<span style="color:#f92672">.</span>ForeignKeyConstraint([<span style="color:#e6db74">&#39;author_id&#39;</span>], [<span style="color:#e6db74">&#39;users.id&#39;</span>], ondelete<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;CASCADE&#39;</span>),
+</span></span><span style="display:flex;"><span>        sa<span style="color:#f92672">.</span>PrimaryKeyConstraint(<span style="color:#e6db74">&#39;id&#39;</span>),
+</span></span><span style="display:flex;"><span>        sa<span style="color:#f92672">.</span>CheckConstraint(
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#34;status IN (&#39;draft&#39;, &#39;published&#39;, &#39;archived&#39;)&#34;</span>,
+</span></span><span style="display:flex;"><span>            name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;posts_status_check&#39;</span>
+</span></span><span style="display:flex;"><span>        )
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>    op<span style="color:#f92672">.</span>create_index(<span style="color:#e6db74">&#39;idx_posts_author_id&#39;</span>, <span style="color:#e6db74">&#39;posts&#39;</span>, [<span style="color:#e6db74">&#39;author_id&#39;</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">downgrade</span>() <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span>    op<span style="color:#f92672">.</span>drop_index(<span style="color:#e6db74">&#39;idx_posts_author_id&#39;</span>)
+</span></span><span style="display:flex;"><span>    op<span style="color:#f92672">.</span>drop_table(<span style="color:#e6db74">&#39;posts&#39;</span>)
+</span></span></code></pre></div><blockquote>
+<p><strong>注意：</strong> <code>autogenerate</code> 無法自動偵測表名/欄位名重新命名、觸發器、自訂函式、部分索引條件等變更，這些需手動撰寫。</p>
+</blockquote>
+<h3 id="django-migrations">Django Migrations</h3>
+<p>Django 的內建遷移系統與 ORM 深度整合，提供最佳的 Python Web 開發體驗。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 根據 Model 變更自動生成遷移</span>
+</span></span><span style="display:flex;"><span>python manage.py makemigrations
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 執行所有待執行的遷移</span>
+</span></span><span style="display:flex;"><span>python manage.py migrate
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 查看遷移生成的 SQL（不執行）</span>
+</span></span><span style="display:flex;"><span>python manage.py sqlmigrate myapp <span style="color:#ae81ff">0003</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 查看遷移狀態</span>
+</span></span><span style="display:flex;"><span>python manage.py showmigrations
+</span></span></code></pre></div><h4 id="runsql-與-runpython">RunSQL 與 RunPython</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 在遷移中執行任意 SQL</span>
+</span></span><span style="display:flex;"><span>migrations<span style="color:#f92672">.</span>RunSQL(
+</span></span><span style="display:flex;"><span>    sql<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;ALTER TABLE posts ADD COLUMN search_vector tsvector&#34;</span>,
+</span></span><span style="display:flex;"><span>    reverse_sql<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;ALTER TABLE posts DROP COLUMN search_vector&#34;</span>
+</span></span><span style="display:flex;"><span>),
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 在遷移中執行 Python 邏輯（資料遷移）</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">populate_full_name</span>(apps, schema_editor):
+</span></span><span style="display:flex;"><span>    User <span style="color:#f92672">=</span> apps<span style="color:#f92672">.</span>get_model(<span style="color:#e6db74">&#39;myapp&#39;</span>, <span style="color:#e6db74">&#39;User&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> user <span style="color:#f92672">in</span> User<span style="color:#f92672">.</span>objects<span style="color:#f92672">.</span>all():
+</span></span><span style="display:flex;"><span>        user<span style="color:#f92672">.</span>full_name <span style="color:#f92672">=</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>user<span style="color:#f92672">.</span>first_name<span style="color:#e6db74">}</span><span style="color:#e6db74"> </span><span style="color:#e6db74">{</span>user<span style="color:#f92672">.</span>last_name<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>strip()
+</span></span><span style="display:flex;"><span>        user<span style="color:#f92672">.</span>save(update_fields<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#39;full_name&#39;</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>migrations<span style="color:#f92672">.</span>RunPython(
+</span></span><span style="display:flex;"><span>    populate_full_name,
+</span></span><span style="display:flex;"><span>    reverse_code<span style="color:#f92672">=</span>migrations<span style="color:#f92672">.</span>RunPython<span style="color:#f92672">.</span>noop
+</span></span><span style="display:flex;"><span>),
+</span></span></code></pre></div><h3 id="typeorm-migrationsnodejstypescript">TypeORM Migrations（Node.js/TypeScript）</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-typescript" data-lang="typescript"><span style="display:flex;"><span><span style="color:#75715e">// DataSource 配置
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">AppDataSource</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">DataSource</span>({
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">type</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;postgres&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">host</span>: <span style="color:#66d9ef">process.env.DB_HOST</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">port</span>: <span style="color:#66d9ef">parseInt</span>(<span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">env</span>.<span style="color:#a6e22e">DB_PORT</span> <span style="color:#f92672">??</span> <span style="color:#e6db74">&#39;5432&#39;</span>),
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">username</span>: <span style="color:#66d9ef">process.env.DB_USER</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">password</span>: <span style="color:#66d9ef">process.env.DB_PASSWORD</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">database</span>: <span style="color:#66d9ef">process.env.DB_NAME</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">entities</span><span style="color:#f92672">:</span> [<span style="color:#e6db74">&#39;src/entities/**/*.ts&#39;</span>],
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">migrations</span><span style="color:#f92672">:</span> [<span style="color:#e6db74">&#39;src/migrations/**/*.ts&#39;</span>],
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">synchronize</span>: <span style="color:#66d9ef">false</span>,  <span style="color:#75715e">// 生產環境絕對不要設為 true
+</span></span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 比對 Entity 與資料庫，自動生成遷移</span>
+</span></span><span style="display:flex;"><span>npx typeorm migration:generate src/migrations/AddPostsTable -d ormconfig.ts
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 執行遷移</span>
+</span></span><span style="display:flex;"><span>npx typeorm migration:run -d ormconfig.ts
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 回滾最後一個遷移</span>
+</span></span><span style="display:flex;"><span>npx typeorm migration:revert -d ormconfig.ts
+</span></span></code></pre></div><blockquote>
+<p><strong>重要警告：</strong> 生產環境嚴禁使用 <code>synchronize: true</code>——它會在每次應用啟動時自動同步 Schema，可能導致資料遺失。</p>
+</blockquote>
+<h3 id="prisma-migrate宣告式-schema">Prisma Migrate（宣告式 Schema）</h3>
+<p><strong>Prisma</strong> 以宣告式 <code>schema.prisma</code> 為核心，自動產生遷移 SQL。</p>
+<pre tabindex="0"><code class="language-prisma" data-lang="prisma">// prisma/schema.prisma
+model User {
+  id          BigInt    @id @default(autoincrement())
+  username    String    @unique @db.VarChar(50)
+  email       String    @unique @db.VarChar(255)
+  displayName String?   @db.VarChar(100) @map(&#34;display_name&#34;)
+  isActive    Boolean   @default(true) @map(&#34;is_active&#34;)
+  createdAt   DateTime  @default(now()) @map(&#34;created_at&#34;) @db.Timestamptz
+  posts       Post[]
+
+  @@map(&#34;users&#34;)
+}
+
+model Post {
+  id        BigInt    @id @default(autoincrement())
+  authorId  BigInt    @map(&#34;author_id&#34;)
+  title     String    @db.VarChar(500)
+  content   String?
+  status    String    @default(&#34;draft&#34;) @db.VarChar(20)
+  createdAt DateTime  @default(now()) @map(&#34;created_at&#34;) @db.Timestamptz
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([authorId], name: &#34;idx_posts_author_id&#34;)
+  @@map(&#34;posts&#34;)
+}
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 開發環境：生成遷移並套用</span>
+</span></span><span style="display:flex;"><span>npx prisma migrate dev --name add-posts-table
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 生產環境：只套用已存在的遷移</span>
+</span></span><span style="display:flex;"><span>npx prisma migrate deploy
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 查看遷移狀態</span>
+</span></span><span style="display:flex;"><span>npx prisma migrate status
+</span></span></code></pre></div><p><strong>Prisma 的限制：</strong> 無法直接管理 Stored Procedure、Trigger、自訂函式、部分索引、物化視圖——需在產生的 <code>migration.sql</code> 中手動追加。</p>
+<h3 id="sqitch語言無關的變更集模式">sqitch（語言無關的變更集模式）</h3>
+<p><strong>sqitch</strong> 以「變更集（Change）」而非版本號為核心，強調變更之間的依賴關係。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 初始化</span>
+</span></span><span style="display:flex;"><span>sqitch init myproject --engine pg
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 新增一個變更（生成 deploy/revert/verify 三個檔案）</span>
+</span></span><span style="display:flex;"><span>sqitch add create-users-table -n <span style="color:#e6db74">&#39;建立使用者主表&#39;</span>
+</span></span></code></pre></div><h4 id="deploy--revert--verify-三件組">Deploy / Revert / Verify 三件組</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- deploy/create-users-table.sql
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">BEGIN</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> users (
+</span></span><span style="display:flex;"><span>    id          BIGSERIAL <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
+</span></span><span style="display:flex;"><span>    username    VARCHAR(<span style="color:#ae81ff">50</span>) <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">UNIQUE</span>,
+</span></span><span style="display:flex;"><span>    email       VARCHAR(<span style="color:#ae81ff">255</span>) <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">UNIQUE</span>,
+</span></span><span style="display:flex;"><span>    created_at  TIMESTAMPTZ <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">DEFAULT</span> NOW()
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">COMMIT</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- revert/create-users-table.sql
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">BEGIN</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">DROP</span> <span style="color:#66d9ef">TABLE</span> <span style="color:#66d9ef">IF</span> <span style="color:#66d9ef">EXISTS</span> users <span style="color:#66d9ef">CASCADE</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">COMMIT</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- verify/create-users-table.sql
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> id, username, email, created_at
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> users
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> <span style="color:#66d9ef">FALSE</span>;  <span style="color:#75715e">-- 只驗證結構，不查詢資料
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sqitch deploy db:pg://user:pass@localhost/mydb   <span style="color:#75715e"># 部署</span>
+</span></span><span style="display:flex;"><span>sqitch revert db:pg://user:pass@localhost/mydb   <span style="color:#75715e"># 回滾</span>
+</span></span><span style="display:flex;"><span>sqitch verify db:pg://user:pass@localhost/mydb   <span style="color:#75715e"># 驗證</span>
+</span></span><span style="display:flex;"><span>sqitch status db:pg://user:pass@localhost/mydb   <span style="color:#75715e"># 狀態</span>
+</span></span></code></pre></div><h3 id="七大工具完整比較">七大工具完整比較</h3>
+<table>
+  <thead>
+      <tr>
+          <th>維度</th>
+          <th>Flyway</th>
+          <th>Liquibase</th>
+          <th>Alembic</th>
+          <th>Django</th>
+          <th>TypeORM</th>
+          <th>Prisma</th>
+          <th>sqitch</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>語言生態</td>
+          <td>JVM</td>
+          <td>JVM</td>
+          <td>Python</td>
+          <td>Python/Django</td>
+          <td>Node.js/TS</td>
+          <td>Node.js/TS</td>
+          <td>語言無關</td>
+      </tr>
+      <tr>
+          <td>撰寫格式</td>
+          <td>SQL</td>
+          <td>SQL/YAML/XML</td>
+          <td>Python</td>
+          <td>Python</td>
+          <td>TypeScript</td>
+          <td>Schema 定義+SQL</td>
+          <td>SQL</td>
+      </tr>
+      <tr>
+          <td>自動生成</td>
+          <td>否</td>
+          <td>否</td>
+          <td>是</td>
+          <td>是</td>
+          <td>是</td>
+          <td>是</td>
+          <td>否</td>
+      </tr>
+      <tr>
+          <td>回滾支援</td>
+          <td>付費</td>
+          <td>免費</td>
+          <td>手動</td>
+          <td>手動</td>
+          <td>手動</td>
+          <td>不支援</td>
+          <td>內建</td>
+      </tr>
+      <tr>
+          <td>驗證腳本</td>
+          <td>否</td>
+          <td>否</td>
+          <td>否</td>
+          <td>否</td>
+          <td>否</td>
+          <td>否</td>
+          <td>內建</td>
+      </tr>
+      <tr>
+          <td>跨資料庫</td>
+          <td>中等</td>
+          <td>優秀</td>
+          <td>中等</td>
+          <td>中等</td>
+          <td>好</td>
+          <td>好</td>
+          <td>好</td>
+      </tr>
+  </tbody>
+</table>
+<h4 id="選型決策流程">選型決策流程</h4>
+<pre tabindex="0"><code>1. 你的主要技術棧是什麼？
+   Java/Spring Boot     → Flyway（首選）或 Liquibase
+   Python/Django        → Django Migrations（內建）
+   Python/FastAPI       → Alembic
+   Node.js + Prisma ORM → Prisma Migrate
+   Node.js + TypeORM    → TypeORM Migrations
+   語言無關/多語言       → sqitch 或 Flyway
+
+2. 你需要自動偵測 Schema 差異嗎？
+   需要 → Alembic、Django、TypeORM、Prisma
+   不需要 → Flyway、sqitch
+
+3. 你的 Schema 複雜度如何？
+   簡單 DDL        → 所有工具均可
+   觸發器/函式     → Flyway 或 sqitch（純 SQL 控制）
+   含資料遷移      → Alembic 或 Django（Python 邏輯）
+</code></pre><h3 id="zero-downtime-migrationexpand-contract-模式">Zero-Downtime Migration：Expand-Contract 模式</h3>
+<p>在高可用系統中，Schema 遷移不能導致服務停機。<strong>Expand-Contract 模式</strong> 分三階段進行：</p>
+<pre tabindex="0"><code>傳統做法（有停機風險）：
+  1. 停止服務
+  2. 執行遷移（如重新命名欄位）
+  3. 部署新版應用程式
+  4. 啟動服務
+  → 步驟 2-3 之間有不一致窗口
+
+Expand-Contract 模式（零停機）：
+  階段 1（Expand/擴張）：
+    - 新增新欄位，舊欄位保留
+    - 部署「同時寫入新舊欄位」的應用程式版本
+    - 資料回填
+
+  階段 2（驗證期）：
+    - 確認新欄位資料完整性
+    - 監控錯誤率（持續數天到數週）
+
+  階段 3（Contract/收縮）：
+    - 部署「只讀寫新欄位」的應用程式版本
+    - 刪除舊欄位
+</code></pre><h4 id="實際範例重新命名欄位">實際範例：重新命名欄位</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- ========= 階段 1：Expand =========
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 步驟 1a：新增新欄位
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> users <span style="color:#66d9ef">ADD</span> <span style="color:#66d9ef">COLUMN</span> username VARCHAR(<span style="color:#ae81ff">50</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 步驟 1b：分批回填（避免長時間鎖定大表）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">DO</span> <span style="color:#960050;background-color:#1e0010">$$</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">DECLARE</span>
+</span></span><span style="display:flex;"><span>    batch_size INT :<span style="color:#f92672">=</span> <span style="color:#ae81ff">1000</span>;
+</span></span><span style="display:flex;"><span>    last_id    BIGINT :<span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    max_id     BIGINT;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">BEGIN</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">SELECT</span> <span style="color:#66d9ef">MAX</span>(id) <span style="color:#66d9ef">INTO</span> max_id <span style="color:#66d9ef">FROM</span> users;
+</span></span><span style="display:flex;"><span>    WHILE last_id <span style="color:#f92672">&lt;</span> max_id LOOP
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">UPDATE</span> users
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">SET</span> username <span style="color:#f92672">=</span> user_name
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">WHERE</span> id <span style="color:#f92672">&gt;</span> last_id
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">AND</span> id <span style="color:#f92672">&lt;=</span> last_id <span style="color:#f92672">+</span> batch_size
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">AND</span> username <span style="color:#66d9ef">IS</span> <span style="color:#66d9ef">NULL</span>;
+</span></span><span style="display:flex;"><span>        last_id :<span style="color:#f92672">=</span> last_id <span style="color:#f92672">+</span> batch_size;
+</span></span><span style="display:flex;"><span>        PERFORM pg_sleep(<span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">01</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">END</span> LOOP;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">END</span>;
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">$$</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 步驟 1c：CONCURRENTLY 建索引（不鎖定讀寫）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">UNIQUE</span> <span style="color:#66d9ef">INDEX</span> CONCURRENTLY idx_users_username <span style="color:#66d9ef">ON</span> users (username);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 步驟 1d：部署 v2（同時讀寫 user_name 與 username）
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- ========= 階段 2：驗證期 =========
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#66d9ef">COUNT</span>(<span style="color:#f92672">*</span>) <span style="color:#66d9ef">FROM</span> users <span style="color:#66d9ef">WHERE</span> username <span style="color:#66d9ef">IS</span> <span style="color:#66d9ef">DISTINCT</span> <span style="color:#66d9ef">FROM</span> user_name;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 應為 0
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- ========= 階段 3：Contract =========
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 步驟 3a：部署 v3（只讀寫 username）
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 步驟 3b：加上 NOT NULL 約束（分兩步驟避免全表鎖）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> users
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">ADD</span> <span style="color:#66d9ef">CONSTRAINT</span> users_username_not_null
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">CHECK</span> (username <span style="color:#66d9ef">IS</span> <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>) <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">VALID</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> users VALIDATE <span style="color:#66d9ef">CONSTRAINT</span> users_username_not_null;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> users <span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">COLUMN</span> username <span style="color:#66d9ef">SET</span> <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 步驟 3c：刪除舊欄位
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> users <span style="color:#66d9ef">DROP</span> <span style="color:#66d9ef">COLUMN</span> user_name;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> users <span style="color:#66d9ef">DROP</span> <span style="color:#66d9ef">CONSTRAINT</span> users_username_not_null;
+</span></span></code></pre></div><h3 id="ddl-鎖管理最佳實踐">DDL 鎖管理最佳實踐</h3>
+<p>Schema 遷移的許多 DDL 操作需要 <strong>AccessExclusiveLock</strong>（排他鎖），這會阻塞所有讀寫操作：</p>
+<h4 id="高風險-ddl需要長時間鎖">高風險 DDL（需要長時間鎖）</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- PG&lt;11 全表重寫
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> large_table <span style="color:#66d9ef">ADD</span> <span style="color:#66d9ef">COLUMN</span> new_col TEXT <span style="color:#66d9ef">DEFAULT</span> <span style="color:#e6db74">&#39;value&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 全表重寫
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> large_table <span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">COLUMN</span> col <span style="color:#66d9ef">TYPE</span> new_type;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 非 CONCURRENTLY 模式
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">INDEX</span> <span style="color:#66d9ef">ON</span> large_table (col);
+</span></span></code></pre></div><h4 id="低風險-ddl安全替代方案">低風險 DDL（安全替代方案）</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- PG 11+：ADD COLUMN 有預設值不再需要全表重寫（瞬間完成）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> large_table <span style="color:#66d9ef">ADD</span> <span style="color:#66d9ef">COLUMN</span> new_col TEXT <span style="color:#66d9ef">DEFAULT</span> <span style="color:#e6db74">&#39;safe&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- CONCURRENTLY 建立索引（不鎖定讀寫）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">INDEX</span> CONCURRENTLY idx_name <span style="color:#66d9ef">ON</span> large_table (col);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- NOT VALID + VALIDATE 分離加約束（不全表鎖）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> large_table
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">ADD</span> <span style="color:#66d9ef">CONSTRAINT</span> col_not_null <span style="color:#66d9ef">CHECK</span> (col <span style="color:#66d9ef">IS</span> <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>) <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">VALID</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> large_table VALIDATE <span style="color:#66d9ef">CONSTRAINT</span> col_not_null;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 外鍵也用 NOT VALID + VALIDATE
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> posts
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">ADD</span> <span style="color:#66d9ef">CONSTRAINT</span> fk_author <span style="color:#66d9ef">FOREIGN</span> <span style="color:#66d9ef">KEY</span> (author_id) <span style="color:#66d9ef">REFERENCES</span> users(id)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">VALID</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> posts VALIDATE <span style="color:#66d9ef">CONSTRAINT</span> fk_author;
+</span></span></code></pre></div><h4 id="鎖等待超時設置">鎖等待超時設置</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 在遷移腳本開頭設置，避免遷移長時間等待鎖
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SET</span> lock_timeout <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;3s&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SET</span> statement_timeout <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;60s&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> users <span style="color:#66d9ef">ADD</span> <span style="color:#66d9ef">COLUMN</span> new_col TEXT;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">RESET</span> lock_timeout;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">RESET</span> statement_timeout;
+</span></span></code></pre></div><h3 id="多人協作的版本衝突處理">多人協作的版本衝突處理</h3>
+<pre tabindex="0"><code>場景：Alice 和 Bob 同時建立 V5 遷移，合併時衝突
+
+解決策略 1（時間戳記版本號）：
+  使用毫秒時間戳記，衝突機率極低
+  V20260722103000001__add_column_a.sql
+  V20260722143000002__add_table_b.sql
+
+解決策略 2（版本號分段）：
+  每位工程師分配版本號段
+  Alice: V1xxx__...
+  Bob:   V2xxx__...
+
+解決策略 3（sqitch 依賴宣告）：
+  不依賴順序，通過依賴關係解決
+  sqitch add add-column-a --requires create-users-table
+
+解決策略 4（分支策略）：
+  遷移只在 main 分支合併後確定最終版本號
+  開發分支使用臨時名稱
+</code></pre><h3 id="遷移測試最佳實踐">遷移測試最佳實踐</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 使用 Testcontainers 進行遷移測試</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> testcontainers.postgres <span style="color:#f92672">import</span> PostgresContainer
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> alembic <span style="color:#f92672">import</span> command
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> alembic.config <span style="color:#f92672">import</span> Config
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">test_migrations_up_and_down</span>():
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">with</span> PostgresContainer(<span style="color:#e6db74">&#34;postgres:16&#34;</span>) <span style="color:#66d9ef">as</span> pg:
+</span></span><span style="display:flex;"><span>        alembic_cfg <span style="color:#f92672">=</span> Config(<span style="color:#e6db74">&#34;alembic.ini&#34;</span>)
+</span></span><span style="display:flex;"><span>        alembic_cfg<span style="color:#f92672">.</span>set_main_option(<span style="color:#e6db74">&#34;sqlalchemy.url&#34;</span>, pg<span style="color:#f92672">.</span>get_connection_url())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 測試升級</span>
+</span></span><span style="display:flex;"><span>        command<span style="color:#f92672">.</span>upgrade(alembic_cfg, <span style="color:#e6db74">&#34;head&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 測試降級（回滾所有）</span>
+</span></span><span style="display:flex;"><span>        command<span style="color:#f92672">.</span>downgrade(alembic_cfg, <span style="color:#e6db74">&#34;base&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 再次升級，確保冪等性</span>
+</span></span><span style="display:flex;"><span>        command<span style="color:#f92672">.</span>upgrade(alembic_cfg, <span style="color:#e6db74">&#34;head&#34;</span>)
+</span></span></code></pre></div><h3 id="生產環境安全檢查清單">生產環境安全檢查清單</h3>
+<table>
+  <thead>
+      <tr>
+          <th>檢查項目</th>
+          <th>說明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>synchronize: false</code></td>
+          <td>TypeORM 生產環境必須關閉自動同步</td>
+      </tr>
+      <tr>
+          <td>使用 <code>migrate deploy</code></td>
+          <td>Prisma 生產環境不要用 <code>migrate dev</code></td>
+      </tr>
+      <tr>
+          <td><code>hbm2ddl.auto=validate</code></td>
+          <td>Hibernate 只驗證不修改</td>
+      </tr>
+      <tr>
+          <td>設定 <code>lock_timeout</code></td>
+          <td>每個遷移腳本設定鎖等待超時</td>
+      </tr>
+      <tr>
+          <td><code>CREATE INDEX CONCURRENTLY</code></td>
+          <td>大表建索引必須使用 CONCURRENTLY</td>
+      </tr>
+      <tr>
+          <td>先在 staging 測試</td>
+          <td>所有遷移先在 staging 環境驗證</td>
+      </tr>
+      <tr>
+          <td>備份再遷移</td>
+          <td>生產遷移前先做資料庫備份</td>
+      </tr>
+      <tr>
+          <td>監控遷移時間</td>
+          <td>記錄每次遷移的執行時間以預測生產耗時</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="總結">總結</h3>
+<p>選擇 Schema 遷移工具的關鍵在於：</p>
+<ol>
+<li><strong>匹配技術棧</strong>——Java 用 Flyway、Python 用 Alembic/Django、Node.js 用 Prisma/TypeORM、語言無關用 sqitch</li>
+<li><strong>版本化遷移 vs 狀態比對</strong>——複雜系統建議版本化遷移（完整歷史、精確控制），快速原型開發可用狀態比對</li>
+<li><strong>零停機遷移</strong>——使用 Expand-Contract 模式，分批回填、CONCURRENTLY 建索引、NOT VALID + VALIDATE 加約束</li>
+<li><strong>鎖管理</strong>——永遠設定 <code>lock_timeout</code>，大表 DDL 使用安全替代方案</li>
+<li><strong>測試遷移</strong>——用 Testcontainers 在 CI 中測試 upgrade + downgrade 完整週期</li>
+</ol>
+<p>下一篇，我們將探討 <strong>ORM 整合實戰</strong>——從 SQLAlchemy、Django ORM 到 Prisma，掌握 PostgreSQL 進階型別映射與查詢最佳化的實戰技巧。</p></div>
+        
+        
+
+        
+        <div class="mt-8">
+          
+<div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose">
+  <div>
+    <div class="flex items-center gap-2 mb-1">
+      <a href="/about" class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">
+        BenZ
+      </a>
+      
+      <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span>
+      
+    </div>
+    <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">
+      熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。
+    </p>
+    <div class="flex items-center gap-3">
+      
+      <a href="https://github.com/benzhub" target="_blank" rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label="GitHub">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      
+      
+      
+    </div>
+  </div>
+</div>
+
+        </div>
+      </div>
+
+      
+      
+<div class="subscribe-widget max-w-xl mx-auto my-10 px-6 py-8 text-center rounded-xl bg-zinc-50 dark:bg-zinc-800">
+  <h3 class="text-lg font-bold mb-1">訂閱 BenzHub 電子報</h3>
+  <p class="text-sm text-zinc-600 dark:text-zinc-300 mb-4">每週 AI 賺錢實戰 + 免費工具地圖</p>
+  <form class="subscribe-form flex flex-col sm:flex-row gap-3 justify-center"
+        data-worker="https://benzhub-newsletter.PLACEHOLDER.workers.dev" data-source="footer-widget">
+    <input type="email" required placeholder="你的 Email"
+           class="px-4 py-2 rounded-lg border border-zinc-300 dark:bg-zinc-900 dark:border-zinc-600" />
+    <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700">訂閱</button>
+  </form>
+  <div class="cf-turnstile mt-3 flex justify-center" data-sitekey="PLACEHOLDER_TURNSTILE_SITE_KEY"></div>
+  <p class="subscribe-status text-sm text-zinc-500 mt-2"></p>
+</div>
+
+
+
+      
+      <div class="post-detail fade-in my-4">
+        
+
+
+<div>
+  <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3>
+  <div class="grid gap-2">
+    
+    <a href="https://benzhub.github.io/post/postgresql/045-timescaledb/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">TimescaleDB 時序資料庫完全指南：從 Hypertable 到連續聚合與壓縮策略 | PostgreSQL</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/21</span>
+    </a>
+    
+    <a href="https://benzhub.github.io/post/postgresql/044-postgis/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">PostGIS 地理空間：從座標系統到空間查詢的完整實戰 | PostgreSQL</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/20</span>
+    </a>
+    
+    <a href="https://benzhub.github.io/post/postgresql/043-pgvector/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">pgvector 向量搜尋：從 Embedding 到 RAG 的完整實戰 | PostgreSQL</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/19</span>
+    </a>
+    
+  </div>
+</div>
+
+
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            
+            <a href="https://benzhub.github.io/post/postgresql/045-timescaledb/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+                <span class="text-sm font-medium">TimescaleDB 時序資料庫完全指南：從 Hypertable 到連續聚合與壓縮策略 | PostgreSQL</span>
+            </a>
+            
+          </div>
+          <div>
+            
+            <a href="https://benzhub.github.io/post/postgresql/047-orm-integration/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+                <span class="text-sm font-medium">ORM 整合實戰：TypeORM、Prisma、SQLAlchemy、Django ORM 與 PostgreSQL 進階型別映射 | PostgreSQL</span>
+            </a>
+            
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        
+<script src="https://giscus.app/client.js"
+        data-repo="benzhub/benzhub.github.io"
+        data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM="
+        data-category="Announcements"
+        data-category-id="MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme="preferred_color_scheme"
+        data-lang="zh-TW"
+        crossorigin="anonymous"
+        async>
+</script>
+
+
+      </div>
+    </div>
+    
+    <div class="hidden lg:block lg:col-span-1 mt-4">
+    
+    
+            
+            <div class="widget fade-in">
+    <p class="widget-title">搜尋</p>
+    <form role="search" method="get" action="https://google.com/search">
+        <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
+        <input type="hidden" name="sitesearch" value="https://benzhub.github.io/" />
+    </form>
+</div>
+
+        
+            
+            
+
+        
+            
+            
+<div class="widget fade-in">
+    <p class="widget-title">標籤</p>
+    <div class="flex flex-wrap gap-1.5">
+        <a href='/tags/80/20-%E6%B3%95%E5%89%87'>
+            <span class="tag-pill">80/20 法則</span>
+        </a>
+        <a href='/tags/acid'>
+            <span class="tag-pill">acid</span>
+        </a>
+        <a href='/tags/aggregate'>
+            <span class="tag-pill">aggregate</span>
+        </a>
+        <a href='/tags/ai'>
+            <span class="tag-pill">ai</span>
+        </a>
+        <a href='/tags/ai-agent'>
+            <span class="tag-pill">ai agent</span>
+        </a>
+        <a href='/tags/ai-workflow'>
+            <span class="tag-pill">ai workflow</span>
+        </a>
+        <a href='/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE'>
+            <span class="tag-pill">ai 工具焦慮</span>
+        </a>
+        <a href='/tags/ai-%E6%8E%A5%E5%96%AE'>
+            <span class="tag-pill">ai 接單</span>
+        </a>
+        <a href='/tags/ai-%E7%B9%AA%E5%9C%96'>
+            <span class="tag-pill">ai 繪圖</span>
+        </a>
+        <a href='/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA'>
+            <span class="tag-pill">ai 虛擬人</span>
+        </a>
+        <a href='/tags/ai-%E8%A1%8C%E9%8A%B7'>
+            <span class="tag-pill">ai 行銷</span>
+        </a>
+        <a href='/tags/ai-%E8%A8%AD%E8%A8%88'>
+            <span class="tag-pill">ai 設計</span>
+        </a>
+        <a href='/tags/ai-%E8%AE%8A%E7%8F%BE'>
+            <span class="tag-pill">ai 變現</span>
+        </a>
+        <a href='/tags/ai-%E8%B3%BA%E9%8C%A2'>
+            <span class="tag-pill">ai 賺錢</span>
+        </a>
+        <a href='/tags/ai-income'>
+            <span class="tag-pill">ai-income</span>
+        </a>
+        <a href='/tags/ai-insights'>
+            <span class="tag-pill">ai-insights</span>
+        </a>
+        <a href='/tags/analytics'>
+            <span class="tag-pill">analytics</span>
+        </a>
+        <a href='/tags/api'>
+            <span class="tag-pill">api</span>
+        </a>
+        <a href='/tags/architecture'>
+            <span class="tag-pill">architecture</span>
+        </a>
+        <a href='/tags/audit'>
+            <span class="tag-pill">audit</span>
+        </a>
+    </div>
+</div>
+
+
+        
+            
+            
+<div class="widget fade-in">
+    <p class="widget-title">文章系列</p>
+    <div class="flex flex-wrap gap-1.5">
+        
+        
+        
+        
+        <a href='/post/postgresql/'>
+            <span class="tag-pill">PostgreSQL (50)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/javascript/'>
+            <span class="tag-pill">JavaScript (109)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/django/'>
+            <span class="tag-pill">Django (44)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/python/'>
+            <span class="tag-pill">Python (37)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/htmlcss/'>
+            <span class="tag-pill">HTML &amp; CSS (23)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/linux/'>
+            <span class="tag-pill">Linux (22)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/git/'>
+            <span class="tag-pill">Git (18)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/ai-insights/'>
+            <span class="tag-pill">AI Insights (13)</span>
+        </a>
+        
+        
+    </div>
+</div>
+
+
+        
+            
+            
+
+<div class="widget fade-in">
+    <p class="widget-title">最新文章</p>
+    <div class="flex flex-col gap-1">
+        <a href="/post/javascript/data-structures--algorithms/047-load-balancer/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計負載均衡器 — Round Robin、一致性雜湊與健康檢查實戰 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/30
+            </p>
+        </a>
+        <a href="/post/javascript/data-structures--algorithms/046-text-diff/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計文本差異比對 — LCS、Myers Diff 演算法與 Patch 生成實戰 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/29
+            </p>
+        </a>
+        <a href="/post/javascript/data-structures--algorithms/045-recommendation/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計推薦系統 — 協同過濾、內容推薦與矩陣分解實戰 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/28
+            </p>
+        </a>
+        <a href="/post/javascript/data-structures--algorithms/044-url-shortener/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計短網址系統 — Base62 編碼、分散式 ID 生成與重導向架構 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/27
+            </p>
+        </a>
+        <a href="/post/postgresql/050-citus-distributed/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Citus 分散式 PostgreSQL：水平擴展到多節點叢集 | PostgreSQL</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/26
+            </p>
+        </a>
+    </div>
+</div>
+
+        
+    
+</div>
+
+    
+</div>
+
+        </div>
+    </div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]">
+    
+    <p>&copy; 2026 <a href="https://benzhub.github.io/" class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p>
+</footer>
+
+
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script src="/js/subscribe.js" defer></script>
+
+
+
+<script>
+    (function (window, document) {
+        function main() {
+            var ad = document.createElement('script');
+            ad.async = true;
+            ad.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606';
+            ad.crossOrigin = "anonymous";
+            var sc = document.getElementsByTagName('script')[0];
+            sc.parentNode.insertBefore(ad, sc);
+        }
+        var lazyLoad = false;
+        function onLazyLoad() {
+            if (lazyLoad === false) {
+                lazyLoad = true;
+                window.removeEventListener('scroll', onLazyLoad);
+                window.removeEventListener('mousemove', onLazyLoad);
+                window.removeEventListener('mousedown', onLazyLoad);
+                window.removeEventListener('touchstart', onLazyLoad);
+                window.removeEventListener('keydown', onLazyLoad);
+                main();
+            }
+        }
+        window.addEventListener('scroll', onLazyLoad);
+        window.addEventListener('mousemove', onLazyLoad);
+        window.addEventListener('mousedown', onLazyLoad);
+        window.addEventListener('touchstart', onLazyLoad);
+        window.addEventListener('keydown', onLazyLoad);
+        window.addEventListener('load', function () {
+            if (window.pageYOffset) {
+                onLazyLoad();
+                window.setTimeout(onLazyLoad, 3000);
+            }
+        });
+    })(window, document);
+</script>
+
+
+<script>
+    
+    var icon = document.getElementById("icon");
+    var icon2 = document.getElementById("icon2");
+    if (document.documentElement.classList.contains("dark") || localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+        if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+    function toggleDarkMode() {
+        if (document.documentElement.classList.contains('dark')) {
+            if (icon) { icon.classList.remove("icon-sun"); icon.classList.add("icon-moon"); }
+            if (icon2) { icon2.classList.remove("icon-sun"); icon2.classList.add("icon-moon"); }
+            document.documentElement.classList.remove('dark');
+            localStorage.theme = 'light';
+        } else {
+            if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+            if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+            document.documentElement.classList.add('dark');
+            localStorage.theme = 'dark';
+        }
+    }
+
+    
+    document.addEventListener('DOMContentLoaded', function () {
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0 });
+
+        document.querySelectorAll('.fade-in').forEach(function (el) {
+            observer.observe(el);
+        });
+    });
+</script>
+</body>
+
+</html>

@@ -1,0 +1,2332 @@
+<!DOCTYPE html>
+
+<html lang="zh-TW">
+<head>
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-FSEWPBJMJT');
+</script>
+
+<title>設計搜尋自動補全 — Trie、Top-K 排序與分散式即時建議系統 | 資料結構與演算法 | BenzHub</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="apple-touch-icon" sizes="180x180" href='/favicon/apple-touch-icon.png'>
+    <link rel="icon" type="image/png" sizes="32x32" href='/favicon/favicon-32x32.png'>
+    <link rel="icon" type="image/png" sizes="16x16" href='/favicon/favicon-16x16.png'>
+    <link rel="manifest" href='/favicon/site.webmanifest' />
+    <link rel="mask-icon" href=' /favicon/safari-pinned-tab.svg' color="#5bbad5" />
+    <link rel="shortcut icon" href='/favicon/favicon.ico' />
+    <meta name="theme-color" content="#fafafa">
+    <meta property="og:title" content="設計搜尋自動補全 — Trie、Top-K 排序與分散式即時建議系統 | 資料結構與演算法 | BenzHub" />
+    
+    
+    
+    <link rel="stylesheet" href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css" />
+    
+    <link href=' /css/blonde.min.css' rel="stylesheet" type="text/css" media="print"
+        onload="this.media=' all'">
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+
+<meta name="description" content="深入實作搜尋自動補全系統，掌握 Trie 前綴樹結合 Top-K 排序、快取策略、分散式架構設計與即時更新機制，搭配 JavaScript/TypeScript 與 C&#43;&#43; 完整程式碼與 LeetCode 練習">
+<meta property="og:site_name" content="BenzHub">
+<meta property="og:description" content="深入實作搜尋自動補全系統，掌握 Trie 前綴樹結合 Top-K 排序、快取策略、分散式架構設計與即時更新機制，搭配 JavaScript/TypeScript 與 C&#43;&#43; 完整程式碼與 LeetCode 練習">
+<meta property="og:url" content="https://benzhub.github.io/post/javascript/data-structures--algorithms/042-search-autocomplete/">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="zh_TW">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="">
+
+<link rel="canonical" href="https://benzhub.github.io/post/javascript/data-structures--algorithms/042-search-autocomplete/">
+
+<meta name="twitter:description" content="深入實作搜尋自動補全系統，掌握 Trie 前綴樹結合 Top-K 排序、快取策略、分散式架構設計與即時更新機制，搭配 JavaScript/TypeScript 與 C&#43;&#43; 完整程式碼與 LeetCode 練習">
+<meta property="article:published_time" content="2026-07-25T00:00:00&#43;00:00">
+<meta property="article:updated_time" content="2026-07-25T00:00:00&#43;00:00">
+
+
+
+
+
+    
+<meta property="og:image" content="https://benzhub.github.io/img/javascript/Data%20Structures%20&amp;%20Algorithms/042-Search-Autocomplete.png">
+<meta property="og:image:url" content="https://benzhub.github.io/img/javascript/Data%20Structures%20&amp;%20Algorithms/042-Search-Autocomplete.png">
+    
+
+    
+    <link rel="stylesheet" href='/css/custom.css'>
+    <i class="dark hidden"></i>
+    
+<link rel="alternate" hreflang="zh-TW" href="https://benzhub.github.io/post/javascript/data-structures--algorithms/042-search-autocomplete/" />
+
+<link rel="alternate" hreflang="x-default" href="https://benzhub.github.io/post/javascript/data-structures--algorithms/042-search-autocomplete/" />
+
+    
+
+
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "\"設計搜尋自動補全 — Trie、Top-K 排序與分散式即時建議系統 | 資料結構與演算法\"",
+  "description": "\"深入實作搜尋自動補全系統，掌握 Trie 前綴樹結合 Top-K 排序、快取策略、分散式架構設計與即時更新機制，搭配 JavaScript/TypeScript 與 C++ 完整程式碼與 LeetCode 練習\"",
+  "author": {
+    "@type": "Person",
+    "name": "\"BenzHub\"",
+    "url": "https:\/\/benzhub.github.io\/about",
+    "jobTitle": "\"Software Developer\"",
+    "sameAs": [
+      "\"https://github.com/benzhub\""
+    ]
+  },
+  "datePublished": "2026-07-25T00:00:00\u002b00:00",
+  "dateModified": "2026-07-25T00:00:00\u002b00:00",
+  "image": "https:\/\/benzhub.github.io\/img\/javascript\/Data%20Structures%20\u0026%20Algorithms\/042-Search-Autocomplete.png",
+  "publisher": {
+    "@type": "Organization",
+    "name": "\"BenzHub\"",
+    "url": "\"https://benzhub.github.io/\"",
+    "sameAs": [
+      "\"https://github.com/benzhub\""
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/benzhub.github.io\/post\/javascript\/data-structures--algorithms\/042-search-autocomplete\/"
+  },
+  "inLanguage": "zh-TW"
+}
+</script>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "\"BenzHub\"",
+      "item": "https:\/\/benzhub.github.io\/"
+    }
+    
+    
+      
+      
+    ,{
+      "@type": "ListItem",
+      "position": 2,
+      "name": "\"Blog\"",
+      "item": "https:\/\/benzhub.github.io\/post\/javascript\/"
+    }
+      
+      
+    
+    ,{
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "\"設計搜尋自動補全 — Trie、Top-K 排序與分散式即時建議系統 | 資料結構與演算法\""
+    }
+  ]
+}
+</script>
+
+
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    
+    
+    {
+      "@type": "Question",
+      "name": "\"Autocomplete 和全文搜尋（Full-Text Search）有什麼區別？\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"兩者解決的問題不同。Autocomplete（自動補全）是前綴匹配——使用者輸入 'app' 時，系統回傳以 'app' 開頭的建議，如 'apple'、'application'，核心資料結構是 Trie（前綴樹），回傳速度要求極高（\\u003c 100ms），通常在使用者每輸入一個字元時觸發。全文搜尋（Full-Text Search）則是關鍵字匹配——使用者輸入 'how to cook pasta' 時，系統回傳內容中包含這些關鍵字的文件，核心技術是倒排索引（Inverted Index），如 Elasticsearch 和 Solr。在實際產品中，兩者通常協作：使用者打字時 Autocomplete 提供即時建議，按下 Enter 後全文搜尋回傳完整結果。面試時要注意區分這兩者的需求和技術選型。\""
+      }
+    }
+    
+    ,
+    {
+      "@type": "Question",
+      "name": "\"為什麼要在 Trie 每個節點快取 Top-K 結果？這不是浪費記憶體嗎？\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"這是一個典型的時間換空間（或者說空間換時間）的權衡。如果不在每個節點快取 Top-K，每次查詢前綴時需要遍歷整個子樹來找出最熱門的 K 個結果，時間複雜度為 O(P + N log K)，其中 N 是子樹中所有完整字串的數量，對於熱門前綴如 'a' 可能有數百萬個結果。快取 Top-K 後，查詢時間降為 O(P)，P 是前綴長度，通常只有幾個字元，這對於要求 \\u003c 100ms 回應的即時建議系統至關重要。記憶體開銷方面，假設每個節點存 10 個建議，每個建議約 30 bytes，對於 100 萬個節點，額外開銷約 300MB，在伺服器端完全可以接受。而且實際上不需要在所有節點都快取——只對深度較淺的節點（前 4-5 層）快取就能覆蓋絕大多數查詢。這種設計讓讀取路徑極快，代價是寫入時需要沿路更新每個節點的 Top-K，但由於 Trie 通常是離線建構、批量更新的，寫入效能不是瓶頸。\""
+      }
+    }
+    
+    ,
+    {
+      "@type": "Question",
+      "name": "\"如何處理中日韓（CJK）等多位元組字元的自動補全？\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"CJK 字元對 Autocomplete 的挑戰主要有三個。第一，字元集龐大——英文只有 26 個字母，中文常用字約 6,000 個，如果 Trie 每個節點用固定大小的陣列存子節點（像英文的 children[26]），記憶體會爆炸。解決方案是使用 HashMap 作為子節點容器，按需分配空間。第二，輸入法問題——中文使用者透過拼音（如 'pinyin'）或注音輸入，系統需要支援拼音到漢字的映射，例如輸入 'bei' 時應建議 '北京'、'背包' 等。常見做法是為每個中文詞條同時建立漢字和拼音的 Trie 索引，查詢時合併兩個 Trie 的結果。第三，分詞問題——中文沒有空格分隔詞彙，需要先進行分詞（如使用 jieba），再將詞彙插入 Trie。生產環境中，Elasticsearch 的 Completion Suggester 已經內建了 CJK 分析器（如 icu_analyzer），能較好地處理這些問題，是最實用的選擇。\""
+      }
+    }
+    
+  ]
+}
+</script>
+
+
+
+
+
+</head>
+<body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class="site-nav" id="siteNav">
+    <div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full">
+        
+        <a href="https://benzhub.github.io/" class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">
+            BenzHub
+        </a>
+
+        
+        <div class="hidden md:flex items-center gap-6">
+            
+            <a href="/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                首頁
+            </a>
+            
+            <a href="/about/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                關於
+            </a>
+            
+            <a href="/contact/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                聯絡
+            </a>
+            
+            <a href="/resourses/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                資源
+            </a>
+            
+
+            
+            <div class="flex items-center gap-2">
+                <form class="flex items-center" role="search" method="get" action="https://google.com/search" id="navSearchForm">
+                    <input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50"
+                        type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋" id="navSearchInput">
+                    <input type="hidden" name="sitesearch" value="https://benzhub.github.io/" />
+                </form>
+                <button onclick="toggleNavSearch()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+                    <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                    </svg>
+                </button>
+            </div>
+
+            
+            <span class="text-zinc-200 dark:text-zinc-700">|</span>
+
+            
+            
+
+
+
+
+<div class="lang-switcher relative hidden md:block">
+    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+        <span>🌐</span>
+        <span>繁體中文</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
+        
+            
+            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
+    <div class="flex gap-2">
+        
+            
+            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+            
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon2" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+        </div>
+
+        
+        <div class="flex md:hidden items-center gap-1">
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+            <button id="hamburgerbtn" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Menu">
+                <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    
+    <div class="mobile-menu md:hidden" id="mobileMenu">
+        
+        <a href="/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            首頁
+        </a>
+        
+        <a href="/about/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            關於
+        </a>
+        
+        <a href="/contact/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            聯絡
+        </a>
+        
+        <a href="/resourses/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            資源
+        </a>
+        
+        <form class="mt-2" role="search" method="get" action="https://google.com/search">
+            <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
+            <input type="hidden" name="sitesearch" value="https://benzhub.github.io/" />
+        </form>
+        
+        
+
+
+
+
+<div class="lang-switcher relative hidden md:block">
+    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+        <span>🌐</span>
+        <span>繁體中文</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
+        
+            
+            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
+    <div class="flex gap-2">
+        
+            
+            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+    </div>
+</nav>
+
+<script>
+    
+    document.getElementById('hamburgerbtn').addEventListener('click', function () {
+        document.getElementById('mobileMenu').classList.toggle('active');
+    });
+
+    
+    window.addEventListener('scroll', function () {
+        var nav = document.getElementById('siteNav');
+        if (window.scrollY > 50) {
+            nav.classList.add('scrolled');
+        } else {
+            nav.classList.remove('scrolled');
+        }
+    });
+
+    
+    function toggleNavSearch() {
+        var input = document.getElementById('navSearchInput');
+        input.classList.toggle('expanded');
+        if (input.classList.contains('expanded')) {
+            input.focus();
+        }
+    }
+
+    
+    function toggleLangMenu() {
+        var dropdown = document.getElementById('langDropdown');
+        dropdown.classList.toggle('hidden');
+    }
+
+    
+    document.addEventListener('click', function (e) {
+        
+        var form = document.getElementById('navSearchForm');
+        var input = document.getElementById('navSearchInput');
+        if (form && input && !form.contains(e.target) && !e.target.closest('[aria-label="Toggle Search"]')) {
+            input.classList.remove('expanded');
+        }
+        
+        var langSwitcher = e.target.closest('.lang-switcher');
+        if (!langSwitcher) {
+            var dropdown = document.getElementById('langDropdown');
+            if (dropdown) dropdown.classList.add('hidden');
+        }
+    });
+</script>
+<div class="nav-spacer"></div>
+    <div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id="content">
+        <div class="lg:mx-5">
+<div class="grid grid-cols-3 gap-6">
+  
+  <div class="col-span-3 lg:col-span-2">
+  
+      
+      <div class="post-detail fade-in my-4">
+        <h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">設計搜尋自動補全 — Trie、Top-K 排序與分散式即時建議系統 | 資料結構與演算法</h1>
+        <div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4">
+            <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/25
+            </span>
+            
+        </div>
+        
+        <div class="flex flex-wrap gap-1.5 mb-5">
+            
+            <a href='/tags/javascript' class="tag-pill no-underline">javascript</a>
+            
+            <a href='/tags/%E8%B3%87%E6%96%99%E7%B5%90%E6%A7%8B%E6%BC%94%E7%AE%97%E6%B3%95' class="tag-pill no-underline">資料結構&amp;演算法</a>
+            
+            <a href='/tags/autocomplete' class="tag-pill no-underline">Autocomplete</a>
+            
+            <a href='/tags/%E6%90%9C%E5%B0%8B%E5%BB%BA%E8%AD%B0' class="tag-pill no-underline">搜尋建議</a>
+            
+            <a href='/tags/%E7%B3%BB%E7%B5%B1%E8%A8%AD%E8%A8%88' class="tag-pill no-underline">系統設計</a>
+            
+        </div>
+        
+        
+        <img class="py-4 m-auto rounded-lg thumb-img" src="https://benzhub.github.io/img/javascript/Data%20Structures%20&amp;%20Algorithms/042-Search-Autocomplete.png" alt="設計搜尋自動補全 — Trie、Top-K 排序與分散式即時建議系統 | 資料結構與演算法">
+        
+        
+        <div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote>
+<p><strong>搜尋自動補全（Search Autocomplete）</strong> 是現代搜尋體驗的核心功能——使用者每輸入一個字元，系統即時回傳最相關的候選建議。本文將從需求分析出發，深入設計以 <strong>Trie（前綴樹）</strong> 結合 <strong>Top-K 排序</strong> 為核心的自動補全系統，涵蓋 <strong>頻率追蹤</strong>、<strong>個人化建議</strong>、<strong>模糊搜尋（BK-Tree）</strong>、<strong>分散式架構</strong> 與 <strong>多層快取策略</strong>，搭配 <strong>JavaScript/TypeScript</strong> 與 <strong>C++</strong> 雙語言完整實作，帶你徹底掌握搜尋建議系統的設計與實戰。</p>
+</blockquote>
+<h3 id="前言">前言</h3>
+<p>在上一篇文章中，我們實作了</p>
+
+  <a class="text-blue-500 font-bold no-underline" href="/post/javascript/data-structures-algorithms/041-cache-lru/" target="_blank">LRU/LFU Cache</a>
+
+<p>，學會如何用資料結構設計高效的快取淘汰策略。今天我們要解決另一個每天都在使用、卻很少深入思考的系統設計問題——<strong>搜尋自動補全（Autocomplete）</strong>。</p>
+<p>打開 Google，輸入 &ldquo;how to&rdquo;，在你打完第二個空格的瞬間，搜尋框下方就出現了十條建議：&ldquo;how to tie a tie&rdquo;、&ldquo;how to screenshot&rdquo;、&ldquo;how to cook rice&rdquo;&hellip; 這些建議如何在 <strong>不到 100 毫秒</strong> 內從數十億條歷史搜尋中篩選出來？Amazon 的商品搜尋、YouTube 的影片搜尋、IDE 的程式碼補全——背後都是同一套核心技術。</p>
+<p>這個問題的關鍵挑戰在於 <strong>前綴匹配的效率</strong> 和 <strong>排序的即時性</strong>。暴力掃描所有候選字串顯然不可行，我們需要一種能在 O(P) 時間內（P 為前綴長度）直接取得 Top-K 結果的資料結構。答案正是我們在</p>
+
+  <a class="text-blue-500 font-bold no-underline" href="/post/javascript/data-structures-algorithms/011-trie/" target="_blank">第 011 篇</a>
+
+<p>中學過的 <strong>Trie（字典樹）</strong>，但需要加上精心設計的 Top-K 快取、頻率追蹤，以及多層分散式架構。</p>
+<p>本文你將學到：</p>
+<ul>
+<li>搜尋自動補全的完整需求分析與規模估算</li>
+<li>三種方案比較：純 Trie、Trie + 節點 Top-K 快取、純雜湊表</li>
+<li>完整可運行的 JavaScript/TypeScript 與 C++ 雙語言實作</li>
+<li>模糊搜尋（Fuzzy Search）的 BK-Tree 演算法</li>
+<li>分散式 Trie 分片、多層快取、即時趨勢更新與 CJK 支援</li>
+<li>4 道 LeetCode 經典自動補全題目</li>
+</ul>
+<hr>
+<h2 id="1-需求分析">1. 需求分析</h2>
+<h3 id="功能性需求functional-requirements">功能性需求（Functional Requirements）</h3>
+<ul>
+<li>使用者每輸入一個字元，回傳前 K 個（通常 K = 5 ~ 10）最相關的補全建議</li>
+<li>建議按照 <strong>熱度（搜尋頻率）</strong> 排序</li>
+<li>支援 <strong>最近搜尋（Recent Searches）</strong> 個人化結果</li>
+<li>支援 <strong>模糊匹配（Fuzzy Match）</strong>——容忍拼寫錯誤，例如 &ldquo;goolge&rdquo; 應建議 &ldquo;google&rdquo;</li>
+<li>空白輸入時回傳使用者的最近搜尋記錄</li>
+</ul>
+<h3 id="非功能性需求non-functional-requirements">非功能性需求（Non-Functional Requirements）</h3>
+<ul>
+<li><strong>延遲（Latency）</strong>：P99 &lt; 100ms，理想目標 &lt; 50ms</li>
+<li><strong>可用性（Availability）</strong>：99.99%（每年停機不超過 52 分鐘）</li>
+<li><strong>一致性（Consistency）</strong>：最終一致性可接受——熱度更新延遲幾小時無妨</li>
+<li><strong>可擴展性</strong>：支援數十億級別的歷史搜尋字串</li>
+<li><strong>記憶體可控</strong>：在有限的伺服器記憶體中高效索引</li>
+</ul>
+<h3 id="排除範圍">排除範圍</h3>
+<ul>
+<li>不處理語意搜尋（Semantic Search）</li>
+<li>不處理多語言混排補全</li>
+<li>不設計使用者認證系統</li>
+</ul>
+<h3 id="規模估算">規模估算</h3>
+<p>以 Google 搜尋規模為參考：</p>
+<table>
+  <thead>
+      <tr>
+          <th>指標</th>
+          <th>數值</th>
+          <th>說明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>DAU</td>
+          <td>5 億</td>
+          <td>每日活躍搜尋用戶</td>
+      </tr>
+      <tr>
+          <td>每用戶日均搜尋</td>
+          <td>10 次</td>
+          <td>每次搜尋觸發多次補全請求</td>
+      </tr>
+      <tr>
+          <td>每次搜尋補全請求</td>
+          <td>15 次</td>
+          <td>平均查詢長度 15 字元，每字元一次</td>
+      </tr>
+      <tr>
+          <td>每日總請求</td>
+          <td>750 億</td>
+          <td>5 億 x 10 x 15</td>
+      </tr>
+      <tr>
+          <td>QPS</td>
+          <td>~870,000</td>
+          <td>750 億 / 86,400</td>
+      </tr>
+      <tr>
+          <td>峰值 QPS（x3）</td>
+          <td>~2,600,000</td>
+          <td>尖峰流量</td>
+      </tr>
+      <tr>
+          <td>唯一搜尋字串數</td>
+          <td>~100 億</td>
+          <td>歷史累積</td>
+      </tr>
+      <tr>
+          <td>Trie 記憶體</td>
+          <td>~300 GB</td>
+          <td>100 億 x 30B（字串 + 頻率 + 索引）</td>
+      </tr>
+      <tr>
+          <td>熱門查詢快取</td>
+          <td>~6 GB</td>
+          <td>2,000 萬條 x 300B，可放入 Redis</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>結論</strong>：核心挑戰是 <strong>~100 萬 QPS 的讀取路徑</strong>，而非資料量。必須依賴 <strong>多層快取</strong>（瀏覽器 → CDN → Redis → Trie Service）來分散壓力。</p>
+<hr>
+<h2 id="2-方案設計">2. 方案設計</h2>
+<h3 id="21-方案一純-trie--即時遍歷">2.1 方案一：純 Trie + 即時遍歷</h3>
+<p>每次查詢前綴時，在 Trie 中定位到前綴節點，然後 <strong>遍歷整個子樹</strong> 收集所有完整字串，再用 Min-Heap 篩選 Top-K。</p>
+<pre tabindex="0"><code>查詢 &#34;app&#34; 的流程：
+1. 在 Trie 中走 a → p → p，到達 &#34;app&#34; 節點
+2. DFS 遍歷子樹，找到 &#34;apple&#34;(1000), &#34;application&#34;(600), &#34;apply&#34;(450)...
+3. 用 Min-Heap（大小 K）篩選出 Top-K 結果
+時間複雜度：O(P + N log K)，N = 子樹節點數
+</code></pre><p><strong>優點</strong>：記憶體最省，更新即時。<strong>缺點</strong>：熱門前綴（如 &ldquo;a&rdquo;）子樹巨大，N 可達數百萬，延遲不可控。</p>
+<h3 id="22-方案二trie--節點-top-k-快取推薦">2.2 方案二：Trie + 節點 Top-K 快取（推薦）</h3>
+<p>核心優化——<strong>在每個 Trie 節點上預先快取 Top-K 結果</strong>。查詢時只需走到前綴節點，直接讀取已排序的 Top-K 列表。</p>
+<pre tabindex="0"><code>帶 Top-K 快取的 Trie：
+
+    root
+    ├── top_k: [&#34;apple&#34;(1000), &#34;amazon&#34;(900), &#34;ant&#34;(800)...]
+    │
+    └── a (節點)
+        ├── top_k: [&#34;apple&#34;(1000), &#34;amazon&#34;(900), &#34;app&#34;(750)...]
+        │
+        └── p (節點)
+            ├── top_k: [&#34;apple&#34;(1000), &#34;app&#34;(750), &#34;apply&#34;(600)...]
+            │
+            ├── p → ...
+            └── t → ...
+
+查詢 &#34;app&#34; → 走到 &#34;app&#34; 節點 → 直接回傳 top_k 陣列
+時間複雜度：O(P)  ← 前綴長度，通常只有幾個字元
+</code></pre><p><strong>優點</strong>：查詢極快 O(P)，適合讀多寫少場景。<strong>缺點</strong>：插入/更新時需沿路更新所有節點的 Top-K，時間 O(L x K log K)。</p>
+<h3 id="23-方案三純雜湊表前綴--top-k">2.3 方案三：純雜湊表（前綴 → Top-K）</h3>
+<p>預先計算所有可能前綴（長度 1 ~ maxLen）對應的 Top-K 結果，存入 HashMap。</p>
+<pre tabindex="0"><code>HashMap:
+  &#34;a&#34;   → [&#34;apple&#34;(1000), &#34;amazon&#34;(900), ...]
+  &#34;ap&#34;  → [&#34;apple&#34;(1000), &#34;app&#34;(750), ...]
+  &#34;app&#34; → [&#34;apple&#34;(1000), &#34;app&#34;(750), &#34;apply&#34;(600), ...]
+  ...
+</code></pre><p><strong>優點</strong>：查詢 O(1)。<strong>缺點</strong>：空間爆炸——每條字串產生 L 個前綴鍵，100 億字串 x 平均 15 前綴 = 1,500 億條目。</p>
+<h3 id="方案比較">方案比較</h3>
+<table>
+  <thead>
+      <tr>
+          <th>策略</th>
+          <th>查詢時間</th>
+          <th>更新時間</th>
+          <th>空間</th>
+          <th>適用場景</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>純 Trie + 即時遍歷</td>
+          <td>O(P + N log K)</td>
+          <td>O(L)</td>
+          <td>低</td>
+          <td>資料量小、更新頻繁</td>
+      </tr>
+      <tr>
+          <td><strong>Trie + 節點快取 Top-K</strong></td>
+          <td><strong>O(P)</strong></td>
+          <td><strong>O(L x K)</strong></td>
+          <td><strong>中</strong></td>
+          <td><strong>讀多寫少、生產環境</strong></td>
+      </tr>
+      <tr>
+          <td>純雜湊表</td>
+          <td>O(1)</td>
+          <td>O(N)</td>
+          <td>高</td>
+          <td>極端讀取、離線更新</td>
+      </tr>
+      <tr>
+          <td>Elasticsearch Suggest</td>
+          <td>O(1)</td>
+          <td>非同步</td>
+          <td>高</td>
+          <td>大規模生產環境</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>結論</strong>：本文選擇 <strong>方案二（Trie + 節點 Top-K 快取）</strong>，在查詢效能和記憶體之間取得最佳平衡。</p>
+<hr>
+<h2 id="3-核心實作javascripttypescript">3. 核心實作——JavaScript/TypeScript</h2>
+<h3 id="31-型別定義與-minheap">3.1 型別定義與 MinHeap</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-typescript" data-lang="typescript"><span style="display:flex;"><span><span style="color:#75715e">// ============================================================
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// Autocomplete Service — TypeScript 完整實作
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// 包含：Trie + Top-K 快取 + 熱度排序 + 最近搜尋 + 模糊搜尋
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// ============================================================
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ─── 型別定義 ───────────────────────────────────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">SearchSuggestion</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">query</span>: <span style="color:#66d9ef">string</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">score</span>: <span style="color:#66d9ef">number</span>;        <span style="color:#75715e">// 熱度分數（搜尋頻率）
+</span></span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">source</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;trie&#34;</span> <span style="color:#f92672">|</span> <span style="color:#e6db74">&#34;recent&#34;</span> <span style="color:#f92672">|</span> <span style="color:#e6db74">&#34;personalized&#34;</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">TrieNode</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">children</span>: <span style="color:#66d9ef">Map</span>&lt;<span style="color:#f92672">string</span>, <span style="color:#a6e22e">TrieNode</span>&gt;;
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">isEnd</span>: <span style="color:#66d9ef">boolean</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">topK</span>: <span style="color:#66d9ef">SearchSuggestion</span>[];  <span style="color:#75715e">// 快取此節點前綴的 Top-K 結果
+</span></span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ─── MinHeap（用於 Top-K 選取）───────────────────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MinHeap</span>&lt;<span style="color:#f92672">T</span>&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">heap</span>: <span style="color:#66d9ef">T</span>[] <span style="color:#f92672">=</span> [];
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">constructor</span>(<span style="color:#66d9ef">private</span> <span style="color:#a6e22e">comparator</span><span style="color:#f92672">:</span> (<span style="color:#a6e22e">a</span>: <span style="color:#66d9ef">T</span>, <span style="color:#a6e22e">b</span>: <span style="color:#66d9ef">T</span>) <span style="color:#f92672">=&gt;</span> <span style="color:#66d9ef">number</span>) {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">push</span>(<span style="color:#a6e22e">item</span>: <span style="color:#66d9ef">T</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">void</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">heap</span>.<span style="color:#a6e22e">push</span>(<span style="color:#a6e22e">item</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">bubbleUp</span>(<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">heap</span>.<span style="color:#a6e22e">length</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">pop</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">T</span> <span style="color:#f92672">|</span> <span style="color:#66d9ef">undefined</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">heap</span>.<span style="color:#a6e22e">length</span> <span style="color:#f92672">===</span> <span style="color:#ae81ff">0</span>) <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">undefined</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">top</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">heap</span>[<span style="color:#ae81ff">0</span>];
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">last</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">heap</span>.<span style="color:#a6e22e">pop</span>()<span style="color:#f92672">!</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">heap</span>.<span style="color:#a6e22e">length</span> <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">heap</span>[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">last</span>;
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">sinkDown</span>(<span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">top</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">peek</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">T</span> <span style="color:#f92672">|</span> <span style="color:#66d9ef">undefined</span> { <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">heap</span>[<span style="color:#ae81ff">0</span>]; }
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">get</span> <span style="color:#a6e22e">size</span>()<span style="color:#f92672">:</span> <span style="color:#66d9ef">number</span> { <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">heap</span>.<span style="color:#a6e22e">length</span>; }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">bubbleUp</span>(<span style="color:#a6e22e">i</span>: <span style="color:#66d9ef">number</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">void</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> (<span style="color:#a6e22e">i</span> <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">parent</span> <span style="color:#f92672">=</span> Math.<span style="color:#a6e22e">floor</span>((<span style="color:#a6e22e">i</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span>);
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">comparator</span>(<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">heap</span>[<span style="color:#a6e22e">i</span>], <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">heap</span>[<span style="color:#a6e22e">parent</span>]) <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>        [<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">heap</span>[<span style="color:#a6e22e">i</span>], <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">heap</span>[<span style="color:#a6e22e">parent</span>]] <span style="color:#f92672">=</span> [<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">heap</span>[<span style="color:#a6e22e">parent</span>], <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">heap</span>[<span style="color:#a6e22e">i</span>]];
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">parent</span>;
+</span></span><span style="display:flex;"><span>      } <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">sinkDown</span>(<span style="color:#a6e22e">i</span>: <span style="color:#66d9ef">number</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">void</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">heap</span>.<span style="color:#a6e22e">length</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> (<span style="color:#66d9ef">true</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">smallest</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">i</span>;
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">left</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">*</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">right</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">*</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span>;
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">left</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">comparator</span>(<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">heap</span>[<span style="color:#a6e22e">left</span>], <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">heap</span>[<span style="color:#a6e22e">smallest</span>]) <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">smallest</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">left</span>;
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">right</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">comparator</span>(<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">heap</span>[<span style="color:#a6e22e">right</span>], <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">heap</span>[<span style="color:#a6e22e">smallest</span>]) <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">smallest</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">right</span>;
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">smallest</span> <span style="color:#f92672">!==</span> <span style="color:#a6e22e">i</span>) {
+</span></span><span style="display:flex;"><span>        [<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">heap</span>[<span style="color:#a6e22e">i</span>], <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">heap</span>[<span style="color:#a6e22e">smallest</span>]] <span style="color:#f92672">=</span> [<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">heap</span>[<span style="color:#a6e22e">smallest</span>], <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">heap</span>[<span style="color:#a6e22e">i</span>]];
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">smallest</span>;
+</span></span><span style="display:flex;"><span>      } <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="32-trie-核心前綴樹--top-k-快取">3.2 Trie 核心——前綴樹 + Top-K 快取</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-typescript" data-lang="typescript"><span style="display:flex;"><span><span style="color:#75715e">// ─── AutocompleteTrie 核心 ──────────────────────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AutocompleteTrie</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">root</span>: <span style="color:#66d9ef">TrieNode</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">readonly</span> <span style="color:#a6e22e">K</span>: <span style="color:#66d9ef">number</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">constructor</span>(<span style="color:#a6e22e">k</span>: <span style="color:#66d9ef">number</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">K</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">k</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">root</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">createNode</span>();
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">createNode</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">TrieNode</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> { <span style="color:#a6e22e">children</span>: <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Map</span>(), <span style="color:#a6e22e">isEnd</span>: <span style="color:#66d9ef">false</span>, <span style="color:#a6e22e">topK</span><span style="color:#f92672">:</span> [] };
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">   * 插入查詢字串並更新沿路所有節點的 Top-K 快取
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">   * 時間複雜度：O(L × K log K)，L = 字串長度
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">   */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">insert</span>(<span style="color:#a6e22e">query</span>: <span style="color:#66d9ef">string</span>, <span style="color:#a6e22e">score</span>: <span style="color:#66d9ef">number</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">void</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">suggestion</span>: <span style="color:#66d9ef">SearchSuggestion</span> <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">query</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">score</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">source</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;trie&#34;</span>,
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">node</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">root</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">updateTopK</span>(<span style="color:#a6e22e">node</span>, <span style="color:#a6e22e">suggestion</span>); <span style="color:#75715e">// 更新根節點
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">char</span> <span style="color:#66d9ef">of</span> <span style="color:#a6e22e">query</span>.<span style="color:#a6e22e">toLowerCase</span>()) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">node</span>.<span style="color:#a6e22e">children</span>.<span style="color:#a6e22e">has</span>(<span style="color:#a6e22e">char</span>)) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">node</span>.<span style="color:#a6e22e">children</span>.<span style="color:#66d9ef">set</span>(<span style="color:#a6e22e">char</span>, <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">createNode</span>());
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">node</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">node</span>.<span style="color:#a6e22e">children</span>.<span style="color:#66d9ef">get</span>(<span style="color:#a6e22e">char</span>)<span style="color:#f92672">!</span>;
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">updateTopK</span>(<span style="color:#a6e22e">node</span>, <span style="color:#a6e22e">suggestion</span>); <span style="color:#75715e">// 更新沿路每個節點
+</span></span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">node</span>.<span style="color:#a6e22e">isEnd</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">   * 維護節點的 Top-K 列表
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">   * 若新項目 score 超過當前最小值則替換
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">   */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">updateTopK</span>(<span style="color:#a6e22e">node</span>: <span style="color:#66d9ef">TrieNode</span>, <span style="color:#a6e22e">suggestion</span>: <span style="color:#66d9ef">SearchSuggestion</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">void</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 去重：若同查詢已存在則更新分數
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">existingIdx</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">node</span>.<span style="color:#a6e22e">topK</span>.<span style="color:#a6e22e">findIndex</span>(<span style="color:#a6e22e">s</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">query</span> <span style="color:#f92672">===</span> <span style="color:#a6e22e">suggestion</span>.<span style="color:#a6e22e">query</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">existingIdx</span> <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">node</span>.<span style="color:#a6e22e">topK</span>[<span style="color:#a6e22e">existingIdx</span>].<span style="color:#a6e22e">score</span> <span style="color:#f92672">=</span> Math.<span style="color:#a6e22e">max</span>(
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">node</span>.<span style="color:#a6e22e">topK</span>[<span style="color:#a6e22e">existingIdx</span>].<span style="color:#a6e22e">score</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">suggestion</span>.<span style="color:#a6e22e">score</span>
+</span></span><span style="display:flex;"><span>      );
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">node</span>.<span style="color:#a6e22e">topK</span>.<span style="color:#a6e22e">sort</span>((<span style="color:#a6e22e">a</span>, <span style="color:#a6e22e">b</span>) <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">b</span>.<span style="color:#a6e22e">score</span> <span style="color:#f92672">-</span> <span style="color:#a6e22e">a</span>.<span style="color:#a6e22e">score</span>);
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 未滿 K 個則直接加入
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">node</span>.<span style="color:#a6e22e">topK</span>.<span style="color:#a6e22e">length</span> <span style="color:#f92672">&lt;</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">K</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">node</span>.<span style="color:#a6e22e">topK</span>.<span style="color:#a6e22e">push</span>({ ...<span style="color:#a6e22e">suggestion</span> });
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">node</span>.<span style="color:#a6e22e">topK</span>.<span style="color:#a6e22e">sort</span>((<span style="color:#a6e22e">a</span>, <span style="color:#a6e22e">b</span>) <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">b</span>.<span style="color:#a6e22e">score</span> <span style="color:#f92672">-</span> <span style="color:#a6e22e">a</span>.<span style="color:#a6e22e">score</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 分數高於當前最低者則替換
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">suggestion</span>.<span style="color:#a6e22e">score</span> <span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">node</span>.<span style="color:#a6e22e">topK</span>[<span style="color:#a6e22e">node</span>.<span style="color:#a6e22e">topK</span>.<span style="color:#a6e22e">length</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>].<span style="color:#a6e22e">score</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">node</span>.<span style="color:#a6e22e">topK</span>[<span style="color:#a6e22e">node</span>.<span style="color:#a6e22e">topK</span>.<span style="color:#a6e22e">length</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>] <span style="color:#f92672">=</span> { ...<span style="color:#a6e22e">suggestion</span> };
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">node</span>.<span style="color:#a6e22e">topK</span>.<span style="color:#a6e22e">sort</span>((<span style="color:#a6e22e">a</span>, <span style="color:#a6e22e">b</span>) <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">b</span>.<span style="color:#a6e22e">score</span> <span style="color:#f92672">-</span> <span style="color:#a6e22e">a</span>.<span style="color:#a6e22e">score</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">   * 查詢前綴對應的 Top-K 建議
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">   * 時間複雜度：O(P)——P = 前綴長度（因為節點已快取 Top-K）
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">   */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">search</span>(<span style="color:#a6e22e">prefix</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#a6e22e">SearchSuggestion</span>[] {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">node</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">root</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">char</span> <span style="color:#66d9ef">of</span> <span style="color:#a6e22e">prefix</span>.<span style="color:#a6e22e">toLowerCase</span>()) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">node</span>.<span style="color:#a6e22e">children</span>.<span style="color:#a6e22e">has</span>(<span style="color:#a6e22e">char</span>)) <span style="color:#66d9ef">return</span> [];
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">node</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">node</span>.<span style="color:#a6e22e">children</span>.<span style="color:#66d9ef">get</span>(<span style="color:#a6e22e">char</span>)<span style="color:#f92672">!</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> [...<span style="color:#a6e22e">node</span>.<span style="color:#a6e22e">topK</span>];
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">   * 序列化 Trie 以便持久化存儲至 S3/GCS
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">   */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">serialize</span>()<span style="color:#f92672">:</span> <span style="color:#66d9ef">string</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">serializeNode</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">node</span>: <span style="color:#66d9ef">TrieNode</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">object</span> <span style="color:#f92672">=&gt;</span> ({
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">isEnd</span>: <span style="color:#66d9ef">node.isEnd</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">topK</span>: <span style="color:#66d9ef">node.topK</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">children</span>: <span style="color:#66d9ef">Object.fromEntries</span>(
+</span></span><span style="display:flex;"><span>        [...<span style="color:#a6e22e">node</span>.<span style="color:#a6e22e">children</span>.<span style="color:#a6e22e">entries</span>()].<span style="color:#a6e22e">map</span>(([<span style="color:#a6e22e">k</span>, <span style="color:#a6e22e">v</span>]) <span style="color:#f92672">=&gt;</span> [<span style="color:#a6e22e">k</span>, <span style="color:#a6e22e">serializeNode</span>(<span style="color:#a6e22e">v</span>)])
+</span></span><span style="display:flex;"><span>      ),
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">JSON</span>.<span style="color:#a6e22e">stringify</span>(<span style="color:#a6e22e">serializeNode</span>(<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">root</span>));
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="33-autocompleteservice對外-api-層">3.3 AutocompleteService——對外 API 層</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-typescript" data-lang="typescript"><span style="display:flex;"><span><span style="color:#75715e">// ─── AutocompleteService（對外 API 層）────────────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">AutocompleteConfig</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">maxSuggestions</span>: <span style="color:#66d9ef">number</span>;     <span style="color:#75715e">// 最終回傳數量（通常 5~10）
+</span></span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">maxRecentSearches</span>: <span style="color:#66d9ef">number</span>;  <span style="color:#75715e">// 保存最近搜尋數量
+</span></span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">recentSearchBoost</span>: <span style="color:#66d9ef">number</span>;  <span style="color:#75715e">// 最近搜尋的分數加成
+</span></span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">debounceMs</span>: <span style="color:#66d9ef">number</span>;         <span style="color:#75715e">// 前端 Debounce 毫秒數
+</span></span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AutocompleteService</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">trie</span>: <span style="color:#66d9ef">AutocompleteTrie</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">recentSearches</span>: <span style="color:#66d9ef">Map</span>&lt;<span style="color:#f92672">string</span>, <span style="color:#a6e22e">string</span><span style="color:#960050;background-color:#1e0010">[]</span>&gt;;  <span style="color:#75715e">// userId → 最近搜尋
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">searchFrequency</span>: <span style="color:#66d9ef">Map</span>&lt;<span style="color:#f92672">string</span>, <span style="color:#a6e22e">number</span>&gt;;    <span style="color:#75715e">// 全域搜尋頻率計數
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">config</span>: <span style="color:#66d9ef">AutocompleteConfig</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 簡易記憶體快取（生產環境應替換為 Redis）
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">cache</span>: <span style="color:#66d9ef">Map</span>&lt;<span style="color:#f92672">string</span>, { <span style="color:#a6e22e">results</span><span style="color:#960050;background-color:#1e0010">:</span> <span style="color:#a6e22e">SearchSuggestion</span><span style="color:#960050;background-color:#1e0010">[];</span> <span style="color:#a6e22e">timestamp</span><span style="color:#960050;background-color:#1e0010">:</span> <span style="color:#a6e22e">number</span> }&gt;;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">readonly</span> <span style="color:#a6e22e">CACHE_TTL</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">300</span><span style="color:#a6e22e">_000</span>; <span style="color:#75715e">// 5 分鐘
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">constructor</span>(<span style="color:#a6e22e">config</span>: <span style="color:#66d9ef">Partial</span>&lt;<span style="color:#f92672">AutocompleteConfig</span>&gt; <span style="color:#f92672">=</span> {}) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">config</span> <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">maxSuggestions</span>: <span style="color:#66d9ef">10</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">maxRecentSearches</span>: <span style="color:#66d9ef">20</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">recentSearchBoost</span>: <span style="color:#66d9ef">500</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">debounceMs</span>: <span style="color:#66d9ef">150</span>,
+</span></span><span style="display:flex;"><span>      ...<span style="color:#a6e22e">config</span>,
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">trie</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">AutocompleteTrie</span>(<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">config</span>.<span style="color:#a6e22e">maxSuggestions</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">2</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">recentSearches</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Map</span>();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">searchFrequency</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Map</span>();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">cache</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Map</span>();
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">   * 建立索引——批量插入查詢字串與頻率
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">   * 通常離線執行，每小時更新一次
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">   */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">buildIndex</span>(<span style="color:#a6e22e">queries</span>: <span style="color:#66d9ef">Array</span><span style="color:#f92672">&lt;</span>{ <span style="color:#a6e22e">query</span>: <span style="color:#66d9ef">string</span>; <span style="color:#a6e22e">frequency</span>: <span style="color:#66d9ef">number</span> }<span style="color:#f92672">&gt;</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">void</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`[Autocomplete] 建立索引，共 </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">queries</span>.<span style="color:#a6e22e">length</span><span style="color:#e6db74">}</span><span style="color:#e6db74"> 筆...`</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">start</span> <span style="color:#f92672">=</span> Date.<span style="color:#a6e22e">now</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">const</span> { <span style="color:#a6e22e">query</span>, <span style="color:#a6e22e">frequency</span> } <span style="color:#66d9ef">of</span> <span style="color:#a6e22e">queries</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">trie</span>.<span style="color:#a6e22e">insert</span>(<span style="color:#a6e22e">query</span>, <span style="color:#a6e22e">frequency</span>);
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">searchFrequency</span>.<span style="color:#66d9ef">set</span>(<span style="color:#a6e22e">query</span>, <span style="color:#a6e22e">frequency</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`[Autocomplete] 索引完成，耗時 </span><span style="color:#e6db74">${</span>Date.<span style="color:#a6e22e">now</span>() <span style="color:#f92672">-</span> <span style="color:#a6e22e">start</span><span style="color:#e6db74">}</span><span style="color:#e6db74">ms`</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">   * 查詢補全建議（主要 API）
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">   * 合併 Trie 結果、最近搜尋、個人化排序
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">   */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">getSuggestions</span>(<span style="color:#a6e22e">prefix</span>: <span style="color:#66d9ef">string</span>, <span style="color:#a6e22e">userId?</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#a6e22e">SearchSuggestion</span>[] {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 空白輸入回傳最近搜尋
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">prefix</span> <span style="color:#f92672">||</span> <span style="color:#a6e22e">prefix</span>.<span style="color:#a6e22e">length</span> <span style="color:#f92672">===</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">userId</span> <span style="color:#f92672">?</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">getRecentSearches</span>(<span style="color:#a6e22e">userId</span>) <span style="color:#f92672">:</span> [];
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">cacheKey</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">`</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">userId</span> <span style="color:#f92672">??</span> <span style="color:#e6db74">&#34;anon&#34;</span><span style="color:#e6db74">}</span><span style="color:#e6db74">:</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">prefix</span>.<span style="color:#a6e22e">toLowerCase</span>()<span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 1. 檢查快取
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">cached</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">cache</span>.<span style="color:#66d9ef">get</span>(<span style="color:#a6e22e">cacheKey</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">cached</span> <span style="color:#f92672">&amp;&amp;</span> Date.<span style="color:#a6e22e">now</span>() <span style="color:#f92672">-</span> <span style="color:#a6e22e">cached</span>.<span style="color:#a6e22e">timestamp</span> <span style="color:#f92672">&lt;</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">CACHE_TTL</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">cached</span>.<span style="color:#a6e22e">results</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 2. Trie 查詢——O(P)
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">trieSuggestions</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">trie</span>.<span style="color:#a6e22e">search</span>(<span style="color:#a6e22e">prefix</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 3. 混合最近搜尋（個人化）
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">results</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">mergeWithRecentSearches</span>(<span style="color:#a6e22e">trieSuggestions</span>, <span style="color:#a6e22e">prefix</span>, <span style="color:#a6e22e">userId</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 4. 截取 Top-K
+</span></span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">results</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">results</span>.<span style="color:#a6e22e">slice</span>(<span style="color:#ae81ff">0</span>, <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">config</span>.<span style="color:#a6e22e">maxSuggestions</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 5. 寫入快取
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">cache</span>.<span style="color:#66d9ef">set</span>(<span style="color:#a6e22e">cacheKey</span>, { <span style="color:#a6e22e">results</span>, <span style="color:#a6e22e">timestamp</span>: <span style="color:#66d9ef">Date.now</span>() });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">results</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">   * 記錄使用者搜尋（更新頻率與最近搜尋）
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">   */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">recordSearch</span>(<span style="color:#a6e22e">query</span>: <span style="color:#66d9ef">string</span>, <span style="color:#a6e22e">userId?</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">void</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 更新全域頻率（生產環境應發送至 Kafka 非同步處理）
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">currentFreq</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">searchFrequency</span>.<span style="color:#66d9ef">get</span>(<span style="color:#a6e22e">query</span>) <span style="color:#f92672">??</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">searchFrequency</span>.<span style="color:#66d9ef">set</span>(<span style="color:#a6e22e">query</span>, <span style="color:#a6e22e">currentFreq</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 更新使用者最近搜尋
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">userId</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">recent</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">recentSearches</span>.<span style="color:#66d9ef">get</span>(<span style="color:#a6e22e">userId</span>) <span style="color:#f92672">??</span> [];
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">filtered</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">recent</span>.<span style="color:#a6e22e">filter</span>(<span style="color:#a6e22e">q</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">q</span> <span style="color:#f92672">!==</span> <span style="color:#a6e22e">query</span>);
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">recentSearches</span>.<span style="color:#66d9ef">set</span>(
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">userId</span>,
+</span></span><span style="display:flex;"><span>        [<span style="color:#a6e22e">query</span>, ...<span style="color:#a6e22e">filtered</span>].<span style="color:#a6e22e">slice</span>(<span style="color:#ae81ff">0</span>, <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">config</span>.<span style="color:#a6e22e">maxRecentSearches</span>)
+</span></span><span style="display:flex;"><span>      );
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">getRecentSearches</span>(<span style="color:#a6e22e">userId</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#a6e22e">SearchSuggestion</span>[] {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">recent</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">recentSearches</span>.<span style="color:#66d9ef">get</span>(<span style="color:#a6e22e">userId</span>) <span style="color:#f92672">??</span> [];
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">recent</span>.<span style="color:#a6e22e">map</span>(<span style="color:#a6e22e">query</span> <span style="color:#f92672">=&gt;</span> ({
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">query</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">score</span>: <span style="color:#66d9ef">this.config.recentSearchBoost</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">source</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;recent&#34;</span> <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">const</span>,
+</span></span><span style="display:flex;"><span>    }));
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">mergeWithRecentSearches</span>(
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">trieSuggestions</span>: <span style="color:#66d9ef">SearchSuggestion</span>[],
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">prefix</span>: <span style="color:#66d9ef">string</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">userId?</span>: <span style="color:#66d9ef">string</span>
+</span></span><span style="display:flex;"><span>  )<span style="color:#f92672">:</span> <span style="color:#a6e22e">SearchSuggestion</span>[] {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">userId</span>) <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">trieSuggestions</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 篩選出匹配前綴的最近搜尋
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">recentMatches</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">getRecentSearches</span>(<span style="color:#a6e22e">userId</span>)
+</span></span><span style="display:flex;"><span>      .<span style="color:#a6e22e">filter</span>(<span style="color:#a6e22e">s</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">query</span>.<span style="color:#a6e22e">toLowerCase</span>().<span style="color:#a6e22e">startsWith</span>(<span style="color:#a6e22e">prefix</span>.<span style="color:#a6e22e">toLowerCase</span>()));
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 合併並去重——最近搜尋因 boost 加成會排在前面
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">seen</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Set</span>&lt;<span style="color:#f92672">string</span>&gt;();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">merged</span>: <span style="color:#66d9ef">SearchSuggestion</span>[] <span style="color:#f92672">=</span> [];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">suggestion</span> <span style="color:#66d9ef">of</span> [...<span style="color:#a6e22e">recentMatches</span>, ...<span style="color:#a6e22e">trieSuggestions</span>]) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">seen</span>.<span style="color:#a6e22e">has</span>(<span style="color:#a6e22e">suggestion</span>.<span style="color:#a6e22e">query</span>)) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">seen</span>.<span style="color:#a6e22e">add</span>(<span style="color:#a6e22e">suggestion</span>.<span style="color:#a6e22e">query</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">merged</span>.<span style="color:#a6e22e">push</span>(<span style="color:#a6e22e">suggestion</span>);
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">merged</span>.<span style="color:#a6e22e">sort</span>((<span style="color:#a6e22e">a</span>, <span style="color:#a6e22e">b</span>) <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">b</span>.<span style="color:#a6e22e">score</span> <span style="color:#f92672">-</span> <span style="color:#a6e22e">a</span>.<span style="color:#a6e22e">score</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="34-模糊搜尋bk-tree-實作">3.4 模糊搜尋——BK-Tree 實作</h3>
+<p>當使用者輸入 &ldquo;aple&rdquo; 時，精確前綴匹配找不到結果，此時需要 <strong>模糊搜尋</strong> 容忍拼寫錯誤。<strong>BK-Tree（Burkhard-Keller Tree）</strong> 是基於 Edit Distance 建立的度量樹，能高效查詢「所有與目標字串 Edit Distance &lt;= d 的字串」。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-typescript" data-lang="typescript"><span style="display:flex;"><span><span style="color:#75715e">// ─── BK-Tree — 模糊搜尋 ────────────────────────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">BKTree</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">root</span><span style="color:#f92672">:</span> { <span style="color:#a6e22e">word</span>: <span style="color:#66d9ef">string</span>; <span style="color:#a6e22e">children</span>: <span style="color:#66d9ef">Map</span>&lt;<span style="color:#f92672">number</span>, <span style="color:#a6e22e">any</span>&gt; } <span style="color:#f92672">|</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">   * 計算 Levenshtein Edit Distance（動態規劃）
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">   * 時間複雜度：O(m × n)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">   */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">static</span> <span style="color:#a6e22e">editDistance</span>(<span style="color:#a6e22e">a</span>: <span style="color:#66d9ef">string</span>, <span style="color:#a6e22e">b</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">number</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">m</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">a</span>.<span style="color:#a6e22e">length</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">b</span>.<span style="color:#a6e22e">length</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">dp</span>: <span style="color:#66d9ef">number</span>[][] <span style="color:#f92672">=</span> Array.<span style="color:#66d9ef">from</span>({ <span style="color:#a6e22e">length</span>: <span style="color:#66d9ef">m</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span> }, (<span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">i</span>) <span style="color:#f92672">=&gt;</span>
+</span></span><span style="display:flex;"><span>      Array.<span style="color:#66d9ef">from</span>({ <span style="color:#a6e22e">length</span>: <span style="color:#66d9ef">n</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span> }, (<span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">j</span>) <span style="color:#f92672">=&gt;</span> (<span style="color:#a6e22e">i</span> <span style="color:#f92672">===</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">?</span> <span style="color:#a6e22e">j</span> : <span style="color:#66d9ef">j</span> <span style="color:#f92672">===</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">?</span> <span style="color:#a6e22e">i</span> : <span style="color:#66d9ef">0</span>))
+</span></span><span style="display:flex;"><span>    );
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;=</span> <span style="color:#a6e22e">m</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">j</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>; <span style="color:#a6e22e">j</span> <span style="color:#f92672">&lt;=</span> <span style="color:#a6e22e">n</span>; <span style="color:#a6e22e">j</span><span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">a</span>[<span style="color:#a6e22e">i</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>] <span style="color:#f92672">===</span> <span style="color:#a6e22e">b</span>[<span style="color:#a6e22e">j</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>]) {
+</span></span><span style="display:flex;"><span>          <span style="color:#a6e22e">dp</span>[<span style="color:#a6e22e">i</span>][<span style="color:#a6e22e">j</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">dp</span>[<span style="color:#a6e22e">i</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>][<span style="color:#a6e22e">j</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>];
+</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>          <span style="color:#a6e22e">dp</span>[<span style="color:#a6e22e">i</span>][<span style="color:#a6e22e">j</span>] <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">+</span> Math.<span style="color:#a6e22e">min</span>(
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">dp</span>[<span style="color:#a6e22e">i</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>][<span style="color:#a6e22e">j</span>],     <span style="color:#75715e">// 刪除
+</span></span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">dp</span>[<span style="color:#a6e22e">i</span>][<span style="color:#a6e22e">j</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>],     <span style="color:#75715e">// 插入
+</span></span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">dp</span>[<span style="color:#a6e22e">i</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>][<span style="color:#a6e22e">j</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>]  <span style="color:#75715e">// 替換
+</span></span></span><span style="display:flex;"><span>          );
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">dp</span>[<span style="color:#a6e22e">m</span>][<span style="color:#a6e22e">n</span>];
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">insert</span>(<span style="color:#a6e22e">word</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">void</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">root</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">root</span> <span style="color:#f92672">=</span> { <span style="color:#a6e22e">word</span>, <span style="color:#a6e22e">children</span>: <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Map</span>() };
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">current</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">root</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> (<span style="color:#66d9ef">true</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">dist</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">BKTree</span>.<span style="color:#a6e22e">editDistance</span>(<span style="color:#a6e22e">word</span>, <span style="color:#a6e22e">current</span>.<span style="color:#a6e22e">word</span>);
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">dist</span> <span style="color:#f92672">===</span> <span style="color:#ae81ff">0</span>) <span style="color:#66d9ef">return</span>; <span style="color:#75715e">// 已存在
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">current</span>.<span style="color:#a6e22e">children</span>.<span style="color:#a6e22e">has</span>(<span style="color:#a6e22e">dist</span>)) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">current</span>.<span style="color:#a6e22e">children</span>.<span style="color:#66d9ef">set</span>(<span style="color:#a6e22e">dist</span>, { <span style="color:#a6e22e">word</span>, <span style="color:#a6e22e">children</span>: <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Map</span>() });
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">current</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">current</span>.<span style="color:#a6e22e">children</span>.<span style="color:#66d9ef">get</span>(<span style="color:#a6e22e">dist</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">   * 查詢所有與 target Edit Distance ≤ maxDist 的字串
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">   * BK-Tree 剪枝率通常達 75~90%，遠優於線性掃描
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">   */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">search</span>(<span style="color:#a6e22e">target</span>: <span style="color:#66d9ef">string</span>, <span style="color:#a6e22e">maxDist</span>: <span style="color:#66d9ef">number</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">string</span>[] {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">root</span>) <span style="color:#66d9ef">return</span> [];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">results</span>: <span style="color:#66d9ef">string</span>[] <span style="color:#f92672">=</span> [];
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">stack</span> <span style="color:#f92672">=</span> [<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">root</span>];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> (<span style="color:#a6e22e">stack</span>.<span style="color:#a6e22e">length</span> <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">node</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">stack</span>.<span style="color:#a6e22e">pop</span>()<span style="color:#f92672">!</span>;
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">dist</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">BKTree</span>.<span style="color:#a6e22e">editDistance</span>(<span style="color:#a6e22e">target</span>, <span style="color:#a6e22e">node</span>.<span style="color:#a6e22e">word</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">dist</span> <span style="color:#f92672">&lt;=</span> <span style="color:#a6e22e">maxDist</span>) <span style="color:#a6e22e">results</span>.<span style="color:#a6e22e">push</span>(<span style="color:#a6e22e">node</span>.<span style="color:#a6e22e">word</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e">// 剪枝：只探索距離在 [dist-maxDist, dist+maxDist] 範圍的子節點
+</span></span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">const</span> [<span style="color:#a6e22e">childDist</span>, <span style="color:#a6e22e">childNode</span>] <span style="color:#66d9ef">of</span> <span style="color:#a6e22e">node</span>.<span style="color:#a6e22e">children</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (Math.<span style="color:#a6e22e">abs</span>(<span style="color:#a6e22e">childDist</span> <span style="color:#f92672">-</span> <span style="color:#a6e22e">dist</span>) <span style="color:#f92672">&lt;=</span> <span style="color:#a6e22e">maxDist</span>) {
+</span></span><span style="display:flex;"><span>          <span style="color:#a6e22e">stack</span>.<span style="color:#a6e22e">push</span>(<span style="color:#a6e22e">childNode</span>);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">results</span>.<span style="color:#a6e22e">sort</span>();
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="35-完整使用示範">3.5 完整使用示範</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-typescript" data-lang="typescript"><span style="display:flex;"><span><span style="color:#75715e">// ─── 使用示範 ──────────────────────────────────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">demo</span>()<span style="color:#f92672">:</span> <span style="color:#66d9ef">void</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;=== 搜尋自動補全系統 Demo ===\n&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">service</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">AutocompleteService</span>({
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">maxSuggestions</span>: <span style="color:#66d9ef">5</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">recentSearchBoost</span>: <span style="color:#66d9ef">800</span>,
+</span></span><span style="display:flex;"><span>  });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 1. 建立索引
+</span></span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">service</span>.<span style="color:#a6e22e">buildIndex</span>([
+</span></span><span style="display:flex;"><span>    { <span style="color:#a6e22e">query</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;apple&#34;</span>, <span style="color:#a6e22e">frequency</span>: <span style="color:#66d9ef">1000</span> },
+</span></span><span style="display:flex;"><span>    { <span style="color:#a6e22e">query</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;apple watch&#34;</span>, <span style="color:#a6e22e">frequency</span>: <span style="color:#66d9ef">850</span> },
+</span></span><span style="display:flex;"><span>    { <span style="color:#a6e22e">query</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;apple store&#34;</span>, <span style="color:#a6e22e">frequency</span>: <span style="color:#66d9ef">720</span> },
+</span></span><span style="display:flex;"><span>    { <span style="color:#a6e22e">query</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;apple iphone&#34;</span>, <span style="color:#a6e22e">frequency</span>: <span style="color:#66d9ef">680</span> },
+</span></span><span style="display:flex;"><span>    { <span style="color:#a6e22e">query</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;application&#34;</span>, <span style="color:#a6e22e">frequency</span>: <span style="color:#66d9ef">600</span> },
+</span></span><span style="display:flex;"><span>    { <span style="color:#a6e22e">query</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;apply for job&#34;</span>, <span style="color:#a6e22e">frequency</span>: <span style="color:#66d9ef">450</span> },
+</span></span><span style="display:flex;"><span>    { <span style="color:#a6e22e">query</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;apt-get install&#34;</span>, <span style="color:#a6e22e">frequency</span>: <span style="color:#66d9ef">300</span> },
+</span></span><span style="display:flex;"><span>    { <span style="color:#a6e22e">query</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;apartment&#34;</span>, <span style="color:#a6e22e">frequency</span>: <span style="color:#66d9ef">280</span> },
+</span></span><span style="display:flex;"><span>    { <span style="color:#a6e22e">query</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;amazon&#34;</span>, <span style="color:#a6e22e">frequency</span>: <span style="color:#66d9ef">950</span> },
+</span></span><span style="display:flex;"><span>    { <span style="color:#a6e22e">query</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;amazon prime&#34;</span>, <span style="color:#a6e22e">frequency</span>: <span style="color:#66d9ef">800</span> },
+</span></span><span style="display:flex;"><span>    { <span style="color:#a6e22e">query</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;appetizer&#34;</span>, <span style="color:#a6e22e">frequency</span>: <span style="color:#66d9ef">200</span> },
+</span></span><span style="display:flex;"><span>  ]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 2. 記錄使用者最近搜尋
+</span></span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">service</span>.<span style="color:#a6e22e">recordSearch</span>(<span style="color:#e6db74">&#34;apple store&#34;</span>, <span style="color:#e6db74">&#34;user_001&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">service</span>.<span style="color:#a6e22e">recordSearch</span>(<span style="color:#e6db74">&#34;apple watch&#34;</span>, <span style="color:#e6db74">&#34;user_001&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 3. 匿名用戶查詢
+</span></span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;\n--- 前綴 &#34;app&#34; 的建議（匿名用戶）---&#39;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">anonResults</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">service</span>.<span style="color:#a6e22e">getSuggestions</span>(<span style="color:#e6db74">&#34;app&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">anonResults</span>.<span style="color:#a6e22e">forEach</span>((<span style="color:#a6e22e">s</span>, <span style="color:#a6e22e">i</span>) <span style="color:#f92672">=&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`  </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">i</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span><span style="color:#e6db74">}</span><span style="color:#e6db74">. </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">query</span><span style="color:#e6db74">}</span><span style="color:#e6db74"> (score: </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">score</span><span style="color:#e6db74">}</span><span style="color:#e6db74">, source: </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">source</span><span style="color:#e6db74">}</span><span style="color:#e6db74">)`</span>)
+</span></span><span style="display:flex;"><span>  );
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 輸出：
+</span></span></span><span style="display:flex;"><span>  <span style="color:#75715e">//   1. apple (score: 1000, source: trie)
+</span></span></span><span style="display:flex;"><span>  <span style="color:#75715e">//   2. apple watch (score: 850, source: trie)
+</span></span></span><span style="display:flex;"><span>  <span style="color:#75715e">//   3. apple store (score: 720, source: trie)
+</span></span></span><span style="display:flex;"><span>  <span style="color:#75715e">//   4. apple iphone (score: 680, source: trie)
+</span></span></span><span style="display:flex;"><span>  <span style="color:#75715e">//   5. application (score: 600, source: trie)
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 4. 個人化查詢——最近搜尋有 boost 加成
+</span></span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;\n--- 前綴 &#34;app&#34; 的建議（user_001，有個人化）---&#39;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">personalResults</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">service</span>.<span style="color:#a6e22e">getSuggestions</span>(<span style="color:#e6db74">&#34;app&#34;</span>, <span style="color:#e6db74">&#34;user_001&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">personalResults</span>.<span style="color:#a6e22e">forEach</span>((<span style="color:#a6e22e">s</span>, <span style="color:#a6e22e">i</span>) <span style="color:#f92672">=&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`  </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">i</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span><span style="color:#e6db74">}</span><span style="color:#e6db74">. </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">query</span><span style="color:#e6db74">}</span><span style="color:#e6db74"> (score: </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">score</span><span style="color:#e6db74">}</span><span style="color:#e6db74">, source: </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">source</span><span style="color:#e6db74">}</span><span style="color:#e6db74">)`</span>)
+</span></span><span style="display:flex;"><span>  );
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 輸出：
+</span></span></span><span style="display:flex;"><span>  <span style="color:#75715e">//   1. apple (score: 1000, source: trie)
+</span></span></span><span style="display:flex;"><span>  <span style="color:#75715e">//   2. apple watch (score: 800, source: recent) ← boost 加成
+</span></span></span><span style="display:flex;"><span>  <span style="color:#75715e">//   3. apple store (score: 800, source: recent) ← boost 加成
+</span></span></span><span style="display:flex;"><span>  <span style="color:#75715e">//   4. apple iphone (score: 680, source: trie)
+</span></span></span><span style="display:flex;"><span>  <span style="color:#75715e">//   5. application (score: 600, source: trie)
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 5. 模糊搜尋 Demo
+</span></span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;\n--- 模糊搜尋 BK-Tree Demo ---&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">bkTree</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">BKTree</span>();
+</span></span><span style="display:flex;"><span>  [<span style="color:#e6db74">&#34;apple&#34;</span>, <span style="color:#e6db74">&#34;application&#34;</span>, <span style="color:#e6db74">&#34;apply&#34;</span>, <span style="color:#e6db74">&#34;appetizer&#34;</span>, <span style="color:#e6db74">&#34;apartment&#34;</span>].<span style="color:#a6e22e">forEach</span>(<span style="color:#a6e22e">w</span> <span style="color:#f92672">=&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">bkTree</span>.<span style="color:#a6e22e">insert</span>(<span style="color:#a6e22e">w</span>)
+</span></span><span style="display:flex;"><span>  );
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">typo</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;aple&#34;</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">fuzzyResults</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">bkTree</span>.<span style="color:#a6e22e">search</span>(<span style="color:#a6e22e">typo</span>, <span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`  輸入 &#34;</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">typo</span><span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;（容忍距離=1）：</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">fuzzyResults</span>.<span style="color:#a6e22e">join</span>(<span style="color:#e6db74">&#34;, &#34;</span>)<span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 輸出：輸入 &#34;aple&#34;（容忍距離=1）：apple
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">typo2</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;appel&#34;</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">fuzzyResults2</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">bkTree</span>.<span style="color:#a6e22e">search</span>(<span style="color:#a6e22e">typo2</span>, <span style="color:#ae81ff">2</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`  輸入 &#34;</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">typo2</span><span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;（容忍距離=2）：</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">fuzzyResults2</span>.<span style="color:#a6e22e">join</span>(<span style="color:#e6db74">&#34;, &#34;</span>)<span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 輸出：輸入 &#34;appel&#34;（容忍距離=2）：apple, apply
+</span></span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">demo</span>();
+</span></span></code></pre></div><hr>
+<h2 id="4-核心實作c">4. 核心實作——C++</h2>
+<p>C++ 版本提供兩種 Trie 實作策略的比較：<strong>陣列版</strong>（cache-friendly，適合英文）與 <strong>HashMap 版</strong>（支援 Unicode，彈性高）。</p>
+<h3 id="41-陣列版-trie固定字母表">4.1 陣列版 Trie（固定字母表）</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">// ============================================================
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// 搜尋自動補全 — C++ 高效實作
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// 策略一：陣列版 Trie（固定字母表，cache-friendly）
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// ============================================================
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;array&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;string&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;vector&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;algorithm&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;iostream&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;chrono&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">constexpr</span> <span style="color:#66d9ef">int</span> ALPHABET_SIZE <span style="color:#f92672">=</span> <span style="color:#ae81ff">26</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">ArrayTrieNode</span> {
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>array<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span>, ALPHABET_SIZE<span style="color:#f92672">&gt;</span> children; <span style="color:#75715e">// 索引代替指標
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">bool</span> isEnd <span style="color:#f92672">=</span> false;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> score <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>vector<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>pair<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span>, std<span style="color:#f92672">::</span>string<span style="color:#f92672">&gt;&gt;</span> topK; <span style="color:#75715e">// {score, query}
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    ArrayTrieNode() { children.fill(<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>); }
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ArrayTrie</span> {
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">explicit</span> ArrayTrie(<span style="color:#66d9ef">int</span> k <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span>) <span style="color:#f92672">:</span> K_(k) {
+</span></span><span style="display:flex;"><span>        nodes_.reserve(<span style="color:#ae81ff">1&#39;000&#39;000</span>); <span style="color:#75715e">// 預分配節點池
+</span></span></span><span style="display:flex;"><span>        nodes_.emplace_back();     <span style="color:#75715e">// root = 節點 0
+</span></span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">insert</span>(<span style="color:#66d9ef">const</span> std<span style="color:#f92672">::</span>string<span style="color:#f92672">&amp;</span> query, <span style="color:#66d9ef">int</span> score) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> cur <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>        updateTopK(<span style="color:#ae81ff">0</span>, query, score);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">char</span> ch : query) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (ch <span style="color:#f92672">&lt;</span> <span style="color:#e6db74">&#39;a&#39;</span> <span style="color:#f92672">||</span> ch <span style="color:#f92672">&gt;</span> <span style="color:#e6db74">&#39;z&#39;</span>) <span style="color:#66d9ef">continue</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">int</span> idx <span style="color:#f92672">=</span> ch <span style="color:#f92672">-</span> <span style="color:#e6db74">&#39;a&#39;</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (nodes_[cur].children[idx] <span style="color:#f92672">==</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>) {
+</span></span><span style="display:flex;"><span>                nodes_[cur].children[idx] <span style="color:#f92672">=</span> <span style="color:#66d9ef">static_cast</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span>(nodes_.size());
+</span></span><span style="display:flex;"><span>                nodes_.emplace_back();
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>            cur <span style="color:#f92672">=</span> nodes_[cur].children[idx];
+</span></span><span style="display:flex;"><span>            updateTopK(cur, query, score);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        nodes_[cur].isEnd <span style="color:#f92672">=</span> true;
+</span></span><span style="display:flex;"><span>        nodes_[cur].score <span style="color:#f92672">=</span> score;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>vector<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>pair<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span>, std<span style="color:#f92672">::</span>string<span style="color:#f92672">&gt;&gt;</span> search(
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> std<span style="color:#f92672">::</span>string<span style="color:#f92672">&amp;</span> prefix
+</span></span><span style="display:flex;"><span>    ) <span style="color:#66d9ef">const</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> cur <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">char</span> ch : prefix) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (ch <span style="color:#f92672">&lt;</span> <span style="color:#e6db74">&#39;a&#39;</span> <span style="color:#f92672">||</span> ch <span style="color:#f92672">&gt;</span> <span style="color:#e6db74">&#39;z&#39;</span>) <span style="color:#66d9ef">return</span> {};
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">int</span> idx <span style="color:#f92672">=</span> ch <span style="color:#f92672">-</span> <span style="color:#e6db74">&#39;a&#39;</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (nodes_[cur].children[idx] <span style="color:#f92672">==</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>) <span style="color:#66d9ef">return</span> {};
+</span></span><span style="display:flex;"><span>            cur <span style="color:#f92672">=</span> nodes_[cur].children[idx];
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> nodes_[cur].topK;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    size_t <span style="color:#a6e22e">nodeCount</span>() <span style="color:#66d9ef">const</span> { <span style="color:#66d9ef">return</span> nodes_.size(); }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">private</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">void</span> updateTopK(
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> nodeIdx, <span style="color:#66d9ef">const</span> std<span style="color:#f92672">::</span>string<span style="color:#f92672">&amp;</span> query, <span style="color:#66d9ef">int</span> score
+</span></span><span style="display:flex;"><span>    ) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">auto</span><span style="color:#f92672">&amp;</span> topK <span style="color:#f92672">=</span> nodes_[nodeIdx].topK;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// 去重
+</span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">auto</span><span style="color:#f92672">&amp;</span> [s, q] <span style="color:#f92672">:</span> topK) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (q <span style="color:#f92672">==</span> query) {
+</span></span><span style="display:flex;"><span>                s <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>max(s, score);
+</span></span><span style="display:flex;"><span>                std<span style="color:#f92672">::</span>sort(topK.begin(), topK.end(),
+</span></span><span style="display:flex;"><span>                    [](<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span><span style="color:#f92672">&amp;</span> a, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span><span style="color:#f92672">&amp;</span> b) {
+</span></span><span style="display:flex;"><span>                        <span style="color:#66d9ef">return</span> a.first <span style="color:#f92672">&gt;</span> b.first;
+</span></span><span style="display:flex;"><span>                    });
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (<span style="color:#66d9ef">static_cast</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span>(topK.size()) <span style="color:#f92672">&lt;</span> K_) {
+</span></span><span style="display:flex;"><span>            topK.emplace_back(score, query);
+</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">else</span> <span style="color:#a6e22e">if</span> (score <span style="color:#f92672">&gt;</span> topK.back().first) {
+</span></span><span style="display:flex;"><span>            topK.back() <span style="color:#f92672">=</span> {score, query};
+</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>sort(topK.begin(), topK.end(),
+</span></span><span style="display:flex;"><span>            [](<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span><span style="color:#f92672">&amp;</span> a, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span><span style="color:#f92672">&amp;</span> b) {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span> a.first <span style="color:#f92672">&gt;</span> b.first;
+</span></span><span style="display:flex;"><span>            });
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>vector<span style="color:#f92672">&lt;</span>ArrayTrieNode<span style="color:#f92672">&gt;</span> nodes_;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> K_;
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><h3 id="42-hashmap-版-trie支援-unicode">4.2 HashMap 版 Trie（支援 Unicode）</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">// 策略二：HashMap 版 Trie（支援任意字元集）
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;unordered_map&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;memory&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">HashTrieNode</span> {
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>unordered_map<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">char</span>, std<span style="color:#f92672">::</span>unique_ptr<span style="color:#f92672">&lt;</span>HashTrieNode<span style="color:#f92672">&gt;&gt;</span> children;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">bool</span> isEnd <span style="color:#f92672">=</span> false;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> score <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>vector<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>pair<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span>, std<span style="color:#f92672">::</span>string<span style="color:#f92672">&gt;&gt;</span> topK;
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HashTrie</span> {
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">explicit</span> HashTrie(<span style="color:#66d9ef">int</span> k <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">:</span> K_(k), root_(std<span style="color:#f92672">::</span>make_unique<span style="color:#f92672">&lt;</span>HashTrieNode<span style="color:#f92672">&gt;</span>()) {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">insert</span>(<span style="color:#66d9ef">const</span> std<span style="color:#f92672">::</span>string<span style="color:#f92672">&amp;</span> query, <span style="color:#66d9ef">int</span> score) {
+</span></span><span style="display:flex;"><span>        HashTrieNode<span style="color:#f92672">*</span> cur <span style="color:#f92672">=</span> root_.get();
+</span></span><span style="display:flex;"><span>        updateTopK(cur, query, score);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">char</span> ch : query) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>cur<span style="color:#f92672">-&gt;</span>children.count(ch)) {
+</span></span><span style="display:flex;"><span>                cur<span style="color:#f92672">-&gt;</span>children[ch] <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>make_unique<span style="color:#f92672">&lt;</span>HashTrieNode<span style="color:#f92672">&gt;</span>();
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>            cur <span style="color:#f92672">=</span> cur<span style="color:#f92672">-&gt;</span>children[ch].get();
+</span></span><span style="display:flex;"><span>            updateTopK(cur, query, score);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        cur<span style="color:#f92672">-&gt;</span>isEnd <span style="color:#f92672">=</span> true;
+</span></span><span style="display:flex;"><span>        cur<span style="color:#f92672">-&gt;</span>score <span style="color:#f92672">=</span> score;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>vector<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>pair<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span>, std<span style="color:#f92672">::</span>string<span style="color:#f92672">&gt;&gt;</span> search(
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> std<span style="color:#f92672">::</span>string<span style="color:#f92672">&amp;</span> prefix
+</span></span><span style="display:flex;"><span>    ) <span style="color:#66d9ef">const</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> HashTrieNode<span style="color:#f92672">*</span> cur <span style="color:#f92672">=</span> root_.get();
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">char</span> ch : prefix) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">auto</span> it <span style="color:#f92672">=</span> cur<span style="color:#f92672">-&gt;</span>children.find(ch);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (it <span style="color:#f92672">==</span> cur<span style="color:#f92672">-&gt;</span>children.end()) <span style="color:#66d9ef">return</span> {};
+</span></span><span style="display:flex;"><span>            cur <span style="color:#f92672">=</span> it<span style="color:#f92672">-&gt;</span>second.get();
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> cur<span style="color:#f92672">-&gt;</span>topK;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">private</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">void</span> updateTopK(
+</span></span><span style="display:flex;"><span>        HashTrieNode<span style="color:#f92672">*</span> node, <span style="color:#66d9ef">const</span> std<span style="color:#f92672">::</span>string<span style="color:#f92672">&amp;</span> query, <span style="color:#66d9ef">int</span> score
+</span></span><span style="display:flex;"><span>    ) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">auto</span><span style="color:#f92672">&amp;</span> topK <span style="color:#f92672">=</span> node<span style="color:#f92672">-&gt;</span>topK;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">auto</span><span style="color:#f92672">&amp;</span> [s, q] <span style="color:#f92672">:</span> topK) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (q <span style="color:#f92672">==</span> query) {
+</span></span><span style="display:flex;"><span>                s <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>max(s, score);
+</span></span><span style="display:flex;"><span>                std<span style="color:#f92672">::</span>sort(topK.begin(), topK.end(),
+</span></span><span style="display:flex;"><span>                    [](<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span><span style="color:#f92672">&amp;</span> a, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span><span style="color:#f92672">&amp;</span> b) {
+</span></span><span style="display:flex;"><span>                        <span style="color:#66d9ef">return</span> a.first <span style="color:#f92672">&gt;</span> b.first;
+</span></span><span style="display:flex;"><span>                    });
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (<span style="color:#66d9ef">static_cast</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span>(topK.size()) <span style="color:#f92672">&lt;</span> K_) {
+</span></span><span style="display:flex;"><span>            topK.emplace_back(score, query);
+</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">else</span> <span style="color:#a6e22e">if</span> (score <span style="color:#f92672">&gt;</span> topK.back().first) {
+</span></span><span style="display:flex;"><span>            topK.back() <span style="color:#f92672">=</span> {score, query};
+</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>sort(topK.begin(), topK.end(),
+</span></span><span style="display:flex;"><span>            [](<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span><span style="color:#f92672">&amp;</span> a, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span><span style="color:#f92672">&amp;</span> b) {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span> a.first <span style="color:#f92672">&gt;</span> b.first;
+</span></span><span style="display:flex;"><span>            });
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>unique_ptr<span style="color:#f92672">&lt;</span>HashTrieNode<span style="color:#f92672">&gt;</span> root_;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> K_;
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><h3 id="43-edit-distance--效能測試">4.3 Edit Distance + 效能測試</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">// ─── Edit Distance（空間優化版本）──────────────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">editDistance</span>(<span style="color:#66d9ef">const</span> std<span style="color:#f92672">::</span>string<span style="color:#f92672">&amp;</span> a, <span style="color:#66d9ef">const</span> std<span style="color:#f92672">::</span>string<span style="color:#f92672">&amp;</span> b) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> m <span style="color:#f92672">=</span> <span style="color:#66d9ef">static_cast</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span>(a.size());
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> n <span style="color:#f92672">=</span> <span style="color:#66d9ef">static_cast</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span>(b.size());
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> prev(n <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>), curr(n <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; j <span style="color:#f92672">&lt;=</span> n; <span style="color:#f92672">++</span>j) prev[j] <span style="color:#f92672">=</span> j;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>; i <span style="color:#f92672">&lt;=</span> m; <span style="color:#f92672">++</span>i) {
+</span></span><span style="display:flex;"><span>        curr[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">=</span> i;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>; j <span style="color:#f92672">&lt;=</span> n; <span style="color:#f92672">++</span>j) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (a[i<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>] <span style="color:#f92672">==</span> b[j<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]) {
+</span></span><span style="display:flex;"><span>                curr[j] <span style="color:#f92672">=</span> prev[j<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>];
+</span></span><span style="display:flex;"><span>            } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>                curr[j] <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">+</span> std<span style="color:#f92672">::</span>min({prev[j], curr[j<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>], prev[j<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]});
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>swap(prev, curr);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> prev[n];
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ─── 主程式與效能測試 ─────────────────────────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;=== 搜尋自動補全 C++ 效能測試 ===</span><span style="color:#ae81ff">\n\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 功能測試
+</span></span></span><span style="display:flex;"><span>    ArrayTrie trie;
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>vector<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>pair<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>string, <span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;&gt;</span> data <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;apple&#34;</span>, <span style="color:#ae81ff">1000</span>}, {<span style="color:#e6db74">&#34;apple watch&#34;</span>, <span style="color:#ae81ff">850</span>},
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;application&#34;</span>, <span style="color:#ae81ff">600</span>}, {<span style="color:#e6db74">&#34;apply&#34;</span>, <span style="color:#ae81ff">450</span>},
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;apt&#34;</span>, <span style="color:#ae81ff">300</span>}, {<span style="color:#e6db74">&#34;amazon&#34;</span>, <span style="color:#ae81ff">950</span>}
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span><span style="color:#f92672">&amp;</span> [q, s] <span style="color:#f92672">:</span> data) trie.insert(q, s);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;前綴 </span><span style="color:#ae81ff">\&#34;</span><span style="color:#e6db74">app</span><span style="color:#ae81ff">\&#34;</span><span style="color:#e6db74"> 的 Top-5 建議：</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">auto</span> results <span style="color:#f92672">=</span> trie.search(<span style="color:#e6db74">&#34;app&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> <span style="color:#66d9ef">static_cast</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span>(results.size()); <span style="color:#f92672">++</span>i) {
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;  &#34;</span> <span style="color:#f92672">&lt;&lt;</span> (i<span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>) <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;. &#34;</span> <span style="color:#f92672">&lt;&lt;</span> results[i].second
+</span></span><span style="display:flex;"><span>                  <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; (score: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> results[i].first <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;)</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 輸出：
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75715e">//   1. apple (score: 1000)
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75715e">//   2. apple watch (score: 850)
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75715e">//   3. application (score: 600)
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75715e">//   4. apply (score: 450)
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75715e">//   5. apt (score: 300)
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">Edit Distance(</span><span style="color:#ae81ff">\&#34;</span><span style="color:#e6db74">aple</span><span style="color:#ae81ff">\&#34;</span><span style="color:#e6db74">, </span><span style="color:#ae81ff">\&#34;</span><span style="color:#e6db74">apple</span><span style="color:#ae81ff">\&#34;</span><span style="color:#e6db74">) = &#34;</span>
+</span></span><span style="display:flex;"><span>              <span style="color:#f92672">&lt;&lt;</span> editDistance(<span style="color:#e6db74">&#34;aple&#34;</span>, <span style="color:#e6db74">&#34;apple&#34;</span>) <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 輸出：Edit Distance(&#34;aple&#34;, &#34;apple&#34;) = 1
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 效能基準測試——10 萬筆資料
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">using</span> Clock <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>chrono<span style="color:#f92672">::</span>high_resolution_clock;
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>vector<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>pair<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>string, <span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;&gt;</span> testData;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> std<span style="color:#f92672">::</span>string chars <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;abcdefghijklmnopqrstuvwxyz&#34;</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">100&#39;000</span>; <span style="color:#f92672">++</span>i) {
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>string query;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> len <span style="color:#f92672">=</span> <span style="color:#ae81ff">5</span> <span style="color:#f92672">+</span> rand() <span style="color:#f92672">%</span> <span style="color:#ae81ff">10</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; j <span style="color:#f92672">&lt;</span> len; <span style="color:#f92672">++</span>j) query <span style="color:#f92672">+=</span> chars[rand() <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span>];
+</span></span><span style="display:flex;"><span>        testData.emplace_back(query, rand() <span style="color:#f92672">%</span> <span style="color:#ae81ff">10000</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    ArrayTrie benchTrie;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">auto</span> t0 <span style="color:#f92672">=</span> Clock<span style="color:#f92672">::</span>now();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span><span style="color:#f92672">&amp;</span> [q, s] <span style="color:#f92672">:</span> testData) benchTrie.insert(q, s);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">auto</span> t1 <span style="color:#f92672">=</span> Clock<span style="color:#f92672">::</span>now();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> queries <span style="color:#f92672">=</span> <span style="color:#ae81ff">10000</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> queries; <span style="color:#f92672">++</span>i) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">auto</span> prefix <span style="color:#f92672">=</span> testData[i <span style="color:#f92672">%</span> testData.size()].first.substr(<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">3</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">auto</span> r <span style="color:#f92672">=</span> benchTrie.search(prefix);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">auto</span> t2 <span style="color:#f92672">=</span> Clock<span style="color:#f92672">::</span>now();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">auto</span> insertMs <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>chrono<span style="color:#f92672">::</span>duration_cast<span style="color:#f92672">&lt;</span>
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>chrono<span style="color:#f92672">::</span>milliseconds<span style="color:#f92672">&gt;</span>(t1 <span style="color:#f92672">-</span> t0).count();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">auto</span> searchMs <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>chrono<span style="color:#f92672">::</span>duration_cast<span style="color:#f92672">&lt;</span>
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>chrono<span style="color:#f92672">::</span>milliseconds<span style="color:#f92672">&gt;</span>(t2 <span style="color:#f92672">-</span> t1).count();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">--- 效能基準測試（ArrayTrie）---</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;插入 100,000 筆: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> insertMs <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;ms</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;查詢 10,000 次: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> searchMs <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;ms</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;節點數: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> benchTrie.nodeCount() <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="兩種實作策略比較">兩種實作策略比較</h3>
+<table>
+  <thead>
+      <tr>
+          <th>特性</th>
+          <th>ArrayTrie</th>
+          <th>HashTrie</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>字母表限制</td>
+          <td>固定（英文 26 字元）</td>
+          <td>任意字符</td>
+      </tr>
+      <tr>
+          <td>記憶體布局</td>
+          <td>連續陣列（cache-friendly）</td>
+          <td>分散（pointer chasing）</td>
+      </tr>
+      <tr>
+          <td>Cache 命中率</td>
+          <td>高</td>
+          <td>低</td>
+      </tr>
+      <tr>
+          <td>每節點記憶體</td>
+          <td>26 x 4B = 104B（固定）</td>
+          <td>動態分配（平均更少）</td>
+      </tr>
+      <tr>
+          <td>空節點浪費</td>
+          <td>高（26 slots 固定）</td>
+          <td>無（按需分配）</td>
+      </tr>
+      <tr>
+          <td>查詢速度</td>
+          <td>O(L)，常數極小</td>
+          <td>O(L)，常數較大</td>
+      </tr>
+      <tr>
+          <td>Unicode 支援</td>
+          <td>需特殊處理</td>
+          <td>原生支援</td>
+      </tr>
+      <tr>
+          <td>適用場景</td>
+          <td>英文搜尋、效能敏感</td>
+          <td>多語言、字元集未知</td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<h2 id="5-效能分析">5. 效能分析</h2>
+<h3 id="時間複雜度">時間複雜度</h3>
+<table>
+  <thead>
+      <tr>
+          <th>操作</th>
+          <th>純 Trie</th>
+          <th>Trie + Top-K 快取</th>
+          <th>說明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>插入</td>
+          <td>O(L)</td>
+          <td>O(L x K log K)</td>
+          <td>L = 字串長度，K = Top-K 大小</td>
+      </tr>
+      <tr>
+          <td>前綴查詢</td>
+          <td>O(P + N log K)</td>
+          <td><strong>O(P)</strong></td>
+          <td>P = 前綴長度，N = 子樹節點數</td>
+      </tr>
+      <tr>
+          <td>模糊查詢（BK-Tree）</td>
+          <td>—</td>
+          <td>O(N^(1-d/Sigma))</td>
+          <td>遠優於線性掃描 O(N)</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="空間複雜度">空間複雜度</h3>
+<table>
+  <thead>
+      <tr>
+          <th>結構</th>
+          <th>空間</th>
+          <th>說明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Trie 節點</td>
+          <td>O(N x Sigma)</td>
+          <td>N = 節點數，Sigma = 字母表大小</td>
+      </tr>
+      <tr>
+          <td>Top-K 快取</td>
+          <td>O(N x K)</td>
+          <td>每節點存 K 個建議</td>
+      </tr>
+      <tr>
+          <td>BK-Tree</td>
+          <td>O(M)</td>
+          <td>M = 詞彙數量</td>
+      </tr>
+      <tr>
+          <td>Redis 快取</td>
+          <td>~6 GB</td>
+          <td>2,000 萬熱門前綴</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="延遲基準參考值">延遲基準（參考值）</h3>
+<table>
+  <thead>
+      <tr>
+          <th>路徑</th>
+          <th>延遲</th>
+          <th>說明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>瀏覽器本地快取命中</td>
+          <td>&lt; 1ms</td>
+          <td>Service Worker / localStorage</td>
+      </tr>
+      <tr>
+          <td>CDN 邊緣快取命中</td>
+          <td>5 ~ 20ms</td>
+          <td>地理就近節點</td>
+      </tr>
+      <tr>
+          <td>Redis 快取命中</td>
+          <td>1 ~ 5ms</td>
+          <td>記憶體讀取</td>
+      </tr>
+      <tr>
+          <td>Trie Service 查詢</td>
+          <td>1 ~ 10ms</td>
+          <td>記憶體中 O(P) 查詢</td>
+      </tr>
+      <tr>
+          <td>端到端（含網路）</td>
+          <td>30 ~ 100ms</td>
+          <td>全鏈路含序列化</td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<h2 id="6-生產環境考量">6. 生產環境考量</h2>
+<h3 id="61-整體架構">6.1 整體架構</h3>
+<pre tabindex="0"><code>┌─────────────────────────────────────────────────────────────┐
+│                    Client（瀏覽器/App）                        │
+│  [input onChange] ── Debounce(150ms) ──→ GET /suggest?q=XXX │
+└──────────────────────────┬──────────────────────────────────┘
+                           │ HTTPS
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    CDN / Edge Cache                          │
+│          （Cloudflare / Fastly — 快取熱門前綴 TTL=60s）       │
+└──────────────────────────┬──────────────────────────────────┘
+                           │ Cache Miss
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│                 API Gateway / Load Balancer                  │
+│            （Nginx / AWS ALB — 路由、限流、SSL 終止）         │
+└──────────┬──────────────────────────────────────────────────┘
+           │
+     ┌─────┴──────┐
+     ▼            ▼
+┌─────────┐  ┌─────────┐      ┌──────────────────────────┐
+│Suggest  │  │Suggest  │      │     Redis Cluster        │
+│Service  │  │Service  │ ←──→ │  前綴→Top-K 映射          │
+│（TS/Go）│  │（TS/Go）│      │  TTL=300s，記憶體 6GB    │
+└─────────┘  └─────────┘      └──────────────────────────┘
+     │
+     │ Cache Miss
+     ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   Trie Service                               │
+│        （讀取只讀 Trie 索引，部署在高記憶體機器）               │
+│        每小時從離線管線重建索引（Atomic Swap）                 │
+└─────────────────────────────────────────────────────────────┘
+
+                ┌──────────────────────────────────────┐
+                │       離線資料管線（Offline Pipeline）  │
+                │                                      │
+                │  搜尋日誌 → Kafka → Flink/Spark      │
+                │  （收集事件）  （串流聚合頻率）         │
+                │        ↓                             │
+                │   頻率資料庫（PostgreSQL / BigQuery） │
+                │        ↓                             │
+                │   Trie Builder（每小時執行）           │
+                │        ↓                             │
+                │   序列化 Trie 存儲（S3 / GCS）       │
+                │        ↓                             │
+                │   通知 Trie Service 熱重載            │
+                └──────────────────────────────────────┘
+</code></pre><h3 id="62-前端-debounce-策略">6.2 前端 Debounce 策略</h3>
+<p>前端不應每輸入一個字元就發送請求。使用 Debounce 可以將 QPS 降低 <strong>70~80%</strong>。</p>
+<pre tabindex="0"><code>使用者輸入 &#34;apple&#34;：
+
+  無 Debounce（5 次請求）：
+  a → ap → app → appl → apple  共 5 次 HTTP 請求
+
+  有 Debounce 150ms（1~2 次請求）：
+  使用者停止輸入 150ms 後才發送 → 大幅減少伺服器壓力
+</code></pre><h3 id="63-分散式-trie-分片">6.3 分散式 Trie 分片</h3>
+<p>當單機記憶體無法容納完整 Trie 時（例如 300GB），需要按首字母分片：</p>
+<pre tabindex="0"><code>Trie Cluster（按首字母分片）：
+  a-f: Node 1（~50GB RAM）
+  g-l: Node 2（~50GB RAM）
+  m-r: Node 3（~50GB RAM）
+  s-z: Node 4（~50GB RAM）
+
+路由邏輯：
+  prefix = &#34;apple&#34; → 首字母 &#39;a&#39; → 路由到 Node 1
+  prefix = &#34;google&#34; → 首字母 &#39;g&#39; → 路由到 Node 2
+</code></pre><p>使用 <strong>一致性雜湊（Consistent Hashing）</strong> 進行路由，當節點擴縮時只需重新分配少量分片。</p>
+<h3 id="64-多層快取策略">6.4 多層快取策略</h3>
+<table>
+  <thead>
+      <tr>
+          <th>層級</th>
+          <th>技術</th>
+          <th>TTL</th>
+          <th>命中率</th>
+          <th>作用</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>瀏覽器快取</td>
+          <td>localStorage / Service Worker</td>
+          <td>5 分鐘</td>
+          <td>30~50%</td>
+          <td>完全不發送請求</td>
+      </tr>
+      <tr>
+          <td>CDN 邊緣快取</td>
+          <td>Cloudflare / Fastly</td>
+          <td>60 秒</td>
+          <td>50~70%</td>
+          <td>地理就近回應</td>
+      </tr>
+      <tr>
+          <td>Redis 快取</td>
+          <td>Redis Cluster</td>
+          <td>5 分鐘</td>
+          <td>80~90%</td>
+          <td>伺服器端記憶體快取</td>
+      </tr>
+      <tr>
+          <td>Trie Service</td>
+          <td>記憶體內 Trie</td>
+          <td>永久</td>
+          <td>100%</td>
+          <td>最後防線</td>
+      </tr>
+  </tbody>
+</table>
+<p>經過多層快取後，實際到達 Trie Service 的請求量僅為原始 QPS 的 <strong>1~5%</strong>。</p>
+<h3 id="65-即時趨勢更新">6.5 即時趨勢更新</h3>
+<p>當某個突發事件（如大地震、體育賽事）導致搜尋趨勢驟變時，離線每小時更新的頻率可能不夠即時。解決方案是 <strong>雙路合併</strong>：</p>
+<ol>
+<li><strong>離線路徑（Offline）</strong>：每小時重建 Trie，涵蓋長期穩定的搜尋頻率</li>
+<li><strong>即時路徑（Real-time）</strong>：透過 Kafka + Flink 串流計算最近 10 分鐘的熱門搜尋，結果存入 Redis</li>
+<li><strong>合併</strong>：Suggest Service 查詢時同時讀取 Trie 和 Redis 的即時熱門列表，合併排序後回傳</li>
+</ol>
+<h3 id="66-cjk中日韓支援">6.6 CJK（中日韓）支援</h3>
+<p>中文自動補全面臨三個特殊挑戰：</p>
+<ol>
+<li><strong>字元集龐大</strong>：中文常用字約 6,000 個，不能用固定大小陣列。解法：使用 HashMap 作為子節點容器</li>
+<li><strong>輸入法映射</strong>：使用者輸入拼音 &ldquo;bei&rdquo;，系統應建議 &ldquo;北京&rdquo;、&ldquo;背包&rdquo;。解法：同時建立漢字和拼音的 Trie，查詢時合併</li>
+<li><strong>分詞問題</strong>：中文沒有空格分隔詞彙。解法：使用分詞工具（如 jieba）預處理後再建索引</li>
+</ol>
+<h3 id="67-優化要點總覽">6.7 優化要點總覽</h3>
+<table>
+  <thead>
+      <tr>
+          <th>優化維度</th>
+          <th>具體手段</th>
+          <th>預期效益</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>前端 Debounce</td>
+          <td>150ms 防抖</td>
+          <td>QPS 降低 70~80%</td>
+      </tr>
+      <tr>
+          <td>CDN 邊緣快取</td>
+          <td>熱門前綴快取</td>
+          <td>延遲降低 50~80%</td>
+      </tr>
+      <tr>
+          <td>Redis 快取層</td>
+          <td>前綴→Top-K，TTL=5 分鐘</td>
+          <td>DB 壓力降低 90%</td>
+      </tr>
+      <tr>
+          <td>Trie 節點 Top-K</td>
+          <td>避免子樹遍歷，O(P) 查詢</td>
+          <td>速度提升 10~100 倍</td>
+      </tr>
+      <tr>
+          <td>離線建索引</td>
+          <td>頻率離線更新</td>
+          <td>讀寫完全解耦</td>
+      </tr>
+      <tr>
+          <td>分片路由</td>
+          <td>按首字母分片</td>
+          <td>線性水平擴展</td>
+      </tr>
+      <tr>
+          <td>模糊搜尋降級</td>
+          <td>精確匹配無結果時才啟動 BK-Tree</td>
+          <td>90% 走快速路徑</td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<h2 id="7-leetcode-練習">7. LeetCode 練習</h2>
+<p>以下是與搜尋自動補全相關的經典題目，建議按順序練習：</p>
+<h3 id="題目一leetcode-642--design-search-autocomplete-system">題目一：LeetCode 642 — Design Search Autocomplete System</h3>
+<table>
+  <thead>
+      <tr>
+          <th>項目</th>
+          <th>內容</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>難度</td>
+          <td>Hard</td>
+      </tr>
+      <tr>
+          <td>連結</td>
+          <td><a class="text-blue-500 font-bold no-underline" href="https://leetcode.com/problems/design-search-autocomplete-system/" target="_blank">LeetCode 642</a></td>
+      </tr>
+      <tr>
+          <td>核心</td>
+          <td>Trie + 頻率排序，核心即本文實作</td>
+      </tr>
+      <tr>
+          <td>提示</td>
+          <td>注意特殊字元 &lsquo;#&rsquo; 作為搜尋結束信號，觸發 recordSearch</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="題目二leetcode-208--implement-trie-prefix-tree">題目二：LeetCode 208 — Implement Trie (Prefix Tree)</h3>
+<table>
+  <thead>
+      <tr>
+          <th>項目</th>
+          <th>內容</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>難度</td>
+          <td>Medium</td>
+      </tr>
+      <tr>
+          <td>連結</td>
+          <td><a class="text-blue-500 font-bold no-underline" href="https://leetcode.com/problems/implement-trie-prefix-tree/" target="_blank">LeetCode 208</a></td>
+      </tr>
+      <tr>
+          <td>核心</td>
+          <td>Trie 基礎實作——insert、search、startsWith</td>
+      </tr>
+      <tr>
+          <td>提示</td>
+          <td>本題是 642 的前置練習，先確保 Trie 基礎紮實</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="題目三leetcode-1268--search-suggestions-system">題目三：LeetCode 1268 — Search Suggestions System</h3>
+<table>
+  <thead>
+      <tr>
+          <th>項目</th>
+          <th>內容</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>難度</td>
+          <td>Medium</td>
+      </tr>
+      <tr>
+          <td>連結</td>
+          <td><a class="text-blue-500 font-bold no-underline" href="https://leetcode.com/problems/search-suggestions-system/" target="_blank">LeetCode 1268</a></td>
+      </tr>
+      <tr>
+          <td>核心</td>
+          <td>對每個前綴回傳字典序最小的 3 個建議</td>
+      </tr>
+      <tr>
+          <td>提示</td>
+          <td>可用 Trie + DFS，也可用排序 + Binary Search</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="題目四leetcode-72--edit-distance">題目四：LeetCode 72 — Edit Distance</h3>
+<table>
+  <thead>
+      <tr>
+          <th>項目</th>
+          <th>內容</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>難度</td>
+          <td>Medium</td>
+      </tr>
+      <tr>
+          <td>連結</td>
+          <td><a class="text-blue-500 font-bold no-underline" href="https://leetcode.com/problems/edit-distance/" target="_blank">LeetCode 72</a></td>
+      </tr>
+      <tr>
+          <td>核心</td>
+          <td>Levenshtein Distance 的 DP 實作</td>
+      </tr>
+      <tr>
+          <td>提示</td>
+          <td>這是模糊搜尋的理論基石——BK-Tree 的核心度量函數</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>練習建議</strong>：先完成 208（Trie 基礎），再挑戰 642（完整 Autocomplete System）。1268 是簡化版的好練習。72 則幫助理解模糊搜尋的 Edit Distance 原理。在面試中，642 是系統設計類題目的高頻考題，建議在白板上先畫出 Trie 結構圖和 Top-K 更新流程，再開始寫程式碼。</p>
+<hr>
+<h2 id="8-總結">8. 總結</h2>
+<p>在這篇文章中，我們從需求分析出發，完整設計並實作了一套搜尋自動補全系統：</p>
+<ol>
+<li>
+<p><strong>Trie + Top-K 快取</strong>：這是自動補全的核心引擎。透過在每個 Trie 節點預先快取 Top-K 結果，將查詢時間從 O(P + N log K) 降至 <strong>O(P)</strong>，P 通常只有幾個字元，幾乎是常數時間。</p>
+</li>
+<li>
+<p><strong>模糊搜尋（BK-Tree）</strong>：當精確前綴匹配找不到結果時，BK-Tree 利用三角不等式剪枝，高效查詢 Edit Distance 在容忍範圍內的候選字串，剪枝率達 75~90%。</p>
+</li>
+<li>
+<p><strong>個人化建議</strong>：透過維護使用者的最近搜尋記錄，並在合併排序時給予 boost 加成，讓每個使用者看到個人化的建議列表。</p>
+</li>
+<li>
+<p><strong>生產環境架構</strong>：多層快取（瀏覽器 → CDN → Redis → Trie Service）將 260 萬 QPS 的壓力逐層消化；離線管線與即時管線雙路合併，兼顧穩定性與即時性；按首字母分片實現水平擴展。</p>
+</li>
+</ol>
+<p>搜尋自動補全是 Trie、Heap、快取策略、分散式系統設計的綜合應用。理解了這個系統的設計原理後，你不僅能在面試中從容應對 LeetCode 642 等題目，還能在實際工作中為搜尋體驗帶來質的提升。</p>
+<p>在下一篇文章中，我們將探討另一個經典的系統設計問題——</p>
+
+  <a class="text-blue-500 font-bold no-underline" href="/post/javascript/data-structures-algorithms/043-task-scheduler/" target="_blank">設計任務排程器（Task Scheduler）</a>
+
+<p>，學習如何用優先佇列和排程策略實現高效的任務管理系統，敬請期待！</p>
+<hr>
+<h3 id="faq">FAQ</h3>
+<p><strong>Q: Autocomplete 和全文搜尋（Full-Text Search）有什麼區別？</strong></p>
+<p>兩者解決的問題不同。<strong>Autocomplete</strong> 是前綴匹配——使用者輸入 &ldquo;app&rdquo; 時，系統回傳以 &ldquo;app&rdquo; 開頭的建議，核心資料結構是 <strong>Trie</strong>，回傳速度要求極高（&lt; 100ms）。<strong>全文搜尋</strong> 則是關鍵字匹配——使用者輸入 &ldquo;how to cook pasta&rdquo; 時，系統回傳內容中包含這些關鍵字的文件，核心技術是 <strong>倒排索引（Inverted Index）</strong>，如 Elasticsearch。在實際產品中，兩者通常協作：使用者打字時 Autocomplete 提供即時建議，按下 Enter 後全文搜尋回傳完整結果。</p>
+<p><strong>Q: 為什麼要在 Trie 每個節點快取 Top-K 結果？這不是浪費記憶體嗎？</strong></p>
+<p>這是一個典型的 <strong>空間換時間</strong> 的權衡。不快取 Top-K 時，每次查詢需遍歷整個子樹，時間為 O(P + N log K)，熱門前綴如 &ldquo;a&rdquo; 可能有數百萬個結果。快取後查詢降為 <strong>O(P)</strong>，對 &lt; 100ms 的即時建議至關重要。記憶體方面，假設每節點存 10 個建議（約 300 bytes），100 萬個節點的額外開銷約 300MB，伺服器端完全可接受。而且 Trie 通常離線建構、批量更新，寫入效能不是瓶頸。</p>
+<p><strong>Q: 如何處理中日韓（CJK）等多位元組字元的自動補全？</strong></p>
+<p>CJK 的挑戰主要有三：<strong>(1) 字元集龐大</strong>——中文常用字約 6,000 個，不能用固定陣列 <code>children[26]</code>，應使用 HashMap 作為子節點容器。<strong>(2) 輸入法映射</strong>——使用者輸入拼音 &ldquo;bei&rdquo;，系統應建議 &ldquo;北京&rdquo;，做法是同時建立漢字和拼音的 Trie 索引。<strong>(3) 分詞問題</strong>——中文沒有空格分隔詞彙，需先用分詞工具（如 jieba）處理。生產環境推薦使用 Elasticsearch 的 Completion Suggester，它內建 CJK 分析器，能較好地處理這些問題。</p></div>
+        
+        
+
+        
+        <div class="mt-8">
+          
+<div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose">
+  <div>
+    <div class="flex items-center gap-2 mb-1">
+      <a href="/about" class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">
+        BenZ
+      </a>
+      
+      <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span>
+      
+    </div>
+    <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">
+      熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。
+    </p>
+    <div class="flex items-center gap-3">
+      
+      <a href="https://github.com/benzhub" target="_blank" rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label="GitHub">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      
+      
+      
+    </div>
+  </div>
+</div>
+
+        </div>
+      </div>
+
+      
+      
+<div class="subscribe-widget max-w-xl mx-auto my-10 px-6 py-8 text-center rounded-xl bg-zinc-50 dark:bg-zinc-800">
+  <h3 class="text-lg font-bold mb-1">訂閱 BenzHub 電子報</h3>
+  <p class="text-sm text-zinc-600 dark:text-zinc-300 mb-4">每週 AI 賺錢實戰 + 免費工具地圖</p>
+  <form class="subscribe-form flex flex-col sm:flex-row gap-3 justify-center"
+        data-worker="https://benzhub-newsletter.PLACEHOLDER.workers.dev" data-source="footer-widget">
+    <input type="email" required placeholder="你的 Email"
+           class="px-4 py-2 rounded-lg border border-zinc-300 dark:bg-zinc-900 dark:border-zinc-600" />
+    <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700">訂閱</button>
+  </form>
+  <div class="cf-turnstile mt-3 flex justify-center" data-sitekey="PLACEHOLDER_TURNSTILE_SITE_KEY"></div>
+  <p class="subscribe-status text-sm text-zinc-500 mt-2"></p>
+</div>
+
+
+
+      
+      <div class="post-detail fade-in my-4">
+        
+
+
+<div>
+  <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3>
+  <div class="grid gap-2">
+    
+    <a href="https://benzhub.github.io/post/javascript/data-structures--algorithms/041-cache-lru/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">設計 LRU/LFU Cache — 雜湊表與雙向鏈結串列的 O(1) 快取實作 | 資料結構與演算法</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/24</span>
+    </a>
+    
+    <a href="https://benzhub.github.io/post/javascript/data-structures--algorithms/040-rate-limiter/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">設計 Rate Limiter — Token Bucket、Sliding Window 與分散式限流實戰 | 資料結構與演算法</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/23</span>
+    </a>
+    
+    <a href="https://benzhub.github.io/post/javascript/data-structures--algorithms/039-persistent-ds/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">持久化資料結構完全指南 — 路徑複製、Fat Node 與持久化線段樹 | 資料結構與演算法</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/22</span>
+    </a>
+    
+  </div>
+</div>
+
+
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            
+            <a href="https://benzhub.github.io/post/javascript/data-structures--algorithms/041-cache-lru/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+                <span class="text-sm font-medium">設計 LRU/LFU Cache — 雜湊表與雙向鏈結串列的 O(1) 快取實作 | 資料結構與演算法</span>
+            </a>
+            
+          </div>
+          <div>
+            
+            <a href="https://benzhub.github.io/post/javascript/data-structures--algorithms/043-task-scheduler/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+                <span class="text-sm font-medium">設計任務排程器 — Priority Queue、Time Wheel 與 Cron 排程實戰 | 資料結構與演算法</span>
+            </a>
+            
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        
+<script src="https://giscus.app/client.js"
+        data-repo="benzhub/benzhub.github.io"
+        data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM="
+        data-category="Announcements"
+        data-category-id="MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme="preferred_color_scheme"
+        data-lang="zh-TW"
+        crossorigin="anonymous"
+        async>
+</script>
+
+
+      </div>
+    </div>
+    
+    <div class="hidden lg:block lg:col-span-1 mt-4">
+    
+    
+            
+            <div class="widget fade-in">
+    <p class="widget-title">搜尋</p>
+    <form role="search" method="get" action="https://google.com/search">
+        <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
+        <input type="hidden" name="sitesearch" value="https://benzhub.github.io/" />
+    </form>
+</div>
+
+        
+            
+            
+
+        
+            
+            
+<div class="widget fade-in">
+    <p class="widget-title">標籤</p>
+    <div class="flex flex-wrap gap-1.5">
+        <a href='/tags/80/20-%E6%B3%95%E5%89%87'>
+            <span class="tag-pill">80/20 法則</span>
+        </a>
+        <a href='/tags/acid'>
+            <span class="tag-pill">acid</span>
+        </a>
+        <a href='/tags/aggregate'>
+            <span class="tag-pill">aggregate</span>
+        </a>
+        <a href='/tags/ai'>
+            <span class="tag-pill">ai</span>
+        </a>
+        <a href='/tags/ai-agent'>
+            <span class="tag-pill">ai agent</span>
+        </a>
+        <a href='/tags/ai-workflow'>
+            <span class="tag-pill">ai workflow</span>
+        </a>
+        <a href='/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE'>
+            <span class="tag-pill">ai 工具焦慮</span>
+        </a>
+        <a href='/tags/ai-%E6%8E%A5%E5%96%AE'>
+            <span class="tag-pill">ai 接單</span>
+        </a>
+        <a href='/tags/ai-%E7%B9%AA%E5%9C%96'>
+            <span class="tag-pill">ai 繪圖</span>
+        </a>
+        <a href='/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA'>
+            <span class="tag-pill">ai 虛擬人</span>
+        </a>
+        <a href='/tags/ai-%E8%A1%8C%E9%8A%B7'>
+            <span class="tag-pill">ai 行銷</span>
+        </a>
+        <a href='/tags/ai-%E8%A8%AD%E8%A8%88'>
+            <span class="tag-pill">ai 設計</span>
+        </a>
+        <a href='/tags/ai-%E8%AE%8A%E7%8F%BE'>
+            <span class="tag-pill">ai 變現</span>
+        </a>
+        <a href='/tags/ai-%E8%B3%BA%E9%8C%A2'>
+            <span class="tag-pill">ai 賺錢</span>
+        </a>
+        <a href='/tags/ai-income'>
+            <span class="tag-pill">ai-income</span>
+        </a>
+        <a href='/tags/ai-insights'>
+            <span class="tag-pill">ai-insights</span>
+        </a>
+        <a href='/tags/analytics'>
+            <span class="tag-pill">analytics</span>
+        </a>
+        <a href='/tags/api'>
+            <span class="tag-pill">api</span>
+        </a>
+        <a href='/tags/architecture'>
+            <span class="tag-pill">architecture</span>
+        </a>
+        <a href='/tags/audit'>
+            <span class="tag-pill">audit</span>
+        </a>
+    </div>
+</div>
+
+
+        
+            
+            
+<div class="widget fade-in">
+    <p class="widget-title">文章系列</p>
+    <div class="flex flex-wrap gap-1.5">
+        
+        
+        
+        
+        <a href='/post/postgresql/'>
+            <span class="tag-pill">PostgreSQL (50)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/javascript/'>
+            <span class="tag-pill">JavaScript (109)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/django/'>
+            <span class="tag-pill">Django (44)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/python/'>
+            <span class="tag-pill">Python (37)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/htmlcss/'>
+            <span class="tag-pill">HTML &amp; CSS (23)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/linux/'>
+            <span class="tag-pill">Linux (22)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/git/'>
+            <span class="tag-pill">Git (18)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/ai-insights/'>
+            <span class="tag-pill">AI Insights (13)</span>
+        </a>
+        
+        
+    </div>
+</div>
+
+
+        
+            
+            
+
+<div class="widget fade-in">
+    <p class="widget-title">最新文章</p>
+    <div class="flex flex-col gap-1">
+        <a href="/post/javascript/data-structures--algorithms/047-load-balancer/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計負載均衡器 — Round Robin、一致性雜湊與健康檢查實戰 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/30
+            </p>
+        </a>
+        <a href="/post/javascript/data-structures--algorithms/046-text-diff/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計文本差異比對 — LCS、Myers Diff 演算法與 Patch 生成實戰 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/29
+            </p>
+        </a>
+        <a href="/post/javascript/data-structures--algorithms/045-recommendation/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計推薦系統 — 協同過濾、內容推薦與矩陣分解實戰 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/28
+            </p>
+        </a>
+        <a href="/post/javascript/data-structures--algorithms/044-url-shortener/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計短網址系統 — Base62 編碼、分散式 ID 生成與重導向架構 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/27
+            </p>
+        </a>
+        <a href="/post/postgresql/050-citus-distributed/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Citus 分散式 PostgreSQL：水平擴展到多節點叢集 | PostgreSQL</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/26
+            </p>
+        </a>
+    </div>
+</div>
+
+        
+    
+</div>
+
+    
+</div>
+
+        </div>
+    </div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]">
+    
+    <p>&copy; 2026 <a href="https://benzhub.github.io/" class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p>
+</footer>
+
+
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script src="/js/subscribe.js" defer></script>
+
+
+
+<script>
+    (function (window, document) {
+        function main() {
+            var ad = document.createElement('script');
+            ad.async = true;
+            ad.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606';
+            ad.crossOrigin = "anonymous";
+            var sc = document.getElementsByTagName('script')[0];
+            sc.parentNode.insertBefore(ad, sc);
+        }
+        var lazyLoad = false;
+        function onLazyLoad() {
+            if (lazyLoad === false) {
+                lazyLoad = true;
+                window.removeEventListener('scroll', onLazyLoad);
+                window.removeEventListener('mousemove', onLazyLoad);
+                window.removeEventListener('mousedown', onLazyLoad);
+                window.removeEventListener('touchstart', onLazyLoad);
+                window.removeEventListener('keydown', onLazyLoad);
+                main();
+            }
+        }
+        window.addEventListener('scroll', onLazyLoad);
+        window.addEventListener('mousemove', onLazyLoad);
+        window.addEventListener('mousedown', onLazyLoad);
+        window.addEventListener('touchstart', onLazyLoad);
+        window.addEventListener('keydown', onLazyLoad);
+        window.addEventListener('load', function () {
+            if (window.pageYOffset) {
+                onLazyLoad();
+                window.setTimeout(onLazyLoad, 3000);
+            }
+        });
+    })(window, document);
+</script>
+
+
+<script>
+    
+    var icon = document.getElementById("icon");
+    var icon2 = document.getElementById("icon2");
+    if (document.documentElement.classList.contains("dark") || localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+        if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+    function toggleDarkMode() {
+        if (document.documentElement.classList.contains('dark')) {
+            if (icon) { icon.classList.remove("icon-sun"); icon.classList.add("icon-moon"); }
+            if (icon2) { icon2.classList.remove("icon-sun"); icon2.classList.add("icon-moon"); }
+            document.documentElement.classList.remove('dark');
+            localStorage.theme = 'light';
+        } else {
+            if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+            if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+            document.documentElement.classList.add('dark');
+            localStorage.theme = 'dark';
+        }
+    }
+
+    
+    document.addEventListener('DOMContentLoaded', function () {
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0 });
+
+        document.querySelectorAll('.fade-in').forEach(function (el) {
+            observer.observe(el);
+        });
+    });
+</script>
+</body>
+
+</html>

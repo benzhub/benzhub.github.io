@@ -1,0 +1,2253 @@
+<!DOCTYPE html>
+
+<html lang="zh-TW">
+<head>
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-FSEWPBJMJT');
+</script>
+
+<title>設計短網址系統 — Base62 編碼、分散式 ID 生成與重導向架構 | 資料結構與演算法 | BenzHub</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="apple-touch-icon" sizes="180x180" href='/favicon/apple-touch-icon.png'>
+    <link rel="icon" type="image/png" sizes="32x32" href='/favicon/favicon-32x32.png'>
+    <link rel="icon" type="image/png" sizes="16x16" href='/favicon/favicon-16x16.png'>
+    <link rel="manifest" href='/favicon/site.webmanifest' />
+    <link rel="mask-icon" href=' /favicon/safari-pinned-tab.svg' color="#5bbad5" />
+    <link rel="shortcut icon" href='/favicon/favicon.ico' />
+    <meta name="theme-color" content="#fafafa">
+    <meta property="og:title" content="設計短網址系統 — Base62 編碼、分散式 ID 生成與重導向架構 | 資料結構與演算法 | BenzHub" />
+    
+    
+    
+    <link rel="stylesheet" href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css" />
+    
+    <link href=' /css/blonde.min.css' rel="stylesheet" type="text/css" media="print"
+        onload="this.media=' all'">
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+
+<meta name="description" content="深入實作短網址系統，掌握 Base62 編碼轉換、雜湊碰撞處理、Snowflake 分散式 ID 生成與 301/302 重導向策略，搭配 JavaScript/TypeScript 與 C&#43;&#43; 完整程式碼與 LeetCode 練習">
+<meta property="og:site_name" content="BenzHub">
+<meta property="og:description" content="深入實作短網址系統，掌握 Base62 編碼轉換、雜湊碰撞處理、Snowflake 分散式 ID 生成與 301/302 重導向策略，搭配 JavaScript/TypeScript 與 C&#43;&#43; 完整程式碼與 LeetCode 練習">
+<meta property="og:url" content="https://benzhub.github.io/post/javascript/data-structures--algorithms/044-url-shortener/">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="zh_TW">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="">
+
+<link rel="canonical" href="https://benzhub.github.io/post/javascript/data-structures--algorithms/044-url-shortener/">
+
+<meta name="twitter:description" content="深入實作短網址系統，掌握 Base62 編碼轉換、雜湊碰撞處理、Snowflake 分散式 ID 生成與 301/302 重導向策略，搭配 JavaScript/TypeScript 與 C&#43;&#43; 完整程式碼與 LeetCode 練習">
+<meta property="article:published_time" content="2026-07-27T00:00:00&#43;00:00">
+<meta property="article:updated_time" content="2026-07-27T00:00:00&#43;00:00">
+
+
+
+
+
+    
+<meta property="og:image" content="https://benzhub.github.io/img/javascript/Data%20Structures%20&amp;%20Algorithms/044-URL-Shortener.png">
+<meta property="og:image:url" content="https://benzhub.github.io/img/javascript/Data%20Structures%20&amp;%20Algorithms/044-URL-Shortener.png">
+    
+
+    
+    <link rel="stylesheet" href='/css/custom.css'>
+    <i class="dark hidden"></i>
+    
+<link rel="alternate" hreflang="zh-TW" href="https://benzhub.github.io/post/javascript/data-structures--algorithms/044-url-shortener/" />
+
+<link rel="alternate" hreflang="x-default" href="https://benzhub.github.io/post/javascript/data-structures--algorithms/044-url-shortener/" />
+
+    
+
+
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "\"設計短網址系統 — Base62 編碼、分散式 ID 生成與重導向架構 | 資料結構與演算法\"",
+  "description": "\"深入實作短網址系統，掌握 Base62 編碼轉換、雜湊碰撞處理、Snowflake 分散式 ID 生成與 301/302 重導向策略，搭配 JavaScript/TypeScript 與 C++ 完整程式碼與 LeetCode 練習\"",
+  "author": {
+    "@type": "Person",
+    "name": "\"BenzHub\"",
+    "url": "https:\/\/benzhub.github.io\/about",
+    "jobTitle": "\"Software Developer\"",
+    "sameAs": [
+      "\"https://github.com/benzhub\""
+    ]
+  },
+  "datePublished": "2026-07-27T00:00:00\u002b00:00",
+  "dateModified": "2026-07-27T00:00:00\u002b00:00",
+  "image": "https:\/\/benzhub.github.io\/img\/javascript\/Data%20Structures%20\u0026%20Algorithms\/044-URL-Shortener.png",
+  "publisher": {
+    "@type": "Organization",
+    "name": "\"BenzHub\"",
+    "url": "\"https://benzhub.github.io/\"",
+    "sameAs": [
+      "\"https://github.com/benzhub\""
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/benzhub.github.io\/post\/javascript\/data-structures--algorithms\/044-url-shortener\/"
+  },
+  "inLanguage": "zh-TW"
+}
+</script>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "\"BenzHub\"",
+      "item": "https:\/\/benzhub.github.io\/"
+    }
+    
+    
+      
+      
+    ,{
+      "@type": "ListItem",
+      "position": 2,
+      "name": "\"Blog\"",
+      "item": "https:\/\/benzhub.github.io\/post\/javascript\/"
+    }
+      
+      
+    
+    ,{
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "\"設計短網址系統 — Base62 編碼、分散式 ID 生成與重導向架構 | 資料結構與演算法\""
+    }
+  ]
+}
+</script>
+
+
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    
+    
+    {
+      "@type": "Question",
+      "name": "\"Base62 編碼和 Base64 有什麼不同？為什麼短網址系統選擇 Base62？\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"Base64 使用 64 個字元（A-Z、a-z、0-9、+、/），常見於編碼二進位資料（如圖片轉文字）。但 + 和 / 在 URL 中是特殊字元，必須進行百分比編碼（%2B、%2F），會讓短網址變長且不美觀。Base62 只使用 62 個字元（A-Z、a-z、0-9），全部都是 URL 安全的（URL-safe），可以直接嵌入網址中不需額外編碼。兩者的差異在於：Base62 的 7 碼可表示 62^7 ≈ 3.5 兆個唯一值，對短網址系統已綽綽有餘。Base64 雖然單碼能多表示 2 個值，但每碼只多 3.2% 的空間，完全不值得犧牲 URL 安全性。因此短網址系統一律選擇 Base62。\""
+      }
+    }
+    
+    ,
+    {
+      "@type": "Question",
+      "name": "\"短網址應該用 301 還是 302 重導向？\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"這取決於你是否需要追蹤點擊數據。301（Moved Permanently）告訴瀏覽器永久快取，後續請求直接跳轉目標 URL，不再經過短網址伺服器。好處是降低伺服器負載和延遲，壞處是你完全無法統計後續點擊次數，且無法更換目標 URL（因為瀏覽器已快取）。302（Found）告訴瀏覽器這是臨時重導向，每次都會先打到短網址伺服器。好處是每次點擊都能被記錄，且可以隨時更換目標 URL、進行 A/B 測試。壞處是每次請求都增加一次網路往返。商業短網址服務如 bit.ly 幾乎都使用 302，因為點擊分析是核心商業價值。只有純粹為了縮短連結、不需分析的場景才考慮 301。\""
+      }
+    }
+    
+    ,
+    {
+      "@type": "Question",
+      "name": "\"為什麼推薦 Snowflake ID 而不是資料庫的 AUTO_INCREMENT？\"",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"AUTO_INCREMENT 的致命缺點是中央化瓶頸和可預測性。首先，AUTO_INCREMENT 依賴單一資料庫實例來保證遞增唯一性，在分散式環境下要麼引入全域鎖（嚴重降低吞吐量），要麼用不同步長分段（如機器 A 產生偶數、機器 B 產生奇數），但擴展不靈活。其次，連續的自增 ID 讓攻擊者可以輕鬆猜測其他短碼——知道 aB3kZ9 存在，就可以嘗試 aB3kZ8、aB3kZa 等。Snowflake ID 解決了這兩個問題：每台機器有獨立的 machineId（10 位元，最多 1024 台），可以完全獨立產生 ID，不需要中央協調；41 位時間戳 + 12 位序列號的組合讓 ID 在時間上有序但不可預測，單機每毫秒可產生 4096 個 ID（每秒 409 萬），遠超短網址服務的需求。\""
+      }
+    }
+    
+  ]
+}
+</script>
+
+
+
+
+
+</head>
+<body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class="site-nav" id="siteNav">
+    <div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full">
+        
+        <a href="https://benzhub.github.io/" class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">
+            BenzHub
+        </a>
+
+        
+        <div class="hidden md:flex items-center gap-6">
+            
+            <a href="/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                首頁
+            </a>
+            
+            <a href="/about/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                關於
+            </a>
+            
+            <a href="/contact/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                聯絡
+            </a>
+            
+            <a href="/resourses/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                資源
+            </a>
+            
+
+            
+            <div class="flex items-center gap-2">
+                <form class="flex items-center" role="search" method="get" action="https://google.com/search" id="navSearchForm">
+                    <input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50"
+                        type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋" id="navSearchInput">
+                    <input type="hidden" name="sitesearch" value="https://benzhub.github.io/" />
+                </form>
+                <button onclick="toggleNavSearch()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+                    <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                    </svg>
+                </button>
+            </div>
+
+            
+            <span class="text-zinc-200 dark:text-zinc-700">|</span>
+
+            
+            
+
+
+
+
+<div class="lang-switcher relative hidden md:block">
+    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+        <span>🌐</span>
+        <span>繁體中文</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
+        
+            
+            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
+    <div class="flex gap-2">
+        
+            
+            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+            
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon2" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+        </div>
+
+        
+        <div class="flex md:hidden items-center gap-1">
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+            <button id="hamburgerbtn" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Menu">
+                <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    
+    <div class="mobile-menu md:hidden" id="mobileMenu">
+        
+        <a href="/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            首頁
+        </a>
+        
+        <a href="/about/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            關於
+        </a>
+        
+        <a href="/contact/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            聯絡
+        </a>
+        
+        <a href="/resourses/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            資源
+        </a>
+        
+        <form class="mt-2" role="search" method="get" action="https://google.com/search">
+            <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
+            <input type="hidden" name="sitesearch" value="https://benzhub.github.io/" />
+        </form>
+        
+        
+
+
+
+
+<div class="lang-switcher relative hidden md:block">
+    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+        <span>🌐</span>
+        <span>繁體中文</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
+        
+            
+            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
+    <div class="flex gap-2">
+        
+            
+            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+    </div>
+</nav>
+
+<script>
+    
+    document.getElementById('hamburgerbtn').addEventListener('click', function () {
+        document.getElementById('mobileMenu').classList.toggle('active');
+    });
+
+    
+    window.addEventListener('scroll', function () {
+        var nav = document.getElementById('siteNav');
+        if (window.scrollY > 50) {
+            nav.classList.add('scrolled');
+        } else {
+            nav.classList.remove('scrolled');
+        }
+    });
+
+    
+    function toggleNavSearch() {
+        var input = document.getElementById('navSearchInput');
+        input.classList.toggle('expanded');
+        if (input.classList.contains('expanded')) {
+            input.focus();
+        }
+    }
+
+    
+    function toggleLangMenu() {
+        var dropdown = document.getElementById('langDropdown');
+        dropdown.classList.toggle('hidden');
+    }
+
+    
+    document.addEventListener('click', function (e) {
+        
+        var form = document.getElementById('navSearchForm');
+        var input = document.getElementById('navSearchInput');
+        if (form && input && !form.contains(e.target) && !e.target.closest('[aria-label="Toggle Search"]')) {
+            input.classList.remove('expanded');
+        }
+        
+        var langSwitcher = e.target.closest('.lang-switcher');
+        if (!langSwitcher) {
+            var dropdown = document.getElementById('langDropdown');
+            if (dropdown) dropdown.classList.add('hidden');
+        }
+    });
+</script>
+<div class="nav-spacer"></div>
+    <div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id="content">
+        <div class="lg:mx-5">
+<div class="grid grid-cols-3 gap-6">
+  
+  <div class="col-span-3 lg:col-span-2">
+  
+      
+      <div class="post-detail fade-in my-4">
+        <h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">設計短網址系統 — Base62 編碼、分散式 ID 生成與重導向架構 | 資料結構與演算法</h1>
+        <div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4">
+            <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/27
+            </span>
+            
+        </div>
+        
+        <div class="flex flex-wrap gap-1.5 mb-5">
+            
+            <a href='/tags/javascript' class="tag-pill no-underline">javascript</a>
+            
+            <a href='/tags/%E8%B3%87%E6%96%99%E7%B5%90%E6%A7%8B%E6%BC%94%E7%AE%97%E6%B3%95' class="tag-pill no-underline">資料結構&amp;演算法</a>
+            
+            <a href='/tags/url-shortener' class="tag-pill no-underline">URL Shortener</a>
+            
+            <a href='/tags/%E7%9F%AD%E7%B6%B2%E5%9D%80' class="tag-pill no-underline">短網址</a>
+            
+            <a href='/tags/%E7%B3%BB%E7%B5%B1%E8%A8%AD%E8%A8%88' class="tag-pill no-underline">系統設計</a>
+            
+        </div>
+        
+        
+        <img class="py-4 m-auto rounded-lg thumb-img" src="https://benzhub.github.io/img/javascript/Data%20Structures%20&amp;%20Algorithms/044-URL-Shortener.png" alt="設計短網址系統 — Base62 編碼、分散式 ID 生成與重導向架構 | 資料結構與演算法">
+        
+        
+        <div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote>
+<p><strong>短網址系統（URL Shortener）</strong> 是系統設計面試中的經典入門題——將冗長的 URL 映射為短碼（如 <code>https://short.ly/aB3kZ9</code>），訪問時重導向至原始網址。本文將從需求分析出發，深入比較 <strong>雜湊截斷法</strong>、<strong>自增 ID + Base62</strong> 與 <strong>Snowflake 分散式 ID</strong> 三種方案，實作完整的 <strong>Base62 編解碼器</strong> 與 <strong>Snowflake ID 生成器</strong>，探討 <strong>301 vs 302 重導向策略</strong>、<strong>快取架構</strong> 與 <strong>水平擴展設計</strong>，搭配 <strong>JavaScript/TypeScript</strong> 與 <strong>C++</strong> 雙語言完整程式碼，帶你徹底掌握短網址系統的設計與實戰。</p>
+</blockquote>
+<h3 id="前言">前言</h3>
+<p>在上一篇文章中，我們實作了</p>
+
+  <a class="text-blue-500 font-bold no-underline" href="/post/javascript/data-structures-algorithms/043-task-scheduler/" target="_blank">任務排程器（Task Scheduler）</a>
+
+<p>，學會如何用 Priority Queue 和 Timer Wheel 管理即時、延遲與週期性任務的調度。今天我們要解決另一個看似簡單、實則涵蓋多個核心系統設計議題的問題——<strong>短網址系統（URL Shortener）</strong>。</p>
+<p>你一定用過 bit.ly、tinyurl.com 或 Twitter 的 t.co——在社群媒體、簡訊、電子郵件中，長達數百個字元的 URL 不僅佔據寶貴的字元空間，還難以閱讀和分享。短網址服務將長 URL 映射為一個 6-7 個字元的短碼，同時提供點擊追蹤、地理位置分析等加值功能。</p>
+<p>這個問題的核心挑戰是：如何在 <strong>全域唯一</strong> 的前提下，高效地產生短碼、儲存映射關係、並在極低延遲下完成重導向？暴力的 MD5 截斷會遇到碰撞問題，單機的自增 ID 會成為瓶頸——我們需要精心設計的 ID 生成策略與編碼方案。答案是我們在</p>
+
+  <a class="text-blue-500 font-bold no-underline" href="/post/javascript/data-structures-algorithms/016-advanced-hashing/" target="_blank">第 016 篇</a>
+
+<p>中學過的雜湊原理，加上分散式 ID 生成器（如 <strong>Snowflake</strong>）與 <strong>Base62 編碼</strong>。</p>
+<p>本文你將學到：</p>
+<ul>
+<li>短網址系統的完整需求分析與規模估算</li>
+<li>三種方案比較：雜湊截斷法、自增 ID + Base62、Snowflake ID + Base62</li>
+<li>完整可運行的 JavaScript/TypeScript 與 C++ 雙語言實作</li>
+<li>301 vs 302 重導向策略的選擇與權衡</li>
+<li>生產環境考量：快取策略、過期清理、自訂短碼、CDN 加速</li>
+<li>3 道 LeetCode 相關練習題</li>
+</ul>
+<hr>
+<h2 id="1-需求分析">1. 需求分析</h2>
+<h3 id="功能性需求functional-requirements">功能性需求（Functional Requirements）</h3>
+<ul>
+<li><strong>建立短網址</strong>：輸入長 URL，系統回傳唯一短碼（如 <code>https://short.ly/aB3kZ9</code>）</li>
+<li><strong>重導向</strong>：訪問短網址時，系統將使用者重導向至原始長 URL</li>
+<li><strong>自訂短碼</strong>：使用者可選擇自訂短碼（如 <code>https://short.ly/my-brand</code>）</li>
+<li><strong>分析統計</strong>：追蹤點擊次數、地理位置、裝置類型</li>
+<li><strong>過期設定</strong>：短網址可設定有效期限，到期後自動失效</li>
+</ul>
+<h3 id="非功能性需求non-functional-requirements">非功能性需求（Non-Functional Requirements）</h3>
+<table>
+  <thead>
+      <tr>
+          <th>需求</th>
+          <th>目標</th>
+          <th>說明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>高可用性</td>
+          <td>SLA 99.9%</td>
+          <td>每年停機不超過 8.7 小時</td>
+      </tr>
+      <tr>
+          <td>低延遲</td>
+          <td>重導向 P99 &lt; 10ms</td>
+          <td>建立 P99 &lt; 100ms</td>
+      </tr>
+      <tr>
+          <td>一致性</td>
+          <td>最終一致性可接受</td>
+          <td>同一短碼永遠指向同一長 URL</td>
+      </tr>
+      <tr>
+          <td>短碼唯一性</td>
+          <td>全域唯一</td>
+          <td>不得碰撞</td>
+      </tr>
+      <tr>
+          <td>規模</td>
+          <td>每秒數萬次重導向</td>
+          <td>讀多寫少，讀寫比約 100:1</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="排除範圍">排除範圍</h3>
+<ul>
+<li>不設計使用者認證系統</li>
+<li>不設計前端 UI</li>
+<li>不處理惡意 URL 偵測</li>
+</ul>
+<h3 id="規模估算">規模估算</h3>
+<p>以中型短網址服務為參考：</p>
+<pre tabindex="0"><code>流量估算：
+  - 每天新建短網址：100 萬條
+  - 讀寫比（重導向 : 建立）= 100 : 1
+  - 短網址平均壽命：5 年
+
+  新建 QPS：100 萬 / 86,400 秒 ≈ 12 QPS（峰值 x3 ≈ 36 QPS）
+  重導向 QPS：12 x 100 = 1,200 QPS（峰值 ≈ 3,600 QPS）
+
+儲存估算：
+  每條記錄：short_code(7B) + long_url(200B) + metadata(100B) ≈ 315 B
+  5 年總資料量：100 萬/天 x 365 天 x 5 年 = 18.25 億條
+  18.25 億 x 315 B ≈ 575 GB
+
+短碼空間估算（Base62）：
+  6 碼：62^6 ≈ 568 億
+  7 碼：62^7 ≈ 3.5 兆
+  → 7 碼空間（3.5 兆）遠超 5 年需求（18.25 億），綽綽有餘
+</code></pre><p><strong>結論</strong>：核心挑戰不在於儲存量，而在於 <strong>讀取路徑的低延遲</strong>（1,200+ QPS 的重導向請求）和 <strong>短碼的全域唯一性</strong>。必須依賴 Redis 快取 + 高效的 ID 生成策略。</p>
+<hr>
+<h2 id="2-方案設計">2. 方案設計</h2>
+<h3 id="21-方案一雜湊截斷法hash-based">2.1 方案一：雜湊截斷法（Hash-Based）</h3>
+<p>對長 URL 計算 MD5 或 SHA-256 雜湊值，取前 N 位轉為 Base62 作為短碼。</p>
+<pre tabindex="0"><code>流程：
+  long_url = &#34;https://example.com/very/long/path&#34;
+         │
+         ▼
+  hash = MD5(long_url)                → &#34;e99a18c428cb38d5f...&#34;（128 位）
+  short_code = Base62(hash[:8])       → &#34;aB3kZ9x&#34;
+         │
+         ▼
+  查詢 DB：short_code 是否存在？
+         │
+    ┌────┴────┐
+    │ 不存在  │ 存在
+    ▼         ▼
+  寫入 DB   long_url 相同？
+            │
+       ┌────┴────┐
+       │ 是      │ 否（碰撞！）
+       ▼         ▼
+     回傳      重試：hash = MD5(url + salt++)
+              最多 3 次，仍碰撞則 fallback 自增 ID
+</code></pre><p><strong>優點</strong>：無需中央 ID 生成器，相同 URL 自然產生相同短碼（天然冪等）。
+<strong>缺點</strong>：碰撞風險需要額外處理，重試邏輯增加複雜度與延遲。</p>
+<h3 id="22-方案二自增-id--base62">2.2 方案二：自增 ID + Base62</h3>
+<p>使用資料庫 <code>AUTO_INCREMENT</code> 產生唯一 ID，再將 ID 編碼為 Base62 字串。</p>
+<pre tabindex="0"><code>流程：
+  INSERT → id = 12345678
+  short_code = toBase62(12345678)     → &#34;zxpq&#34;（補齊至 7 碼）
+  → &#34;000zxpq&#34;
+
+編碼原理（十進位轉 62 進位）：
+  12345678 ÷ 62 = 199123 餘 52 → &#39;q&#39;
+  199123   ÷ 62 = 3211   餘 41 → &#39;f&#39;
+  3211     ÷ 62 = 51     餘 49 → &#39;n&#39;
+  51       ÷ 62 = 0      餘 51 → &#39;p&#39;
+  反轉 → &#34;pnfq&#34; → 補齊 → &#34;000pnfq&#34;
+</code></pre><p><strong>優點</strong>：保證唯一性，實作極簡單。
+<strong>缺點</strong>：單一資料庫成為瓶頸；連續 ID 可被預測（安全風險）。</p>
+<h3 id="23-方案三snowflake-id--base62推薦">2.3 方案三：Snowflake ID + Base62（推薦）</h3>
+<p>使用分散式唯一 ID 生成器（如 Twitter 的 Snowflake 演算法），產生 64 位 ID 後轉 Base62。</p>
+<pre tabindex="0"><code>Snowflake ID（64 位元）結構：
+
+ 63      63  62    22  21      12  11        0
+ ┌────────┬──────────┬──────────┬────────────┐
+ │符號位  │時間戳(ms)│機器 ID   │序列號      │
+ │ 1 bit  │ 41 bits  │ 10 bits  │  12 bits   │
+ └────────┴──────────┴──────────┴────────────┘
+
+ 時間戳：當前毫秒 - 自訂 Epoch（如 2020-01-01）
+ 機器 ID：資料中心 ID(5 位) + 機器 ID(5 位) = 1024 台機器
+ 序列號：同一毫秒內最多 4096 個 ID
+
+ → 最大吞吐：1024 台機器 x 4096 個/ms = 419 萬 ID/ms
+</code></pre><p><strong>優點</strong>：無碰撞、高吞吐、完全去中心化，每台機器獨立生成 ID。
+<strong>缺點</strong>：需要時鐘同步（NTP），實作較複雜。</p>
+<h3 id="24-方案比較">2.4 方案比較</h3>
+<table>
+  <thead>
+      <tr>
+          <th>維度</th>
+          <th>雜湊截斷法</th>
+          <th>自增 ID + Base62</th>
+          <th>Snowflake + Base62</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>唯一性保證</td>
+          <td>需碰撞處理</td>
+          <td>保證唯一</td>
+          <td><strong>保證唯一</strong></td>
+      </tr>
+      <tr>
+          <td>分散式支援</td>
+          <td>天然支援</td>
+          <td>需額外設計</td>
+          <td><strong>天然支援</strong></td>
+      </tr>
+      <tr>
+          <td>可預測性</td>
+          <td>低</td>
+          <td>高（安全風險）</td>
+          <td><strong>低</strong></td>
+      </tr>
+      <tr>
+          <td>吞吐量</td>
+          <td>受碰撞重試影響</td>
+          <td>受 DB 限制</td>
+          <td><strong>極高（419 萬/ms）</strong></td>
+      </tr>
+      <tr>
+          <td>冪等性</td>
+          <td>天然冪等</td>
+          <td>需額外查詢</td>
+          <td>需額外查詢</td>
+      </tr>
+      <tr>
+          <td>實作複雜度</td>
+          <td>中</td>
+          <td>低</td>
+          <td>中</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>結論</strong>：生產環境推薦 <strong>Snowflake ID + Base62</strong>，兼顧唯一性、分散式擴展與安全性。</p>
+<hr>
+<h2 id="3-核心實作javascript--typescript">3. 核心實作——JavaScript / TypeScript</h2>
+<h3 id="31-base62-編解碼器">3.1 Base62 編解碼器</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-typescript" data-lang="typescript"><span style="display:flex;"><span><span style="color:#75715e">// ─── Base62 編解碼器 ──────────────────────────────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">BASE62_CHARS</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz&#34;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">BASE62_MAP</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Map</span>&lt;<span style="color:#f92672">string</span>, <span style="color:#a6e22e">number</span>&gt;(
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">BASE62_CHARS</span>.<span style="color:#a6e22e">split</span>(<span style="color:#e6db74">&#34;&#34;</span>).<span style="color:#a6e22e">map</span>((<span style="color:#a6e22e">c</span>, <span style="color:#a6e22e">i</span>) <span style="color:#f92672">=&gt;</span> [<span style="color:#a6e22e">c</span>, <span style="color:#a6e22e">i</span>])
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/** 將 bigint 編碼為 Base62 字串 */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">toBase62</span>(<span style="color:#a6e22e">num</span>: <span style="color:#66d9ef">bigint</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">string</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">num</span> <span style="color:#f92672">===</span> <span style="color:#ae81ff">0</span><span style="color:#a6e22e">n</span>) <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;0&#34;</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">base</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">62</span><span style="color:#a6e22e">n</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">digits</span>: <span style="color:#66d9ef">string</span>[] <span style="color:#f92672">=</span> [];
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">num</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">while</span> (<span style="color:#a6e22e">n</span> <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span><span style="color:#a6e22e">n</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">digits</span>.<span style="color:#a6e22e">push</span>(<span style="color:#a6e22e">BASE62_CHARS</span>[Number(<span style="color:#a6e22e">n</span> <span style="color:#f92672">%</span> <span style="color:#a6e22e">base</span>)]);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">n</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">/</span> <span style="color:#a6e22e">base</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">digits</span>.<span style="color:#a6e22e">reverse</span>().<span style="color:#a6e22e">join</span>(<span style="color:#e6db74">&#34;&#34;</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/** 將 Base62 字串解碼為 bigint */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">fromBase62</span>(<span style="color:#a6e22e">str</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">bigint</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">base</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">62</span><span style="color:#a6e22e">n</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">result</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span><span style="color:#a6e22e">n</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">ch</span> <span style="color:#66d9ef">of</span> <span style="color:#a6e22e">str</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">val</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">BASE62_MAP</span>.<span style="color:#66d9ef">get</span>(<span style="color:#a6e22e">ch</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">val</span> <span style="color:#f92672">===</span> <span style="color:#66d9ef">undefined</span>) <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> Error(<span style="color:#e6db74">`無效的 Base62 字元：</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">ch</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">result</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">result</span> <span style="color:#f92672">*</span> <span style="color:#a6e22e">base</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">BigInt</span>(<span style="color:#a6e22e">val</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">result</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/** 補齊至固定長度（左補 &#39;0&#39;） */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">padBase62</span>(<span style="color:#a6e22e">str</span>: <span style="color:#66d9ef">string</span>, <span style="color:#a6e22e">length</span>: <span style="color:#66d9ef">number</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">string</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">str</span>.<span style="color:#a6e22e">padStart</span>(<span style="color:#a6e22e">length</span>, <span style="color:#e6db74">&#34;0&#34;</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ─── 測試 Base62 ─────────────────────────────────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">testId</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">123456789</span><span style="color:#a6e22e">n</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">encoded</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">toBase62</span>(<span style="color:#a6e22e">testId</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">decoded</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">fromBase62</span>(<span style="color:#a6e22e">encoded</span>);
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`ID: </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">testId</span><span style="color:#e6db74">}</span><span style="color:#e6db74"> → Base62: &#34;</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">encoded</span><span style="color:#e6db74">}</span><span style="color:#e6db74">&#34; → 解碼: </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">decoded</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`驗證: </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">testId</span> <span style="color:#f92672">===</span> <span style="color:#a6e22e">decoded</span> <span style="color:#f92672">?</span> <span style="color:#e6db74">&#34;通過&#34;</span> <span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;失敗&#34;</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 輸出：
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//   ID: 123456789 → Base62: &#34;8M0kX&#34; → 解碼: 123456789
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//   驗證: 通過
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 邊界值測試
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">val</span> <span style="color:#66d9ef">of</span> [<span style="color:#ae81ff">0</span><span style="color:#a6e22e">n</span>, <span style="color:#ae81ff">1</span><span style="color:#a6e22e">n</span>, <span style="color:#ae81ff">61</span><span style="color:#a6e22e">n</span>, <span style="color:#ae81ff">62</span><span style="color:#a6e22e">n</span>, <span style="color:#ae81ff">3844</span><span style="color:#a6e22e">n</span>, <span style="color:#a6e22e">BigInt</span>(Number.<span style="color:#a6e22e">MAX_SAFE_INTEGER</span>)]) {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">enc</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">toBase62</span>(<span style="color:#a6e22e">val</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">dec</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">fromBase62</span>(<span style="color:#a6e22e">enc</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`  </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">val</span><span style="color:#e6db74">}</span><span style="color:#e6db74"> → &#34;</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">padBase62</span>(<span style="color:#a6e22e">enc</span>, <span style="color:#ae81ff">7</span>)<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34; → </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">dec</span><span style="color:#e6db74">}</span><span style="color:#e6db74"> [</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">val</span> <span style="color:#f92672">===</span> <span style="color:#a6e22e">dec</span> <span style="color:#f92672">?</span> <span style="color:#e6db74">&#34;OK&#34;</span> <span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;FAIL&#34;</span><span style="color:#e6db74">}</span><span style="color:#e6db74">]`</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 輸出：
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//   0 → &#34;0000000&#34; → 0 [OK]
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//   1 → &#34;0000001&#34; → 1 [OK]
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//   61 → &#34;000000z&#34; → 61 [OK]
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//   62 → &#34;0000010&#34; → 62 [OK]
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//   3844 → &#34;0000100&#34; → 3844 [OK]
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//   9007199254740991 → &#34;FfGNdXsE7&#34; → 9007199254740991 [OK]
+</span></span></span></code></pre></div><h3 id="32-snowflake-id-生成器">3.2 Snowflake ID 生成器</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-typescript" data-lang="typescript"><span style="display:flex;"><span><span style="color:#75715e">// ─── Snowflake ID 生成器 ──────────────────────────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">SnowflakeGenerator</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">readonly</span> <span style="color:#a6e22e">epoch</span>: <span style="color:#66d9ef">bigint</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">readonly</span> <span style="color:#a6e22e">machineId</span>: <span style="color:#66d9ef">bigint</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">sequence</span>: <span style="color:#66d9ef">bigint</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span><span style="color:#a6e22e">n</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">lastTimestamp</span>: <span style="color:#66d9ef">bigint</span> <span style="color:#f92672">=</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span><span style="color:#a6e22e">n</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 位元配置
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">readonly</span> <span style="color:#a6e22e">MACHINE_BITS</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span><span style="color:#a6e22e">n</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">readonly</span> <span style="color:#a6e22e">SEQUENCE_BITS</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">12</span><span style="color:#a6e22e">n</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">readonly</span> <span style="color:#a6e22e">MAX_SEQUENCE</span> <span style="color:#f92672">=</span> (<span style="color:#ae81ff">1</span><span style="color:#a6e22e">n</span> <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">12</span><span style="color:#a6e22e">n</span>) <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span><span style="color:#a6e22e">n</span>;     <span style="color:#75715e">// 4095
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">readonly</span> <span style="color:#a6e22e">MAX_MACHINE_ID</span> <span style="color:#f92672">=</span> (<span style="color:#ae81ff">1</span><span style="color:#a6e22e">n</span> <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">10</span><span style="color:#a6e22e">n</span>) <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span><span style="color:#a6e22e">n</span>;   <span style="color:#75715e">// 1023
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">constructor</span>(<span style="color:#a6e22e">machineId</span>: <span style="color:#66d9ef">number</span>, <span style="color:#a6e22e">epochMs</span>: <span style="color:#66d9ef">number</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">1577836800000</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">BigInt</span>(<span style="color:#a6e22e">machineId</span>) <span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">SnowflakeGenerator</span>.<span style="color:#a6e22e">MAX_MACHINE_ID</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> Error(<span style="color:#e6db74">`machineId 必須 &lt; </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">SnowflakeGenerator</span>.<span style="color:#a6e22e">MAX_MACHINE_ID</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">machineId</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">BigInt</span>(<span style="color:#a6e22e">machineId</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">epoch</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">BigInt</span>(<span style="color:#a6e22e">epochMs</span>); <span style="color:#75715e">// 預設 2020-01-01
+</span></span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">/** 產生下一個唯一 ID */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">generate</span>()<span style="color:#f92672">:</span> <span style="color:#66d9ef">bigint</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">now</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">BigInt</span>(Date.<span style="color:#a6e22e">now</span>());
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">now</span> <span style="color:#f92672">===</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">lastTimestamp</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e">// 同毫秒內遞增序列號
+</span></span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">sequence</span> <span style="color:#f92672">=</span> (<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">sequence</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span><span style="color:#a6e22e">n</span>) <span style="color:#f92672">&amp;</span> <span style="color:#a6e22e">SnowflakeGenerator</span>.<span style="color:#a6e22e">MAX_SEQUENCE</span>;
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">sequence</span> <span style="color:#f92672">===</span> <span style="color:#ae81ff">0</span><span style="color:#a6e22e">n</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// 序列號耗盡，等待下一毫秒
+</span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">while</span> (<span style="color:#a6e22e">now</span> <span style="color:#f92672">&lt;=</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">lastTimestamp</span>) {
+</span></span><span style="display:flex;"><span>          <span style="color:#a6e22e">now</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">BigInt</span>(Date.<span style="color:#a6e22e">now</span>());
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">sequence</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span><span style="color:#a6e22e">n</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">lastTimestamp</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">now</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 組合 64 位 ID
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> (
+</span></span><span style="display:flex;"><span>      ((<span style="color:#a6e22e">now</span> <span style="color:#f92672">-</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">epoch</span>) <span style="color:#f92672">&lt;&lt;</span> (<span style="color:#a6e22e">SnowflakeGenerator</span>.<span style="color:#a6e22e">MACHINE_BITS</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">SnowflakeGenerator</span>.<span style="color:#a6e22e">SEQUENCE_BITS</span>)) <span style="color:#f92672">|</span>
+</span></span><span style="display:flex;"><span>      (<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">machineId</span> <span style="color:#f92672">&lt;&lt;</span> <span style="color:#a6e22e">SnowflakeGenerator</span>.<span style="color:#a6e22e">SEQUENCE_BITS</span>) <span style="color:#f92672">|</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">sequence</span>
+</span></span><span style="display:flex;"><span>    );
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ─── 測試 Snowflake ──────────────────────────────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">idGen</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">SnowflakeGenerator</span>(<span style="color:#ae81ff">1</span>); <span style="color:#75715e">// 機器 ID = 1
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">ids</span>: <span style="color:#66d9ef">bigint</span>[] <span style="color:#f92672">=</span> [];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;\n--- Snowflake ID 生成 ---&#34;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">5</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">id</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">idGen</span>.<span style="color:#a6e22e">generate</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">ids</span>.<span style="color:#a6e22e">push</span>(<span style="color:#a6e22e">id</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">code</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">padBase62</span>(<span style="color:#a6e22e">toBase62</span>(<span style="color:#a6e22e">id</span>), <span style="color:#ae81ff">7</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`ID: </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">id</span><span style="color:#e6db74">}</span><span style="color:#e6db74"> → 短碼: &#34;</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">code</span><span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;`</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 唯一性驗證
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">uniqueIds</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Set</span>(<span style="color:#a6e22e">ids</span>.<span style="color:#a6e22e">map</span>(String));
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`唯一性驗證：</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">uniqueIds</span>.<span style="color:#a6e22e">size</span> <span style="color:#f92672">===</span> <span style="color:#a6e22e">ids</span>.<span style="color:#a6e22e">length</span> <span style="color:#f92672">?</span> <span style="color:#e6db74">&#34;全部唯一&#34;</span> <span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;有重複！&#34;</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 輸出：
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//   ID: 832943816704000 → 短碼: &#34;3yFxHe80&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//   ID: 832943816704001 → 短碼: &#34;3yFxHe81&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//   ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//   唯一性驗證：全部唯一
+</span></span></span></code></pre></div><h3 id="33-完整短網址服務">3.3 完整短網址服務</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-typescript" data-lang="typescript"><span style="display:flex;"><span><span style="color:#75715e">// ─── 資料模型 ─────────────────────────────────────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">UrlRecord</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">id</span>: <span style="color:#66d9ef">bigint</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">shortCode</span>: <span style="color:#66d9ef">string</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">longUrl</span>: <span style="color:#66d9ef">string</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">createdAt</span>: <span style="color:#66d9ef">Date</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">expiresAt?</span>: <span style="color:#66d9ef">Date</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">clickCount</span>: <span style="color:#66d9ef">number</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ─── 資料存取層（模擬資料庫） ─────────────────────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">UrlRepository</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">db</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Map</span>&lt;<span style="color:#f92672">string</span>, <span style="color:#a6e22e">UrlRecord</span>&gt;();           <span style="color:#75715e">// shortCode → record
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">longUrlIndex</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Map</span>&lt;<span style="color:#f92672">string</span>, <span style="color:#a6e22e">string</span>&gt;();    <span style="color:#75715e">// longUrl → shortCode
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">async</span> <span style="color:#a6e22e">findByShortCode</span>(<span style="color:#a6e22e">shortCode</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#a6e22e">Promise</span>&lt;<span style="color:#f92672">UrlRecord</span> <span style="color:#960050;background-color:#1e0010">|</span> <span style="color:#a6e22e">null</span>&gt; {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">db</span>.<span style="color:#66d9ef">get</span>(<span style="color:#a6e22e">shortCode</span>) <span style="color:#f92672">??</span> <span style="color:#66d9ef">null</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">async</span> <span style="color:#a6e22e">findByLongUrl</span>(<span style="color:#a6e22e">longUrl</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#a6e22e">Promise</span>&lt;<span style="color:#f92672">string</span> <span style="color:#960050;background-color:#1e0010">|</span> <span style="color:#a6e22e">null</span>&gt; {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">longUrlIndex</span>.<span style="color:#66d9ef">get</span>(<span style="color:#a6e22e">longUrl</span>) <span style="color:#f92672">??</span> <span style="color:#66d9ef">null</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">async</span> <span style="color:#a6e22e">save</span>(<span style="color:#a6e22e">record</span>: <span style="color:#66d9ef">UrlRecord</span>)<span style="color:#f92672">:</span> <span style="color:#a6e22e">Promise</span>&lt;<span style="color:#f92672">void</span>&gt; {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">db</span>.<span style="color:#66d9ef">set</span>(<span style="color:#a6e22e">record</span>.<span style="color:#a6e22e">shortCode</span>, <span style="color:#a6e22e">record</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">longUrlIndex</span>.<span style="color:#66d9ef">set</span>(<span style="color:#a6e22e">record</span>.<span style="color:#a6e22e">longUrl</span>, <span style="color:#a6e22e">record</span>.<span style="color:#a6e22e">shortCode</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">async</span> <span style="color:#a6e22e">incrementClick</span>(<span style="color:#a6e22e">shortCode</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#a6e22e">Promise</span>&lt;<span style="color:#f92672">void</span>&gt; {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">record</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">db</span>.<span style="color:#66d9ef">get</span>(<span style="color:#a6e22e">shortCode</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">record</span>) <span style="color:#a6e22e">record</span>.<span style="color:#a6e22e">clickCount</span><span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">async</span> <span style="color:#a6e22e">deleteExpired</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">Promise</span>&lt;<span style="color:#f92672">number</span>&gt; {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">now</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Date();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">deleted</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">const</span> [<span style="color:#a6e22e">code</span>, <span style="color:#a6e22e">record</span>] <span style="color:#66d9ef">of</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">db</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">record</span>.<span style="color:#a6e22e">expiresAt</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">record</span>.<span style="color:#a6e22e">expiresAt</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">now</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">db</span>.<span style="color:#66d9ef">delete</span>(<span style="color:#a6e22e">code</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">longUrlIndex</span>.<span style="color:#66d9ef">delete</span>(<span style="color:#a6e22e">record</span>.<span style="color:#a6e22e">longUrl</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">deleted</span><span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">deleted</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ─── Redis 快取層（模擬） ─────────────────────────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">CacheLayer</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">cache</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Map</span>&lt;<span style="color:#f92672">string</span>, { <span style="color:#a6e22e">value</span><span style="color:#960050;background-color:#1e0010">:</span> <span style="color:#a6e22e">string</span><span style="color:#960050;background-color:#1e0010">;</span> <span style="color:#a6e22e">expiresAt</span><span style="color:#960050;background-color:#1e0010">:</span> <span style="color:#a6e22e">number</span> }&gt;();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">get</span>(<span style="color:#a6e22e">key</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#a6e22e">Promise</span>&lt;<span style="color:#f92672">string</span> <span style="color:#960050;background-color:#1e0010">|</span> <span style="color:#a6e22e">null</span>&gt; {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">entry</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">cache</span>.<span style="color:#66d9ef">get</span>(<span style="color:#a6e22e">key</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">entry</span>) <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (Date.<span style="color:#a6e22e">now</span>() <span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">entry</span>.<span style="color:#a6e22e">expiresAt</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">cache</span>.<span style="color:#66d9ef">delete</span>(<span style="color:#a6e22e">key</span>);
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">entry</span>.<span style="color:#a6e22e">value</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">set</span>(<span style="color:#a6e22e">key</span>: <span style="color:#66d9ef">string</span>, <span style="color:#a6e22e">value</span>: <span style="color:#66d9ef">string</span>, <span style="color:#a6e22e">ttlSeconds</span>: <span style="color:#66d9ef">number</span>)<span style="color:#f92672">:</span> <span style="color:#a6e22e">Promise</span>&lt;<span style="color:#f92672">void</span>&gt; {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">cache</span>.<span style="color:#66d9ef">set</span>(<span style="color:#a6e22e">key</span>, {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">value</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">expiresAt</span>: <span style="color:#66d9ef">Date.now</span>() <span style="color:#f92672">+</span> <span style="color:#a6e22e">ttlSeconds</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">1000</span>,
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">async</span> <span style="color:#a6e22e">del</span>(<span style="color:#a6e22e">key</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#a6e22e">Promise</span>&lt;<span style="color:#f92672">void</span>&gt; {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">cache</span>.<span style="color:#66d9ef">delete</span>(<span style="color:#a6e22e">key</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">cacheKey</span>(<span style="color:#a6e22e">shortCode</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">string</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#e6db74">`url:</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">shortCode</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ─── 核心服務層 ───────────────────────────────────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">ShortenOptions</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">customCode?</span>: <span style="color:#66d9ef">string</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">expiresInDays?</span>: <span style="color:#66d9ef">number</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">ShortenResult</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">shortCode</span>: <span style="color:#66d9ef">string</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">shortUrl</span>: <span style="color:#66d9ef">string</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">longUrl</span>: <span style="color:#66d9ef">string</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">expiresAt?</span>: <span style="color:#66d9ef">Date</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">isNew</span>: <span style="color:#66d9ef">boolean</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">UrlShortenerService</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">readonly</span> <span style="color:#a6e22e">SHORT_CODE_LENGTH</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">7</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">readonly</span> <span style="color:#a6e22e">CACHE_TTL</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">86400</span>; <span style="color:#75715e">// 24 小時
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">readonly</span> <span style="color:#a6e22e">BASE_URL</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;https://short.ly&#34;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">constructor</span>(
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">readonly</span> <span style="color:#a6e22e">idGen</span>: <span style="color:#66d9ef">SnowflakeGenerator</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">readonly</span> <span style="color:#a6e22e">repo</span>: <span style="color:#66d9ef">UrlRepository</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">readonly</span> <span style="color:#a6e22e">cache</span>: <span style="color:#66d9ef">CacheLayer</span>
+</span></span><span style="display:flex;"><span>  ) {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">/** 建立短網址 */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">async</span> <span style="color:#a6e22e">shorten</span>(<span style="color:#a6e22e">longUrl</span>: <span style="color:#66d9ef">string</span>, <span style="color:#a6e22e">opts</span>: <span style="color:#66d9ef">ShortenOptions</span> <span style="color:#f92672">=</span> {})<span style="color:#f92672">:</span> <span style="color:#a6e22e">Promise</span>&lt;<span style="color:#f92672">ShortenResult</span>&gt; {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">validateUrl</span>(<span style="color:#a6e22e">longUrl</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 自訂短碼
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">opts</span>.<span style="color:#a6e22e">customCode</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">createCustomCode</span>(<span style="color:#a6e22e">longUrl</span>, <span style="color:#a6e22e">opts</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 冪等性檢查：相同長 URL 是否已有短碼？
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">existing</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">repo</span>.<span style="color:#a6e22e">findByLongUrl</span>(<span style="color:#a6e22e">longUrl</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">existing</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">return</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">shortCode</span>: <span style="color:#66d9ef">existing</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">shortUrl</span><span style="color:#f92672">:</span> <span style="color:#e6db74">`</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">UrlShortenerService</span>.<span style="color:#a6e22e">BASE_URL</span><span style="color:#e6db74">}</span><span style="color:#e6db74">/</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">existing</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">longUrl</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">isNew</span>: <span style="color:#66d9ef">false</span>,
+</span></span><span style="display:flex;"><span>      };
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 生成 Snowflake ID → Base62 短碼
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">id</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">idGen</span>.<span style="color:#a6e22e">generate</span>();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">shortCode</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">padBase62</span>(<span style="color:#a6e22e">toBase62</span>(<span style="color:#a6e22e">id</span>), <span style="color:#a6e22e">UrlShortenerService</span>.<span style="color:#a6e22e">SHORT_CODE_LENGTH</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">expiresAt</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">opts</span>.<span style="color:#a6e22e">expiresInDays</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">?</span> <span style="color:#66d9ef">new</span> Date(Date.<span style="color:#a6e22e">now</span>() <span style="color:#f92672">+</span> <span style="color:#a6e22e">opts</span>.<span style="color:#a6e22e">expiresInDays</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">86400000</span>)
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">:</span> <span style="color:#66d9ef">undefined</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">record</span>: <span style="color:#66d9ef">UrlRecord</span> <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">id</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">shortCode</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">longUrl</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">createdAt</span>: <span style="color:#66d9ef">new</span> Date(),
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">expiresAt</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">clickCount</span>: <span style="color:#66d9ef">0</span>,
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">await</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">repo</span>.<span style="color:#a6e22e">save</span>(<span style="color:#a6e22e">record</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 預熱快取
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">await</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">cache</span>.<span style="color:#66d9ef">set</span>(
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">cache</span>.<span style="color:#a6e22e">cacheKey</span>(<span style="color:#a6e22e">shortCode</span>),
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">longUrl</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">UrlShortenerService</span>.<span style="color:#a6e22e">CACHE_TTL</span>
+</span></span><span style="display:flex;"><span>    );
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">shortCode</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">shortUrl</span><span style="color:#f92672">:</span> <span style="color:#e6db74">`</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">UrlShortenerService</span>.<span style="color:#a6e22e">BASE_URL</span><span style="color:#e6db74">}</span><span style="color:#e6db74">/</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">shortCode</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">longUrl</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">expiresAt</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">isNew</span>: <span style="color:#66d9ef">true</span>,
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">/** 重導向解析：短碼 → 長 URL */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">async</span> <span style="color:#a6e22e">resolve</span>(<span style="color:#a6e22e">shortCode</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#a6e22e">Promise</span>&lt;<span style="color:#f92672">string</span> <span style="color:#960050;background-color:#1e0010">|</span> <span style="color:#a6e22e">null</span>&gt; {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 1. 查詢快取
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">cacheKey</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">cache</span>.<span style="color:#a6e22e">cacheKey</span>(<span style="color:#a6e22e">shortCode</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">cached</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">cache</span>.<span style="color:#66d9ef">get</span>(<span style="color:#a6e22e">cacheKey</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">cached</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e">// 非同步記錄點擊（不阻塞回應）
+</span></span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">repo</span>.<span style="color:#a6e22e">incrementClick</span>(<span style="color:#a6e22e">shortCode</span>).<span style="color:#66d9ef">catch</span>(<span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">error</span>);
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">cached</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 2. 快取未命中 → 查詢資料庫
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">record</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">repo</span>.<span style="color:#a6e22e">findByShortCode</span>(<span style="color:#a6e22e">shortCode</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">record</span>) <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 3. 檢查是否已過期
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">record</span>.<span style="color:#a6e22e">expiresAt</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">record</span>.<span style="color:#a6e22e">expiresAt</span> <span style="color:#f92672">&lt;</span> <span style="color:#66d9ef">new</span> Date()) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 4. 回寫快取並記錄點擊
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">await</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">cache</span>.<span style="color:#66d9ef">set</span>(<span style="color:#a6e22e">cacheKey</span>, <span style="color:#a6e22e">record</span>.<span style="color:#a6e22e">longUrl</span>, <span style="color:#a6e22e">UrlShortenerService</span>.<span style="color:#a6e22e">CACHE_TTL</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">repo</span>.<span style="color:#a6e22e">incrementClick</span>(<span style="color:#a6e22e">shortCode</span>).<span style="color:#66d9ef">catch</span>(<span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">error</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">record</span>.<span style="color:#a6e22e">longUrl</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">/** 自訂短碼處理 */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">async</span> <span style="color:#a6e22e">createCustomCode</span>(
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">longUrl</span>: <span style="color:#66d9ef">string</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">opts</span>: <span style="color:#66d9ef">ShortenOptions</span>
+</span></span><span style="display:flex;"><span>  )<span style="color:#f92672">:</span> <span style="color:#a6e22e">Promise</span>&lt;<span style="color:#f92672">ShortenResult</span>&gt; {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">customCode</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">opts</span>.<span style="color:#a6e22e">customCode</span><span style="color:#f92672">!</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 驗證格式：只允許字母、數字、連字符，長度 3-20
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#e6db74">/^[a-zA-Z0-9-]{3,20}$/</span>.<span style="color:#a6e22e">test</span>(<span style="color:#a6e22e">customCode</span>)) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> Error(<span style="color:#e6db74">&#34;自訂短碼只允許字母、數字、連字符，長度 3-20&#34;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 檢查衝突
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">conflict</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">repo</span>.<span style="color:#a6e22e">findByShortCode</span>(<span style="color:#a6e22e">customCode</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">conflict</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> Error(<span style="color:#e6db74">`短碼 &#34;</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">customCode</span><span style="color:#e6db74">}</span><span style="color:#e6db74">&#34; 已被使用`</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">id</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">idGen</span>.<span style="color:#a6e22e">generate</span>();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">expiresAt</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">opts</span>.<span style="color:#a6e22e">expiresInDays</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">?</span> <span style="color:#66d9ef">new</span> Date(Date.<span style="color:#a6e22e">now</span>() <span style="color:#f92672">+</span> <span style="color:#a6e22e">opts</span>.<span style="color:#a6e22e">expiresInDays</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">86400000</span>)
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">:</span> <span style="color:#66d9ef">undefined</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">record</span>: <span style="color:#66d9ef">UrlRecord</span> <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">id</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">shortCode</span>: <span style="color:#66d9ef">customCode</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">longUrl</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">createdAt</span>: <span style="color:#66d9ef">new</span> Date(),
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">expiresAt</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">clickCount</span>: <span style="color:#66d9ef">0</span>,
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">await</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">repo</span>.<span style="color:#a6e22e">save</span>(<span style="color:#a6e22e">record</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">await</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">cache</span>.<span style="color:#66d9ef">set</span>(
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">cache</span>.<span style="color:#a6e22e">cacheKey</span>(<span style="color:#a6e22e">customCode</span>),
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">longUrl</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">UrlShortenerService</span>.<span style="color:#a6e22e">CACHE_TTL</span>
+</span></span><span style="display:flex;"><span>    );
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">shortCode</span>: <span style="color:#66d9ef">customCode</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">shortUrl</span><span style="color:#f92672">:</span> <span style="color:#e6db74">`</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">UrlShortenerService</span>.<span style="color:#a6e22e">BASE_URL</span><span style="color:#e6db74">}</span><span style="color:#e6db74">/</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">customCode</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">longUrl</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">expiresAt</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">isNew</span>: <span style="color:#66d9ef">true</span>,
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">validateUrl</span>(<span style="color:#a6e22e">url</span>: <span style="color:#66d9ef">string</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">void</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">parsed</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">URL</span>(<span style="color:#a6e22e">url</span>);
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>[<span style="color:#e6db74">&#34;http:&#34;</span>, <span style="color:#e6db74">&#34;https:&#34;</span>].<span style="color:#a6e22e">includes</span>(<span style="color:#a6e22e">parsed</span>.<span style="color:#a6e22e">protocol</span>)) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> Error(<span style="color:#e6db74">&#34;只支援 HTTP/HTTPS 協定&#34;</span>);
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">catch</span> {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> Error(<span style="color:#e6db74">`無效的 URL 格式：</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">url</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ─── 完整使用示範 ─────────────────────────────────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">demo</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">Promise</span>&lt;<span style="color:#f92672">void</span>&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;=== URL Shortener Demo ===\n&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">idGen</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">SnowflakeGenerator</span>(<span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">repo</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">UrlRepository</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">cache</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">CacheLayer</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">service</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">UrlShortenerService</span>(<span style="color:#a6e22e">idGen</span>, <span style="color:#a6e22e">repo</span>, <span style="color:#a6e22e">cache</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 1. 建立短網址
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">result1</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">service</span>.<span style="color:#a6e22e">shorten</span>(
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;https://www.example.com/very/long/path?query=value&amp;more=params&#34;</span>
+</span></span><span style="display:flex;"><span>  );
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`建立短網址：</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">result1</span>.<span style="color:#a6e22e">shortUrl</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`  原始 URL：</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">result1</span>.<span style="color:#a6e22e">longUrl</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`  是否新建：</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">result1</span>.<span style="color:#a6e22e">isNew</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 2. 冪等性測試——相同 URL 回傳相同短碼
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">result2</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">service</span>.<span style="color:#a6e22e">shorten</span>(
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;https://www.example.com/very/long/path?query=value&amp;more=params&#34;</span>
+</span></span><span style="display:flex;"><span>  );
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`</span><span style="color:#960050;background-color:#1e0010">\</span><span style="color:#e6db74">n冪等性測試：</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">result2</span>.<span style="color:#a6e22e">shortUrl</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`  短碼相同：</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">result1</span>.<span style="color:#a6e22e">shortCode</span> <span style="color:#f92672">===</span> <span style="color:#a6e22e">result2</span>.<span style="color:#a6e22e">shortCode</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`  是否新建：</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">result2</span>.<span style="color:#a6e22e">isNew</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 3. 重導向解析
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">longUrl</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">service</span>.<span style="color:#a6e22e">resolve</span>(<span style="color:#a6e22e">result1</span>.<span style="color:#a6e22e">shortCode</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`</span><span style="color:#960050;background-color:#1e0010">\</span><span style="color:#e6db74">n解析短碼 &#34;</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">result1</span>.<span style="color:#a6e22e">shortCode</span><span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;：`</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`  → </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">longUrl</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 4. 自訂短碼 + 過期設定
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">custom</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">service</span>.<span style="color:#a6e22e">shorten</span>(<span style="color:#e6db74">&#34;https://openai.com&#34;</span>, {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">customCode</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;openai&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">expiresInDays</span>: <span style="color:#66d9ef">30</span>,
+</span></span><span style="display:flex;"><span>  });
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`</span><span style="color:#960050;background-color:#1e0010">\</span><span style="color:#e6db74">n自訂短碼：</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">custom</span>.<span style="color:#a6e22e">shortUrl</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`  過期時間：</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">custom</span>.<span style="color:#a6e22e">expiresAt</span><span style="color:#f92672">?</span>.<span style="color:#a6e22e">toISOString</span>()<span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 5. 不存在的短碼
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">notFound</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">service</span>.<span style="color:#a6e22e">resolve</span>(<span style="color:#e6db74">&#34;xxxxxxx&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`</span><span style="color:#960050;background-color:#1e0010">\</span><span style="color:#e6db74">n解析不存在的短碼：</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">notFound</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">demo</span>().<span style="color:#66d9ef">catch</span>(<span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">error</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 輸出：
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//   === URL Shortener Demo ===
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//   建立短網址：https://short.ly/3yFxHe80
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//     原始 URL：https://www.example.com/very/long/path?query=value&amp;more=params
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//     是否新建：true
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//   冪等性測試：https://short.ly/3yFxHe80
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//     短碼相同：true
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//     是否新建：false
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//   解析短碼 &#34;3yFxHe80&#34;：
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//     → https://www.example.com/very/long/path?query=value&amp;more=params
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//   自訂短碼：https://short.ly/openai
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//     過期時間：2026-08-26T...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//   解析不存在的短碼：null
+</span></span></span></code></pre></div><hr>
+<h2 id="4-核心實作c">4. 核心實作——C++</h2>
+<p>C++ 版本提供高效能的 Base62 查表法與執行緒安全的 Snowflake ID 生成器，適合對延遲敏感的重導向服務。</p>
+<h3 id="41-base62-編解碼器查表法">4.1 Base62 編解碼器（查表法）</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">// ============================================================
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// URL Shortener — C++ 高效實作
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// Base62 查表法 + Snowflake ID + 完整服務
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// ============================================================
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;iostream&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;string&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;unordered_map&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;optional&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdexcept&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;chrono&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;mutex&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;cstdint&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;vector&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;cassert&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ─── Base62 編解碼（查表法，O(1) 反查）──────────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">namespace</span> Base62 {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">constexpr</span> <span style="color:#66d9ef">char</span> CHARS[] <span style="color:#f92672">=</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz&#34;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">constexpr</span> <span style="color:#66d9ef">int</span> BASE <span style="color:#f92672">=</span> <span style="color:#ae81ff">62</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 靜態反查表（ASCII 0-127 → Base62 index，無效為 -1）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">int</span> REVERSE[<span style="color:#ae81ff">128</span>];
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">bool</span> initialized <span style="color:#f92672">=</span> false;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">init</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (initialized) <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">128</span>; i<span style="color:#f92672">++</span>) REVERSE[i] <span style="color:#f92672">=</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> BASE; i<span style="color:#f92672">++</span>) REVERSE[(<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span>)CHARS[i]] <span style="color:#f92672">=</span> i;
+</span></span><span style="display:flex;"><span>    initialized <span style="color:#f92672">=</span> true;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 編碼：uint64_t → Base62 字串（左補 0 至 padLen 長度）
+</span></span></span><span style="display:flex;"><span>std<span style="color:#f92672">::</span>string encode(<span style="color:#66d9ef">uint64_t</span> num, <span style="color:#66d9ef">int</span> padLen <span style="color:#f92672">=</span> <span style="color:#ae81ff">7</span>) {
+</span></span><span style="display:flex;"><span>    init();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (num <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) <span style="color:#66d9ef">return</span> std<span style="color:#f92672">::</span>string(padLen, <span style="color:#e6db74">&#39;0&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span> buf[<span style="color:#ae81ff">16</span>];
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> pos <span style="color:#f92672">=</span> <span style="color:#ae81ff">15</span>;
+</span></span><span style="display:flex;"><span>    buf[pos] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;\0&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> (num <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>        buf[<span style="color:#f92672">--</span>pos] <span style="color:#f92672">=</span> CHARS[num <span style="color:#f92672">%</span> BASE];
+</span></span><span style="display:flex;"><span>        num <span style="color:#f92672">/=</span> BASE;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>string result(buf <span style="color:#f92672">+</span> pos);
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 左補 &#39;0&#39; 至指定長度
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> ((<span style="color:#66d9ef">int</span>)result.size() <span style="color:#f92672">&lt;</span> padLen) {
+</span></span><span style="display:flex;"><span>        result <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>string(padLen <span style="color:#f92672">-</span> result.size(), <span style="color:#e6db74">&#39;0&#39;</span>) <span style="color:#f92672">+</span> result;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> result;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 解碼：Base62 字串 → uint64_t
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">uint64_t</span> <span style="color:#a6e22e">decode</span>(<span style="color:#66d9ef">const</span> std<span style="color:#f92672">::</span>string<span style="color:#f92672">&amp;</span> str) {
+</span></span><span style="display:flex;"><span>    init();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint64_t</span> result <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">char</span> c : str) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> ((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span>)c <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">128</span> <span style="color:#f92672">||</span> REVERSE[(<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span>)c] <span style="color:#f92672">==</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">throw</span> std<span style="color:#f92672">::</span>invalid_argument(
+</span></span><span style="display:flex;"><span>                std<span style="color:#f92672">::</span>string(<span style="color:#e6db74">&#34;無效的 Base62 字元：&#34;</span>) <span style="color:#f92672">+</span> c
+</span></span><span style="display:flex;"><span>            );
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        result <span style="color:#f92672">=</span> result <span style="color:#f92672">*</span> BASE <span style="color:#f92672">+</span> REVERSE[(<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span>)c];
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> result;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>} <span style="color:#75715e">// namespace Base62
+</span></span></span></code></pre></div><h3 id="42-snowflake-id-生成器">4.2 Snowflake ID 生成器</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">// ─── Snowflake ID 生成器（執行緒安全）─────────────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">SnowflakeGenerator</span> {
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">constexpr</span> <span style="color:#66d9ef">uint64_t</span> EPOCH_MS <span style="color:#f92672">=</span> <span style="color:#ae81ff">1577836800000ULL</span>; <span style="color:#75715e">// 2020-01-01
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">constexpr</span> <span style="color:#66d9ef">int</span> MACHINE_BITS  <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">constexpr</span> <span style="color:#66d9ef">int</span> SEQUENCE_BITS <span style="color:#f92672">=</span> <span style="color:#ae81ff">12</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">constexpr</span> <span style="color:#66d9ef">uint64_t</span> MAX_SEQUENCE <span style="color:#f92672">=</span> (<span style="color:#ae81ff">1ULL</span> <span style="color:#f92672">&lt;&lt;</span> SEQUENCE_BITS) <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">constexpr</span> <span style="color:#66d9ef">uint64_t</span> MAX_MACHINE  <span style="color:#f92672">=</span> (<span style="color:#ae81ff">1ULL</span> <span style="color:#f92672">&lt;&lt;</span> MACHINE_BITS) <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">explicit</span> <span style="color:#a6e22e">SnowflakeGenerator</span>(<span style="color:#66d9ef">uint32_t</span> machineId) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (machineId <span style="color:#f92672">&gt;</span> MAX_MACHINE) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">throw</span> std<span style="color:#f92672">::</span>invalid_argument(<span style="color:#e6db74">&#34;machineId 超出範圍（最大 1023）&#34;</span>);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        machineId_ <span style="color:#f92672">=</span> <span style="color:#66d9ef">static_cast</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">uint64_t</span><span style="color:#f92672">&gt;</span>(machineId);
+</span></span><span style="display:flex;"><span>        sequence_  <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>        lastMs_    <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint64_t</span> <span style="color:#a6e22e">generate</span>() {
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>lock_guard<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>mutex<span style="color:#f92672">&gt;</span> lock(mu_);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">uint64_t</span> now <span style="color:#f92672">=</span> currentMs();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (now <span style="color:#f92672">==</span> lastMs_) {
+</span></span><span style="display:flex;"><span>            sequence_ <span style="color:#f92672">=</span> (sequence_ <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">&amp;</span> MAX_SEQUENCE;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (sequence_ <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// 同毫秒序列號耗盡，自旋等待
+</span></span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">while</span> (now <span style="color:#f92672">&lt;=</span> lastMs_) now <span style="color:#f92672">=</span> currentMs();
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>            sequence_ <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        lastMs_ <span style="color:#f92672">=</span> now;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> ((now <span style="color:#f92672">-</span> EPOCH_MS) <span style="color:#f92672">&lt;&lt;</span> (MACHINE_BITS <span style="color:#f92672">+</span> SEQUENCE_BITS))
+</span></span><span style="display:flex;"><span>             <span style="color:#f92672">|</span> (machineId_ <span style="color:#f92672">&lt;&lt;</span> SEQUENCE_BITS)
+</span></span><span style="display:flex;"><span>             <span style="color:#f92672">|</span> sequence_;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">private</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint64_t</span> currentMs() <span style="color:#66d9ef">const</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">using</span> <span style="color:#66d9ef">namespace</span> std<span style="color:#f92672">::</span>chrono;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> duration_cast<span style="color:#f92672">&lt;</span>milliseconds<span style="color:#f92672">&gt;</span>(
+</span></span><span style="display:flex;"><span>            system_clock<span style="color:#f92672">::</span>now().time_since_epoch()
+</span></span><span style="display:flex;"><span>        ).count();
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint64_t</span> machineId_;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint64_t</span> sequence_;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint64_t</span> lastMs_;
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>mutex mu_;
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><h3 id="43-完整服務與基準測試">4.3 完整服務與基準測試</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">// ─── 資料模型 ─────────────────────────────────────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">UrlRecord</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint64_t</span>    id;
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>string shortCode;
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>string longUrl;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int64_t</span>     createdAt;   <span style="color:#75715e">// Unix 時間戳（秒）
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int64_t</span>     expiresAt;   <span style="color:#75715e">// 0 = 永不過期
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint64_t</span>    clickCount;
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ─── 短網址服務 ───────────────────────────────────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">UrlShortenerService</span> {
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">constexpr</span> <span style="color:#66d9ef">int</span> SHORT_CODE_LEN <span style="color:#f92672">=</span> <span style="color:#ae81ff">7</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">explicit</span> <span style="color:#a6e22e">UrlShortenerService</span>(<span style="color:#66d9ef">uint32_t</span> machineId)
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">:</span> idGen_(machineId) {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 建立短網址，回傳短碼
+</span></span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>string shorten(<span style="color:#66d9ef">const</span> std<span style="color:#f92672">::</span>string<span style="color:#f92672">&amp;</span> longUrl, <span style="color:#66d9ef">int</span> expiresInDays <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// 冪等性檢查
+</span></span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            std<span style="color:#f92672">::</span>lock_guard<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>mutex<span style="color:#f92672">&gt;</span> lock(mu_);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">auto</span> it <span style="color:#f92672">=</span> longToShort_.find(longUrl);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (it <span style="color:#f92672">!=</span> longToShort_.end()) <span style="color:#66d9ef">return</span> it<span style="color:#f92672">-&gt;</span>second;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">uint64_t</span> id <span style="color:#f92672">=</span> idGen_.generate();
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>string shortCode <span style="color:#f92672">=</span> Base62<span style="color:#f92672">::</span>encode(id, SHORT_CODE_LEN);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int64_t</span> now <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>chrono<span style="color:#f92672">::</span>duration_cast<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>chrono<span style="color:#f92672">::</span>seconds<span style="color:#f92672">&gt;</span>(
+</span></span><span style="display:flex;"><span>            std<span style="color:#f92672">::</span>chrono<span style="color:#f92672">::</span>system_clock<span style="color:#f92672">::</span>now().time_since_epoch()
+</span></span><span style="display:flex;"><span>        ).count();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        UrlRecord record{
+</span></span><span style="display:flex;"><span>            id, shortCode, longUrl, now,
+</span></span><span style="display:flex;"><span>            expiresInDays <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">?</span> now <span style="color:#f92672">+</span> expiresInDays <span style="color:#f92672">*</span> <span style="color:#ae81ff">86400LL</span> <span style="color:#f92672">:</span> <span style="color:#ae81ff">0LL</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#ae81ff">0ULL</span>
+</span></span><span style="display:flex;"><span>        };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            std<span style="color:#f92672">::</span>lock_guard<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>mutex<span style="color:#f92672">&gt;</span> lock(mu_);
+</span></span><span style="display:flex;"><span>            db_[shortCode] <span style="color:#f92672">=</span> record;
+</span></span><span style="display:flex;"><span>            longToShort_[longUrl] <span style="color:#f92672">=</span> shortCode;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> shortCode;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 解析短碼 → 長 URL
+</span></span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>optional<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>string<span style="color:#f92672">&gt;</span> resolve(<span style="color:#66d9ef">const</span> std<span style="color:#f92672">::</span>string<span style="color:#f92672">&amp;</span> shortCode) {
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>lock_guard<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>mutex<span style="color:#f92672">&gt;</span> lock(mu_);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// 先查快取
+</span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">auto</span> cit <span style="color:#f92672">=</span> cache_.find(shortCode);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (cit <span style="color:#f92672">!=</span> cache_.end()) {
+</span></span><span style="display:flex;"><span>            db_[shortCode].clickCount<span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> cit<span style="color:#f92672">-&gt;</span>second;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// 查資料庫
+</span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">auto</span> it <span style="color:#f92672">=</span> db_.find(shortCode);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (it <span style="color:#f92672">==</span> db_.end()) <span style="color:#66d9ef">return</span> std<span style="color:#f92672">::</span>nullopt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">auto</span><span style="color:#f92672">&amp;</span> record <span style="color:#f92672">=</span> it<span style="color:#f92672">-&gt;</span>second;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// 過期檢查
+</span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (record.expiresAt <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">int64_t</span> now <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>chrono<span style="color:#f92672">::</span>duration_cast<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>chrono<span style="color:#f92672">::</span>seconds<span style="color:#f92672">&gt;</span>(
+</span></span><span style="display:flex;"><span>                std<span style="color:#f92672">::</span>chrono<span style="color:#f92672">::</span>system_clock<span style="color:#f92672">::</span>now().time_since_epoch()
+</span></span><span style="display:flex;"><span>            ).count();
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (now <span style="color:#f92672">&gt;</span> record.expiresAt) <span style="color:#66d9ef">return</span> std<span style="color:#f92672">::</span>nullopt;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// 回寫快取
+</span></span></span><span style="display:flex;"><span>        cache_[shortCode] <span style="color:#f92672">=</span> record.longUrl;
+</span></span><span style="display:flex;"><span>        record.clickCount<span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> record.longUrl;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">private</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>    SnowflakeGenerator idGen_;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">mutable</span> std<span style="color:#f92672">::</span>mutex mu_;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>unordered_map<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>string, UrlRecord<span style="color:#f92672">&gt;</span>     db_;
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>unordered_map<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>string, std<span style="color:#f92672">::</span>string<span style="color:#f92672">&gt;</span>   longToShort_;
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>unordered_map<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>string, std<span style="color:#f92672">::</span>string<span style="color:#f92672">&gt;</span>   cache_;
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ─── 效能基準測試 ─────────────────────────────────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">benchmarkBase62</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">using</span> <span style="color:#66d9ef">namespace</span> std<span style="color:#f92672">::</span>chrono;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">int</span> N <span style="color:#f92672">=</span> <span style="color:#ae81ff">1&#39;000&#39;000</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 編碼基準
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">auto</span> start <span style="color:#f92672">=</span> high_resolution_clock<span style="color:#f92672">::</span>now();
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>string last;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> N; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>        last <span style="color:#f92672">=</span> Base62<span style="color:#f92672">::</span>encode(<span style="color:#66d9ef">static_cast</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">uint64_t</span><span style="color:#f92672">&gt;</span>(i) <span style="color:#f92672">*</span> <span style="color:#ae81ff">1234567</span>, <span style="color:#ae81ff">7</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">auto</span> end <span style="color:#f92672">=</span> high_resolution_clock<span style="color:#f92672">::</span>now();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">double</span> ms <span style="color:#f92672">=</span> duration_cast<span style="color:#f92672">&lt;</span>nanoseconds<span style="color:#f92672">&gt;</span>(end <span style="color:#f92672">-</span> start).count() <span style="color:#f92672">/</span> <span style="color:#ae81ff">1e6</span>;
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Base62 encode &#34;</span> <span style="color:#f92672">&lt;&lt;</span> N <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; 次：&#34;</span> <span style="color:#f92672">&lt;&lt;</span> ms <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; ms</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 解碼基準
+</span></span></span><span style="display:flex;"><span>    start <span style="color:#f92672">=</span> high_resolution_clock<span style="color:#f92672">::</span>now();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint64_t</span> sum <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> N; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>        sum <span style="color:#f92672">+=</span> Base62<span style="color:#f92672">::</span>decode(last);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    end <span style="color:#f92672">=</span> high_resolution_clock<span style="color:#f92672">::</span>now();
+</span></span><span style="display:flex;"><span>    ms <span style="color:#f92672">=</span> duration_cast<span style="color:#f92672">&lt;</span>nanoseconds<span style="color:#f92672">&gt;</span>(end <span style="color:#f92672">-</span> start).count() <span style="color:#f92672">/</span> <span style="color:#ae81ff">1e6</span>;
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Base62 decode &#34;</span> <span style="color:#f92672">&lt;&lt;</span> N <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; 次：&#34;</span> <span style="color:#f92672">&lt;&lt;</span> ms <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; ms</span><span style="color:#ae81ff">\n\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ─── 主程式 ───────────────────────────────────────────────────
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;=== URL Shortener C++ Demo ===</span><span style="color:#ae81ff">\n\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 1. Base62 測試
+</span></span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;--- Base62 編解碼 ---</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint64_t</span> testId <span style="color:#f92672">=</span> <span style="color:#ae81ff">123456789ULL</span>;
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>string enc <span style="color:#f92672">=</span> Base62<span style="color:#f92672">::</span>encode(testId, <span style="color:#ae81ff">7</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint64_t</span> dec <span style="color:#f92672">=</span> Base62<span style="color:#f92672">::</span>decode(enc);
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;ID: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> testId <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; → </span><span style="color:#ae81ff">\&#34;</span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">&lt;&lt;</span> enc
+</span></span><span style="display:flex;"><span>              <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\&#34;</span><span style="color:#e6db74"> → &#34;</span> <span style="color:#f92672">&lt;&lt;</span> dec
+</span></span><span style="display:flex;"><span>              <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; [&#34;</span> <span style="color:#f92672">&lt;&lt;</span> (testId <span style="color:#f92672">==</span> dec <span style="color:#f92672">?</span> <span style="color:#e6db74">&#34;OK&#34;</span> <span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;FAIL&#34;</span>) <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;]</span><span style="color:#ae81ff">\n\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 2. Snowflake 測試
+</span></span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;--- Snowflake ID ---</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    SnowflakeGenerator gen(<span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">5</span>; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">uint64_t</span> id <span style="color:#f92672">=</span> gen.generate();
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>string code <span style="color:#f92672">=</span> Base62<span style="color:#f92672">::</span>encode(id, <span style="color:#ae81ff">7</span>);
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;ID: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> id <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; → </span><span style="color:#ae81ff">\&#34;</span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">&lt;&lt;</span> code <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\&#34;\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 3. 完整服務測試
+</span></span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">--- URL Shortener 服務 ---</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    UrlShortenerService service(<span style="color:#ae81ff">42</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>string url <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;https://www.example.com/very/long/path?q=1&#34;</span>;
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>string code1 <span style="color:#f92672">=</span> service.shorten(url);
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;縮短: </span><span style="color:#ae81ff">\&#34;</span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">&lt;&lt;</span> code1 <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\&#34;\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>string code2 <span style="color:#f92672">=</span> service.shorten(url);
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;冪等: </span><span style="color:#ae81ff">\&#34;</span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">&lt;&lt;</span> code2 <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\&#34;</span><span style="color:#e6db74"> [&#34;</span>
+</span></span><span style="display:flex;"><span>              <span style="color:#f92672">&lt;&lt;</span> (code1 <span style="color:#f92672">==</span> code2 <span style="color:#f92672">?</span> <span style="color:#e6db74">&#34;相同&#34;</span> <span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;不同&#34;</span>) <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;]</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">auto</span> resolved <span style="color:#f92672">=</span> service.resolve(code1);
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;解析: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> (resolved <span style="color:#f92672">?</span> <span style="color:#f92672">*</span>resolved : <span style="color:#e6db74">&#34;(null)&#34;</span>) <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">auto</span> notFound <span style="color:#f92672">=</span> service.resolve(<span style="color:#e6db74">&#34;xxxxxxx&#34;</span>);
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;不存在: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> (notFound <span style="color:#f92672">?</span> <span style="color:#f92672">*</span>notFound : <span style="color:#e6db74">&#34;(null)&#34;</span>) <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 4. 效能基準
+</span></span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">--- 效能基準 ---</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    benchmarkBase62();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 輸出：
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//   === URL Shortener C++ Demo ===
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//   --- Base62 編解碼 ---
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//   ID: 123456789 → &#34;008M0kX&#34; → 123456789 [OK]
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//   --- Snowflake ID ---
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//   ID: 832943816704000 → &#34;3yFxHe80&#34; ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//   --- URL Shortener 服務 ---
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//   縮短: &#34;3yFxHe80&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//   冪等: &#34;3yFxHe80&#34; [相同]
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//   解析: https://www.example.com/very/long/path?q=1
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//   不存在: (null)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//   --- 效能基準 ---
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//   Base62 encode 1000000 次：~12 ms
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//   Base62 decode 1000000 次：~9 ms
+</span></span></span></code></pre></div><hr>
+<h2 id="5-效能分析">5. 效能分析</h2>
+<h3 id="時間複雜度">時間複雜度</h3>
+<table>
+  <thead>
+      <tr>
+          <th>操作</th>
+          <th>複雜度</th>
+          <th>說明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Base62 編碼</td>
+          <td>O(log_{62} n)</td>
+          <td>固定長度 7 碼 ≈ O(1)</td>
+      </tr>
+      <tr>
+          <td>Base62 解碼</td>
+          <td>O(k)</td>
+          <td>k = 短碼長度（7），≈ O(1)</td>
+      </tr>
+      <tr>
+          <td>Snowflake ID 生成</td>
+          <td>O(1)</td>
+          <td>位元運算</td>
+      </tr>
+      <tr>
+          <td>建立短網址</td>
+          <td>O(1) 均攤</td>
+          <td>ID 生成 + 編碼 + DB 寫入</td>
+      </tr>
+      <tr>
+          <td>重導向（快取命中）</td>
+          <td>O(1)</td>
+          <td>Redis GET</td>
+      </tr>
+      <tr>
+          <td>重導向（快取未命中）</td>
+          <td>O(1) 均攤</td>
+          <td>DB 查詢（索引） + 回寫快取</td>
+      </tr>
+      <tr>
+          <td>雜湊碰撞處理</td>
+          <td>O(r) 最壞</td>
+          <td>r = 重試次數（通常 ≤ 3）</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="空間複雜度">空間複雜度</h3>
+<table>
+  <thead>
+      <tr>
+          <th>結構</th>
+          <th>空間</th>
+          <th>說明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>單條記錄</td>
+          <td>~315 B</td>
+          <td>short_code + long_url + metadata</td>
+      </tr>
+      <tr>
+          <td>5 年總資料</td>
+          <td>~575 GB</td>
+          <td>18.25 億條</td>
+      </tr>
+      <tr>
+          <td>B-Tree 索引</td>
+          <td>~60-170 GB</td>
+          <td>資料的 10-30%</td>
+      </tr>
+      <tr>
+          <td>Redis 熱門快取</td>
+          <td>~210 MB</td>
+          <td>100 萬條 x (10 + 200) B</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="效能基準參考值">效能基準（參考值）</h3>
+<table>
+  <thead>
+      <tr>
+          <th>組件</th>
+          <th>預期吞吐量</th>
+          <th>延遲（P99）</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Redis 單節點</td>
+          <td>10 萬 QPS</td>
+          <td>&lt; 1ms</td>
+      </tr>
+      <tr>
+          <td>MySQL 讀取（索引）</td>
+          <td>5 萬 QPS</td>
+          <td>&lt; 5ms</td>
+      </tr>
+      <tr>
+          <td>Snowflake ID 生成</td>
+          <td>419 萬 ID/ms</td>
+          <td>可忽略</td>
+      </tr>
+      <tr>
+          <td>Base62 編碼（C++）</td>
+          <td>8,000 萬次/秒</td>
+          <td>可忽略</td>
+      </tr>
+      <tr>
+          <td><strong>系統整體（快取命中 95%）</strong></td>
+          <td><strong>~9.5 萬 QPS</strong></td>
+          <td><strong>&lt; 2ms</strong></td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<h2 id="6-生產環境考量">6. 生產環境考量</h2>
+<h3 id="61-301-vs-302-重導向策略">6.1 301 vs 302 重導向策略</h3>
+<pre tabindex="0"><code>HTTP 301 Moved Permanently（永久重導向）：
+  + 瀏覽器快取，後續請求不再訪問短網址伺服器
+  + 降低伺服器負載
+  - 無法追蹤後續點擊（請求直接到達目標 URL）
+  - 長 URL 需更新時，瀏覽器快取無法立即清除
+  適用：靜態頁面、長期有效且不需要分析的連結
+
+HTTP 302 Found（臨時重導向）：
+  + 每次都回到短網址伺服器，可統計每次點擊
+  + 可隨時更換目標 URL、支援 A/B 測試
+  - 每次請求都打到伺服器，增加負載
+  - 延遲略高（多一次網路往返）
+  適用：需要分析統計、動態更換目標的場景
+
+結論：商業短網址服務（bit.ly、t.co）幾乎都選 302
+      CDN/靜態資源重導向選 301
+</code></pre><h3 id="62-點擊分析架構">6.2 點擊分析架構</h3>
+<p>點擊統計是短網址服務的核心商業價值之一。重導向路徑上的點擊紀錄必須 <strong>非同步處理</strong>，避免阻塞重導向回應：</p>
+<pre tabindex="0"><code>重導向流程（非同步分析）：
+
+  使用者訪問 https://short.ly/aB3kZ9
+         │
+         ▼
+  短網址服務（回應 302 重導向）
+         │
+    ┌────┴────┐
+    │ 同步    │ 非同步
+    ▼         ▼
+  302 回應  發送點擊事件 → Kafka Topic
+  &lt; 5ms     （包含 IP、User-Agent、Referrer、時間戳）
+                    │
+                    ▼
+              分析消費者 → 寫入 ClickHouse / BigQuery
+                    │
+                    ▼
+              儀表板（國家、裝置、時段分布）
+</code></pre><h3 id="63-過期清理">6.3 過期清理</h3>
+<p>短網址過期後應自動失效。兩種實作方式：</p>
+<p><strong>惰性刪除（Lazy Deletion）</strong>：解析時檢查 <code>expiresAt</code>，過期則回傳 404。不額外耗費資源，但過期記錄持續佔用儲存空間。</p>
+<p><strong>定期清理（Scheduled Cleanup）</strong>：背景排程每小時執行 <code>DELETE FROM url_mappings WHERE expires_at &lt; NOW()</code>，同時清除對應的 Redis 快取。可搭配索引 <code>INDEX idx_expires_at (expires_at)</code> 加速查詢。</p>
+<p>生產環境建議 <strong>兩者並用</strong>：惰性刪除確保即時正確性，定期清理回收儲存空間。</p>
+<h3 id="64-自訂短碼與保留字">6.4 自訂短碼與保留字</h3>
+<p>自訂短碼（Custom Alias）讓使用者選擇品牌化的短碼，如 <code>short.ly/my-brand</code>。設計要點：</p>
+<ul>
+<li><strong>格式驗證</strong>：只允許 <code>[a-zA-Z0-9-]</code>，長度 3-20，避免與系統路徑（如 <code>/api</code>、<code>/admin</code>）衝突</li>
+<li><strong>保留字清單</strong>：維護一份保留字清單（<code>api</code>、<code>admin</code>、<code>health</code>、<code>login</code> 等），自訂短碼不得與保留字重複</li>
+<li><strong>衝突檢查</strong>：寫入前查詢 DB，確認短碼未被佔用</li>
+<li><strong>長度區分</strong>：自訂短碼長度通常 &gt; 7 碼，與系統生成的 7 碼短碼天然區隔</li>
+</ul>
+<h3 id="65-cdn-快取與全球加速">6.5 CDN 快取與全球加速</h3>
+<p>短網址重導向是標準的 CDN 加速場景——全球使用者訪問同一個短碼，都應該被重導向到相同的目標 URL：</p>
+<pre tabindex="0"><code>全球加速架構：
+
+  台灣使用者          美國使用者          歐洲使用者
+       │                  │                  │
+       ▼                  ▼                  ▼
+  ┌──────────┐      ┌──────────┐      ┌──────────┐
+  │ CDN PoP  │      │ CDN PoP  │      │ CDN PoP  │
+  │ 東京節點 │      │ 美西節點 │      │ 法蘭克福 │
+  └────┬─────┘      └────┬─────┘      └────┬─────┘
+       │                  │                  │
+       └──────────────────┼──────────────────┘
+                          │ CDN Cache Miss
+                          ▼
+                   ┌─────────────┐
+                   │ Origin 伺服 │
+                   │ (Redis+DB)  │
+                   └─────────────┘
+
+CDN 快取策略：
+  - 使用 302 重導向時：Cache-Control: private, max-age=0（不快取）
+  - 使用 301 重導向時：Cache-Control: public, max-age=86400（CDN 快取 24 小時）
+  - 結合 302 + CDN Edge 快取：CDN 層快取但仍統計邊緣節點的請求次數
+</code></pre><h3 id="66-資料庫-schema-與分庫分表">6.6 資料庫 Schema 與分庫分表</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 主表：短網址映射
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> url_mappings (
+</span></span><span style="display:flex;"><span>    id          BIGINT <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
+</span></span><span style="display:flex;"><span>    short_code  VARCHAR(<span style="color:#ae81ff">10</span>) <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">UNIQUE</span>,
+</span></span><span style="display:flex;"><span>    long_url    TEXT <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
+</span></span><span style="display:flex;"><span>    user_id     BIGINT,
+</span></span><span style="display:flex;"><span>    created_at  <span style="color:#66d9ef">TIMESTAMP</span> <span style="color:#66d9ef">DEFAULT</span> NOW(),
+</span></span><span style="display:flex;"><span>    expires_at  <span style="color:#66d9ef">TIMESTAMP</span>,
+</span></span><span style="display:flex;"><span>    click_count BIGINT <span style="color:#66d9ef">DEFAULT</span> <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>    is_custom   BOOLEAN <span style="color:#66d9ef">DEFAULT</span> <span style="color:#66d9ef">FALSE</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">INDEX</span> idx_short_code (short_code),
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">INDEX</span> idx_user_id (user_id),
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">INDEX</span> idx_expires_at (expires_at)
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 點擊事件表（獨立存儲，可用 ClickHouse 替代）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> click_events (
+</span></span><span style="display:flex;"><span>    id         BIGINT AUTO_INCREMENT <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span>,
+</span></span><span style="display:flex;"><span>    short_code VARCHAR(<span style="color:#ae81ff">10</span>) <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span>,
+</span></span><span style="display:flex;"><span>    clicked_at <span style="color:#66d9ef">TIMESTAMP</span> <span style="color:#66d9ef">DEFAULT</span> NOW(),
+</span></span><span style="display:flex;"><span>    ip_hash    VARCHAR(<span style="color:#ae81ff">64</span>),
+</span></span><span style="display:flex;"><span>    country    VARCHAR(<span style="color:#ae81ff">2</span>),
+</span></span><span style="display:flex;"><span>    device     VARCHAR(<span style="color:#ae81ff">20</span>),
+</span></span><span style="display:flex;"><span>    referrer   VARCHAR(<span style="color:#ae81ff">500</span>),
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">INDEX</span> idx_short_code_time (short_code, clicked_at)
+</span></span><span style="display:flex;"><span>);
+</span></span></code></pre></div><p>當資料量超過單機限制時，按短碼首字元或 ID 範圍做分片（Sharding），每個分片獨立持有 Redis 快取與 DB 副本。</p>
+<hr>
+<h2 id="7-leetcode-練習">7. LeetCode 練習</h2>
+<p>以下是與短網址系統相關的經典題目，建議按順序練習：</p>
+<h3 id="題目一leetcode-535--encode-and-decode-tinyurl">題目一：LeetCode 535 — Encode and Decode TinyURL</h3>
+<table>
+  <thead>
+      <tr>
+          <th>項目</th>
+          <th>內容</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>難度</td>
+          <td>Medium</td>
+      </tr>
+      <tr>
+          <td>連結</td>
+          <td><a class="text-blue-500 font-bold no-underline" href="https://leetcode.com/problems/encode-and-decode-tinyurl/" target="_blank">LeetCode 535</a></td>
+      </tr>
+      <tr>
+          <td>核心</td>
+          <td>設計短網址的編碼與解碼方法</td>
+      </tr>
+      <tr>
+          <td>提示</td>
+          <td>這正是本文的核心主題——可以用自增 ID + Base62，也可以用隨機字串 + HashMap。面試時重點在於解釋不同方案的取捨</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="題目二leetcode-706--design-hashmap">題目二：LeetCode 706 — Design HashMap</h3>
+<table>
+  <thead>
+      <tr>
+          <th>項目</th>
+          <th>內容</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>難度</td>
+          <td>Easy</td>
+      </tr>
+      <tr>
+          <td>連結</td>
+          <td><a class="text-blue-500 font-bold no-underline" href="https://leetcode.com/problems/design-hashmap/" target="_blank">LeetCode 706</a></td>
+      </tr>
+      <tr>
+          <td>核心</td>
+          <td>從零實作 HashMap，理解雜湊碰撞處理</td>
+      </tr>
+      <tr>
+          <td>提示</td>
+          <td>短網址的雜湊截斷法底層就是 HashMap 原理。練習 chaining（鏈結法）和 open addressing（開放定址法）</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="題目三leetcode-146--lru-cache">題目三：LeetCode 146 — LRU Cache</h3>
+<table>
+  <thead>
+      <tr>
+          <th>項目</th>
+          <th>內容</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>難度</td>
+          <td>Medium</td>
+      </tr>
+      <tr>
+          <td>連結</td>
+          <td><a class="text-blue-500 font-bold no-underline" href="https://leetcode.com/problems/lru-cache/" target="_blank">LeetCode 146</a></td>
+      </tr>
+      <tr>
+          <td>核心</td>
+          <td>實作 LRU 快取淘汰策略</td>
+      </tr>
+      <tr>
+          <td>提示</td>
+          <td>短網址系統的 Redis 快取使用 LRU 淘汰策略。結合 HashMap + 雙向鏈結串列實現 O(1) 的 get 和 put</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>練習建議</strong>：先完成 535（直接對應本文主題），理解編碼 / 解碼的多種實作方式。再做 706 深入雜湊碰撞處理原理。最後用 146 鞏固快取設計——這三題串起了短網址系統從 ID 映射、碰撞處理到快取淘汰的完整知識鏈。面試時建議先畫出系統架構圖（負載均衡 → 快取 → 資料庫），再切入 Base62 編碼的實作細節。</p>
+<hr>
+<h2 id="8-總結">8. 總結</h2>
+<p>在這篇文章中，我們從需求分析出發，完整設計並實作了一套短網址系統：</p>
+<ol>
+<li>
+<p><strong>Base62 編解碼</strong>：將十進位 ID 轉換為 62 進位字串，7 碼空間可表示 3.5 兆個唯一值，遠超 5 年需求。編碼過程本質上是進位轉換，解碼則是反向計算——簡單、高效、URL 安全。</p>
+</li>
+<li>
+<p><strong>三種 ID 生成方案</strong>：雜湊截斷法簡單但有碰撞風險；自增 ID 唯一但有中央瓶頸和可預測性問題；<strong>Snowflake ID</strong> 兼顧唯一性、分散式擴展與安全性，是生產環境的首選。</p>
+</li>
+<li>
+<p><strong>快取架構</strong>：Cache-Aside 策略搭配 Redis LRU 淘汰，熱門短碼的 95% 請求在快取層完成，單機即可支撐 9.5 萬 QPS 的重導向流量。</p>
+</li>
+<li>
+<p><strong>重導向策略</strong>：301 降低負載但犧牲分析能力；302 保留完整點擊追蹤，是商業短網址服務的標準選擇。</p>
+</li>
+<li>
+<p><strong>生產環境擴展</strong>：自訂短碼、過期清理、CDN 全球加速、分庫分表——每一個維度都是面試中的加分項。</p>
+</li>
+</ol>
+<p>短網址系統是 Base62 編碼、分散式 ID 生成、快取設計、重導向策略的綜合應用。理解了這個系統的設計原理後，你不僅能在面試中從容應對 LeetCode 535 等編碼題，還能在實際工作中設計高可用、高效能的 URL 映射服務。</p>
+<p>在下一篇文章中，我們將探討另一個經典的系統設計問題——</p>
+
+  <a class="text-blue-500 font-bold no-underline" href="/post/javascript/data-structures-algorithms/045-recommendation-system/" target="_blank">設計推薦系統（Recommendation System）</a>
+
+<p>，學習如何用協同過濾和內容過濾演算法打造個人化推薦引擎，敬請期待！</p>
+<hr>
+<h3 id="faq">FAQ</h3>
+<p><strong>Q: Base62 編碼和 Base64 有什麼不同？為什麼短網址系統選擇 Base62？</strong></p>
+<p><strong>Base64</strong> 使用 64 個字元（A-Z、a-z、0-9、<code>+</code>、<code>/</code>），常見於編碼二進位資料（如圖片轉文字）。但 <code>+</code> 和 <code>/</code> 在 URL 中是特殊字元，必須進行百分比編碼（<code>%2B</code>、<code>%2F</code>），會讓短網址變長且不美觀。<strong>Base62</strong> 只使用 62 個字元（A-Z、a-z、0-9），全部都是 URL 安全的（URL-safe），可以直接嵌入網址中不需額外編碼。Base62 的 7 碼可表示 62^7 ≈ 3.5 兆個唯一值，對短網址系統已綽綽有餘。Base64 雖然單碼能多表示 2 個值，但每碼只多 3.2% 的空間，完全不值得犧牲 URL 安全性。因此短網址系統一律選擇 Base62。</p>
+<p><strong>Q: 短網址應該用 301 還是 302 重導向？</strong></p>
+<p>這取決於你是否需要追蹤點擊數據。<strong>301（Moved Permanently）</strong> 告訴瀏覽器永久快取，後續請求直接跳轉目標 URL，不再經過短網址伺服器。好處是降低伺服器負載和延遲，壞處是你完全無法統計後續點擊次數，且無法更換目標 URL（因為瀏覽器已快取）。<strong>302（Found）</strong> 告訴瀏覽器這是臨時重導向，每次都會先打到短網址伺服器。好處是每次點擊都能被記錄，且可以隨時更換目標 URL、進行 A/B 測試。壞處是每次請求都增加一次網路往返。商業短網址服務如 bit.ly 幾乎都使用 302，因為點擊分析是核心商業價值。只有純粹為了縮短連結、不需分析的場景才考慮 301。</p>
+<p><strong>Q: 為什麼推薦 Snowflake ID 而不是資料庫的 AUTO_INCREMENT？</strong></p>
+<p><code>AUTO_INCREMENT</code> 的致命缺點是 <strong>中央化瓶頸</strong> 和 <strong>可預測性</strong>。首先，<code>AUTO_INCREMENT</code> 依賴單一資料庫實例來保證遞增唯一性，在分散式環境下要麼引入全域鎖（嚴重降低吞吐量），要麼用不同步長分段（如機器 A 產生偶數、機器 B 產生奇數），但擴展不靈活。其次，連續的自增 ID 讓攻擊者可以輕鬆猜測其他短碼——知道 <code>aB3kZ9</code> 存在，就可以嘗試 <code>aB3kZ8</code>、<code>aB3kZa</code> 等。<strong>Snowflake ID</strong> 解決了這兩個問題：每台機器有獨立的 <code>machineId</code>（10 位元，最多 1024 台），可以完全獨立產生 ID，不需要中央協調；41 位時間戳 + 12 位序列號的組合讓 ID 在時間上有序但不可預測，單機每毫秒可產生 4096 個 ID（每秒 409 萬），遠超短網址服務的需求。</p></div>
+        
+        
+
+        
+        <div class="mt-8">
+          
+<div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose">
+  <div>
+    <div class="flex items-center gap-2 mb-1">
+      <a href="/about" class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">
+        BenZ
+      </a>
+      
+      <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span>
+      
+    </div>
+    <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">
+      熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。
+    </p>
+    <div class="flex items-center gap-3">
+      
+      <a href="https://github.com/benzhub" target="_blank" rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label="GitHub">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      
+      
+      
+    </div>
+  </div>
+</div>
+
+        </div>
+      </div>
+
+      
+      
+<div class="subscribe-widget max-w-xl mx-auto my-10 px-6 py-8 text-center rounded-xl bg-zinc-50 dark:bg-zinc-800">
+  <h3 class="text-lg font-bold mb-1">訂閱 BenzHub 電子報</h3>
+  <p class="text-sm text-zinc-600 dark:text-zinc-300 mb-4">每週 AI 賺錢實戰 + 免費工具地圖</p>
+  <form class="subscribe-form flex flex-col sm:flex-row gap-3 justify-center"
+        data-worker="https://benzhub-newsletter.PLACEHOLDER.workers.dev" data-source="footer-widget">
+    <input type="email" required placeholder="你的 Email"
+           class="px-4 py-2 rounded-lg border border-zinc-300 dark:bg-zinc-900 dark:border-zinc-600" />
+    <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700">訂閱</button>
+  </form>
+  <div class="cf-turnstile mt-3 flex justify-center" data-sitekey="PLACEHOLDER_TURNSTILE_SITE_KEY"></div>
+  <p class="subscribe-status text-sm text-zinc-500 mt-2"></p>
+</div>
+
+
+
+      
+      <div class="post-detail fade-in my-4">
+        
+
+
+<div>
+  <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3>
+  <div class="grid gap-2">
+    
+    <a href="https://benzhub.github.io/post/javascript/data-structures--algorithms/043-task-scheduler/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">設計任務排程器 — Priority Queue、Time Wheel 與 Cron 排程實戰 | 資料結構與演算法</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/26</span>
+    </a>
+    
+    <a href="https://benzhub.github.io/post/javascript/data-structures--algorithms/042-search-autocomplete/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">設計搜尋自動補全 — Trie、Top-K 排序與分散式即時建議系統 | 資料結構與演算法</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/25</span>
+    </a>
+    
+    <a href="https://benzhub.github.io/post/javascript/data-structures--algorithms/041-cache-lru/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">設計 LRU/LFU Cache — 雜湊表與雙向鏈結串列的 O(1) 快取實作 | 資料結構與演算法</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/24</span>
+    </a>
+    
+  </div>
+</div>
+
+
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            
+            <a href="https://benzhub.github.io/post/javascript/data-structures--algorithms/043-task-scheduler/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+                <span class="text-sm font-medium">設計任務排程器 — Priority Queue、Time Wheel 與 Cron 排程實戰 | 資料結構與演算法</span>
+            </a>
+            
+          </div>
+          <div>
+            
+            <a href="https://benzhub.github.io/post/javascript/data-structures--algorithms/045-recommendation/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+                <span class="text-sm font-medium">設計推薦系統 — 協同過濾、內容推薦與矩陣分解實戰 | 資料結構與演算法</span>
+            </a>
+            
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        
+<script src="https://giscus.app/client.js"
+        data-repo="benzhub/benzhub.github.io"
+        data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM="
+        data-category="Announcements"
+        data-category-id="MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme="preferred_color_scheme"
+        data-lang="zh-TW"
+        crossorigin="anonymous"
+        async>
+</script>
+
+
+      </div>
+    </div>
+    
+    <div class="hidden lg:block lg:col-span-1 mt-4">
+    
+    
+            
+            <div class="widget fade-in">
+    <p class="widget-title">搜尋</p>
+    <form role="search" method="get" action="https://google.com/search">
+        <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
+        <input type="hidden" name="sitesearch" value="https://benzhub.github.io/" />
+    </form>
+</div>
+
+        
+            
+            
+
+        
+            
+            
+<div class="widget fade-in">
+    <p class="widget-title">標籤</p>
+    <div class="flex flex-wrap gap-1.5">
+        <a href='/tags/80/20-%E6%B3%95%E5%89%87'>
+            <span class="tag-pill">80/20 法則</span>
+        </a>
+        <a href='/tags/acid'>
+            <span class="tag-pill">acid</span>
+        </a>
+        <a href='/tags/aggregate'>
+            <span class="tag-pill">aggregate</span>
+        </a>
+        <a href='/tags/ai'>
+            <span class="tag-pill">ai</span>
+        </a>
+        <a href='/tags/ai-agent'>
+            <span class="tag-pill">ai agent</span>
+        </a>
+        <a href='/tags/ai-workflow'>
+            <span class="tag-pill">ai workflow</span>
+        </a>
+        <a href='/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE'>
+            <span class="tag-pill">ai 工具焦慮</span>
+        </a>
+        <a href='/tags/ai-%E6%8E%A5%E5%96%AE'>
+            <span class="tag-pill">ai 接單</span>
+        </a>
+        <a href='/tags/ai-%E7%B9%AA%E5%9C%96'>
+            <span class="tag-pill">ai 繪圖</span>
+        </a>
+        <a href='/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA'>
+            <span class="tag-pill">ai 虛擬人</span>
+        </a>
+        <a href='/tags/ai-%E8%A1%8C%E9%8A%B7'>
+            <span class="tag-pill">ai 行銷</span>
+        </a>
+        <a href='/tags/ai-%E8%A8%AD%E8%A8%88'>
+            <span class="tag-pill">ai 設計</span>
+        </a>
+        <a href='/tags/ai-%E8%AE%8A%E7%8F%BE'>
+            <span class="tag-pill">ai 變現</span>
+        </a>
+        <a href='/tags/ai-%E8%B3%BA%E9%8C%A2'>
+            <span class="tag-pill">ai 賺錢</span>
+        </a>
+        <a href='/tags/ai-income'>
+            <span class="tag-pill">ai-income</span>
+        </a>
+        <a href='/tags/ai-insights'>
+            <span class="tag-pill">ai-insights</span>
+        </a>
+        <a href='/tags/analytics'>
+            <span class="tag-pill">analytics</span>
+        </a>
+        <a href='/tags/api'>
+            <span class="tag-pill">api</span>
+        </a>
+        <a href='/tags/architecture'>
+            <span class="tag-pill">architecture</span>
+        </a>
+        <a href='/tags/audit'>
+            <span class="tag-pill">audit</span>
+        </a>
+    </div>
+</div>
+
+
+        
+            
+            
+<div class="widget fade-in">
+    <p class="widget-title">文章系列</p>
+    <div class="flex flex-wrap gap-1.5">
+        
+        
+        
+        
+        <a href='/post/postgresql/'>
+            <span class="tag-pill">PostgreSQL (50)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/javascript/'>
+            <span class="tag-pill">JavaScript (109)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/django/'>
+            <span class="tag-pill">Django (44)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/python/'>
+            <span class="tag-pill">Python (37)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/htmlcss/'>
+            <span class="tag-pill">HTML &amp; CSS (23)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/linux/'>
+            <span class="tag-pill">Linux (22)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/git/'>
+            <span class="tag-pill">Git (18)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/ai-insights/'>
+            <span class="tag-pill">AI Insights (13)</span>
+        </a>
+        
+        
+    </div>
+</div>
+
+
+        
+            
+            
+
+<div class="widget fade-in">
+    <p class="widget-title">最新文章</p>
+    <div class="flex flex-col gap-1">
+        <a href="/post/javascript/data-structures--algorithms/047-load-balancer/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計負載均衡器 — Round Robin、一致性雜湊與健康檢查實戰 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/30
+            </p>
+        </a>
+        <a href="/post/javascript/data-structures--algorithms/046-text-diff/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計文本差異比對 — LCS、Myers Diff 演算法與 Patch 生成實戰 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/29
+            </p>
+        </a>
+        <a href="/post/javascript/data-structures--algorithms/045-recommendation/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計推薦系統 — 協同過濾、內容推薦與矩陣分解實戰 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/28
+            </p>
+        </a>
+        <a href="/post/javascript/data-structures--algorithms/044-url-shortener/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計短網址系統 — Base62 編碼、分散式 ID 生成與重導向架構 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/27
+            </p>
+        </a>
+        <a href="/post/postgresql/050-citus-distributed/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Citus 分散式 PostgreSQL：水平擴展到多節點叢集 | PostgreSQL</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/26
+            </p>
+        </a>
+    </div>
+</div>
+
+        
+    
+</div>
+
+    
+</div>
+
+        </div>
+    </div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]">
+    
+    <p>&copy; 2026 <a href="https://benzhub.github.io/" class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p>
+</footer>
+
+
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script src="/js/subscribe.js" defer></script>
+
+
+
+<script>
+    (function (window, document) {
+        function main() {
+            var ad = document.createElement('script');
+            ad.async = true;
+            ad.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606';
+            ad.crossOrigin = "anonymous";
+            var sc = document.getElementsByTagName('script')[0];
+            sc.parentNode.insertBefore(ad, sc);
+        }
+        var lazyLoad = false;
+        function onLazyLoad() {
+            if (lazyLoad === false) {
+                lazyLoad = true;
+                window.removeEventListener('scroll', onLazyLoad);
+                window.removeEventListener('mousemove', onLazyLoad);
+                window.removeEventListener('mousedown', onLazyLoad);
+                window.removeEventListener('touchstart', onLazyLoad);
+                window.removeEventListener('keydown', onLazyLoad);
+                main();
+            }
+        }
+        window.addEventListener('scroll', onLazyLoad);
+        window.addEventListener('mousemove', onLazyLoad);
+        window.addEventListener('mousedown', onLazyLoad);
+        window.addEventListener('touchstart', onLazyLoad);
+        window.addEventListener('keydown', onLazyLoad);
+        window.addEventListener('load', function () {
+            if (window.pageYOffset) {
+                onLazyLoad();
+                window.setTimeout(onLazyLoad, 3000);
+            }
+        });
+    })(window, document);
+</script>
+
+
+<script>
+    
+    var icon = document.getElementById("icon");
+    var icon2 = document.getElementById("icon2");
+    if (document.documentElement.classList.contains("dark") || localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+        if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+    function toggleDarkMode() {
+        if (document.documentElement.classList.contains('dark')) {
+            if (icon) { icon.classList.remove("icon-sun"); icon.classList.add("icon-moon"); }
+            if (icon2) { icon2.classList.remove("icon-sun"); icon2.classList.add("icon-moon"); }
+            document.documentElement.classList.remove('dark');
+            localStorage.theme = 'light';
+        } else {
+            if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+            if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+            document.documentElement.classList.add('dark');
+            localStorage.theme = 'dark';
+        }
+    }
+
+    
+    document.addEventListener('DOMContentLoaded', function () {
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0 });
+
+        document.querySelectorAll('.fade-in').forEach(function (el) {
+            observer.observe(el);
+        });
+    });
+</script>
+</body>
+
+</html>

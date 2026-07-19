@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+
+<html lang="zh-TW">
+<head>
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-FSEWPBJMJT');
+</script>
+
+<title>PostgreSQL 開發者工具鏈：psql、pgAdmin、pgbench、pgTAP 完整指南 | PostgreSQL | BenzHub</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="apple-touch-icon" sizes="180x180" href='/favicon/apple-touch-icon.png'>
+    <link rel="icon" type="image/png" sizes="32x32" href='/favicon/favicon-32x32.png'>
+    <link rel="icon" type="image/png" sizes="16x16" href='/favicon/favicon-16x16.png'>
+    <link rel="manifest" href='/favicon/site.webmanifest' />
+    <link rel="mask-icon" href=' /favicon/safari-pinned-tab.svg' color="#5bbad5" />
+    <link rel="shortcut icon" href='/favicon/favicon.ico' />
+    <meta name="theme-color" content="#fafafa">
+    <meta property="og:title" content="PostgreSQL 開發者工具鏈：psql、pgAdmin、pgbench、pgTAP 完整指南 | PostgreSQL | BenzHub" />
+    
+    
+    
+    <link rel="stylesheet" href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css" />
+    
+    <link href=' /css/blonde.min.css' rel="stylesheet" type="text/css" media="print"
+        onload="this.media=' all'">
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+
+<meta name="description" content="全面介紹 PostgreSQL 開發工具鏈——從 psql 進階用法、pgAdmin/DBeaver/DataGrip 比較、COPY 高速匯入匯出、pgbench 效能測試到 pgTAP 資料庫單元測試，打造高效的 PostgreSQL 開發與維運工作流程。">
+<meta property="og:site_name" content="BenzHub">
+<meta property="og:description" content="全面介紹 PostgreSQL 開發工具鏈——從 psql 進階用法、pgAdmin/DBeaver/DataGrip 比較、COPY 高速匯入匯出、pgbench 效能測試到 pgTAP 資料庫單元測試，打造高效的 PostgreSQL 開發與維運工作流程。">
+<meta property="og:url" content="https://benzhub.github.io/post/postgresql/049-devtools/">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="zh_TW">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="">
+
+<link rel="canonical" href="https://benzhub.github.io/post/postgresql/049-devtools/">
+
+<meta name="twitter:description" content="全面介紹 PostgreSQL 開發工具鏈——從 psql 進階用法、pgAdmin/DBeaver/DataGrip 比較、COPY 高速匯入匯出、pgbench 效能測試到 pgTAP 資料庫單元測試，打造高效的 PostgreSQL 開發與維運工作流程。">
+<meta property="article:published_time" content="2026-07-25T00:00:00&#43;00:00">
+<meta property="article:updated_time" content="2026-07-25T00:00:00&#43;00:00">
+
+
+
+
+
+    
+<meta property="og:image" content="https://benzhub.github.io/img/postgresql/049-DevTools.png">
+<meta property="og:image:url" content="https://benzhub.github.io/img/postgresql/049-DevTools.png">
+    
+
+    
+    <link rel="stylesheet" href='/css/custom.css'>
+    <i class="dark hidden"></i>
+    
+<link rel="alternate" hreflang="zh-TW" href="https://benzhub.github.io/post/postgresql/049-devtools/" />
+
+<link rel="alternate" hreflang="x-default" href="https://benzhub.github.io/post/postgresql/049-devtools/" />
+
+    
+
+
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "\"PostgreSQL 開發者工具鏈：psql、pgAdmin、pgbench、pgTAP 完整指南 | PostgreSQL\"",
+  "description": "\"全面介紹 PostgreSQL 開發工具鏈——從 psql 進階用法、pgAdmin/DBeaver/DataGrip 比較、COPY 高速匯入匯出、pgbench 效能測試到 pgTAP 資料庫單元測試，打造高效的 PostgreSQL 開發與維運工作流程。\"",
+  "author": {
+    "@type": "Person",
+    "name": "\"BenzHub\"",
+    "url": "https:\/\/benzhub.github.io\/about",
+    "jobTitle": "\"Software Developer\"",
+    "sameAs": [
+      "\"https://github.com/benzhub\""
+    ]
+  },
+  "datePublished": "2026-07-25T00:00:00\u002b00:00",
+  "dateModified": "2026-07-25T00:00:00\u002b00:00",
+  "image": "https:\/\/benzhub.github.io\/img\/postgresql\/049-DevTools.png",
+  "publisher": {
+    "@type": "Organization",
+    "name": "\"BenzHub\"",
+    "url": "\"https://benzhub.github.io/\"",
+    "sameAs": [
+      "\"https://github.com/benzhub\""
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https:\/\/benzhub.github.io\/post\/postgresql\/049-devtools\/"
+  },
+  "inLanguage": "zh-TW"
+}
+</script>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "\"BenzHub\"",
+      "item": "https:\/\/benzhub.github.io\/"
+    }
+    
+    
+      
+      
+    ,{
+      "@type": "ListItem",
+      "position": 2,
+      "name": "\"Blog\"",
+      "item": "https:\/\/benzhub.github.io\/post\/postgresql\/"
+    }
+      
+      
+    
+    ,{
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "\"PostgreSQL 開發者工具鏈：psql、pgAdmin、pgbench、pgTAP 完整指南 | PostgreSQL\""
+    }
+  ]
+}
+</script>
+
+
+
+
+
+
+
+
+
+
+
+</head>
+<body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class="site-nav" id="siteNav">
+    <div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full">
+        
+        <a href="https://benzhub.github.io/" class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">
+            BenzHub
+        </a>
+
+        
+        <div class="hidden md:flex items-center gap-6">
+            
+            <a href="/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                首頁
+            </a>
+            
+            <a href="/about/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                關於
+            </a>
+            
+            <a href="/contact/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                聯絡
+            </a>
+            
+            <a href="/resourses/"
+                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
+                資源
+            </a>
+            
+
+            
+            <div class="flex items-center gap-2">
+                <form class="flex items-center" role="search" method="get" action="https://google.com/search" id="navSearchForm">
+                    <input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50"
+                        type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋" id="navSearchInput">
+                    <input type="hidden" name="sitesearch" value="https://benzhub.github.io/" />
+                </form>
+                <button onclick="toggleNavSearch()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+                    <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                    </svg>
+                </button>
+            </div>
+
+            
+            <span class="text-zinc-200 dark:text-zinc-700">|</span>
+
+            
+            
+
+
+
+
+<div class="lang-switcher relative hidden md:block">
+    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+        <span>🌐</span>
+        <span>繁體中文</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
+        
+            
+            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
+    <div class="flex gap-2">
+        
+            
+            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+            
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon2" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+        </div>
+
+        
+        <div class="flex md:hidden items-center gap-1">
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+                <i id="icon" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+            </button>
+            <button id="hamburgerbtn" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Menu">
+                <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    
+    <div class="mobile-menu md:hidden" id="mobileMenu">
+        
+        <a href="/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            首頁
+        </a>
+        
+        <a href="/about/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            關於
+        </a>
+        
+        <a href="/contact/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            聯絡
+        </a>
+        
+        <a href="/resourses/"
+            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
+            資源
+        </a>
+        
+        <form class="mt-2" role="search" method="get" action="https://google.com/search">
+            <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
+            <input type="hidden" name="sitesearch" value="https://benzhub.github.io/" />
+        </form>
+        
+        
+
+
+
+
+<div class="lang-switcher relative hidden md:block">
+    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+        <span>🌐</span>
+        <span>繁體中文</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
+        
+            
+            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+
+<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
+    <div class="flex gap-2">
+        
+            
+            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+            
+        
+            
+                
+                
+                <a href="/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+                
+            
+        
+            
+                
+                
+                <a href="/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
+                
+            
+        
+    </div>
+</div>
+
+    </div>
+</nav>
+
+<script>
+    
+    document.getElementById('hamburgerbtn').addEventListener('click', function () {
+        document.getElementById('mobileMenu').classList.toggle('active');
+    });
+
+    
+    window.addEventListener('scroll', function () {
+        var nav = document.getElementById('siteNav');
+        if (window.scrollY > 50) {
+            nav.classList.add('scrolled');
+        } else {
+            nav.classList.remove('scrolled');
+        }
+    });
+
+    
+    function toggleNavSearch() {
+        var input = document.getElementById('navSearchInput');
+        input.classList.toggle('expanded');
+        if (input.classList.contains('expanded')) {
+            input.focus();
+        }
+    }
+
+    
+    function toggleLangMenu() {
+        var dropdown = document.getElementById('langDropdown');
+        dropdown.classList.toggle('hidden');
+    }
+
+    
+    document.addEventListener('click', function (e) {
+        
+        var form = document.getElementById('navSearchForm');
+        var input = document.getElementById('navSearchInput');
+        if (form && input && !form.contains(e.target) && !e.target.closest('[aria-label="Toggle Search"]')) {
+            input.classList.remove('expanded');
+        }
+        
+        var langSwitcher = e.target.closest('.lang-switcher');
+        if (!langSwitcher) {
+            var dropdown = document.getElementById('langDropdown');
+            if (dropdown) dropdown.classList.add('hidden');
+        }
+    });
+</script>
+<div class="nav-spacer"></div>
+    <div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id="content">
+        <div class="lg:mx-5">
+<div class="grid grid-cols-3 gap-6">
+  
+  <div class="col-span-3 lg:col-span-2">
+  
+      
+      <div class="post-detail fade-in my-4">
+        <h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">PostgreSQL 開發者工具鏈：psql、pgAdmin、pgbench、pgTAP 完整指南 | PostgreSQL</h1>
+        <div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4">
+            <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/25
+            </span>
+            
+        </div>
+        
+        <div class="flex flex-wrap gap-1.5 mb-5">
+            
+            <a href='/tags/postgresql' class="tag-pill no-underline">postgresql</a>
+            
+            <a href='/tags/devtools' class="tag-pill no-underline">DevTools</a>
+            
+            <a href='/tags/psql' class="tag-pill no-underline">psql</a>
+            
+            <a href='/tags/pgbench' class="tag-pill no-underline">pgbench</a>
+            
+            <a href='/tags/pgtap' class="tag-pill no-underline">pgTAP</a>
+            
+        </div>
+        
+        
+        <img class="py-4 m-auto rounded-lg thumb-img" src="https://benzhub.github.io/img/postgresql/049-DevTools.png" alt="PostgreSQL 開發者工具鏈：psql、pgAdmin、pgbench、pgTAP 完整指南 | PostgreSQL">
+        
+        
+        <div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote>
+<p><strong>PostgreSQL</strong> 擁有豐富且成熟的開發工具生態——從官方 CLI 工具 <strong>psql</strong>、圖形化管理介面 <strong>pgAdmin 4</strong>，到效能測試框架 <strong>pgbench</strong> 與單元測試工具 <strong>pgTAP</strong>，開發者與 DBA 可以根據不同場景選擇最適合的工具組合。本文將深入每個工具的進階用法，幫助你打造高效的 PostgreSQL 工作流程。</p>
+</blockquote>
+<h3 id="開發工具的四個層次">開發工具的四個層次</h3>
+<p>PostgreSQL 的開發工具可依功能分為四個層次：</p>
+<pre tabindex="0"><code>┌─────────────────────────────────────────────────────────────┐
+│ Layer 4：分析與調優          pg_stat_statements 查詢分析      │
+│                             auto_explain, EXPLAIN           │
+├─────────────────────────────────────────────────────────────┤
+│ Layer 3：測試與驗證          pgTAP（單元測試）                │
+│                             pgbench（效能測試）              │
+├─────────────────────────────────────────────────────────────┤
+│ Layer 2：資料搬遷            pg_dump / pg_restore            │
+│                             COPY（高速匯入匯出）             │
+├─────────────────────────────────────────────────────────────┤
+│ Layer 1：互動操作            psql（CLI）                     │
+│                             pgAdmin / DBeaver / DataGrip     │
+└─────────────────────────────────────────────────────────────┘
+</code></pre><h4 id="cli-vs-gui-的選擇">CLI vs GUI 的選擇</h4>
+<table>
+  <thead>
+      <tr>
+          <th>面向</th>
+          <th>CLI（psql / pgcli）</th>
+          <th>GUI（pgAdmin / DBeaver / DataGrip）</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>自動化腳本</strong></td>
+          <td>優秀，可嵌入 Shell/CI</td>
+          <td>不適合</td>
+      </tr>
+      <tr>
+          <td><strong>遠端伺服器</strong></td>
+          <td>SSH 即可使用</td>
+          <td>需 SSH Tunnel</td>
+      </tr>
+      <tr>
+          <td><strong>複雜查詢開發</strong></td>
+          <td>適合短查詢</td>
+          <td>語法高亮、自動補全、結果視覺化</td>
+      </tr>
+      <tr>
+          <td><strong>Schema 瀏覽</strong></td>
+          <td><code>\d</code> 系列 meta command</td>
+          <td>樹狀結構、ER 圖</td>
+      </tr>
+      <tr>
+          <td><strong>效能分析</strong></td>
+          <td>EXPLAIN 文字輸出</td>
+          <td>圖形化執行計劃</td>
+      </tr>
+      <tr>
+          <td><strong>學習曲線</strong></td>
+          <td>較陡峭</td>
+          <td>較友善</td>
+      </tr>
+  </tbody>
+</table>
+<p>生產環境中，<strong>psql</strong> 是 DBA 的首選——輕量、可腳本化、無需安裝圖形環境。開發環境中，GUI 工具能大幅提升探索性查詢效率。</p>
+<hr>
+<h3 id="psql-進階用法">psql 進階用法</h3>
+<p>psql 是 PostgreSQL 官方 CLI 客戶端，功能遠比表面看到的強大。</p>
+<h4 id="meta-commands-精選">Meta Commands 精選</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- Schema 探索
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span>dt<span style="color:#f92672">+</span>                    <span style="color:#75715e">-- 列出所有 tables（含大小）
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span>d<span style="color:#f92672">+</span> orders              <span style="color:#75715e">-- 顯示 table 結構（含儲存參數）
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span>di<span style="color:#f92672">+</span> orders<span style="color:#f92672">*</span>            <span style="color:#75715e">-- 列出特定 table 的 indexes
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span>df<span style="color:#f92672">+</span> <span style="color:#66d9ef">public</span>.<span style="color:#f92672">*</span>           <span style="color:#75715e">-- 列出所有 functions
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span>dx                     <span style="color:#75715e">-- 列出所有 extensions
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span>sf my_function         <span style="color:#75715e">-- 顯示 function 原始碼
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span>sv my_view             <span style="color:#75715e">-- 顯示 view 定義
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span>sf<span style="color:#f92672">+</span> my_function        <span style="color:#75715e">-- 含行號的原始碼
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 連線與資訊
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span>conninfo               <span style="color:#75715e">-- 顯示連線資訊
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span><span style="color:#66d9ef">c</span> otherdb              <span style="color:#75715e">-- 切換資料庫
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span>l<span style="color:#f92672">+</span>                     <span style="color:#75715e">-- 列出所有 databases
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span>dn<span style="color:#f92672">+</span>                    <span style="color:#75715e">-- 列出所有 schemas
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span>du<span style="color:#f92672">+</span>                    <span style="color:#75715e">-- 列出所有 roles
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 輸出控制
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span>x auto                 <span style="color:#75715e">-- 自動切換擴展顯示（推薦）
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span>timing <span style="color:#66d9ef">on</span>              <span style="color:#75715e">-- 顯示查詢執行時間
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span>pset <span style="color:#66d9ef">null</span> <span style="color:#e6db74">&#39;(NULL)&#39;</span>     <span style="color:#75715e">-- NULL 值明確顯示
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span>pset format csv        <span style="color:#75715e">-- CSV 格式輸出
+</span></span></span></code></pre></div><h4 id="watch--即時監控">\watch — 即時監控</h4>
+<p><code>\watch</code> 是 psql 的即時監控利器，每隔指定秒數自動重新執行最後一個查詢：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 每 2 秒監控活動連線
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> pid, usename, <span style="color:#66d9ef">state</span>, wait_event_type, <span style="color:#66d9ef">left</span>(query, <span style="color:#ae81ff">60</span>) <span style="color:#66d9ef">AS</span> query
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> pg_stat_activity
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> <span style="color:#66d9ef">state</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;active&#39;</span> <span style="color:#66d9ef">AND</span> pid <span style="color:#f92672">&lt;&gt;</span> pg_backend_pid();
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span>watch <span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 每 5 秒監控複寫延遲
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span>
+</span></span><span style="display:flex;"><span>    client_addr, <span style="color:#66d9ef">state</span>,
+</span></span><span style="display:flex;"><span>    pg_wal_lsn_diff(sent_lsn, replay_lsn) <span style="color:#66d9ef">AS</span> replay_lag_bytes,
+</span></span><span style="display:flex;"><span>    replay_lag
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> pg_stat_replication;
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span>watch <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 每 10 秒監控表膨脹
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span>
+</span></span><span style="display:flex;"><span>    relname, n_live_tup, n_dead_tup,
+</span></span><span style="display:flex;"><span>    round(<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">0</span> <span style="color:#f92672">*</span> n_dead_tup <span style="color:#f92672">/</span> <span style="color:#66d9ef">nullif</span>(n_live_tup <span style="color:#f92672">+</span> n_dead_tup, <span style="color:#ae81ff">0</span>), <span style="color:#ae81ff">1</span>) <span style="color:#66d9ef">AS</span> dead_pct,
+</span></span><span style="display:flex;"><span>    last_autovacuum::<span style="color:#66d9ef">timestamp</span>(<span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> pg_stat_user_tables
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> n_live_tup <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">1000</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> dead_pct <span style="color:#66d9ef">DESC</span> NULLS <span style="color:#66d9ef">LAST</span> <span style="color:#66d9ef">LIMIT</span> <span style="color:#ae81ff">10</span>;
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span>watch <span style="color:#ae81ff">10</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- PG16+：指定次數與間隔
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span>watch i<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span> <span style="color:#66d9ef">c</span><span style="color:#f92672">=</span><span style="color:#ae81ff">10</span>   <span style="color:#75715e">-- 每 2 秒一次，共 10 次
+</span></span></span></code></pre></div><h4 id="copy--客戶端-copy">\copy — 客戶端 COPY</h4>
+<p>與伺服器端 <code>COPY</code> 不同，<code>\copy</code> 透過 psql 連線傳輸，不需要伺服器端檔案存取權限：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 匯出查詢結果為 CSV
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span><span style="color:#66d9ef">copy</span> (<span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> orders <span style="color:#66d9ef">WHERE</span> created_at <span style="color:#f92672">&gt;</span> <span style="color:#e6db74">&#39;2026-01-01&#39;</span>) <span style="color:#66d9ef">TO</span> <span style="color:#e6db74">&#39;/tmp/orders.csv&#39;</span> <span style="color:#66d9ef">WITH</span> (FORMAT csv, HEADER <span style="color:#66d9ef">true</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 從 CSV 匯入
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span><span style="color:#66d9ef">copy</span> staging_orders <span style="color:#66d9ef">FROM</span> <span style="color:#e6db74">&#39;/home/user/data.csv&#39;</span> <span style="color:#66d9ef">WITH</span> (FORMAT csv, HEADER <span style="color:#66d9ef">true</span>, <span style="color:#66d9ef">NULL</span> <span style="color:#e6db74">&#39;&#39;</span>)
+</span></span></code></pre></div><table>
+  <thead>
+      <tr>
+          <th>特性</th>
+          <th><code>\copy</code>（psql 指令）</th>
+          <th><code>COPY</code>（SQL 指令）</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>檔案位置</td>
+          <td>客戶端本地</td>
+          <td>伺服器端</td>
+      </tr>
+      <tr>
+          <td>權限需求</td>
+          <td>一般使用者</td>
+          <td>需 superuser</td>
+      </tr>
+      <tr>
+          <td>效能</td>
+          <td>透過網路，略慢</td>
+          <td>伺服器直接讀寫，較快</td>
+      </tr>
+      <tr>
+          <td>適用場景</td>
+          <td>開發環境、遠端操作</td>
+          <td>大量資料搬移</td>
+      </tr>
+  </tbody>
+</table>
+<h4 id="psql-獨有進階功能">psql 獨有進階功能</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- \gexec：將查詢結果作為 SQL 執行（Meta Programming）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> format(<span style="color:#e6db74">&#39;CREATE INDEX idx_%I_id ON %I(id);&#39;</span>, tablename, tablename)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> pg_tables
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> schemaname <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;public&#39;</span> <span style="color:#66d9ef">AND</span> tablename <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">IN</span> (
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">SELECT</span> tablename <span style="color:#66d9ef">FROM</span> pg_indexes <span style="color:#66d9ef">WHERE</span> indexname <span style="color:#66d9ef">LIKE</span> <span style="color:#e6db74">&#39;%_id&#39;</span>
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span>gexec
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 自動為所有缺少 id 索引的表建立索引
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- \crosstabview：交叉表視圖（樞紐分析）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">extract</span>(<span style="color:#66d9ef">month</span> <span style="color:#66d9ef">FROM</span> created_at)::int <span style="color:#66d9ef">AS</span> <span style="color:#66d9ef">month</span>,
+</span></span><span style="display:flex;"><span>    status,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">count</span>(<span style="color:#f92672">*</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> orders
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> created_at <span style="color:#f92672">&gt;=</span> <span style="color:#e6db74">&#39;2026-01-01&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">GROUP</span> <span style="color:#66d9ef">BY</span> <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span> <span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>;
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span>crosstabview
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- \gdesc：顯示查詢欄位型別（不實際執行）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> id, name, total_amount <span style="color:#66d9ef">FROM</span> orders;
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span>gdesc
+</span></span></code></pre></div><h4 id="psqlrc-自訂配置">psqlrc 自訂配置</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- ~/.psqlrc 範例
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 客製化 PROMPT（顯示 DB 名稱與主機）
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span><span style="color:#66d9ef">set</span> PROMPT1 <span style="color:#e6db74">&#39;%[%033[1;31m%]%/%[%033[0m%] %n@%M:%&gt; %x%R%# &#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- NULL 顯示為明確文字
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span>pset <span style="color:#66d9ef">null</span> <span style="color:#e6db74">&#39;¤NULL¤&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 自動切換擴展顯示
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span>x auto
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 顯示查詢執行時間
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span>timing <span style="color:#66d9ef">on</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 歷史紀錄設定
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span><span style="color:#66d9ef">set</span> HISTSIZE <span style="color:#ae81ff">5000</span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span><span style="color:#66d9ef">set</span> HISTFILE <span style="color:#f92672">~/</span>.psql_history<span style="color:#f92672">-</span>:DBNAME
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span><span style="color:#66d9ef">set</span> HISTCONTROL ignoredups
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 錯誤時自動 rollback 到 savepoint
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span><span style="color:#66d9ef">set</span> ON_ERROR_ROLLBACK interactive
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 常用查詢別名
+</span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span><span style="color:#66d9ef">set</span> activity <span style="color:#e6db74">&#39;SELECT pid, usename, state, wait_event_type, left(query, 80) AS query FROM pg_stat_activity WHERE state != \&#39;</span>idle<span style="color:#960050;background-color:#1e0010">\</span><span style="color:#e6db74">&#39; AND pid &lt;&gt; pg_backend_pid() ORDER BY query_start;&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span><span style="color:#66d9ef">set</span> locks <span style="color:#e6db74">&#39;SELECT pid, locktype, relation::regclass, mode, granted FROM pg_locks WHERE NOT granted ORDER BY pid;&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span><span style="color:#66d9ef">set</span> bloat <span style="color:#e6db74">&#39;SELECT relname, n_live_tup, n_dead_tup, round(100.0 * n_dead_tup / nullif(n_live_tup + n_dead_tup, 0), 1) AS dead_pct FROM pg_stat_user_tables WHERE n_live_tup &gt; 1000 ORDER BY dead_pct DESC NULLS LAST LIMIT 20;&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span><span style="color:#66d9ef">set</span> dbsize <span style="color:#e6db74">&#39;SELECT datname, pg_size_pretty(pg_database_size(datname)) AS size FROM pg_database ORDER BY pg_database_size(datname) DESC;&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span><span style="color:#66d9ef">set</span> tablesize <span style="color:#e6db74">&#39;SELECT relname, pg_size_pretty(pg_total_relation_size(oid)) AS total_size, pg_size_pretty(pg_relation_size(oid)) AS table_size, pg_size_pretty(pg_indexes_size(oid)) AS index_size FROM pg_class WHERE relkind = \&#39;</span>r<span style="color:#960050;background-color:#1e0010">\</span><span style="color:#e6db74">&#39; AND relnamespace = \&#39;</span><span style="color:#66d9ef">public</span><span style="color:#960050;background-color:#1e0010">\</span><span style="color:#e6db74">&#39;::regnamespace ORDER BY pg_total_relation_size(oid) DESC LIMIT 20;&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span>echo <span style="color:#e6db74">&#39;=== psqlrc loaded ===&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">\</span>echo <span style="color:#e6db74">&#39;Type :activity :locks :bloat :dbsize :tablesize for quick queries&#39;</span>
+</span></span></code></pre></div><p>使用方式——在 psql 中輸入 <code>:activity</code>、<code>:locks</code> 等即可執行預定義查詢。</p>
+<hr>
+<h3 id="gui-管理工具比較">GUI 管理工具比較</h3>
+<h4 id="pgadmin-4">pgAdmin 4</h4>
+<p>pgAdmin 4 是 PostgreSQL 官方推薦的開源圖形化管理工具，以 Web 應用形式運行：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># macOS</span>
+</span></span><span style="display:flex;"><span>brew install --cask pgadmin4
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Docker（推薦開發環境）</span>
+</span></span><span style="display:flex;"><span>docker run -d --name pgadmin4 <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  -p 5050:80 <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  -e PGADMIN_DEFAULT_EMAIL<span style="color:#f92672">=</span>admin@example.com <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  -e PGADMIN_DEFAULT_PASSWORD<span style="color:#f92672">=</span>admin <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  dpage/pgadmin4
+</span></span></code></pre></div><p><strong>核心功能</strong>：伺服器管理（多實例樹狀瀏覽）、查詢工具（語法高亮+自動補全）、<strong>EXPLAIN 圖形化</strong>（瓶頸節點紅色高亮）、Dashboard 即時監控、GUI 化的 pg_dump/pg_restore。</p>
+<h4 id="dbeaver">DBeaver</h4>
+<p>開源的通用資料庫管理工具，支援 PostgreSQL、MySQL、Oracle 等數十種資料庫：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># macOS</span>
+</span></span><span style="display:flex;"><span>brew install --cask dbeaver-community
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Linux</span>
+</span></span><span style="display:flex;"><span>flatpak install flathub io.dbeaver.DBeaverCommunity
+</span></span></code></pre></div><p><strong>PostgreSQL 特有功能</strong>：ER 圖自動生成、資料匯入/匯出精靈（CSV/JSON/XML/Excel）、Extension 管理介面、多格式匯出。</p>
+<h4 id="datagrip">DataGrip</h4>
+<p>JetBrains 出品的商用資料庫 IDE，擁有最強大的 SQL 智慧補全：</p>
+<p><strong>核心優勢</strong>：理解 Schema 上下文的精確補全、SQL 重構（重命名自動更新引用）、版本控制整合、資料比較（跨 database/schema）、PL/pgSQL 智慧感知。</p>
+<h4 id="pgcli--智慧補全-cli">pgcli — 智慧補全 CLI</h4>
+<p>psql 的增強替代品，最大特色是即時的多行自動補全與語法高亮：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>pip install pgcli
+</span></span><span style="display:flex;"><span>pgcli -h localhost -U postgres -d mydb
+</span></span></code></pre></div><table>
+  <thead>
+      <tr>
+          <th>功能</th>
+          <th>psql</th>
+          <th>pgcli</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>自動補全</td>
+          <td>基礎（Tab）</td>
+          <td>即時多行（Fuzzy matching）</td>
+      </tr>
+      <tr>
+          <td>語法高亮</td>
+          <td>無</td>
+          <td>有（即時）</td>
+      </tr>
+      <tr>
+          <td><code>\watch</code></td>
+          <td>支援</td>
+          <td>不支援</td>
+      </tr>
+      <tr>
+          <td><code>\copy</code></td>
+          <td>支援</td>
+          <td>不支援</td>
+      </tr>
+      <tr>
+          <td>適用場景</td>
+          <td>生產環境、腳本自動化</td>
+          <td>開發環境、互動式探索</td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<h3 id="pg_dump--pg_restore-進階技巧">pg_dump / pg_restore 進階技巧</h3>
+<h4 id="pg_dump-進階用法">pg_dump 進階用法</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 並行 dump（僅支援 -Fd 目錄格式，-j 建議 CPU 核心數的 50-75%）</span>
+</span></span><span style="display:flex;"><span>pg_dump -U postgres -Fd mydb -j <span style="color:#ae81ff">8</span> -f /backup/mydb_dir/
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 排除大表資料但保留結構（開發環境複製）</span>
+</span></span><span style="display:flex;"><span>pg_dump -U postgres -Fc mydb <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  --exclude-table-data<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;audit_*&#39;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  --exclude-table-data<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;log_*&#39;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  --exclude-table-data<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;sessions&#39;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  &gt; mydb_dev.dump
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 只備份特定 tables</span>
+</span></span><span style="display:flex;"><span>pg_dump -U postgres -Fc mydb <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  -t <span style="color:#e6db74">&#39;orders&#39;</span> -t <span style="color:#e6db74">&#39;order_items&#39;</span> -t <span style="color:#e6db74">&#39;customers&#39;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  &gt; mydb_core.dump
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 分離結構和資料（便於先建表再匯入）</span>
+</span></span><span style="display:flex;"><span>pg_dump -U postgres --section<span style="color:#f92672">=</span>pre-data  -Fc mydb &gt; mydb_pre.dump
+</span></span><span style="display:flex;"><span>pg_dump -U postgres --section<span style="color:#f92672">=</span>data      -Fc mydb &gt; mydb_data.dump
+</span></span><span style="display:flex;"><span>pg_dump -U postgres --section<span style="color:#f92672">=</span>post-data -Fc mydb &gt; mydb_post.dump
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 可攜式 dump（忽略 owner、privilege、tablespace）</span>
+</span></span><span style="display:flex;"><span>pg_dump -U postgres -Fc mydb <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  --no-owner --no-privileges --no-tablespaces <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  &gt; mydb_portable.dump
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># PG16+：指定壓縮算法</span>
+</span></span><span style="display:flex;"><span>pg_dump -U postgres -Fc --compress<span style="color:#f92672">=</span>lz4 mydb &gt; mydb_lz4.dump
+</span></span><span style="display:flex;"><span>pg_dump -U postgres -Fc --compress<span style="color:#f92672">=</span>zstd:3 mydb &gt; mydb_zstd.dump
+</span></span></code></pre></div><h4 id="pg_restore-進階用法">pg_restore 進階用法</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 並行還原（大幅縮短時間）</span>
+</span></span><span style="display:flex;"><span>pg_restore -U postgres -d mydb -j <span style="color:#ae81ff">8</span> mydb.dump
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 選擇性還原：列出內容 → 編輯 → 還原</span>
+</span></span><span style="display:flex;"><span>pg_restore --list mydb.dump &gt; restore_list.txt
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 編輯 restore_list.txt，用 ; 註解不需要的項目</span>
+</span></span><span style="display:flex;"><span>pg_restore -U postgres -d mydb -L restore_list.txt mydb.dump
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 分段還原（效能最佳化：先建表 → 匯入資料 → 再建索引）</span>
+</span></span><span style="display:flex;"><span>pg_restore -U postgres -d mydb --section<span style="color:#f92672">=</span>pre-data mydb_pre.dump
+</span></span><span style="display:flex;"><span>pg_restore -U postgres -d mydb --section<span style="color:#f92672">=</span>data mydb_data.dump
+</span></span><span style="display:flex;"><span>pg_restore -U postgres -d mydb --section<span style="color:#f92672">=</span>post-data mydb_post.dump
+</span></span></code></pre></div><p><strong>分段還原的效能優勢</strong>：將 post-data（indexes、constraints、triggers）分離到資料匯入之後建立，可避免匯入每筆資料時都更新索引，整體速度可提升數倍。</p>
+<hr>
+<h3 id="copy-高速匯入匯出">COPY 高速匯入匯出</h3>
+<p><code>COPY</code> 是 PostgreSQL 伺服器端的高速資料搬遷指令，速度遠超 INSERT——在 SSD 伺服器上，每秒可匯入約 <strong>50 萬~200 萬行</strong>。</p>
+<h4 id="基本用法">基本用法</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 匯出查詢結果
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">COPY</span> (
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">SELECT</span> o.id, <span style="color:#66d9ef">c</span>.name, o.total_amount
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">FROM</span> orders o <span style="color:#66d9ef">JOIN</span> customers <span style="color:#66d9ef">c</span> <span style="color:#66d9ef">ON</span> o.customer_id <span style="color:#f92672">=</span> <span style="color:#66d9ef">c</span>.id
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">WHERE</span> o.created_at <span style="color:#f92672">&gt;=</span> <span style="color:#e6db74">&#39;2026-01-01&#39;</span>
+</span></span><span style="display:flex;"><span>) <span style="color:#66d9ef">TO</span> <span style="color:#e6db74">&#39;/tmp/order_summary.csv&#39;</span> <span style="color:#66d9ef">WITH</span> (FORMAT csv, HEADER <span style="color:#66d9ef">true</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 匯入到臨時表（常見 ETL 模式）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> TEMP <span style="color:#66d9ef">TABLE</span> staging_orders (<span style="color:#66d9ef">LIKE</span> orders <span style="color:#66d9ef">INCLUDING</span> <span style="color:#66d9ef">ALL</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">COPY</span> staging_orders <span style="color:#66d9ef">FROM</span> <span style="color:#e6db74">&#39;/tmp/new_orders.csv&#39;</span> <span style="color:#66d9ef">WITH</span> (FORMAT csv, HEADER <span style="color:#66d9ef">true</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 合併到正式表（UPSERT）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">INSERT</span> <span style="color:#66d9ef">INTO</span> orders <span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> staging_orders
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ON</span> CONFLICT (id) <span style="color:#66d9ef">DO</span> <span style="color:#66d9ef">UPDATE</span> <span style="color:#66d9ef">SET</span>
+</span></span><span style="display:flex;"><span>    total_amount <span style="color:#f92672">=</span> EXCLUDED.total_amount,
+</span></span><span style="display:flex;"><span>    updated_at <span style="color:#f92672">=</span> now();
+</span></span></code></pre></div><h4 id="進階參數">進階參數</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- PG17+：ON_ERROR 參數（跳過格式錯誤的行）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">COPY</span> orders <span style="color:#66d9ef">FROM</span> <span style="color:#e6db74">&#39;/tmp/messy_data.csv&#39;</span> <span style="color:#66d9ef">WITH</span> (
+</span></span><span style="display:flex;"><span>    FORMAT csv, HEADER <span style="color:#66d9ef">true</span>,
+</span></span><span style="display:flex;"><span>    ON_ERROR <span style="color:#e6db74">&#39;ignore&#39;</span>       <span style="color:#75715e">-- 跳過錯誤行而非中止
+</span></span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- COPY FREEZE：匯入同時凍結 tuple，避免後續 VACUUM
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">BEGIN</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">TRUNCATE</span> orders;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">COPY</span> orders <span style="color:#66d9ef">FROM</span> <span style="color:#e6db74">&#39;/data/orders.csv&#39;</span> <span style="color:#66d9ef">WITH</span> (FORMAT csv, HEADER <span style="color:#66d9ef">true</span>, <span style="color:#66d9ef">FREEZE</span> <span style="color:#66d9ef">true</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">COMMIT</span>;
+</span></span></code></pre></div><h4 id="大量匯入效能最佳化">大量匯入效能最佳化</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 1. 暫時停用 indexes
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">-- 2. 暫時停用 triggers
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> orders DISABLE <span style="color:#66d9ef">TRIGGER</span> <span style="color:#66d9ef">ALL</span>;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 3. 暫時停用 foreign key checks
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SET</span> session_replication_role <span style="color:#f92672">=</span> replica;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 4. 增大 maintenance_work_mem
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SET</span> maintenance_work_mem <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;1GB&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 5. 執行 COPY
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">COPY</span> orders <span style="color:#66d9ef">FROM</span> <span style="color:#e6db74">&#39;/data/large_import.csv&#39;</span> <span style="color:#66d9ef">WITH</span> (FORMAT csv, HEADER <span style="color:#66d9ef">true</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 6. 重建 indexes
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">-- 7. 恢復 triggers
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> orders ENABLE <span style="color:#66d9ef">TRIGGER</span> <span style="color:#66d9ef">ALL</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SET</span> session_replication_role <span style="color:#f92672">=</span> <span style="color:#66d9ef">DEFAULT</span>;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 8. 更新統計
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ANALYZE</span> orders;
+</span></span></code></pre></div><h4 id="管道串聯用法">管道串聯用法</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 從壓縮檔直接匯入</span>
+</span></span><span style="display:flex;"><span>gunzip -c orders.csv.gz | psql -U postgres -d mydb <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  -c <span style="color:#e6db74">&#34;COPY orders FROM STDIN WITH (FORMAT csv, HEADER true)&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 跨伺服器資料搬遷</span>
+</span></span><span style="display:flex;"><span>psql -h source -c <span style="color:#e6db74">&#34;COPY orders TO STDOUT WITH (FORMAT csv, HEADER true)&#34;</span> | <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>psql -h target -c <span style="color:#e6db74">&#34;COPY orders FROM STDIN WITH (FORMAT csv, HEADER true)&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 搭配 pv 監控傳輸進度</span>
+</span></span><span style="display:flex;"><span>psql -h source -c <span style="color:#e6db74">&#34;COPY orders TO STDOUT WITH (FORMAT binary)&#34;</span> | <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  pv -pterb | <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  psql -h target -c <span style="color:#e6db74">&#34;COPY orders FROM STDIN WITH (FORMAT binary)&#34;</span>
+</span></span></code></pre></div><hr>
+<h3 id="pgtap--資料庫單元測試">pgTAP — 資料庫單元測試</h3>
+<p>pgTAP 是 PostgreSQL 的單元測試框架 Extension，實作 TAP（Test Anything Protocol），讓你以 SQL 撰寫資料庫層級的測試。</p>
+<h4 id="安裝">安裝</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Ubuntu/Debian</span>
+</span></span><span style="display:flex;"><span>sudo apt install postgresql-17-pgtap
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># macOS</span>
+</span></span><span style="display:flex;"><span>brew install pgtap
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> EXTENSION pgtap;
+</span></span></code></pre></div><h4 id="測試撰寫">測試撰寫</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">BEGIN</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> plan(<span style="color:#ae81ff">5</span>);    <span style="color:#75715e">-- 宣告共 5 個測試
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 結構測試
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> has_table(<span style="color:#e6db74">&#39;orders&#39;</span>, <span style="color:#e6db74">&#39;orders 表應存在&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> has_column(<span style="color:#e6db74">&#39;orders&#39;</span>, <span style="color:#e6db74">&#39;total_amount&#39;</span>, <span style="color:#e6db74">&#39;應有 total_amount 欄位&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> col_type_is(<span style="color:#e6db74">&#39;orders&#39;</span>, <span style="color:#e6db74">&#39;total_amount&#39;</span>, <span style="color:#e6db74">&#39;numeric&#39;</span>, <span style="color:#e6db74">&#39;型別應為 numeric&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> has_pk(<span style="color:#e6db74">&#39;orders&#39;</span>, <span style="color:#e6db74">&#39;應有 primary key&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> has_fk(<span style="color:#e6db74">&#39;order_items&#39;</span>, <span style="color:#e6db74">&#39;應有 foreign key&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> finish();
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ROLLBACK</span>;    <span style="color:#75715e">-- rollback 確保測試不污染資料
+</span></span></span></code></pre></div><h4 id="常用測試函式">常用測試函式</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 欄位約束測試
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> col_not_null(<span style="color:#e6db74">&#39;orders&#39;</span>, <span style="color:#e6db74">&#39;customer_id&#39;</span>, <span style="color:#e6db74">&#39;customer_id 不可為 NULL&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> col_has_default(<span style="color:#e6db74">&#39;orders&#39;</span>, <span style="color:#e6db74">&#39;created_at&#39;</span>, <span style="color:#e6db74">&#39;created_at 應有預設值&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> col_default_is(<span style="color:#e6db74">&#39;orders&#39;</span>, <span style="color:#e6db74">&#39;status&#39;</span>, <span style="color:#e6db74">&#39;pending&#39;</span>, <span style="color:#e6db74">&#39;status 預設為 pending&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 外鍵測試
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> fk_ok(<span style="color:#e6db74">&#39;order_items&#39;</span>, <span style="color:#e6db74">&#39;order_id&#39;</span>, <span style="color:#e6db74">&#39;orders&#39;</span>, <span style="color:#e6db74">&#39;id&#39;</span>,
+</span></span><span style="display:flex;"><span>             <span style="color:#e6db74">&#39;order_items.order_id 應參照 orders.id&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 索引測試
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> has_index(<span style="color:#e6db74">&#39;orders&#39;</span>, <span style="color:#e6db74">&#39;idx_orders_customer_id&#39;</span>, <span style="color:#e6db74">&#39;索引應存在&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> index_is_type(<span style="color:#e6db74">&#39;orders&#39;</span>, <span style="color:#e6db74">&#39;idx_orders_customer_id&#39;</span>, <span style="color:#e6db74">&#39;btree&#39;</span>, <span style="color:#e6db74">&#39;應為 btree&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- Function 測試
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> has_function(<span style="color:#e6db74">&#39;calculate_total&#39;</span>, ARRAY[<span style="color:#e6db74">&#39;integer&#39;</span>], <span style="color:#e6db74">&#39;函數應存在&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> function_returns(<span style="color:#e6db74">&#39;calculate_total&#39;</span>, ARRAY[<span style="color:#e6db74">&#39;integer&#39;</span>], <span style="color:#e6db74">&#39;numeric&#39;</span>, <span style="color:#e6db74">&#39;應回傳 numeric&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 資料測試（結果集比較）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> results_eq(
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;SELECT count(*)::integer FROM orders WHERE status = &#39;&#39;completed&#39;&#39;&#39;</span>,
+</span></span><span style="display:flex;"><span>    ARRAY[<span style="color:#ae81ff">42</span>],
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;已完成訂單應有 42 筆&#39;</span>
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 例外測試
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> throws_ok(
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;INSERT INTO orders (id) VALUES (NULL)&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;23502&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">NULL</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;插入 NULL id 應報錯&#39;</span>
+</span></span><span style="display:flex;"><span>);
+</span></span></code></pre></div><h4 id="schema-migration-測試">Schema Migration 測試</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">BEGIN</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> plan(<span style="color:#ae81ff">8</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> has_table(<span style="color:#e6db74">&#39;user_preferences&#39;</span>, <span style="color:#e6db74">&#39;migration 應建立 user_preferences 表&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> has_column(<span style="color:#e6db74">&#39;user_preferences&#39;</span>, <span style="color:#e6db74">&#39;user_id&#39;</span>, <span style="color:#e6db74">&#39;應有 user_id 欄位&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> has_column(<span style="color:#e6db74">&#39;user_preferences&#39;</span>, <span style="color:#e6db74">&#39;theme&#39;</span>, <span style="color:#e6db74">&#39;應有 theme 欄位&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> col_type_is(<span style="color:#e6db74">&#39;user_preferences&#39;</span>, <span style="color:#e6db74">&#39;theme&#39;</span>, <span style="color:#e6db74">&#39;text&#39;</span>, <span style="color:#e6db74">&#39;應為 text&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> col_default_is(<span style="color:#e6db74">&#39;user_preferences&#39;</span>, <span style="color:#e6db74">&#39;theme&#39;</span>, <span style="color:#e6db74">&#39;light&#39;</span>, <span style="color:#e6db74">&#39;預設為 light&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> fk_ok(<span style="color:#e6db74">&#39;user_preferences&#39;</span>, <span style="color:#e6db74">&#39;user_id&#39;</span>, <span style="color:#e6db74">&#39;users&#39;</span>, <span style="color:#e6db74">&#39;id&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> has_index(<span style="color:#e6db74">&#39;user_preferences&#39;</span>, <span style="color:#e6db74">&#39;idx_user_preferences_user_id&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> hasnt_column(<span style="color:#e6db74">&#39;users&#39;</span>, <span style="color:#e6db74">&#39;preferences_json&#39;</span>, <span style="color:#e6db74">&#39;舊欄位應已移除&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> finish();
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ROLLBACK</span>;
+</span></span></code></pre></div><h4 id="使用-pg_prove-執行">使用 pg_prove 執行</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 執行測試目錄下所有 .sql 測試檔</span>
+</span></span><span style="display:flex;"><span>pg_prove -U postgres -d testdb tests/*.sql
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 詳細輸出</span>
+</span></span><span style="display:flex;"><span>pg_prove -U postgres -d testdb -v tests/*.sql
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e"># CI/CD 整合（GitHub Actions）</span>
+</span></span><span style="display:flex;"><span>- <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Run database tests</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">run</span>: <span style="color:#ae81ff">pg_prove -U postgres -d testdb --recurse tests/</span>
+</span></span></code></pre></div><hr>
+<h3 id="pgbench--效能測試">pgbench — 效能測試</h3>
+<p>pgbench 是 PostgreSQL 內建的基準測試工具，用於衡量資料庫在特定負載下的 TPS（Transactions Per Second）。</p>
+<h4 id="初始化與基本測試">初始化與基本測試</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 初始化測試資料（-s 100 → 約 1.6GB，1000 萬筆帳戶）</span>
+</span></span><span style="display:flex;"><span>pgbench -U postgres -i -s <span style="color:#ae81ff">100</span> mydb
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 基礎壓測：10 個客戶端，每個 100 transactions</span>
+</span></span><span style="display:flex;"><span>pgbench -U postgres -c <span style="color:#ae81ff">10</span> -t <span style="color:#ae81ff">100</span> mydb
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 指定持續時間 + 多執行緒 + 進度報告</span>
+</span></span><span style="display:flex;"><span>pgbench -U postgres -c <span style="color:#ae81ff">32</span> -j <span style="color:#ae81ff">8</span> -T <span style="color:#ae81ff">120</span> -P <span style="color:#ae81ff">5</span> mydb
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 只讀測試</span>
+</span></span><span style="display:flex;"><span>pgbench -U postgres -c <span style="color:#ae81ff">32</span> -j <span style="color:#ae81ff">8</span> -T <span style="color:#ae81ff">60</span> -S mydb
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 使用 Prepared Statements（更貼近實際）</span>
+</span></span><span style="display:flex;"><span>pgbench -U postgres -c <span style="color:#ae81ff">16</span> -j <span style="color:#ae81ff">4</span> -T <span style="color:#ae81ff">120</span> -M prepared mydb
+</span></span></code></pre></div><h4 id="自訂測試腳本">自訂測試腳本</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 建立自訂腳本</span>
+</span></span><span style="display:flex;"><span>cat &gt; /tmp/custom_bench.sql <span style="color:#e6db74">&lt;&lt; &#39;EOF&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">\set customer_id random(1, 100000)
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">\set amount random(100, 10000)
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">BEGIN;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">SELECT * FROM customers WHERE id = :customer_id;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">INSERT INTO orders (customer_id, total_amount, status)
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">VALUES (:customer_id, :amount, &#39;pending&#39;);
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">UPDATE customers SET last_order_at = now() WHERE id = :customer_id;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">COMMIT;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">EOF</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>pgbench -U postgres -c <span style="color:#ae81ff">16</span> -j <span style="color:#ae81ff">4</span> -T <span style="color:#ae81ff">120</span> -f /tmp/custom_bench.sql mydb
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 多腳本混合測試（讀寫比 80:20）</span>
+</span></span><span style="display:flex;"><span>pgbench -U postgres -c <span style="color:#ae81ff">16</span> -j <span style="color:#ae81ff">4</span> -T <span style="color:#ae81ff">120</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  -f /tmp/read_bench.sql@80 <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  -f /tmp/custom_bench.sql@20 <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>  mydb
+</span></span></code></pre></div><h4 id="模擬熱點資料">模擬熱點資料</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Zipfian 分佈（少數 ID 被頻繁存取，貼近真實場景）</span>
+</span></span><span style="display:flex;"><span>cat &gt; /tmp/zipf_bench.sql <span style="color:#e6db74">&lt;&lt; &#39;EOF&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">\set aid random_zipfian(1, 100000, 1.5)
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">SELECT * FROM pgbench_accounts WHERE aid = :aid;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">EOF</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>pgbench -U postgres -c <span style="color:#ae81ff">16</span> -T <span style="color:#ae81ff">120</span> -f /tmp/zipf_bench.sql mydb
+</span></span></code></pre></div><h4 id="結果解讀">結果解讀</h4>
+<table>
+  <thead>
+      <tr>
+          <th>指標</th>
+          <th>意義</th>
+          <th>健康值</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>TPS</strong></td>
+          <td>每秒處理的 transaction 數</td>
+          <td>取決於硬體與負載模型</td>
+      </tr>
+      <tr>
+          <td><strong>latency average</strong></td>
+          <td>平均回應延遲</td>
+          <td>OLTP 通常 &lt;5ms</td>
+      </tr>
+      <tr>
+          <td><strong>latency stddev</strong></td>
+          <td>延遲標準差</td>
+          <td>越低越穩定</td>
+      </tr>
+      <tr>
+          <td><strong>failed transactions</strong></td>
+          <td>失敗率</td>
+          <td>應為 0%</td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<h3 id="pg_stat_statements-查詢分析工作流">pg_stat_statements 查詢分析工作流</h3>
+<p><code>pg_stat_statements</code> 是查詢效能分析的基石。以下是系統化的分析工作流：</p>
+<pre tabindex="0"><code>Step 1：重置統計 → 定義觀察視窗
+Step 2：收集數據 → 等待業務高峰期
+Step 3：Top-N 分析 → 找出最耗資源的查詢
+Step 4：深入診斷 → EXPLAIN ANALYZE
+Step 5：優化執行 → 新增索引 / 改寫查詢
+Step 6：驗證效果 → 比對前後統計
+</code></pre><h4 id="top-n-多維分析">Top-N 多維分析</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 維度一：總耗時 Top 20（對整體效能影響最大）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span>
+</span></span><span style="display:flex;"><span>    queryid,
+</span></span><span style="display:flex;"><span>    round(total_exec_time::numeric <span style="color:#f92672">/</span> <span style="color:#ae81ff">1000</span>, <span style="color:#ae81ff">2</span>) <span style="color:#66d9ef">AS</span> total_secs,
+</span></span><span style="display:flex;"><span>    calls,
+</span></span><span style="display:flex;"><span>    round(mean_exec_time::numeric, <span style="color:#ae81ff">2</span>) <span style="color:#66d9ef">AS</span> avg_ms,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">rows</span>,
+</span></span><span style="display:flex;"><span>    round(<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">0</span> <span style="color:#f92672">*</span> shared_blks_hit <span style="color:#f92672">/</span> <span style="color:#66d9ef">nullif</span>(shared_blks_hit <span style="color:#f92672">+</span> shared_blks_read, <span style="color:#ae81ff">0</span>), <span style="color:#ae81ff">1</span>) <span style="color:#66d9ef">AS</span> hit_pct,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">left</span>(query, <span style="color:#ae81ff">120</span>) <span style="color:#66d9ef">AS</span> query
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> pg_stat_statements
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> total_exec_time <span style="color:#66d9ef">DESC</span> <span style="color:#66d9ef">LIMIT</span> <span style="color:#ae81ff">20</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 維度二：平均耗時 Top 20（單次最慢）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> queryid, calls,
+</span></span><span style="display:flex;"><span>    round(mean_exec_time::numeric, <span style="color:#ae81ff">2</span>) <span style="color:#66d9ef">AS</span> avg_ms,
+</span></span><span style="display:flex;"><span>    round(max_exec_time::numeric, <span style="color:#ae81ff">2</span>) <span style="color:#66d9ef">AS</span> max_ms,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">left</span>(query, <span style="color:#ae81ff">120</span>) <span style="color:#66d9ef">AS</span> query
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> pg_stat_statements
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> calls <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">10</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> mean_exec_time <span style="color:#66d9ef">DESC</span> <span style="color:#66d9ef">LIMIT</span> <span style="color:#ae81ff">20</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 維度三：I/O 密集 Top 20（需要索引優化）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> queryid, calls,
+</span></span><span style="display:flex;"><span>    shared_blks_read <span style="color:#66d9ef">AS</span> disk_reads,
+</span></span><span style="display:flex;"><span>    round(<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">0</span> <span style="color:#f92672">*</span> shared_blks_hit <span style="color:#f92672">/</span> <span style="color:#66d9ef">nullif</span>(shared_blks_hit <span style="color:#f92672">+</span> shared_blks_read, <span style="color:#ae81ff">0</span>), <span style="color:#ae81ff">1</span>) <span style="color:#66d9ef">AS</span> hit_pct,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">left</span>(query, <span style="color:#ae81ff">120</span>) <span style="color:#66d9ef">AS</span> query
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> pg_stat_statements
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> shared_blks_read <span style="color:#66d9ef">DESC</span> <span style="color:#66d9ef">LIMIT</span> <span style="color:#ae81ff">20</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 維度四：執行時間不穩定（CV 值高）
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> queryid, calls,
+</span></span><span style="display:flex;"><span>    round(mean_exec_time::numeric, <span style="color:#ae81ff">2</span>) <span style="color:#66d9ef">AS</span> avg_ms,
+</span></span><span style="display:flex;"><span>    round(<span style="color:#ae81ff">100</span>.<span style="color:#ae81ff">0</span> <span style="color:#f92672">*</span> stddev_exec_time <span style="color:#f92672">/</span> <span style="color:#66d9ef">nullif</span>(mean_exec_time, <span style="color:#ae81ff">0</span>), <span style="color:#ae81ff">1</span>) <span style="color:#66d9ef">AS</span> cv_pct,
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">left</span>(query, <span style="color:#ae81ff">120</span>) <span style="color:#66d9ef">AS</span> query
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> pg_stat_statements
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> calls <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">50</span> <span style="color:#66d9ef">AND</span> mean_exec_time <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">10</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> cv_pct <span style="color:#66d9ef">DESC</span> <span style="color:#66d9ef">LIMIT</span> <span style="color:#ae81ff">20</span>;
+</span></span></code></pre></div><hr>
+<h3 id="工具選型建議">工具選型建議</h3>
+<table>
+  <thead>
+      <tr>
+          <th>場景</th>
+          <th>推薦工具</th>
+          <th>備選</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>個人開發者</td>
+          <td>pgcli + DBeaver</td>
+          <td>psql + pgAdmin</td>
+      </tr>
+      <tr>
+          <td>小型團隊</td>
+          <td>DataGrip + psql</td>
+          <td>DBeaver + pgcli</td>
+      </tr>
+      <tr>
+          <td>大型團隊</td>
+          <td>DataGrip + pgAdmin</td>
+          <td>DBeaver Enterprise</td>
+      </tr>
+      <tr>
+          <td>DBA 日常維運</td>
+          <td>psql + psqlrc</td>
+          <td>pgAdmin Dashboard</td>
+      </tr>
+      <tr>
+          <td>CI/CD 管線</td>
+          <td>psql + pgTAP</td>
+          <td>pg_prove</td>
+      </tr>
+      <tr>
+          <td>效能測試</td>
+          <td>pgbench</td>
+          <td>pgbench + custom script</td>
+      </tr>
+      <tr>
+          <td>效能分析</td>
+          <td>pg_stat_statements</td>
+          <td>+ auto_explain + pgBadger</td>
+      </tr>
+      <tr>
+          <td>資料搬遷（小量）</td>
+          <td>pg_dump / pg_restore</td>
+          <td>DBeaver 匯出匯入</td>
+      </tr>
+      <tr>
+          <td>資料搬遷（大量）</td>
+          <td>COPY + 管道</td>
+          <td>pg_dump -Fd -j</td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<h3 id="工具鏈整合流程">工具鏈整合流程</h3>
+<p>成熟的 PostgreSQL 開發流程會將多個工具串聯：</p>
+<pre tabindex="0"><code>開發階段：
+  pgcli/DataGrip → 撰寫與測試 SQL
+       │
+       ▼
+  pgTAP ─────→ 資料庫單元測試
+       │
+       ▼
+  EXPLAIN ANALYZE → 驗證查詢效能
+
+部署階段：
+  pg_dump ────→ 備份現有結構/資料
+       │
+       ▼
+  migration tool → 執行 Schema 變更
+       │
+       ▼
+  pgbench ────→ 壓力測試新版本效能
+
+營運階段：
+  pg_stat_statements → 持續追蹤查詢效能
+       │
+       ▼
+  auto_explain ────→ 自動記錄慢查詢執行計劃
+       │
+       ▼
+  pgBadger / Grafana → 報告與告警
+</code></pre><hr>
+<h3 id="版本演進">版本演進</h3>
+<table>
+  <thead>
+      <tr>
+          <th>PostgreSQL 版本</th>
+          <th>開發工具相關新功能</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>PG10</td>
+          <td>pgbench 支援 <code>\if</code>/<code>\elif</code>/<code>\else</code> 條件邏輯</td>
+      </tr>
+      <tr>
+          <td>PG11</td>
+          <td>pgbench 支援 <code>random_zipfian()</code> 分佈函式</td>
+      </tr>
+      <tr>
+          <td>PG13</td>
+          <td>pg_stat_statements 新增 WAL 統計</td>
+      </tr>
+      <tr>
+          <td>PG15</td>
+          <td>psql <code>\dconfig</code> 模糊搜尋；pg_dump 支援 LZ4/zstd 壓縮</td>
+      </tr>
+      <tr>
+          <td>PG16</td>
+          <td><code>\watch</code> 支援 <code>i=</code>/<code>c=</code> 參數；pg_dump 壓縮算法選擇</td>
+      </tr>
+      <tr>
+          <td>PG17</td>
+          <td>COPY 新增 <code>ON_ERROR</code>、<code>LOG_VERBOSITY</code> 參數</td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<h3 id="總結">總結</h3>
+<p>PostgreSQL 的開發工具生態涵蓋了從日常開發到生產維運的完整鏈路。<strong>psql</strong> 是不可替代的基礎——掌握 <code>\watch</code>、<code>\gexec</code>、<code>\copy</code>、psqlrc 自訂別名等進階功能，可以大幅提升 DBA 效率。<strong>pgTAP</strong> 讓資料庫測試像應用程式測試一樣標準化。<strong>pgbench</strong> 在上線前提供客觀的效能基準。<strong>pg_stat_statements</strong> 則是生產環境中持續追蹤查詢效能的基石。</p>
+<p>選擇工具不必二選一——CLI 與 GUI、psql 與 pgcli、pgAdmin 與 DataGrip 各有長處，根據場景靈活搭配，才是最高效的工作方式。</p>
+<p>下一篇（也是本系列最終篇），我們將探討 <strong>Citus 分散式 PostgreSQL</strong>——如何將 PostgreSQL 水平擴展到多節點叢集，處理 TB 級甚至 PB 級的大規模資料。</p></div>
+        
+        
+
+        
+        <div class="mt-8">
+          
+<div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose">
+  <div>
+    <div class="flex items-center gap-2 mb-1">
+      <a href="/about" class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">
+        BenZ
+      </a>
+      
+      <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span>
+      
+    </div>
+    <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">
+      熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。
+    </p>
+    <div class="flex items-center gap-3">
+      
+      <a href="https://github.com/benzhub" target="_blank" rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label="GitHub">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+      
+      
+      
+    </div>
+  </div>
+</div>
+
+        </div>
+      </div>
+
+      
+      
+<div class="subscribe-widget max-w-xl mx-auto my-10 px-6 py-8 text-center rounded-xl bg-zinc-50 dark:bg-zinc-800">
+  <h3 class="text-lg font-bold mb-1">訂閱 BenzHub 電子報</h3>
+  <p class="text-sm text-zinc-600 dark:text-zinc-300 mb-4">每週 AI 賺錢實戰 + 免費工具地圖</p>
+  <form class="subscribe-form flex flex-col sm:flex-row gap-3 justify-center"
+        data-worker="https://benzhub-newsletter.PLACEHOLDER.workers.dev" data-source="footer-widget">
+    <input type="email" required placeholder="你的 Email"
+           class="px-4 py-2 rounded-lg border border-zinc-300 dark:bg-zinc-900 dark:border-zinc-600" />
+    <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700">訂閱</button>
+  </form>
+  <div class="cf-turnstile mt-3 flex justify-center" data-sitekey="PLACEHOLDER_TURNSTILE_SITE_KEY"></div>
+  <p class="subscribe-status text-sm text-zinc-500 mt-2"></p>
+</div>
+
+
+
+      
+      <div class="post-detail fade-in my-4">
+        
+
+
+<div>
+  <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3>
+  <div class="grid gap-2">
+    
+    <a href="https://benzhub.github.io/post/postgresql/048-cloud-managed/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">雲端託管 PostgreSQL：AWS RDS、Aurora、Cloud SQL、Supabase、Neon 全面比較 | PostgreSQL</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/24</span>
+    </a>
+    
+    <a href="https://benzhub.github.io/post/postgresql/047-orm-integration/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">ORM 整合實戰：TypeORM、Prisma、SQLAlchemy、Django ORM 與 PostgreSQL 進階型別映射 | PostgreSQL</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/23</span>
+    </a>
+    
+    <a href="https://benzhub.github.io/post/postgresql/046-migration-tools/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Schema 遷移工具完全比較：Flyway、Alembic、Prisma、TypeORM 與零停機遷移策略 | PostgreSQL</span>
+      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/22</span>
+    </a>
+    
+  </div>
+</div>
+
+
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            
+            <a href="https://benzhub.github.io/post/postgresql/048-cloud-managed/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+                <span class="text-sm font-medium">雲端託管 PostgreSQL：AWS RDS、Aurora、Cloud SQL、Supabase、Neon 全面比較 | PostgreSQL</span>
+            </a>
+            
+          </div>
+          <div>
+            
+            <a href="https://benzhub.github.io/post/postgresql/050-citus-distributed/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
+                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+                <span class="text-sm font-medium">Citus 分散式 PostgreSQL：水平擴展到多節點叢集 | PostgreSQL</span>
+            </a>
+            
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="post-detail fade-in my-4">
+        
+<script src="https://giscus.app/client.js"
+        data-repo="benzhub/benzhub.github.io"
+        data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM="
+        data-category="Announcements"
+        data-category-id="MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme="preferred_color_scheme"
+        data-lang="zh-TW"
+        crossorigin="anonymous"
+        async>
+</script>
+
+
+      </div>
+    </div>
+    
+    <div class="hidden lg:block lg:col-span-1 mt-4">
+    
+    
+            
+            <div class="widget fade-in">
+    <p class="widget-title">搜尋</p>
+    <form role="search" method="get" action="https://google.com/search">
+        <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
+        <input type="hidden" name="sitesearch" value="https://benzhub.github.io/" />
+    </form>
+</div>
+
+        
+            
+            
+
+        
+            
+            
+<div class="widget fade-in">
+    <p class="widget-title">標籤</p>
+    <div class="flex flex-wrap gap-1.5">
+        <a href='/tags/80/20-%E6%B3%95%E5%89%87'>
+            <span class="tag-pill">80/20 法則</span>
+        </a>
+        <a href='/tags/acid'>
+            <span class="tag-pill">acid</span>
+        </a>
+        <a href='/tags/aggregate'>
+            <span class="tag-pill">aggregate</span>
+        </a>
+        <a href='/tags/ai'>
+            <span class="tag-pill">ai</span>
+        </a>
+        <a href='/tags/ai-agent'>
+            <span class="tag-pill">ai agent</span>
+        </a>
+        <a href='/tags/ai-workflow'>
+            <span class="tag-pill">ai workflow</span>
+        </a>
+        <a href='/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE'>
+            <span class="tag-pill">ai 工具焦慮</span>
+        </a>
+        <a href='/tags/ai-%E6%8E%A5%E5%96%AE'>
+            <span class="tag-pill">ai 接單</span>
+        </a>
+        <a href='/tags/ai-%E7%B9%AA%E5%9C%96'>
+            <span class="tag-pill">ai 繪圖</span>
+        </a>
+        <a href='/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA'>
+            <span class="tag-pill">ai 虛擬人</span>
+        </a>
+        <a href='/tags/ai-%E8%A1%8C%E9%8A%B7'>
+            <span class="tag-pill">ai 行銷</span>
+        </a>
+        <a href='/tags/ai-%E8%A8%AD%E8%A8%88'>
+            <span class="tag-pill">ai 設計</span>
+        </a>
+        <a href='/tags/ai-%E8%AE%8A%E7%8F%BE'>
+            <span class="tag-pill">ai 變現</span>
+        </a>
+        <a href='/tags/ai-%E8%B3%BA%E9%8C%A2'>
+            <span class="tag-pill">ai 賺錢</span>
+        </a>
+        <a href='/tags/ai-income'>
+            <span class="tag-pill">ai-income</span>
+        </a>
+        <a href='/tags/ai-insights'>
+            <span class="tag-pill">ai-insights</span>
+        </a>
+        <a href='/tags/analytics'>
+            <span class="tag-pill">analytics</span>
+        </a>
+        <a href='/tags/api'>
+            <span class="tag-pill">api</span>
+        </a>
+        <a href='/tags/architecture'>
+            <span class="tag-pill">architecture</span>
+        </a>
+        <a href='/tags/audit'>
+            <span class="tag-pill">audit</span>
+        </a>
+    </div>
+</div>
+
+
+        
+            
+            
+<div class="widget fade-in">
+    <p class="widget-title">文章系列</p>
+    <div class="flex flex-wrap gap-1.5">
+        
+        
+        
+        
+        <a href='/post/postgresql/'>
+            <span class="tag-pill">PostgreSQL (50)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/javascript/'>
+            <span class="tag-pill">JavaScript (109)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/django/'>
+            <span class="tag-pill">Django (44)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/python/'>
+            <span class="tag-pill">Python (37)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/htmlcss/'>
+            <span class="tag-pill">HTML &amp; CSS (23)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/linux/'>
+            <span class="tag-pill">Linux (22)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/git/'>
+            <span class="tag-pill">Git (18)</span>
+        </a>
+        
+        
+        
+        
+        
+        <a href='/post/ai-insights/'>
+            <span class="tag-pill">AI Insights (13)</span>
+        </a>
+        
+        
+    </div>
+</div>
+
+
+        
+            
+            
+
+<div class="widget fade-in">
+    <p class="widget-title">最新文章</p>
+    <div class="flex flex-col gap-1">
+        <a href="/post/javascript/data-structures--algorithms/047-load-balancer/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計負載均衡器 — Round Robin、一致性雜湊與健康檢查實戰 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/30
+            </p>
+        </a>
+        <a href="/post/javascript/data-structures--algorithms/046-text-diff/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計文本差異比對 — LCS、Myers Diff 演算法與 Patch 生成實戰 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/29
+            </p>
+        </a>
+        <a href="/post/javascript/data-structures--algorithms/045-recommendation/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計推薦系統 — 協同過濾、內容推薦與矩陣分解實戰 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/28
+            </p>
+        </a>
+        <a href="/post/javascript/data-structures--algorithms/044-url-shortener/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計短網址系統 — Base62 編碼、分散式 ID 生成與重導向架構 | 資料結構與演算法</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/27
+            </p>
+        </a>
+        <a href="/post/postgresql/050-citus-distributed/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
+            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Citus 分散式 PostgreSQL：水平擴展到多節點叢集 | PostgreSQL</div>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2026/07/26
+            </p>
+        </a>
+    </div>
+</div>
+
+        
+    
+</div>
+
+    
+</div>
+
+        </div>
+    </div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]">
+    
+    <p>&copy; 2026 <a href="https://benzhub.github.io/" class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p>
+</footer>
+
+
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script src="/js/subscribe.js" defer></script>
+
+
+
+<script>
+    (function (window, document) {
+        function main() {
+            var ad = document.createElement('script');
+            ad.async = true;
+            ad.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606';
+            ad.crossOrigin = "anonymous";
+            var sc = document.getElementsByTagName('script')[0];
+            sc.parentNode.insertBefore(ad, sc);
+        }
+        var lazyLoad = false;
+        function onLazyLoad() {
+            if (lazyLoad === false) {
+                lazyLoad = true;
+                window.removeEventListener('scroll', onLazyLoad);
+                window.removeEventListener('mousemove', onLazyLoad);
+                window.removeEventListener('mousedown', onLazyLoad);
+                window.removeEventListener('touchstart', onLazyLoad);
+                window.removeEventListener('keydown', onLazyLoad);
+                main();
+            }
+        }
+        window.addEventListener('scroll', onLazyLoad);
+        window.addEventListener('mousemove', onLazyLoad);
+        window.addEventListener('mousedown', onLazyLoad);
+        window.addEventListener('touchstart', onLazyLoad);
+        window.addEventListener('keydown', onLazyLoad);
+        window.addEventListener('load', function () {
+            if (window.pageYOffset) {
+                onLazyLoad();
+                window.setTimeout(onLazyLoad, 3000);
+            }
+        });
+    })(window, document);
+</script>
+
+
+<script>
+    
+    var icon = document.getElementById("icon");
+    var icon2 = document.getElementById("icon2");
+    if (document.documentElement.classList.contains("dark") || localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+        if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+    function toggleDarkMode() {
+        if (document.documentElement.classList.contains('dark')) {
+            if (icon) { icon.classList.remove("icon-sun"); icon.classList.add("icon-moon"); }
+            if (icon2) { icon2.classList.remove("icon-sun"); icon2.classList.add("icon-moon"); }
+            document.documentElement.classList.remove('dark');
+            localStorage.theme = 'light';
+        } else {
+            if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
+            if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
+            document.documentElement.classList.add('dark');
+            localStorage.theme = 'dark';
+        }
+    }
+
+    
+    document.addEventListener('DOMContentLoaded', function () {
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0 });
+
+        document.querySelectorAll('.fade-in').forEach(function (el) {
+            observer.observe(el);
+        });
+    });
+</script>
+</body>
+
+</html>
