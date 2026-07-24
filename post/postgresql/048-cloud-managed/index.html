@@ -1,599 +1,62 @@
-<!DOCTYPE html>
-
-<html lang="zh-TW">
-<head>
-
-
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-FSEWPBJMJT');
-</script>
-
-<title>雲端託管 PostgreSQL：AWS RDS、Aurora、Cloud SQL、Supabase、Neon 全面比較 | PostgreSQL | BenzHub</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="apple-touch-icon" sizes="180x180" href='/favicon/apple-touch-icon.png'>
-    <link rel="icon" type="image/png" sizes="32x32" href='/favicon/favicon-32x32.png'>
-    <link rel="icon" type="image/png" sizes="16x16" href='/favicon/favicon-16x16.png'>
-    <link rel="manifest" href='/favicon/site.webmanifest' />
-    <link rel="mask-icon" href=' /favicon/safari-pinned-tab.svg' color="#5bbad5" />
-    <link rel="shortcut icon" href='/favicon/favicon.ico' />
-    <meta name="theme-color" content="#fafafa">
-    <meta property="og:title" content="雲端託管 PostgreSQL：AWS RDS、Aurora、Cloud SQL、Supabase、Neon 全面比較 | PostgreSQL | BenzHub" />
-    
-    
-    
-    <link rel="stylesheet" href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css" />
-    
-    <link href=' /css/blonde.min.css' rel="stylesheet" type="text/css" media="print"
-        onload="this.media=' all'">
-    
-
-
-
-
-
-
-
-  
-
-
-
-
-  
-
-<meta name="description" content="深入比較 AWS RDS、Aurora、Cloud SQL、AlloyDB、Azure Flexible、Supabase、Neon 等雲端託管 PostgreSQL 方案，從架構差異、HA 機制、Extension 支援到定價模型，幫助你選出最適合的雲端資料庫服務。">
-<meta property="og:site_name" content="BenzHub">
-<meta property="og:description" content="深入比較 AWS RDS、Aurora、Cloud SQL、AlloyDB、Azure Flexible、Supabase、Neon 等雲端託管 PostgreSQL 方案，從架構差異、HA 機制、Extension 支援到定價模型，幫助你選出最適合的雲端資料庫服務。">
-<meta property="og:url" content="https://benzhub.github.io/post/postgresql/048-cloud-managed/">
-<meta property="og:type" content="article">
-<meta property="og:locale" content="zh_TW">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="">
-
-<link rel="canonical" href="https://benzhub.github.io/post/postgresql/048-cloud-managed/">
-
-<meta name="twitter:description" content="深入比較 AWS RDS、Aurora、Cloud SQL、AlloyDB、Azure Flexible、Supabase、Neon 等雲端託管 PostgreSQL 方案，從架構差異、HA 機制、Extension 支援到定價模型，幫助你選出最適合的雲端資料庫服務。">
-<meta property="article:published_time" content="2026-07-24T00:00:00&#43;00:00">
-<meta property="article:updated_time" content="2026-07-24T00:00:00&#43;00:00">
-
-
-
-
-
-    
-<meta property="og:image" content="https://benzhub.github.io/img/postgresql/048-Cloud-Managed.png">
-<meta property="og:image:url" content="https://benzhub.github.io/img/postgresql/048-Cloud-Managed.png">
-    
-
-    
-    <link rel="stylesheet" href='/css/custom.css'>
-    <i class="dark hidden"></i>
-    
-<link rel="alternate" hreflang="zh-TW" href="https://benzhub.github.io/post/postgresql/048-cloud-managed/" />
-
-<link rel="alternate" hreflang="x-default" href="https://benzhub.github.io/post/postgresql/048-cloud-managed/" />
-
-    
-
-
-
-
-
-
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BlogPosting",
-  "headline": "\"雲端託管 PostgreSQL：AWS RDS、Aurora、Cloud SQL、Supabase、Neon 全面比較 | PostgreSQL\"",
-  "description": "\"深入比較 AWS RDS、Aurora、Cloud SQL、AlloyDB、Azure Flexible、Supabase、Neon 等雲端託管 PostgreSQL 方案，從架構差異、HA 機制、Extension 支援到定價模型，幫助你選出最適合的雲端資料庫服務。\"",
-  "author": {
-    "@type": "Person",
-    "name": "\"BenzHub\"",
-    "url": "https:\/\/benzhub.github.io\/about",
-    "jobTitle": "\"Software Developer\"",
-    "sameAs": [
-      "\"https://github.com/benzhub\""
-    ]
-  },
-  "datePublished": "2026-07-24T00:00:00\u002b00:00",
-  "dateModified": "2026-07-24T00:00:00\u002b00:00",
-  "image": "https:\/\/benzhub.github.io\/img\/postgresql\/048-Cloud-Managed.png",
-  "publisher": {
-    "@type": "Organization",
-    "name": "\"BenzHub\"",
-    "url": "\"https://benzhub.github.io/\"",
-    "sameAs": [
-      "\"https://github.com/benzhub\""
-    ]
-  },
-  "mainEntityOfPage": {
-    "@type": "WebPage",
-    "@id": "https:\/\/benzhub.github.io\/post\/postgresql\/048-cloud-managed\/"
-  },
-  "inLanguage": "zh-TW"
-}
-</script>
-
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    {
-      "@type": "ListItem",
-      "position": 1,
-      "name": "\"BenzHub\"",
-      "item": "https:\/\/benzhub.github.io\/"
-    }
-    
-    
-      
-      
-    ,{
-      "@type": "ListItem",
-      "position": 2,
-      "name": "\"Blog\"",
-      "item": "https:\/\/benzhub.github.io\/post\/postgresql\/"
-    }
-      
-      
-    
-    ,{
-      "@type": "ListItem",
-      "position":  3 ,
-      "name": "\"雲端託管 PostgreSQL：AWS RDS、Aurora、Cloud SQL、Supabase、Neon 全面比較 | PostgreSQL\""
-    }
-  ]
-}
-</script>
-
-
-
-
-
-
-
-
-
-
-
-</head>
-<body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class="site-nav" id="siteNav">
-    <div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full">
-        
-        <a href="https://benzhub.github.io/" class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">
-            BenzHub
-        </a>
-
-        
-        <div class="hidden md:flex items-center gap-6">
-            
-            <a href="/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                首頁
-            </a>
-            
-            <a href="/about/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                關於
-            </a>
-            
-            <a href="/contact/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                聯絡
-            </a>
-            
-            <a href="/resourses/"
-                class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">
-                資源
-            </a>
-            
-
-            
-            <div class="flex items-center gap-2">
-                <form class="flex items-center" role="search" method="get" action="https://google.com/search" id="navSearchForm">
-                    <input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50"
-                        type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋" id="navSearchInput">
-                    <input type="hidden" name="sitesearch" value="https://benzhub.github.io/" />
-                </form>
-                <button onclick="toggleNavSearch()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
-                    <svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-                    </svg>
-                </button>
-            </div>
-
-            
-            <span class="text-zinc-200 dark:text-zinc-700">|</span>
-
-            
-            
-
-
-
-
-<div class="lang-switcher relative hidden md:block">
-    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-        <span>🌐</span>
-        <span>繁體中文</span>
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-    </button>
-    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
-        
-            
-            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
-            
-        
-            
-                
-                
-                <a href="/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-                
-            
-        
-            
-                
-                
-                <a href="/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-
-<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
-    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
-    <div class="flex gap-2">
-        
-            
-            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
-            
-        
-            
-                
-                
-                <a href="/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-                
-            
-        
-            
-                
-                
-                <a href="/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-
-            
-            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-                <i id="icon2" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
-            </button>
-        </div>
-
-        
-        <div class="flex md:hidden items-center gap-1">
-            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
-                <i id="icon" class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
-            </button>
-            <button id="hamburgerbtn" class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Menu">
-                <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
-            </button>
-        </div>
-    </div>
-
-    
-    <div class="mobile-menu md:hidden" id="mobileMenu">
-        
-        <a href="/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            首頁
-        </a>
-        
-        <a href="/about/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            關於
-        </a>
-        
-        <a href="/contact/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            聯絡
-        </a>
-        
-        <a href="/resourses/"
-            class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">
-            資源
-        </a>
-        
-        <form class="mt-2" role="search" method="get" action="https://google.com/search">
-            <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
-            <input type="hidden" name="sitesearch" value="https://benzhub.github.io/" />
-        </form>
-        
-        
-
-
-
-
-<div class="lang-switcher relative hidden md:block">
-    <button onclick="toggleLangMenu()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
-        <span>🌐</span>
-        <span>繁體中文</span>
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-    </button>
-    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden">
-        
-            
-            <span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
-            
-        
-            
-                
-                
-                <a href="/en/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-                
-            
-        
-            
-                
-                
-                <a href="/zh-cn/" class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-
-<div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
-    <p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p>
-    <div class="flex gap-2">
-        
-            
-            <span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
-            
-        
-            
-                
-                
-                <a href="/en/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
-                
-            
-        
-            
-                
-                
-                <a href="/zh-cn/" class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a>
-                
-            
-        
-    </div>
-</div>
-
-    </div>
-</nav>
-
-<script>
-    
-    document.getElementById('hamburgerbtn').addEventListener('click', function () {
-        document.getElementById('mobileMenu').classList.toggle('active');
-    });
-
-    
-    window.addEventListener('scroll', function () {
-        var nav = document.getElementById('siteNav');
-        if (window.scrollY > 50) {
-            nav.classList.add('scrolled');
-        } else {
-            nav.classList.remove('scrolled');
-        }
-    });
-
-    
-    function toggleNavSearch() {
-        var input = document.getElementById('navSearchInput');
-        input.classList.toggle('expanded');
-        if (input.classList.contains('expanded')) {
-            input.focus();
-        }
-    }
-
-    
-    function toggleLangMenu() {
-        var dropdown = document.getElementById('langDropdown');
-        dropdown.classList.toggle('hidden');
-    }
-
-    
-    document.addEventListener('click', function (e) {
-        
-        var form = document.getElementById('navSearchForm');
-        var input = document.getElementById('navSearchInput');
-        if (form && input && !form.contains(e.target) && !e.target.closest('[aria-label="Toggle Search"]')) {
-            input.classList.remove('expanded');
-        }
-        
-        var langSwitcher = e.target.closest('.lang-switcher');
-        if (!langSwitcher) {
-            var dropdown = document.getElementById('langDropdown');
-            if (dropdown) dropdown.classList.add('hidden');
-        }
-    });
-</script>
-<div class="nav-spacer"></div>
-    <div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id="content">
-        <div class="lg:mx-5">
-<div class="grid grid-cols-3 gap-6">
-  
-  <div class="col-span-3 lg:col-span-2">
-  
-      
-      <div class="post-detail fade-in my-4">
-        <h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">雲端託管 PostgreSQL：AWS RDS、Aurora、Cloud SQL、Supabase、Neon 全面比較 | PostgreSQL</h1>
-        <div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4">
-            <span class="flex items-center gap-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/07/24
-            </span>
-            
-        </div>
-        
-        <div class="flex flex-wrap gap-1.5 mb-5">
-            
-            <a href='/tags/postgresql' class="tag-pill no-underline">postgresql</a>
-            
-            <a href='/tags/cloud' class="tag-pill no-underline">Cloud</a>
-            
-            <a href='/tags/rds' class="tag-pill no-underline">RDS</a>
-            
-            <a href='/tags/supabase' class="tag-pill no-underline">Supabase</a>
-            
-            <a href='/tags/neon' class="tag-pill no-underline">Neon</a>
-            
-        </div>
-        
-        
-        <img class="py-4 m-auto rounded-lg thumb-img" src="https://benzhub.github.io/img/postgresql/048-Cloud-Managed.png" alt="雲端託管 PostgreSQL：AWS RDS、Aurora、Cloud SQL、Supabase、Neon 全面比較 | PostgreSQL">
-        
-        
-        <div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote>
-<p>雲端託管 <strong>PostgreSQL</strong> 讓開發者不必操心硬體、備份與高可用性設定，專注於應用程式邏輯。從 <strong>AWS RDS</strong>、<strong>Aurora</strong> 到 <strong>Supabase</strong>、<strong>Neon</strong>，市場上的選擇琳瑯滿目。本文將從架構差異、<strong>HA</strong> 機制、<strong>Extension</strong> 支援到定價模型，全面比較各大平台的優劣。</p>
-</blockquote>
-<h3 id="為什麼選擇雲端託管">為什麼選擇雲端託管？</h3>
-<p>自行管理 PostgreSQL 需要處理硬體採購、OS 修補、備份排程、HA 故障轉移、監控告警等大量維運工作。雲端託管服務（Managed PostgreSQL）將這些責任轉移給供應商，讓團隊專注於 Schema 設計、查詢最佳化與應用程式開發。</p>
-<h4 id="共同責任模型">共同責任模型</h4>
-<pre tabindex="0"><code>Self-hosted PostgreSQL（自管）：
+<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>雲端託管 PostgreSQL：AWS RDS、Aurora、Cloud SQL、Supabase、Neon 全面比較 | PostgreSQL | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="雲端託管 PostgreSQL：AWS RDS、Aurora、Cloud SQL、Supabase、Neon 全面比較 | PostgreSQL | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="深入比較 AWS RDS、Aurora、Cloud SQL、AlloyDB、Azure Flexible、Supabase、Neon 等雲端託管 PostgreSQL 方案，從架構差異、HA 機制、Extension 支援到定價模型，幫助你選出最適合的雲端資料庫服務。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="深入比較 AWS RDS、Aurora、Cloud SQL、AlloyDB、Azure Flexible、Supabase、Neon 等雲端託管 PostgreSQL 方案，從架構差異、HA 機制、Extension 支援到定價模型，幫助你選出最適合的雲端資料庫服務。"><meta property="og:url" content="https://benzhub.github.io/post/postgresql/048-cloud-managed/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/postgresql/048-cloud-managed/><meta name=twitter:description content="深入比較 AWS RDS、Aurora、Cloud SQL、AlloyDB、Azure Flexible、Supabase、Neon 等雲端託管 PostgreSQL 方案，從架構差異、HA 機制、Extension 支援到定價模型，幫助你選出最適合的雲端資料庫服務。"><meta property="article:published_time" content="2026-07-24T00:00:00+00:00"><meta property="article:updated_time" content="2026-07-24T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/postgresql/048-Cloud-Managed.png"><meta property="og:image:url" content="https://benzhub.github.io/img/postgresql/048-Cloud-Managed.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/postgresql/048-cloud-managed/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/postgresql/048-cloud-managed/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"雲端託管 PostgreSQL：AWS RDS、Aurora、Cloud SQL、Supabase、Neon 全面比較 | PostgreSQL\"","description":"\"深入比較 AWS RDS、Aurora、Cloud SQL、AlloyDB、Azure Flexible、Supabase、Neon 等雲端託管 PostgreSQL 方案，從架構差異、HA 機制、Extension 支援到定價模型，幫助你選出最適合的雲端資料庫服務。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-07-24T00:00:00\u002b00:00","dateModified":"2026-07-24T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/postgresql\/048-Cloud-Managed.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/postgresql\/048-cloud-managed\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/postgresql\/"},{"@type":"ListItem","position":3,"name":"\"雲端託管 PostgreSQL：AWS RDS、Aurora、Cloud SQL、Supabase、Neon 全面比較 | PostgreSQL\""}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">雲端託管 PostgreSQL：AWS RDS、Aurora、Cloud SQL、Supabase、Neon 全面比較 | PostgreSQL</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/24</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/postgresql class="tag-pill no-underline">postgresql</a>
+<a href=/tags/cloud class="tag-pill no-underline">Cloud</a>
+<a href=/tags/rds class="tag-pill no-underline">RDS</a>
+<a href=/tags/supabase class="tag-pill no-underline">Supabase</a>
+<a href=/tags/neon class="tag-pill no-underline">Neon</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/postgresql/048-Cloud-Managed.png alt="雲端託管 PostgreSQL：AWS RDS、Aurora、Cloud SQL、Supabase、Neon 全面比較 | PostgreSQL"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p>雲端託管 <strong>PostgreSQL</strong> 讓開發者不必操心硬體、備份與高可用性設定，專注於應用程式邏輯。從 <strong>AWS RDS</strong>、<strong>Aurora</strong> 到 <strong>Supabase</strong>、<strong>Neon</strong>，市場上的選擇琳瑯滿目。本文將從架構差異、<strong>HA</strong> 機制、<strong>Extension</strong> 支援到定價模型，全面比較各大平台的優劣。</p></blockquote><h3 id=為什麼選擇雲端託管>為什麼選擇雲端託管？</h3><p>自行管理 PostgreSQL 需要處理硬體採購、OS 修補、備份排程、HA 故障轉移、監控告警等大量維運工作。雲端託管服務（Managed PostgreSQL）將這些責任轉移給供應商，讓團隊專注於 Schema 設計、查詢最佳化與應用程式開發。</p><h4 id=共同責任模型>共同責任模型</h4><pre tabindex=0><code>Self-hosted PostgreSQL（自管）：
   使用者負責 → 硬體、OS、PostgreSQL 安裝、備份、HA、監控、安全性、升級
 
 雲端 Managed PostgreSQL：
   供應商負責 → 硬體、OS 修補、PostgreSQL 安裝/升級、備份自動化、基礎設施 HA
   使用者負責 → Schema 設計、查詢最佳化、應用程式連線、資料安全政策、成本控管
-</code></pre><p>責任轉移是 Managed 服務的核心價值，但同時也意味著對底層配置的控制度降低——某些進階調校（如修改 OS 核心參數、安裝任意 Extension）可能無法執行。</p>
-<h4 id="評估六大維度">評估六大維度</h4>
-<p>選擇 Managed PostgreSQL 時，應從以下維度綜合考量：</p>
-<table>
-  <thead>
-      <tr>
-          <th>維度</th>
-          <th>評估重點</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td><strong>PostgreSQL 相容性</strong></td>
-          <td>支援版本範圍、Extension 白名單、superuser 存取限制</td>
-      </tr>
-      <tr>
-          <td><strong>高可用性（HA）</strong></td>
-          <td>Failover 機制、RTO/RPO 目標、跨 Zone/Region 能力</td>
-      </tr>
-      <tr>
-          <td><strong>擴展性</strong></td>
-          <td>垂直擴充速度、Read Replica 數量、Serverless 自動伸縮</td>
-      </tr>
-      <tr>
-          <td><strong>備份與復原</strong></td>
-          <td>PITR 精度與保留期、跨 Region 備份</td>
-      </tr>
-      <tr>
-          <td><strong>Extension 支援</strong></td>
-          <td>白名單種類、是否允許自訂 Extension</td>
-      </tr>
-      <tr>
-          <td><strong>定價模型</strong></td>
-          <td>計費粒度（固定/按需/Serverless）、儲存與計算分離程度</td>
-      </tr>
-  </tbody>
-</table>
-<hr>
-<h3 id="aws-rds-for-postgresql">AWS RDS for PostgreSQL</h3>
-<p><strong>定位</strong>：AWS 生態系的傳統 Managed PostgreSQL，成熟穩定，整合度高。</p>
-<h4 id="核心特性">核心特性</h4>
-<table>
-  <thead>
-      <tr>
-          <th>特性</th>
-          <th>說明</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>高可用性</td>
-          <td>Multi-AZ 主備架構，同步複製，Failover 約 60–120 秒</td>
-      </tr>
-      <tr>
-          <td>Read Replica</td>
-          <td>最多 5 個，支援 Cross-region Read Replica</td>
-      </tr>
-      <tr>
-          <td>PITR</td>
-          <td>保留 1–35 天 WAL，分鐘級精度還原</td>
-      </tr>
-      <tr>
-          <td>儲存上限</td>
-          <td>最高 64TB，GP3/IO1 SSD，支援 Auto Storage Increase</td>
-      </tr>
-      <tr>
-          <td>連線代理</td>
-          <td>RDS Proxy（基於連線池，減少連線開銷）</td>
-      </tr>
-      <tr>
-          <td>安全性</td>
-          <td>VPC 網路、KMS 加密、IAM 認證、SSL/TLS 強制</td>
-      </tr>
-      <tr>
-          <td>監控</td>
-          <td>CloudWatch、Enhanced Monitoring、Performance Insights</td>
-      </tr>
-  </tbody>
-</table>
-<h4 id="extension-支援">Extension 支援</h4>
-<p>RDS 採用白名單制度，支援 <code>pg_stat_statements</code>、<code>pgvector</code>、<code>PostGIS</code>、<code>pg_partman</code>、<code>pg_cron</code>、<code>uuid-ossp</code> 等大量預核准 Extension，但不允許安裝白名單外的 Extension。使用者沒有 <code>superuser</code>，僅有 <code>rds_superuser</code> 角色。</p>
-<h4 id="常用操作">常用操作</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 查看 RDS 實例</span>
-</span></span><span style="display:flex;"><span>aws rds describe-db-instances --db-instance-identifier mydb
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 建立快照</span>
-</span></span><span style="display:flex;"><span>aws rds create-db-snapshot <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span>  --db-instance-identifier mydb <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span>  --db-snapshot-identifier mydb-snapshot-20260724
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 觸發 Multi-AZ Failover 測試</span>
-</span></span><span style="display:flex;"><span>aws rds reboot-db-instance <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span>  --db-instance-identifier mydb <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span>  --force-failover
-</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 查詢可用 Extension 白名單
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> name <span style="color:#66d9ef">FROM</span> pg_available_extensions <span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> name;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 啟用 Extension
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> EXTENSION <span style="color:#66d9ef">IF</span> <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">EXISTS</span> pg_stat_statements;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> EXTENSION <span style="color:#66d9ef">IF</span> <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">EXISTS</span> pgvector;
-</span></span></code></pre></div><h4 id="限制">限制</h4>
-<ul>
-<li>無法修改 <code>shared_preload_libraries</code> 中的所有參數（需透過 Parameter Group，重啟才生效）</li>
-<li>不支援自訂 OS 層配置</li>
-<li>部分 Extension 安裝需等待 RDS 官方支援</li>
-</ul>
-<hr>
-<h3 id="aws-aurora-postgresql">AWS Aurora PostgreSQL</h3>
-<p><strong>定位</strong>：AWS 自研雲端原生資料庫，PostgreSQL 相容，運算與儲存分離架構，效能顯著優於標準 RDS。</p>
-<h4 id="架構差異">架構差異</h4>
-<pre tabindex="0"><code>標準 RDS PostgreSQL 架構：
+</code></pre><p>責任轉移是 Managed 服務的核心價值，但同時也意味著對底層配置的控制度降低——某些進階調校（如修改 OS 核心參數、安裝任意 Extension）可能無法執行。</p><h4 id=評估六大維度>評估六大維度</h4><p>選擇 Managed PostgreSQL 時，應從以下維度綜合考量：</p><table><thead><tr><th>維度</th><th>評估重點</th></tr></thead><tbody><tr><td><strong>PostgreSQL 相容性</strong></td><td>支援版本範圍、Extension 白名單、superuser 存取限制</td></tr><tr><td><strong>高可用性（HA）</strong></td><td>Failover 機制、RTO/RPO 目標、跨 Zone/Region 能力</td></tr><tr><td><strong>擴展性</strong></td><td>垂直擴充速度、Read Replica 數量、Serverless 自動伸縮</td></tr><tr><td><strong>備份與復原</strong></td><td>PITR 精度與保留期、跨 Region 備份</td></tr><tr><td><strong>Extension 支援</strong></td><td>白名單種類、是否允許自訂 Extension</td></tr><tr><td><strong>定價模型</strong></td><td>計費粒度（固定/按需/Serverless）、儲存與計算分離程度</td></tr></tbody></table><hr><h3 id=aws-rds-for-postgresql>AWS RDS for PostgreSQL</h3><p><strong>定位</strong>：AWS 生態系的傳統 Managed PostgreSQL，成熟穩定，整合度高。</p><h4 id=核心特性>核心特性</h4><table><thead><tr><th>特性</th><th>說明</th></tr></thead><tbody><tr><td>高可用性</td><td>Multi-AZ 主備架構，同步複製，Failover 約 60–120 秒</td></tr><tr><td>Read Replica</td><td>最多 5 個，支援 Cross-region Read Replica</td></tr><tr><td>PITR</td><td>保留 1–35 天 WAL，分鐘級精度還原</td></tr><tr><td>儲存上限</td><td>最高 64TB，GP3/IO1 SSD，支援 Auto Storage Increase</td></tr><tr><td>連線代理</td><td>RDS Proxy（基於連線池，減少連線開銷）</td></tr><tr><td>安全性</td><td>VPC 網路、KMS 加密、IAM 認證、SSL/TLS 強制</td></tr><tr><td>監控</td><td>CloudWatch、Enhanced Monitoring、Performance Insights</td></tr></tbody></table><h4 id=extension-支援>Extension 支援</h4><p>RDS 採用白名單制度，支援 <code>pg_stat_statements</code>、<code>pgvector</code>、<code>PostGIS</code>、<code>pg_partman</code>、<code>pg_cron</code>、<code>uuid-ossp</code> 等大量預核准 Extension，但不允許安裝白名單外的 Extension。使用者沒有 <code>superuser</code>，僅有 <code>rds_superuser</code> 角色。</p><h4 id=常用操作>常用操作</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 查看 RDS 實例</span>
+</span></span><span style=display:flex><span>aws rds describe-db-instances --db-instance-identifier mydb
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 建立快照</span>
+</span></span><span style=display:flex><span>aws rds create-db-snapshot <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --db-instance-identifier mydb <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --db-snapshot-identifier mydb-snapshot-20260724
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 觸發 Multi-AZ Failover 測試</span>
+</span></span><span style=display:flex><span>aws rds reboot-db-instance <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --db-instance-identifier mydb <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --force-failover
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 查詢可用 Extension 白名單
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> name <span style=color:#66d9ef>FROM</span> pg_available_extensions <span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> name;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 啟用 Extension
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> EXTENSION <span style=color:#66d9ef>IF</span> <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>EXISTS</span> pg_stat_statements;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> EXTENSION <span style=color:#66d9ef>IF</span> <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>EXISTS</span> pgvector;
+</span></span></code></pre></div><h4 id=限制>限制</h4><ul><li>無法修改 <code>shared_preload_libraries</code> 中的所有參數（需透過 Parameter Group，重啟才生效）</li><li>不支援自訂 OS 層配置</li><li>部分 Extension 安裝需等待 RDS 官方支援</li></ul><hr><h3 id=aws-aurora-postgresql>AWS Aurora PostgreSQL</h3><p><strong>定位</strong>：AWS 自研雲端原生資料庫，PostgreSQL 相容，運算與儲存分離架構，效能顯著優於標準 RDS。</p><h4 id=架構差異>架構差異</h4><pre tabindex=0><code>標準 RDS PostgreSQL 架構：
   Primary Instance ──WAL 複製──→ Standby（Multi-AZ）
   Primary Instance ──非同步──→ Read Replica
 
@@ -603,257 +66,47 @@ Aurora PostgreSQL 架構：
   Read Replica 2  ─┘
        ↕
   Aurora Storage Layer（分散式日誌，自動 6 副本複製）
-</code></pre><p>Aurora 的關鍵創新在於<strong>共享儲存層</strong>——所有運算節點共用同一份資料，Read Replica 不需要複製 WAL，延遲穩定在 100ms 以內。</p>
-<h4 id="aurora-vs-rds-比較">Aurora vs RDS 比較</h4>
-<table>
-  <thead>
-      <tr>
-          <th>特性</th>
-          <th>Aurora PostgreSQL</th>
-          <th>RDS PostgreSQL</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>Failover 時間</td>
-          <td>&lt;30 秒（Fast Failover）</td>
-          <td>60–120 秒</td>
-      </tr>
-      <tr>
-          <td>Read Replica 數量</td>
-          <td>最多 15 個</td>
-          <td>最多 5 個</td>
-      </tr>
-      <tr>
-          <td>儲存上限</td>
-          <td>自動擴展至 128TB</td>
-          <td>64TB</td>
-      </tr>
-      <tr>
-          <td>Replica 延遲</td>
-          <td>&lt;100ms（共享儲存）</td>
-          <td>非同步延遲不定</td>
-      </tr>
-      <tr>
-          <td>Backtrack</td>
-          <td>支援（倒轉時間點，無需還原）</td>
-          <td>不支援</td>
-      </tr>
-      <tr>
-          <td>Global Database</td>
-          <td>支援（跨 Region，RPL 延遲 &lt;1 秒）</td>
-          <td>不直接支援</td>
-      </tr>
-  </tbody>
-</table>
-<h4 id="aurora-serverless-v2">Aurora Serverless v2</h4>
-<p>計算能力以 ACU（Aurora Capacity Unit）為單位，在 0.5 到設定上限之間自動伸縮，按實際使用的 ACU 秒數計費。適合工作負載不均勻的場景。</p>
-<blockquote>
-<p><strong>注意</strong>：Aurora Serverless v2 最低收費 0.5 ACU，並非真正的「零縮容」。與 Neon 等可完全停止計算的設計有本質差異。</p>
-</blockquote>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 建立 Aurora Read Replica</span>
-</span></span><span style="display:flex;"><span>aws rds create-db-instance <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span>  --db-instance-identifier mydb-reader-1 <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span>  --db-instance-class db.r6g.large <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span>  --engine aurora-postgresql <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span>  --db-cluster-identifier mydb-cluster
-</span></span></code></pre></div><hr>
-<h3 id="gcp-cloud-sql-for-postgresql">GCP Cloud SQL for PostgreSQL</h3>
-<p><strong>定位</strong>：GCP 生態系的標準 Managed PostgreSQL，基於 Compute Engine VM + Persistent Disk。</p>
-<h4 id="核心特性-1">核心特性</h4>
-<table>
-  <thead>
-      <tr>
-          <th>特性</th>
-          <th>說明</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>高可用性</td>
-          <td>Regional HA（跨 Zone 主備），Failover 約 30–60 秒</td>
-      </tr>
-      <tr>
-          <td>Read Replica</td>
-          <td>最多 10 個，支援 Cross-region 與 Cascaded Replica</td>
-      </tr>
-      <tr>
-          <td>PITR</td>
-          <td>保留最多 7 天 WAL</td>
-      </tr>
-      <tr>
-          <td>儲存上限</td>
-          <td>最高 64TB，SSD/HDD 選項</td>
-      </tr>
-      <tr>
-          <td>連線代理</td>
-          <td>Cloud SQL Auth Proxy（IAM 身份驗證，無需開放防火牆）</td>
-      </tr>
-      <tr>
-          <td>監控</td>
-          <td>Cloud Monitoring、Query Insights</td>
-      </tr>
-  </tbody>
-</table>
-<h4 id="與-rds-的關鍵差異">與 RDS 的關鍵差異</h4>
-<ul>
-<li>PITR 保留期較短（7 天 vs RDS 最多 35 天）</li>
-<li>Cloud SQL Auth Proxy 的 IAM 整合比 RDS Proxy 更安全便利</li>
-<li>Read Replica 支援 Cascaded 架構，可減輕 Primary 的複製負擔</li>
-</ul>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 使用 Cloud SQL Auth Proxy 連線（推薦方式）</span>
-</span></span><span style="display:flex;"><span>cloud_sql_proxy -instances<span style="color:#f92672">=</span>PROJECT:REGION:INSTANCE<span style="color:#f92672">=</span>tcp:5432 &amp;
-</span></span><span style="display:flex;"><span>psql -h 127.0.0.1 -U postgres -d mydb
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 建立 Read Replica</span>
-</span></span><span style="display:flex;"><span>gcloud sql instances create mydb-replica <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span>  --master-instance-name<span style="color:#f92672">=</span>mydb <span style="color:#ae81ff">\
-</span></span></span><span style="display:flex;"><span>  --region<span style="color:#f92672">=</span>asia-east1
-</span></span></code></pre></div><hr>
-<h3 id="gcp-alloydb-for-postgresql">GCP AlloyDB for PostgreSQL</h3>
-<p><strong>定位</strong>：GCP 自研 PostgreSQL 相容資料庫，對標 Aurora，內建 Columnar Engine 加速分析查詢。</p>
-<h4 id="架構核心">架構核心</h4>
-<pre tabindex="0"><code>AlloyDB 架構：
+</code></pre><p>Aurora 的關鍵創新在於<strong>共享儲存層</strong>——所有運算節點共用同一份資料，Read Replica 不需要複製 WAL，延遲穩定在 100ms 以內。</p><h4 id=aurora-vs-rds-比較>Aurora vs RDS 比較</h4><table><thead><tr><th>特性</th><th>Aurora PostgreSQL</th><th>RDS PostgreSQL</th></tr></thead><tbody><tr><td>Failover 時間</td><td>&lt;30 秒（Fast Failover）</td><td>60–120 秒</td></tr><tr><td>Read Replica 數量</td><td>最多 15 個</td><td>最多 5 個</td></tr><tr><td>儲存上限</td><td>自動擴展至 128TB</td><td>64TB</td></tr><tr><td>Replica 延遲</td><td>&lt;100ms（共享儲存）</td><td>非同步延遲不定</td></tr><tr><td>Backtrack</td><td>支援（倒轉時間點，無需還原）</td><td>不支援</td></tr><tr><td>Global Database</td><td>支援（跨 Region，RPL 延遲 &lt;1 秒）</td><td>不直接支援</td></tr></tbody></table><h4 id=aurora-serverless-v2>Aurora Serverless v2</h4><p>計算能力以 ACU（Aurora Capacity Unit）為單位，在 0.5 到設定上限之間自動伸縮，按實際使用的 ACU 秒數計費。適合工作負載不均勻的場景。</p><blockquote><p><strong>注意</strong>：Aurora Serverless v2 最低收費 0.5 ACU，並非真正的「零縮容」。與 Neon 等可完全停止計算的設計有本質差異。</p></blockquote><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 建立 Aurora Read Replica</span>
+</span></span><span style=display:flex><span>aws rds create-db-instance <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --db-instance-identifier mydb-reader-1 <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --db-instance-class db.r6g.large <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --engine aurora-postgresql <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --db-cluster-identifier mydb-cluster
+</span></span></code></pre></div><hr><h3 id=gcp-cloud-sql-for-postgresql>GCP Cloud SQL for PostgreSQL</h3><p><strong>定位</strong>：GCP 生態系的標準 Managed PostgreSQL，基於 Compute Engine VM + Persistent Disk。</p><h4 id=核心特性-1>核心特性</h4><table><thead><tr><th>特性</th><th>說明</th></tr></thead><tbody><tr><td>高可用性</td><td>Regional HA（跨 Zone 主備），Failover 約 30–60 秒</td></tr><tr><td>Read Replica</td><td>最多 10 個，支援 Cross-region 與 Cascaded Replica</td></tr><tr><td>PITR</td><td>保留最多 7 天 WAL</td></tr><tr><td>儲存上限</td><td>最高 64TB，SSD/HDD 選項</td></tr><tr><td>連線代理</td><td>Cloud SQL Auth Proxy（IAM 身份驗證，無需開放防火牆）</td></tr><tr><td>監控</td><td>Cloud Monitoring、Query Insights</td></tr></tbody></table><h4 id=與-rds-的關鍵差異>與 RDS 的關鍵差異</h4><ul><li>PITR 保留期較短（7 天 vs RDS 最多 35 天）</li><li>Cloud SQL Auth Proxy 的 IAM 整合比 RDS Proxy 更安全便利</li><li>Read Replica 支援 Cascaded 架構，可減輕 Primary 的複製負擔</li></ul><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 使用 Cloud SQL Auth Proxy 連線（推薦方式）</span>
+</span></span><span style=display:flex><span>cloud_sql_proxy -instances<span style=color:#f92672>=</span>PROJECT:REGION:INSTANCE<span style=color:#f92672>=</span>tcp:5432 &amp;
+</span></span><span style=display:flex><span>psql -h 127.0.0.1 -U postgres -d mydb
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 建立 Read Replica</span>
+</span></span><span style=display:flex><span>gcloud sql instances create mydb-replica <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --master-instance-name<span style=color:#f92672>=</span>mydb <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span>  --region<span style=color:#f92672>=</span>asia-east1
+</span></span></code></pre></div><hr><h3 id=gcp-alloydb-for-postgresql>GCP AlloyDB for PostgreSQL</h3><p><strong>定位</strong>：GCP 自研 PostgreSQL 相容資料庫，對標 Aurora，內建 Columnar Engine 加速分析查詢。</p><h4 id=架構核心>架構核心</h4><pre tabindex=0><code>AlloyDB 架構：
   Primary Instance ─┐
   Read Pool 節點1  ─┤── AlloyDB Storage Layer（分散式 WAL 儲存）
   Read Pool 節點2  ─┘       ↕
                       Columnar Engine（記憶體，自動選擇列式/行式掃描）
-</code></pre><h4 id="核心優勢">核心優勢</h4>
-<ul>
-<li><strong>Columnar Engine</strong>：分析型查詢（COUNT/SUM/大範圍掃描）快 100 倍，無需 ETL 到 BigQuery</li>
-<li><strong>Read Pool</strong>：共享儲存層，新增節點無需資料複製，秒級上線</li>
-<li><strong>AlloyDB AI</strong>：原生整合 pgvector + ScaNN 向量索引，直接呼叫 Vertex AI Embeddings</li>
-<li><strong>SLA 99.99%</strong>：Failover 通常 30 秒內完成</li>
-</ul>
-<p>AlloyDB 最適合需要 <strong>HTAP</strong>（混合事務/分析處理）的場景——在同一資料庫內同時執行 OLTP 和輕量 OLAP。</p>
-<hr>
-<h3 id="azure-database-for-postgresql--flexible-server">Azure Database for PostgreSQL — Flexible Server</h3>
-<p><strong>定位</strong>：Microsoft Azure 的主力 Managed PostgreSQL 服務。</p>
-<h4 id="核心特性-2">核心特性</h4>
-<table>
-  <thead>
-      <tr>
-          <th>特性</th>
-          <th>說明</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>高可用性</td>
-          <td>Zone-Redundant HA 或 Same-Zone HA，Failover 約 60–120 秒</td>
-      </tr>
-      <tr>
-          <td>Read Replica</td>
-          <td>最多 5 個，支援 Cross-region</td>
-      </tr>
-      <tr>
-          <td>PITR</td>
-          <td>保留 1–35 天</td>
-      </tr>
-      <tr>
-          <td>儲存上限</td>
-          <td>最高 32TB，Premium SSD v2</td>
-      </tr>
-      <tr>
-          <td>連線池</td>
-          <td><strong>PgBouncer 內建</strong>，無需額外部署</td>
-      </tr>
-      <tr>
-          <td>安全性</td>
-          <td>VNet、Private Link、Microsoft Entra ID（Azure AD）認證</td>
-      </tr>
-      <tr>
-          <td>監控</td>
-          <td>Azure Monitor、Query Performance Insight</td>
-      </tr>
-  </tbody>
-</table>
-<h4 id="重要特色">重要特色</h4>
-<p>Azure Flexible Server 的三大差異化特色：</p>
-<ol>
-<li><strong>內建 PgBouncer</strong>：原生提供連線池，在連線字串中加入 <code>pgbouncer=on</code> 即可啟用</li>
-<li><strong>Microsoft Entra 整合</strong>：支援 Azure AD 帳戶（含 Managed Identity）直接驗證連線，實現零秘鑰架構</li>
-<li><strong>Intelligent Tuning</strong>：自動偵測查詢效能回退並建議索引</li>
-</ol>
-<hr>
-<h3 id="supabase">Supabase</h3>
-<p><strong>定位</strong>：以 PostgreSQL 為核心的開源 BaaS（Backend-as-a-Service），Firebase 的開源替代方案。</p>
-<h4 id="不只是資料庫">不只是資料庫</h4>
-<p>每個 Supabase Project 是一個獨立的 PostgreSQL 實例，使用者擁有完整的 <code>postgres</code> superuser 存取權限。除了資料庫，還提供：</p>
-<table>
-  <thead>
-      <tr>
-          <th>功能</th>
-          <th>說明</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>Auth</td>
-          <td>Email/Password、OAuth、Magic Link、Phone OTP</td>
-      </tr>
-      <tr>
-          <td>Storage</td>
-          <td>S3 相容物件儲存，支援 RLS 存取控制</td>
-      </tr>
-      <tr>
-          <td>Realtime</td>
-          <td>基於邏輯複製，即時訂閱資料變更</td>
-      </tr>
-      <tr>
-          <td>Edge Functions</td>
-          <td>Deno 邊緣函數</td>
-      </tr>
-      <tr>
-          <td>Auto REST API</td>
-          <td>基於 PostgREST，自動從 Schema 生成 RESTful API</td>
-      </tr>
-      <tr>
-          <td>Auto GraphQL</td>
-          <td>基於 pg_graphql Extension</td>
-      </tr>
-      <tr>
-          <td>Vector</td>
-          <td>原生 pgvector 支援</td>
-      </tr>
-  </tbody>
-</table>
-<h4 id="row-level-securityrls">Row Level Security（RLS）</h4>
-<p>Supabase 將 RLS 作為資料安全的核心機制，讓應用程式可直接從客戶端連接資料庫，無需後端 API 層作為安全邊界：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 啟用 RLS
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> posts ENABLE <span style="color:#66d9ef">ROW</span> <span style="color:#66d9ef">LEVEL</span> <span style="color:#66d9ef">SECURITY</span>;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 使用者只能讀取自己的文章
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> POLICY <span style="color:#e6db74">&#34;Users can view own posts&#34;</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">ON</span> posts <span style="color:#66d9ef">FOR</span> <span style="color:#66d9ef">SELECT</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">USING</span> (auth.uid() <span style="color:#f92672">=</span> user_id);
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 使用者只能建立屬於自己的文章
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> POLICY <span style="color:#e6db74">&#34;Users can insert own posts&#34;</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">ON</span> posts <span style="color:#66d9ef">FOR</span> <span style="color:#66d9ef">INSERT</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">WITH</span> <span style="color:#66d9ef">CHECK</span> (auth.uid() <span style="color:#f92672">=</span> user_id);
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 使用者只能更新自己的文章
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> POLICY <span style="color:#e6db74">&#34;Users can update own posts&#34;</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">ON</span> posts <span style="color:#66d9ef">FOR</span> <span style="color:#66d9ef">UPDATE</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">USING</span> (auth.uid() <span style="color:#f92672">=</span> user_id);
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 查詢當前使用者資訊
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> auth.uid();    <span style="color:#75715e">-- 當前使用者 UUID
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> auth.<span style="color:#66d9ef">role</span>();   <span style="color:#75715e">-- authenticated / anon / service_role
-</span></span></span></code></pre></div><h4 id="extension-支援-1">Extension 支援</h4>
-<p>由於使用者擁有 superuser，Extension 支援度<strong>最高</strong>，幾乎可安裝任何 Extension。預裝包括 pgvector、PostGIS、pg_cron、pg_net、pg_graphql、pgjwt 等。</p>
-<h4 id="定價">定價</h4>
-<ul>
-<li><strong>Free Tier</strong>：500MB 儲存，50,000 MAU Auth，500MB 頻寬</li>
-<li><strong>Pro</strong>：$25/月起，8GB RAM</li>
-<li>注意：Free Tier 實例 7 天不活躍後會自動暫停</li>
-</ul>
-<hr>
-<h3 id="neon--serverless-postgresql">Neon — Serverless PostgreSQL</h3>
-<p><strong>定位</strong>：真正的 Serverless PostgreSQL，運算與儲存完全分離，支援資料庫分支（Branching），閒置時計算層自動縮容至零。</p>
-<h4 id="架構創新">架構創新</h4>
-<pre tabindex="0"><code>Neon 架構：
+</code></pre><h4 id=核心優勢>核心優勢</h4><ul><li><strong>Columnar Engine</strong>：分析型查詢（COUNT/SUM/大範圍掃描）快 100 倍，無需 ETL 到 BigQuery</li><li><strong>Read Pool</strong>：共享儲存層，新增節點無需資料複製，秒級上線</li><li><strong>AlloyDB AI</strong>：原生整合 pgvector + ScaNN 向量索引，直接呼叫 Vertex AI Embeddings</li><li><strong>SLA 99.99%</strong>：Failover 通常 30 秒內完成</li></ul><p>AlloyDB 最適合需要 <strong>HTAP</strong>（混合事務/分析處理）的場景——在同一資料庫內同時執行 OLTP 和輕量 OLAP。</p><hr><h3 id=azure-database-for-postgresql--flexible-server>Azure Database for PostgreSQL — Flexible Server</h3><p><strong>定位</strong>：Microsoft Azure 的主力 Managed PostgreSQL 服務。</p><h4 id=核心特性-2>核心特性</h4><table><thead><tr><th>特性</th><th>說明</th></tr></thead><tbody><tr><td>高可用性</td><td>Zone-Redundant HA 或 Same-Zone HA，Failover 約 60–120 秒</td></tr><tr><td>Read Replica</td><td>最多 5 個，支援 Cross-region</td></tr><tr><td>PITR</td><td>保留 1–35 天</td></tr><tr><td>儲存上限</td><td>最高 32TB，Premium SSD v2</td></tr><tr><td>連線池</td><td><strong>PgBouncer 內建</strong>，無需額外部署</td></tr><tr><td>安全性</td><td>VNet、Private Link、Microsoft Entra ID（Azure AD）認證</td></tr><tr><td>監控</td><td>Azure Monitor、Query Performance Insight</td></tr></tbody></table><h4 id=重要特色>重要特色</h4><p>Azure Flexible Server 的三大差異化特色：</p><ol><li><strong>內建 PgBouncer</strong>：原生提供連線池，在連線字串中加入 <code>pgbouncer=on</code> 即可啟用</li><li><strong>Microsoft Entra 整合</strong>：支援 Azure AD 帳戶（含 Managed Identity）直接驗證連線，實現零秘鑰架構</li><li><strong>Intelligent Tuning</strong>：自動偵測查詢效能回退並建議索引</li></ol><hr><h3 id=supabase>Supabase</h3><p><strong>定位</strong>：以 PostgreSQL 為核心的開源 BaaS（Backend-as-a-Service），Firebase 的開源替代方案。</p><h4 id=不只是資料庫>不只是資料庫</h4><p>每個 Supabase Project 是一個獨立的 PostgreSQL 實例，使用者擁有完整的 <code>postgres</code> superuser 存取權限。除了資料庫，還提供：</p><table><thead><tr><th>功能</th><th>說明</th></tr></thead><tbody><tr><td>Auth</td><td>Email/Password、OAuth、Magic Link、Phone OTP</td></tr><tr><td>Storage</td><td>S3 相容物件儲存，支援 RLS 存取控制</td></tr><tr><td>Realtime</td><td>基於邏輯複製，即時訂閱資料變更</td></tr><tr><td>Edge Functions</td><td>Deno 邊緣函數</td></tr><tr><td>Auto REST API</td><td>基於 PostgREST，自動從 Schema 生成 RESTful API</td></tr><tr><td>Auto GraphQL</td><td>基於 pg_graphql Extension</td></tr><tr><td>Vector</td><td>原生 pgvector 支援</td></tr></tbody></table><h4 id=row-level-securityrls>Row Level Security（RLS）</h4><p>Supabase 將 RLS 作為資料安全的核心機制，讓應用程式可直接從客戶端連接資料庫，無需後端 API 層作為安全邊界：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#75715e>-- 啟用 RLS
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>ALTER</span> <span style=color:#66d9ef>TABLE</span> posts ENABLE <span style=color:#66d9ef>ROW</span> <span style=color:#66d9ef>LEVEL</span> <span style=color:#66d9ef>SECURITY</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 使用者只能讀取自己的文章
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> POLICY <span style=color:#e6db74>&#34;Users can view own posts&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>ON</span> posts <span style=color:#66d9ef>FOR</span> <span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>USING</span> (auth.uid() <span style=color:#f92672>=</span> user_id);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 使用者只能建立屬於自己的文章
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> POLICY <span style=color:#e6db74>&#34;Users can insert own posts&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>ON</span> posts <span style=color:#66d9ef>FOR</span> <span style=color:#66d9ef>INSERT</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>WITH</span> <span style=color:#66d9ef>CHECK</span> (auth.uid() <span style=color:#f92672>=</span> user_id);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 使用者只能更新自己的文章
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> POLICY <span style=color:#e6db74>&#34;Users can update own posts&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>ON</span> posts <span style=color:#66d9ef>FOR</span> <span style=color:#66d9ef>UPDATE</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>USING</span> (auth.uid() <span style=color:#f92672>=</span> user_id);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- 查詢當前使用者資訊
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> auth.uid();    <span style=color:#75715e>-- 當前使用者 UUID
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> auth.<span style=color:#66d9ef>role</span>();   <span style=color:#75715e>-- authenticated / anon / service_role
+</span></span></span></code></pre></div><h4 id=extension-支援-1>Extension 支援</h4><p>由於使用者擁有 superuser，Extension 支援度<strong>最高</strong>，幾乎可安裝任何 Extension。預裝包括 pgvector、PostGIS、pg_cron、pg_net、pg_graphql、pgjwt 等。</p><h4 id=定價>定價</h4><ul><li><strong>Free Tier</strong>：500MB 儲存，50,000 MAU Auth，500MB 頻寬</li><li><strong>Pro</strong>：$25/月起，8GB RAM</li><li>注意：Free Tier 實例 7 天不活躍後會自動暫停</li></ul><hr><h3 id=neon--serverless-postgresql>Neon — Serverless PostgreSQL</h3><p><strong>定位</strong>：真正的 Serverless PostgreSQL，運算與儲存完全分離，支援資料庫分支（Branching），閒置時計算層自動縮容至零。</p><h4 id=架構創新>架構創新</h4><pre tabindex=0><code>Neon 架構：
   Compute Layer：
     - 標準 PostgreSQL 進程（冷啟動約 500ms）
     - 閒置後自動暫停（Autosuspend），計費停止
@@ -863,226 +116,31 @@ Aurora PostgreSQL 架構：
     - Pageserver：分散式頁面服務（類似 Aurora）
     - Safekeeper：WAL 高可用儲存（Raft 共識，3 副本）
     - Copy-on-Write 快照：O(1) 時間建立 Branch
-</code></pre><h4 id="branching殺手級功能">Branching（殺手級功能）</h4>
-<p>Neon 最獨特的功能——類似 git 分支概念，每個 Branch 是資料庫的即時複本：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 安裝 Neon CLI</span>
-</span></span><span style="display:flex;"><span>npm install -g neonctl
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 建立生產資料庫的開發 Branch</span>
-</span></span><span style="display:flex;"><span>neonctl branches create --name dev/feature-payment --parent main
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 取得 Branch 連線字串</span>
-</span></span><span style="display:flex;"><span>neonctl connection-string dev/feature-payment
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 測試完成後刪除</span>
-</span></span><span style="display:flex;"><span>neonctl branches delete dev/feature-payment
-</span></span></code></pre></div><p>Branch 的核心使用場景：</p>
-<ul>
-<li><strong>開發/測試環境</strong>：每個 PR 建立獨立 Branch，測試完畢刪除</li>
-<li><strong>Schema Migration 預演</strong>：在 Branch 執行 Migration 腳本，驗證無誤後再套用至 Production</li>
-<li><strong>Preview Environment</strong>：CI/CD 中自動建立 Branch 對應 Vercel Preview Deployment</li>
-</ul>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e"># GitHub Actions 範例</span>
-</span></span><span style="display:flex;"><span>- <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Create Neon Branch</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#f92672">run</span>: |<span style="color:#e6db74">
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    BRANCH_NAME=&#34;ci/pr-${{ github.event.number }}&#34;
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    neonctl branches create --name $BRANCH_NAME --parent main
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    DB_URL=$(neonctl connection-string $BRANCH_NAME)
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    echo &#34;DATABASE_URL=$DB_URL&#34; &gt;&gt; $GITHUB_ENV</span>
-</span></span></code></pre></div><h4 id="serverless-driver">Serverless Driver</h4>
-<p>針對 Edge 環境設計的輕量驅動程式：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75715e">// Neon Serverless Driver（HTTP over WebSocket）
-</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">import</span> { <span style="color:#a6e22e">neon</span> } <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;@neondatabase/serverless&#39;</span>;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">sql</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">neon</span>(<span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">env</span>.<span style="color:#a6e22e">DATABASE_URL</span>);
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">result</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">sql</span><span style="color:#e6db74">`SELECT 1`</span>;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">// 相比傳統 node-postgres，每次函數呼叫無需建立 TCP 連線
-</span></span></span></code></pre></div><h4 id="冷啟動注意事項">冷啟動注意事項</h4>
-<p>閒置後重新啟動需約 500ms。對延遲敏感的場景可：</p>
-<ul>
-<li>設定較長 <code>suspend_timeout</code>（如 60 分鐘）</li>
-<li>使用 Connection Pooler 保持最小連線數</li>
-<li>定期心跳查詢防止 Compute 暫停</li>
-</ul>
-<h4 id="定價-1">定價</h4>
-<ul>
-<li><strong>Free Tier</strong>：0.5GB 儲存，1 個 Project，無限 Branch</li>
-<li><strong>Launch</strong>：$19/月，10GB 儲存，自動伸縮至 10 CU</li>
-<li>計費單位：CU（1 vCPU + 4GB RAM），按秒計費</li>
-</ul>
-<hr>
-<h3 id="tembo--extension-為中心的平台">Tembo — Extension 為中心的平台</h3>
-<p><strong>定位</strong>：以 PostgreSQL Extension 為中心的 Managed 服務，提供「Stack（堆疊）」概念——針對不同工作負載預先配置最佳化的 Extension 組合。</p>
-<h4 id="stack-類型">Stack 類型</h4>
-<table>
-  <thead>
-      <tr>
-          <th>Stack</th>
-          <th>取代目標</th>
-          <th>核心 Extension</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>OLTP</td>
-          <td>標準 PostgreSQL</td>
-          <td>pg_stat_statements, pgaudit</td>
-      </tr>
-      <tr>
-          <td>Vector</td>
-          <td>Pinecone, Weaviate</td>
-          <td>pgvector, pg_vectorize</td>
-      </tr>
-      <tr>
-          <td>Analytics</td>
-          <td>ClickHouse（輕量 OLAP）</td>
-          <td>pg_partman, pg_analytics</td>
-      </tr>
-      <tr>
-          <td>Message Queue</td>
-          <td>RabbitMQ, SQS</td>
-          <td>pg_amqp, pgmq</td>
-      </tr>
-      <tr>
-          <td>ML</td>
-          <td>輕量模型推論</td>
-          <td>pgml（PostgresML）</td>
-      </tr>
-      <tr>
-          <td>Timeseries</td>
-          <td>InfluxDB</td>
-          <td>timescaledb</td>
-      </tr>
-      <tr>
-          <td>Search</td>
-          <td>Elasticsearch（基本）</td>
-          <td>pg_bm25, ParadeDB</td>
-      </tr>
-  </tbody>
-</table>
-<p>Tembo 的理念是「<strong>Postgres for Everything</strong>」——透過適當的 Extension 組合，讓 PostgreSQL 取代多種專用資料庫。</p>
-<hr>
-<h3 id="綜合比較矩陣">綜合比較矩陣</h3>
-<table>
-  <thead>
-      <tr>
-          <th>特性</th>
-          <th>RDS</th>
-          <th>Aurora</th>
-          <th>Cloud SQL</th>
-          <th>AlloyDB</th>
-          <th>Azure Flexible</th>
-          <th>Supabase</th>
-          <th>Neon</th>
-          <th>Tembo</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td><strong>Superuser</strong></td>
-          <td>否</td>
-          <td>否</td>
-          <td>否</td>
-          <td>否</td>
-          <td>否</td>
-          <td><strong>是</strong></td>
-          <td>否</td>
-          <td>部分</td>
-      </tr>
-      <tr>
-          <td><strong>Extension 彈性</strong></td>
-          <td>中</td>
-          <td>中</td>
-          <td>中</td>
-          <td>中</td>
-          <td>中</td>
-          <td><strong>高</strong></td>
-          <td>中</td>
-          <td><strong>最高</strong></td>
-      </tr>
-      <tr>
-          <td><strong>HA Failover</strong></td>
-          <td>60-120s</td>
-          <td><strong>&lt;30s</strong></td>
-          <td>30-60s</td>
-          <td>&lt;60s</td>
-          <td>60-120s</td>
-          <td>無</td>
-          <td>內建</td>
-          <td>有</td>
-      </tr>
-      <tr>
-          <td><strong>Read Replica</strong></td>
-          <td>5</td>
-          <td><strong>15</strong></td>
-          <td>10</td>
-          <td>Pool</td>
-          <td>5</td>
-          <td>無</td>
-          <td>多 Compute</td>
-          <td>有</td>
-      </tr>
-      <tr>
-          <td><strong>Serverless</strong></td>
-          <td>否</td>
-          <td>v2</td>
-          <td>否</td>
-          <td>否</td>
-          <td>否</td>
-          <td>否</td>
-          <td><strong>原生</strong></td>
-          <td>否</td>
-      </tr>
-      <tr>
-          <td><strong>Branching</strong></td>
-          <td>否</td>
-          <td>否</td>
-          <td>否</td>
-          <td>否</td>
-          <td>否</td>
-          <td>否</td>
-          <td><strong>原生</strong></td>
-          <td>否</td>
-      </tr>
-      <tr>
-          <td><strong>PITR 保留</strong></td>
-          <td><strong>35 天</strong></td>
-          <td><strong>35 天</strong></td>
-          <td>7 天</td>
-          <td>可設定</td>
-          <td><strong>35 天</strong></td>
-          <td>7 天</td>
-          <td>7 天</td>
-          <td>有限</td>
-      </tr>
-      <tr>
-          <td><strong>內建連線池</strong></td>
-          <td>RDS Proxy</td>
-          <td>RDS Proxy</td>
-          <td>Auth Proxy</td>
-          <td>有</td>
-          <td><strong>PgBouncer</strong></td>
-          <td>PgBouncer</td>
-          <td>有</td>
-          <td>有</td>
-      </tr>
-      <tr>
-          <td><strong>定價起點</strong></td>
-          <td>按實例</td>
-          <td>按實例</td>
-          <td>按實例</td>
-          <td>按實例</td>
-          <td>按實例</td>
-          <td><strong>$0</strong></td>
-          <td><strong>$0</strong></td>
-          <td><strong>$0</strong></td>
-      </tr>
-  </tbody>
-</table>
-<hr>
-<h3 id="高可用性架構比較">高可用性架構比較</h3>
-<p>不同平台的 HA 機制差異顯著，直接影響 Failover 時間與資料安全：</p>
-<pre tabindex="0"><code>共享儲存（Failover 最快，無需資料複製）：
+</code></pre><h4 id=branching殺手級功能>Branching（殺手級功能）</h4><p>Neon 最獨特的功能——類似 git 分支概念，每個 Branch 是資料庫的即時複本：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 安裝 Neon CLI</span>
+</span></span><span style=display:flex><span>npm install -g neonctl
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 建立生產資料庫的開發 Branch</span>
+</span></span><span style=display:flex><span>neonctl branches create --name dev/feature-payment --parent main
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 取得 Branch 連線字串</span>
+</span></span><span style=display:flex><span>neonctl connection-string dev/feature-payment
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 測試完成後刪除</span>
+</span></span><span style=display:flex><span>neonctl branches delete dev/feature-payment
+</span></span></code></pre></div><p>Branch 的核心使用場景：</p><ul><li><strong>開發/測試環境</strong>：每個 PR 建立獨立 Branch，測試完畢刪除</li><li><strong>Schema Migration 預演</strong>：在 Branch 執行 Migration 腳本，驗證無誤後再套用至 Production</li><li><strong>Preview Environment</strong>：CI/CD 中自動建立 Branch 對應 Vercel Preview Deployment</li></ul><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#75715e># GitHub Actions 範例</span>
+</span></span><span style=display:flex><span>- <span style=color:#f92672>name</span>: <span style=color:#ae81ff>Create Neon Branch</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>run</span>: |<span style=color:#e6db74>
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>    BRANCH_NAME=&#34;ci/pr-${{ github.event.number }}&#34;
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>    neonctl branches create --name $BRANCH_NAME --parent main
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>    DB_URL=$(neonctl connection-string $BRANCH_NAME)
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>    echo &#34;DATABASE_URL=$DB_URL&#34; &gt;&gt; $GITHUB_ENV</span>
+</span></span></code></pre></div><h4 id=serverless-driver>Serverless Driver</h4><p>針對 Edge 環境設計的輕量驅動程式：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-javascript data-lang=javascript><span style=display:flex><span><span style=color:#75715e>// Neon Serverless Driver（HTTP over WebSocket）
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>import</span> { <span style=color:#a6e22e>neon</span> } <span style=color:#a6e22e>from</span> <span style=color:#e6db74>&#39;@neondatabase/serverless&#39;</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>sql</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>neon</span>(<span style=color:#a6e22e>process</span>.<span style=color:#a6e22e>env</span>.<span style=color:#a6e22e>DATABASE_URL</span>);
+</span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>result</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>await</span> <span style=color:#a6e22e>sql</span><span style=color:#e6db74>`SELECT 1`</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 相比傳統 node-postgres，每次函數呼叫無需建立 TCP 連線
+</span></span></span></code></pre></div><h4 id=冷啟動注意事項>冷啟動注意事項</h4><p>閒置後重新啟動需約 500ms。對延遲敏感的場景可：</p><ul><li>設定較長 <code>suspend_timeout</code>（如 60 分鐘）</li><li>使用 Connection Pooler 保持最小連線數</li><li>定期心跳查詢防止 Compute 暫停</li></ul><h4 id=定價-1>定價</h4><ul><li><strong>Free Tier</strong>：0.5GB 儲存，1 個 Project，無限 Branch</li><li><strong>Launch</strong>：$19/月，10GB 儲存，自動伸縮至 10 CU</li><li>計費單位：CU（1 vCPU + 4GB RAM），按秒計費</li></ul><hr><h3 id=tembo--extension-為中心的平台>Tembo — Extension 為中心的平台</h3><p><strong>定位</strong>：以 PostgreSQL Extension 為中心的 Managed 服務，提供「Stack（堆疊）」概念——針對不同工作負載預先配置最佳化的 Extension 組合。</p><h4 id=stack-類型>Stack 類型</h4><table><thead><tr><th>Stack</th><th>取代目標</th><th>核心 Extension</th></tr></thead><tbody><tr><td>OLTP</td><td>標準 PostgreSQL</td><td>pg_stat_statements, pgaudit</td></tr><tr><td>Vector</td><td>Pinecone, Weaviate</td><td>pgvector, pg_vectorize</td></tr><tr><td>Analytics</td><td>ClickHouse（輕量 OLAP）</td><td>pg_partman, pg_analytics</td></tr><tr><td>Message Queue</td><td>RabbitMQ, SQS</td><td>pg_amqp, pgmq</td></tr><tr><td>ML</td><td>輕量模型推論</td><td>pgml（PostgresML）</td></tr><tr><td>Timeseries</td><td>InfluxDB</td><td>timescaledb</td></tr><tr><td>Search</td><td>Elasticsearch（基本）</td><td>pg_bm25, ParadeDB</td></tr></tbody></table><p>Tembo 的理念是「<strong>Postgres for Everything</strong>」——透過適當的 Extension 組合，讓 PostgreSQL 取代多種專用資料庫。</p><hr><h3 id=綜合比較矩陣>綜合比較矩陣</h3><table><thead><tr><th>特性</th><th>RDS</th><th>Aurora</th><th>Cloud SQL</th><th>AlloyDB</th><th>Azure Flexible</th><th>Supabase</th><th>Neon</th><th>Tembo</th></tr></thead><tbody><tr><td><strong>Superuser</strong></td><td>否</td><td>否</td><td>否</td><td>否</td><td>否</td><td><strong>是</strong></td><td>否</td><td>部分</td></tr><tr><td><strong>Extension 彈性</strong></td><td>中</td><td>中</td><td>中</td><td>中</td><td>中</td><td><strong>高</strong></td><td>中</td><td><strong>最高</strong></td></tr><tr><td><strong>HA Failover</strong></td><td>60-120s</td><td><strong>&lt;30s</strong></td><td>30-60s</td><td>&lt;60s</td><td>60-120s</td><td>無</td><td>內建</td><td>有</td></tr><tr><td><strong>Read Replica</strong></td><td>5</td><td><strong>15</strong></td><td>10</td><td>Pool</td><td>5</td><td>無</td><td>多 Compute</td><td>有</td></tr><tr><td><strong>Serverless</strong></td><td>否</td><td>v2</td><td>否</td><td>否</td><td>否</td><td>否</td><td><strong>原生</strong></td><td>否</td></tr><tr><td><strong>Branching</strong></td><td>否</td><td>否</td><td>否</td><td>否</td><td>否</td><td>否</td><td><strong>原生</strong></td><td>否</td></tr><tr><td><strong>PITR 保留</strong></td><td><strong>35 天</strong></td><td><strong>35 天</strong></td><td>7 天</td><td>可設定</td><td><strong>35 天</strong></td><td>7 天</td><td>7 天</td><td>有限</td></tr><tr><td><strong>內建連線池</strong></td><td>RDS Proxy</td><td>RDS Proxy</td><td>Auth Proxy</td><td>有</td><td><strong>PgBouncer</strong></td><td>PgBouncer</td><td>有</td><td>有</td></tr><tr><td><strong>定價起點</strong></td><td>按實例</td><td>按實例</td><td>按實例</td><td>按實例</td><td>按實例</td><td><strong>$0</strong></td><td><strong>$0</strong></td><td><strong>$0</strong></td></tr></tbody></table><hr><h3 id=高可用性架構比較>高可用性架構比較</h3><p>不同平台的 HA 機制差異顯著，直接影響 Failover 時間與資料安全：</p><pre tabindex=0><code>共享儲存（Failover 最快，無需資料複製）：
   Aurora PostgreSQL    → &lt;30s（Fast Failover）
   AlloyDB             → &lt;60s（共享 Storage Layer）
   Neon                → 內建（Safekeeper Raft 共識）
@@ -1095,74 +153,7 @@ Aurora PostgreSQL 架構：
 非 HA（單節點）：
   Supabase Free Tier  → 無 HA，依賴備份還原
   Neon Compute        → 單 Compute，但 Storage 層高可用
-</code></pre><hr>
-<h3 id="備份策略差異">備份策略差異</h3>
-<table>
-  <thead>
-      <tr>
-          <th>平台</th>
-          <th>自動備份</th>
-          <th>PITR 保留</th>
-          <th>跨 Region 備份</th>
-          <th>手動快照</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>RDS</td>
-          <td>每日</td>
-          <td>1–35 天</td>
-          <td>支援（額外費用）</td>
-          <td>支援</td>
-      </tr>
-      <tr>
-          <td>Aurora</td>
-          <td>持續</td>
-          <td>1–35 天</td>
-          <td>Global Database</td>
-          <td>支援</td>
-      </tr>
-      <tr>
-          <td>Cloud SQL</td>
-          <td>每日</td>
-          <td>最多 7 天</td>
-          <td>需設定</td>
-          <td>支援</td>
-      </tr>
-      <tr>
-          <td>AlloyDB</td>
-          <td>持續</td>
-          <td>14 天</td>
-          <td>限定 Region</td>
-          <td>支援</td>
-      </tr>
-      <tr>
-          <td>Azure Flexible</td>
-          <td>每日</td>
-          <td>1–35 天</td>
-          <td>Geo-redundant</td>
-          <td>支援</td>
-      </tr>
-      <tr>
-          <td>Supabase</td>
-          <td>每日</td>
-          <td>7 天（Pro）</td>
-          <td>無</td>
-          <td>支援（Pro+）</td>
-      </tr>
-      <tr>
-          <td>Neon</td>
-          <td>持續</td>
-          <td>7 天</td>
-          <td>無</td>
-          <td>Branch 即快照</td>
-      </tr>
-  </tbody>
-</table>
-<hr>
-<h3 id="connection-pooling-策略">Connection Pooling 策略</h3>
-<p>Managed 服務通常有連線數上限限制，各平台的連線池策略：</p>
-<pre tabindex="0"><code>AWS RDS / Aurora：
+</code></pre><hr><h3 id=備份策略差異>備份策略差異</h3><table><thead><tr><th>平台</th><th>自動備份</th><th>PITR 保留</th><th>跨 Region 備份</th><th>手動快照</th></tr></thead><tbody><tr><td>RDS</td><td>每日</td><td>1–35 天</td><td>支援（額外費用）</td><td>支援</td></tr><tr><td>Aurora</td><td>持續</td><td>1–35 天</td><td>Global Database</td><td>支援</td></tr><tr><td>Cloud SQL</td><td>每日</td><td>最多 7 天</td><td>需設定</td><td>支援</td></tr><tr><td>AlloyDB</td><td>持續</td><td>14 天</td><td>限定 Region</td><td>支援</td></tr><tr><td>Azure Flexible</td><td>每日</td><td>1–35 天</td><td>Geo-redundant</td><td>支援</td></tr><tr><td>Supabase</td><td>每日</td><td>7 天（Pro）</td><td>無</td><td>支援（Pro+）</td></tr><tr><td>Neon</td><td>持續</td><td>7 天</td><td>無</td><td>Branch 即快照</td></tr></tbody></table><hr><h3 id=connection-pooling-策略>Connection Pooling 策略</h3><p>Managed 服務通常有連線數上限限制，各平台的連線池策略：</p><pre tabindex=0><code>AWS RDS / Aurora：
   → RDS Proxy（託管 PgBouncer，支援 IAM 認證，額外費用）
   → 或在應用層使用 PgBouncer
 
@@ -1178,9 +169,7 @@ Supabase：
 
 Neon：
   → 內建連線池 + Serverless Driver（HTTP over WebSocket）
-</code></pre><hr>
-<h3 id="extension-支援深度">Extension 支援深度</h3>
-<pre tabindex="0"><code>Superuser 完整控制：
+</code></pre><hr><h3 id=extension-支援深度>Extension 支援深度</h3><pre tabindex=0><code>Superuser 完整控制：
   Supabase &gt; Tembo &gt; Self-hosted
 
 白名單 Extension（主流 Extension 均可用）：
@@ -1193,76 +182,7 @@ timescaledb：Tembo 原生，Azure 需啟用，其他有限支援
 
 自訂 Extension（非白名單）：
   僅 Supabase（superuser）與 Tembo（Trunk）支援
-</code></pre><hr>
-<h3 id="成本結構比較">成本結構比較</h3>
-<h4 id="固定計費模式傳統三大雲">固定計費模式（傳統三大雲）</h4>
-<p>按實例規格（vCPU + RAM）+ 儲存 + I/O + 網路流量分項計費。HA 模式通常費用約 2 倍。適合工作負載穩定且持續的應用。</p>
-<h4 id="serverless-計費模式neonaurora-serverless-v2">Serverless 計費模式（Neon、Aurora Serverless v2）</h4>
-<p>按實際使用的計算時間計費。閒置時費用大幅降低（Neon 可降至 $0，Aurora v2 最低 0.5 ACU）。適合工作負載不均勻、開發/測試環境。</p>
-<h4 id="baas-計費模式supabase">BaaS 計費模式（Supabase）</h4>
-<p>包含 Auth、Storage、Edge Functions 等額外服務的整合定價。Free Tier 可能已足夠小型應用。適合需要完整後端能力的全端專案。</p>
-<hr>
-<h3 id="供應商鎖定風險管理">供應商鎖定風險管理</h3>
-<p>PostgreSQL 的可攜性是其最大優勢，但 Managed 服務可能引入鎖定風險：</p>
-<h4 id="高鎖定風險因素">高鎖定風險因素</h4>
-<ul>
-<li>使用僅特定平台支援的 Extension（AlloyDB ScaNN、Supabase pg_graphql）</li>
-<li>依賴平台特有連線機制（Cloud SQL Auth Proxy IAM 整合）</li>
-<li>使用 Aurora Serverless v2 的自動伸縮語意</li>
-<li>依賴 Neon 的 Branching（其他平台無等效功能）</li>
-</ul>
-<h4 id="降低鎖定策略">降低鎖定策略</h4>
-<ul>
-<li>優先使用跨平台支援的 Extension（pgvector、PostGIS、pg_stat_statements）</li>
-<li>抽象化連線字串管理，使用標準 libpq URI 格式</li>
-<li>定期執行 <code>pg_dump</code> 備份並驗證可在其他平台還原</li>
-<li>避免在應用程式碼中硬寫平台特有的 SQL 方言</li>
-</ul>
-<hr>
-<h3 id="self-hosted-vs-managed-決策框架">Self-hosted vs Managed 決策框架</h3>
-<table>
-  <thead>
-      <tr>
-          <th>考量因素</th>
-          <th>傾向 Self-hosted</th>
-          <th>傾向 Managed</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td><strong>DBA 能力</strong></td>
-          <td>有專職 DBA 團隊</td>
-          <td>DBA 資源有限</td>
-      </tr>
-      <tr>
-          <td><strong>合規要求</strong></td>
-          <td>需要資料主權/特殊合規</td>
-          <td>標準合規（SOC2/GDPR）</td>
-      </tr>
-      <tr>
-          <td><strong>成本規模</strong></td>
-          <td>大規模（&gt;數十台伺服器）</td>
-          <td>中小規模</td>
-      </tr>
-      <tr>
-          <td><strong>自訂需求</strong></td>
-          <td>需自訂 Extension、OS 參數</td>
-          <td>標準功能已足夠</td>
-      </tr>
-      <tr>
-          <td><strong>啟動速度</strong></td>
-          <td>可接受較長建置時間</td>
-          <td>需要快速啟動</td>
-      </tr>
-      <tr>
-          <td><strong>供應商鎖定</strong></td>
-          <td>高度重視避免鎖定</td>
-          <td>可接受一定鎖定</td>
-      </tr>
-  </tbody>
-</table>
-<h4 id="決策流程">決策流程</h4>
-<pre tabindex="0"><code>需要自訂 Extension 或 OS 級別配置？
+</code></pre><hr><h3 id=成本結構比較>成本結構比較</h3><h4 id=固定計費模式傳統三大雲>固定計費模式（傳統三大雲）</h4><p>按實例規格（vCPU + RAM）+ 儲存 + I/O + 網路流量分項計費。HA 模式通常費用約 2 倍。適合工作負載穩定且持續的應用。</p><h4 id=serverless-計費模式neonaurora-serverless-v2>Serverless 計費模式（Neon、Aurora Serverless v2）</h4><p>按實際使用的計算時間計費。閒置時費用大幅降低（Neon 可降至 $0，Aurora v2 最低 0.5 ACU）。適合工作負載不均勻、開發/測試環境。</p><h4 id=baas-計費模式supabase>BaaS 計費模式（Supabase）</h4><p>包含 Auth、Storage、Edge Functions 等額外服務的整合定價。Free Tier 可能已足夠小型應用。適合需要完整後端能力的全端專案。</p><hr><h3 id=供應商鎖定風險管理>供應商鎖定風險管理</h3><p>PostgreSQL 的可攜性是其最大優勢，但 Managed 服務可能引入鎖定風險：</p><h4 id=高鎖定風險因素>高鎖定風險因素</h4><ul><li>使用僅特定平台支援的 Extension（AlloyDB ScaNN、Supabase pg_graphql）</li><li>依賴平台特有連線機制（Cloud SQL Auth Proxy IAM 整合）</li><li>使用 Aurora Serverless v2 的自動伸縮語意</li><li>依賴 Neon 的 Branching（其他平台無等效功能）</li></ul><h4 id=降低鎖定策略>降低鎖定策略</h4><ul><li>優先使用跨平台支援的 Extension（pgvector、PostGIS、pg_stat_statements）</li><li>抽象化連線字串管理，使用標準 libpq URI 格式</li><li>定期執行 <code>pg_dump</code> 備份並驗證可在其他平台還原</li><li>避免在應用程式碼中硬寫平台特有的 SQL 方言</li></ul><hr><h3 id=self-hosted-vs-managed-決策框架>Self-hosted vs Managed 決策框架</h3><table><thead><tr><th>考量因素</th><th>傾向 Self-hosted</th><th>傾向 Managed</th></tr></thead><tbody><tr><td><strong>DBA 能力</strong></td><td>有專職 DBA 團隊</td><td>DBA 資源有限</td></tr><tr><td><strong>合規要求</strong></td><td>需要資料主權/特殊合規</td><td>標準合規（SOC2/GDPR）</td></tr><tr><td><strong>成本規模</strong></td><td>大規模（>數十台伺服器）</td><td>中小規模</td></tr><tr><td><strong>自訂需求</strong></td><td>需自訂 Extension、OS 參數</td><td>標準功能已足夠</td></tr><tr><td><strong>啟動速度</strong></td><td>可接受較長建置時間</td><td>需要快速啟動</td></tr><tr><td><strong>供應商鎖定</strong></td><td>高度重視避免鎖定</td><td>可接受一定鎖定</td></tr></tbody></table><h4 id=決策流程>決策流程</h4><pre tabindex=0><code>需要自訂 Extension 或 OS 級別配置？
   → 是 → Self-hosted（或 Supabase / Tembo）
   → 否 ↓
 
@@ -1279,38 +199,7 @@ timescaledb：Tembo 原生，Azure 需啟用，其他有限支援
 是否需要整合 Auth/Storage/API 等完整後端？
   → 是 → Supabase（BaaS）
   → 否 → 根據預算選擇標準 Managed 服務
-</code></pre><hr>
-<h3 id="serverless-postgresql-的使用限制">Serverless PostgreSQL 的使用限制</h3>
-<p>Serverless 形態在某些場景下有固有限制：</p>
-<h4 id="冷啟動問題">冷啟動問題</h4>
-<table>
-  <thead>
-      <tr>
-          <th>場景</th>
-          <th>影響程度</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>即時支付處理（延遲 &lt;100ms）</td>
-          <td>高</td>
-      </tr>
-      <tr>
-          <td>高頻率輪詢應用</td>
-          <td>高</td>
-      </tr>
-      <tr>
-          <td>長時間工作流程</td>
-          <td>中</td>
-      </tr>
-      <tr>
-          <td>一般 Web API</td>
-          <td>低（500ms 首次延遲可接受）</td>
-      </tr>
-  </tbody>
-</table>
-<h4 id="解決方案">解決方案</h4>
-<pre tabindex="0"><code>防止冷啟動的三種策略：
+</code></pre><hr><h3 id=serverless-postgresql-的使用限制>Serverless PostgreSQL 的使用限制</h3><p>Serverless 形態在某些場景下有固有限制：</p><h4 id=冷啟動問題>冷啟動問題</h4><table><thead><tr><th>場景</th><th>影響程度</th></tr></thead><tbody><tr><td>即時支付處理（延遲 &lt;100ms）</td><td>高</td></tr><tr><td>高頻率輪詢應用</td><td>高</td></tr><tr><td>長時間工作流程</td><td>中</td></tr><tr><td>一般 Web API</td><td>低（500ms 首次延遲可接受）</td></tr></tbody></table><h4 id=解決方案>解決方案</h4><pre tabindex=0><code>防止冷啟動的三種策略：
 
 1. 延長暫停時間
    → 設定 suspend_timeout = 3600（1小時）
@@ -1323,505 +212,55 @@ timescaledb：Tembo 原生，Azure 需啟用，其他有限支援
 3. Warm-up 策略
    → 定期排程查詢（如每 5 分鐘 SELECT 1）
    → 適合延遲敏感的端點
-</code></pre><hr>
-<h3 id="遷移路徑">遷移路徑</h3>
-<h4 id="self-hosted--managed">Self-hosted → Managed</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 方法一：pg_dump/pg_restore（離線遷移）</span>
-</span></span><span style="display:flex;"><span>pg_dump -Fc -h source -U user dbname &gt; backup.dump
-</span></span><span style="display:flex;"><span>pg_restore -h managed-host -U user -d dbname backup.dump
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 方法二：邏輯複製（零停機遷移）</span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 在源端建立 Publication</span>
-</span></span><span style="display:flex;"><span>CREATE PUBLICATION my_pub FOR ALL TABLES;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># 在目標端建立 Subscription</span>
-</span></span><span style="display:flex;"><span>CREATE SUBSCRIPTION my_sub
-</span></span><span style="display:flex;"><span>  CONNECTION <span style="color:#e6db74">&#39;host=source dbname=mydb user=repl_user&#39;</span>
-</span></span><span style="display:flex;"><span>  PUBLICATION my_pub;
-</span></span></code></pre></div><h4 id="跨平台遷移注意事項">跨平台遷移注意事項</h4>
-<ul>
-<li>檢查 Extension 相容性（源平台支援但目標平台白名單不含的 Extension）</li>
-<li>確認 Role 與 Permission 映射（<code>rds_superuser</code> vs <code>cloudsqlsuperuser</code> vs <code>postgres</code>）</li>
-<li>測試應用程式連線字串與驅動程式相容性</li>
-</ul>
-<hr>
-<h3 id="選型建議總結">選型建議總結</h3>
-<table>
-  <thead>
-      <tr>
-          <th>你的需求</th>
-          <th>推薦方案</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>AWS 生態 + 穩定可預測</td>
-          <td><strong>RDS for PostgreSQL</strong></td>
-      </tr>
-      <tr>
-          <td>AWS 生態 + 高效能 + 快速 Failover</td>
-          <td><strong>Aurora PostgreSQL</strong></td>
-      </tr>
-      <tr>
-          <td>GCP 生態 + 簡單 Managed</td>
-          <td><strong>Cloud SQL</strong></td>
-      </tr>
-      <tr>
-          <td>GCP 生態 + HTAP 混合分析</td>
-          <td><strong>AlloyDB</strong></td>
-      </tr>
-      <tr>
-          <td>Azure 生態 + Entra ID 整合</td>
-          <td><strong>Azure Flexible Server</strong></td>
-      </tr>
-      <tr>
-          <td>全端 BaaS + superuser 控制</td>
-          <td><strong>Supabase</strong></td>
-      </tr>
-      <tr>
-          <td>Serverless + Branching 工作流程</td>
-          <td><strong>Neon</strong></td>
-      </tr>
-      <tr>
-          <td>Extension 主導 + 取代多種 DB</td>
-          <td><strong>Tembo</strong></td>
-      </tr>
-  </tbody>
-</table>
-<hr>
-<h3 id="總結">總結</h3>
-<p>雲端託管 PostgreSQL 的市場已從三大雲供應商的傳統 Managed 服務，擴展到 Serverless 原生（Neon）、BaaS 整合（Supabase）與 Extension 專精（Tembo）的多元生態。選擇時沒有「最佳」方案，只有「最適合你的場景」的方案——關鍵在於釐清你的 HA 需求、Extension 依賴、預算模型與團隊能力。</p>
-<p><strong>核心原則</strong>：所有平台底層都是 PostgreSQL，你的 SQL 知識與 Schema 設計能力是跨平台通用的。善用 <code>pg_dump</code> 保持可攜性，避免過度依賴平台特有功能，就能在需要時順利遷移。</p>
-<p>下一篇，我們將探討 <strong>PostgreSQL 開發者工具</strong>——從 pgAdmin、DBeaver 到 DataGrip，掌握提升 PostgreSQL 開發效率的必備工具與工作流程。</p></div>
-        
-        
-
-        
-        <div class="mt-8">
-          
-<div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose">
-  <div>
-    <div class="flex items-center gap-2 mb-1">
-      <a href="/about" class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">
-        BenZ
-      </a>
-      
-      <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span>
-      
-    </div>
-    <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">
-      熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。
-    </p>
-    <div class="flex items-center gap-3">
-      
-      <a href="https://github.com/benzhub" target="_blank" rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label="GitHub">
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-      </a>
-      
-      
-      
-    </div>
-  </div>
-</div>
-
-        </div>
-      </div>
-
-      
-      
-<div class="subscribe-widget max-w-xl mx-auto my-10 px-6 py-8 text-center rounded-xl bg-zinc-50 dark:bg-zinc-800">
-  <h3 class="text-lg font-bold mb-1">訂閱 BenzHub 電子報</h3>
-  <p class="text-sm text-zinc-600 dark:text-zinc-300 mb-4">每週 AI 賺錢實戰 + 免費工具地圖</p>
-  <form class="subscribe-form flex flex-col sm:flex-row gap-3 justify-center"
-        data-worker="https://benzhub-newsletter.PLACEHOLDER.workers.dev" data-source="footer-widget">
-    <input type="email" required placeholder="你的 Email"
-           class="px-4 py-2 rounded-lg border border-zinc-300 dark:bg-zinc-900 dark:border-zinc-600" />
-    <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700">訂閱</button>
-  </form>
-  <div class="cf-turnstile mt-3 flex justify-center" data-sitekey="PLACEHOLDER_TURNSTILE_SITE_KEY"></div>
-  <p class="subscribe-status text-sm text-zinc-500 mt-2"></p>
-</div>
-
-
-
-      
-      <div class="post-detail fade-in my-4">
-        
-
-
-<div>
-  <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3>
-  <div class="grid gap-2">
-    
-    <a href="https://benzhub.github.io/post/postgresql/047-orm-integration/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
-      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">ORM 整合實戰：TypeORM、Prisma、SQLAlchemy、Django ORM 與 PostgreSQL 進階型別映射 | PostgreSQL</span>
-      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/23</span>
-    </a>
-    
-    <a href="https://benzhub.github.io/post/postgresql/046-migration-tools/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
-      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Schema 遷移工具完全比較：Flyway、Alembic、Prisma、TypeORM 與零停機遷移策略 | PostgreSQL</span>
-      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/22</span>
-    </a>
-    
-    <a href="https://benzhub.github.io/post/postgresql/045-timescaledb/" class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group">
-      <span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">TimescaleDB 時序資料庫完全指南：從 Hypertable 到連續聚合與壓縮策略 | PostgreSQL</span>
-      <span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/21</span>
-    </a>
-    
-  </div>
-</div>
-
-
-      </div>
-
-      
-      <div class="post-detail fade-in my-4">
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            
-            <a href="https://benzhub.github.io/post/postgresql/047-orm-integration/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
-                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
-                <span class="text-sm font-medium">ORM 整合實戰：TypeORM、Prisma、SQLAlchemy、Django ORM 與 PostgreSQL 進階型別映射 | PostgreSQL</span>
-            </a>
-            
-          </div>
-          <div>
-            
-            <a href="https://benzhub.github.io/post/postgresql/049-devtools/" class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center">
-                <span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
-                <span class="text-sm font-medium">PostgreSQL 開發者工具鏈：psql、pgAdmin、pgbench、pgTAP 完整指南 | PostgreSQL</span>
-            </a>
-            
-          </div>
-        </div>
-      </div>
-
-      
-      <div class="post-detail fade-in my-4">
-        
-<script src="https://giscus.app/client.js"
-        data-repo="benzhub/benzhub.github.io"
-        data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM="
-        data-category="Announcements"
-        data-category-id="MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1"
-        data-mapping="pathname"
-        data-strict="0"
-        data-reactions-enabled="1"
-        data-emit-metadata="0"
-        data-input-position="top"
-        data-theme="preferred_color_scheme"
-        data-lang="zh-TW"
-        crossorigin="anonymous"
-        async>
-</script>
-
-
-      </div>
-    </div>
-    
-    <div class="hidden lg:block lg:col-span-1 mt-4">
-    
-    
-            
-            <div class="widget fade-in">
-    <p class="widget-title">搜尋</p>
-    <form role="search" method="get" action="https://google.com/search">
-        <input class="search-input" type="search" placeholder="搜尋文章..." name="q" aria-label="搜尋">
-        <input type="hidden" name="sitesearch" value="https://benzhub.github.io/" />
-    </form>
-</div>
-
-        
-            
-            
-
-        
-            
-            
-<div class="widget fade-in">
-    <p class="widget-title">標籤</p>
-    <div class="flex flex-wrap gap-1.5">
-        <a href='/tags/80/20-%E6%B3%95%E5%89%87'>
-            <span class="tag-pill">80/20 法則</span>
-        </a>
-        <a href='/tags/acid'>
-            <span class="tag-pill">acid</span>
-        </a>
-        <a href='/tags/aggregate'>
-            <span class="tag-pill">aggregate</span>
-        </a>
-        <a href='/tags/ai'>
-            <span class="tag-pill">ai</span>
-        </a>
-        <a href='/tags/ai-agent'>
-            <span class="tag-pill">ai agent</span>
-        </a>
-        <a href='/tags/ai-workflow'>
-            <span class="tag-pill">ai workflow</span>
-        </a>
-        <a href='/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE'>
-            <span class="tag-pill">ai 工具焦慮</span>
-        </a>
-        <a href='/tags/ai-%E6%8E%A5%E5%96%AE'>
-            <span class="tag-pill">ai 接單</span>
-        </a>
-        <a href='/tags/ai-%E7%B9%AA%E5%9C%96'>
-            <span class="tag-pill">ai 繪圖</span>
-        </a>
-        <a href='/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA'>
-            <span class="tag-pill">ai 虛擬人</span>
-        </a>
-        <a href='/tags/ai-%E8%A1%8C%E9%8A%B7'>
-            <span class="tag-pill">ai 行銷</span>
-        </a>
-        <a href='/tags/ai-%E8%A8%AD%E8%A8%88'>
-            <span class="tag-pill">ai 設計</span>
-        </a>
-        <a href='/tags/ai-%E8%AE%8A%E7%8F%BE'>
-            <span class="tag-pill">ai 變現</span>
-        </a>
-        <a href='/tags/ai-%E8%B3%BA%E9%8C%A2'>
-            <span class="tag-pill">ai 賺錢</span>
-        </a>
-        <a href='/tags/ai-income'>
-            <span class="tag-pill">ai-income</span>
-        </a>
-        <a href='/tags/ai-insights'>
-            <span class="tag-pill">ai-insights</span>
-        </a>
-        <a href='/tags/analytics'>
-            <span class="tag-pill">analytics</span>
-        </a>
-        <a href='/tags/api'>
-            <span class="tag-pill">api</span>
-        </a>
-        <a href='/tags/architecture'>
-            <span class="tag-pill">architecture</span>
-        </a>
-        <a href='/tags/audit'>
-            <span class="tag-pill">audit</span>
-        </a>
-    </div>
-</div>
-
-
-        
-            
-            
-<div class="widget fade-in">
-    <p class="widget-title">文章系列</p>
-    <div class="flex flex-wrap gap-1.5">
-        
-        
-        
-        
-        <a href='/post/postgresql/'>
-            <span class="tag-pill">PostgreSQL (50)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/javascript/'>
-            <span class="tag-pill">JavaScript (109)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/django/'>
-            <span class="tag-pill">Django (44)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/python/'>
-            <span class="tag-pill">Python (37)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/htmlcss/'>
-            <span class="tag-pill">HTML &amp; CSS (23)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/linux/'>
-            <span class="tag-pill">Linux (22)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/git/'>
-            <span class="tag-pill">Git (18)</span>
-        </a>
-        
-        
-        
-        
-        
-        <a href='/post/ai-insights/'>
-            <span class="tag-pill">AI Insights (13)</span>
-        </a>
-        
-        
-    </div>
-</div>
-
-
-        
-            
-            
-
-<div class="widget fade-in">
-    <p class="widget-title">最新文章</p>
-    <div class="flex flex-col gap-1">
-        <a href="/post/javascript/data-structures--algorithms/047-load-balancer/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計負載均衡器 — Round Robin、一致性雜湊與健康檢查實戰 | 資料結構與演算法</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/07/30
-            </p>
-        </a>
-        <a href="/post/javascript/data-structures--algorithms/046-text-diff/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計文本差異比對 — LCS、Myers Diff 演算法與 Patch 生成實戰 | 資料結構與演算法</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/07/29
-            </p>
-        </a>
-        <a href="/post/javascript/data-structures--algorithms/045-recommendation/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計推薦系統 — 協同過濾、內容推薦與矩陣分解實戰 | 資料結構與演算法</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/07/28
-            </p>
-        </a>
-        <a href="/post/javascript/data-structures--algorithms/044-url-shortener/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計短網址系統 — Base62 編碼、分散式 ID 生成與重導向架構 | 資料結構與演算法</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/07/27
-            </p>
-        </a>
-        <a href="/post/postgresql/050-citus-distributed/" class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group">
-            <div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Citus 分散式 PostgreSQL：水平擴展到多節點叢集 | PostgreSQL</div>
-            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                2026/07/26
-            </p>
-        </a>
-    </div>
-</div>
-
-        
-    
-</div>
-
-    
-</div>
-
-        </div>
-    </div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]">
-    
-    <p>&copy; 2026 <a href="https://benzhub.github.io/" class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p>
-</footer>
-
-
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-<script src="/js/subscribe.js" defer></script>
-
-
-
-<script>
-    (function (window, document) {
-        function main() {
-            var ad = document.createElement('script');
-            ad.async = true;
-            ad.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606';
-            ad.crossOrigin = "anonymous";
-            var sc = document.getElementsByTagName('script')[0];
-            sc.parentNode.insertBefore(ad, sc);
-        }
-        var lazyLoad = false;
-        function onLazyLoad() {
-            if (lazyLoad === false) {
-                lazyLoad = true;
-                window.removeEventListener('scroll', onLazyLoad);
-                window.removeEventListener('mousemove', onLazyLoad);
-                window.removeEventListener('mousedown', onLazyLoad);
-                window.removeEventListener('touchstart', onLazyLoad);
-                window.removeEventListener('keydown', onLazyLoad);
-                main();
-            }
-        }
-        window.addEventListener('scroll', onLazyLoad);
-        window.addEventListener('mousemove', onLazyLoad);
-        window.addEventListener('mousedown', onLazyLoad);
-        window.addEventListener('touchstart', onLazyLoad);
-        window.addEventListener('keydown', onLazyLoad);
-        window.addEventListener('load', function () {
-            if (window.pageYOffset) {
-                onLazyLoad();
-                window.setTimeout(onLazyLoad, 3000);
-            }
-        });
-    })(window, document);
-</script>
-
-
-<script>
-    
-    var icon = document.getElementById("icon");
-    var icon2 = document.getElementById("icon2");
-    if (document.documentElement.classList.contains("dark") || localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
-        if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
-        document.documentElement.classList.add('dark');
-    } else {
-        document.documentElement.classList.remove('dark');
-    }
-    function toggleDarkMode() {
-        if (document.documentElement.classList.contains('dark')) {
-            if (icon) { icon.classList.remove("icon-sun"); icon.classList.add("icon-moon"); }
-            if (icon2) { icon2.classList.remove("icon-sun"); icon2.classList.add("icon-moon"); }
-            document.documentElement.classList.remove('dark');
-            localStorage.theme = 'light';
-        } else {
-            if (icon) { icon.classList.remove("icon-moon"); icon.classList.add("icon-sun"); }
-            if (icon2) { icon2.classList.remove("icon-moon"); icon2.classList.add("icon-sun"); }
-            document.documentElement.classList.add('dark');
-            localStorage.theme = 'dark';
-        }
-    }
-
-    
-    document.addEventListener('DOMContentLoaded', function () {
-        var observer = new IntersectionObserver(function (entries) {
-            entries.forEach(function (entry) {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0 });
-
-        document.querySelectorAll('.fade-in').forEach(function (el) {
-            observer.observe(el);
-        });
-    });
-</script>
-</body>
-
-</html>
+</code></pre><hr><h3 id=遷移路徑>遷移路徑</h3><h4 id=self-hosted--managed>Self-hosted → Managed</h4><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># 方法一：pg_dump/pg_restore（離線遷移）</span>
+</span></span><span style=display:flex><span>pg_dump -Fc -h source -U user dbname &gt; backup.dump
+</span></span><span style=display:flex><span>pg_restore -h managed-host -U user -d dbname backup.dump
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 方法二：邏輯複製（零停機遷移）</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 在源端建立 Publication</span>
+</span></span><span style=display:flex><span>CREATE PUBLICATION my_pub FOR ALL TABLES;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># 在目標端建立 Subscription</span>
+</span></span><span style=display:flex><span>CREATE SUBSCRIPTION my_sub
+</span></span><span style=display:flex><span>  CONNECTION <span style=color:#e6db74>&#39;host=source dbname=mydb user=repl_user&#39;</span>
+</span></span><span style=display:flex><span>  PUBLICATION my_pub;
+</span></span></code></pre></div><h4 id=跨平台遷移注意事項>跨平台遷移注意事項</h4><ul><li>檢查 Extension 相容性（源平台支援但目標平台白名單不含的 Extension）</li><li>確認 Role 與 Permission 映射（<code>rds_superuser</code> vs <code>cloudsqlsuperuser</code> vs <code>postgres</code>）</li><li>測試應用程式連線字串與驅動程式相容性</li></ul><hr><h3 id=選型建議總結>選型建議總結</h3><table><thead><tr><th>你的需求</th><th>推薦方案</th></tr></thead><tbody><tr><td>AWS 生態 + 穩定可預測</td><td><strong>RDS for PostgreSQL</strong></td></tr><tr><td>AWS 生態 + 高效能 + 快速 Failover</td><td><strong>Aurora PostgreSQL</strong></td></tr><tr><td>GCP 生態 + 簡單 Managed</td><td><strong>Cloud SQL</strong></td></tr><tr><td>GCP 生態 + HTAP 混合分析</td><td><strong>AlloyDB</strong></td></tr><tr><td>Azure 生態 + Entra ID 整合</td><td><strong>Azure Flexible Server</strong></td></tr><tr><td>全端 BaaS + superuser 控制</td><td><strong>Supabase</strong></td></tr><tr><td>Serverless + Branching 工作流程</td><td><strong>Neon</strong></td></tr><tr><td>Extension 主導 + 取代多種 DB</td><td><strong>Tembo</strong></td></tr></tbody></table><hr><h3 id=總結>總結</h3><p>雲端託管 PostgreSQL 的市場已從三大雲供應商的傳統 Managed 服務，擴展到 Serverless 原生（Neon）、BaaS 整合（Supabase）與 Extension 專精（Tembo）的多元生態。選擇時沒有「最佳」方案，只有「最適合你的場景」的方案——關鍵在於釐清你的 HA 需求、Extension 依賴、預算模型與團隊能力。</p><p><strong>核心原則</strong>：所有平台底層都是 PostgreSQL，你的 SQL 知識與 Schema 設計能力是跨平台通用的。善用 <code>pg_dump</code> 保持可攜性，避免過度依賴平台特有功能，就能在需要時順利遷移。</p><p>下一篇，我們將探討 <strong>PostgreSQL 開發者工具</strong>——從 pgAdmin、DBeaver 到 DataGrip，掌握提升 PostgreSQL 開發效率的必備工具與工作流程。</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
+</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="product-cta max-w-xl mx-auto my-10 rounded-xl bg-blue-50 dark:bg-zinc-800 border border-blue-100 dark:border-zinc-700 text-center" style="padding:1.75rem 2rem"><p class="text-xs font-bold text-blue-600 tracking-wider mb-1">本週主打</p><h3 class="text-lg font-bold mb-1">AI 自動化入門包</h3><p class="text-sm text-zinc-600 dark:text-zinc-300 mb-5">你每天手動在做的那些煩事,其實 AI 可以自己跑。這份給你 10 個照著做就會的自動化工作流 + 50 個複製即用的提示詞,不用會寫程式。</p><a href=/products/ai-starter-kit/ class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg no-underline" style="padding:.7rem 1.9rem">看看這個產品 →</a></div><div class="subscribe-widget max-w-xl mx-auto my-10 px-6 py-8 text-center rounded-xl bg-zinc-50 dark:bg-zinc-800"><h3 class="text-lg font-bold mb-1">訂閱 BenzHub 電子報</h3><p class="text-sm text-zinc-600 dark:text-zinc-300 mb-4">每週 AI 賺錢實戰 + 免費工具地圖</p><form class="subscribe-form flex flex-col sm:flex-row gap-3 justify-center" data-worker=https://benzhub-newsletter.benzhub.workers.dev data-source=footer-widget><input type=email required placeholder="你的 Email" class="px-4 py-2 rounded-lg border border-zinc-300 dark:bg-zinc-900 dark:border-zinc-600"><div class="cf-turnstile mt-3 flex justify-center" data-sitekey=0x4AAAAAAD4_sR6pI3UknZVz></div><button type=submit class="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700">訂閱</button></form><p class="subscribe-status text-sm text-zinc-500 mt-2"></p></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/postgresql/047-orm-integration/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">ORM 整合實戰：TypeORM、Prisma、SQLAlchemy、Django ORM 與 PostgreSQL 進階型別映射 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/23</span>
+</a><a href=https://benzhub.github.io/post/postgresql/046-migration-tools/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Schema 遷移工具完全比較：Flyway、Alembic、Prisma、TypeORM 與零停機遷移策略 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/22</span>
+</a><a href=https://benzhub.github.io/post/postgresql/045-timescaledb/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">TimescaleDB 時序資料庫完全指南：從 Hypertable 到連續聚合與壓縮策略 | PostgreSQL</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/07/21</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/postgresql/047-orm-integration/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+<span class="text-sm font-medium">ORM 整合實戰：TypeORM、Prisma、SQLAlchemy、Django ORM 與 PostgreSQL 進階型別映射 | PostgreSQL</span></a></div><div></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
+</a><a href=/tags/acid><span class=tag-pill>acid</span>
+</a><a href=/tags/aggregate><span class=tag-pill>aggregate</span>
+</a><a href=/tags/ai><span class=tag-pill>ai</span>
+</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
+</a><a href=/tags/ai-coding><span class=tag-pill>ai coding</span>
+</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
+</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7><span class=tag-pill>ai 工具</span>
+</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
+</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
+</a><a href=/tags/ai-%E6%8E%A5%E6%A1%88><span class=tag-pill>ai 接案</span>
+</a><a href=/tags/ai-%E7%94%A2%E5%93%81><span class=tag-pill>ai 產品</span>
+</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
+</a><a href=/tags/ai-%E8%87%AA%E5%8B%95%E5%8C%96><span class=tag-pill>ai 自動化</span>
+</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
+</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
+</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
+</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
+</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
+</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (48)</span>
+</a><a href=/post/javascript/><span class=tag-pill>JavaScript (103)</span>
+</a><a href=/post/django/><span class=tag-pill>Django (44)</span>
+</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
+</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
+</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
+</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
+</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (14)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/javascript/data-structures--algorithms/041-cache-lru/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計 LRU/LFU Cache — 雜湊表與雙向鏈結串列的 O(1) 快取實作 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/24</p></a><a href=/post/postgresql/048-cloud-managed/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">雲端託管 PostgreSQL：AWS RDS、Aurora、Cloud SQL、Supabase、Neon 全面比較 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/24</p></a><a href=/post/postgresql/047-orm-integration/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">ORM 整合實戰：TypeORM、Prisma、SQLAlchemy、Django ORM 與 PostgreSQL 進階型別映射 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/23</p></a><a href=/post/javascript/data-structures--algorithms/040-rate-limiter/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">設計 Rate Limiter — Token Bucket、Sliding Window 與分散式限流實戰 | 資料結構與演算法</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/23</p></a><a href=/post/postgresql/046-migration-tools/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Schema 遷移工具完全比較：Flyway、Alembic、Prisma、TypeORM 與零停機遷移策略 | PostgreSQL</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/07/22</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script src=https://challenges.cloudflare.com/turnstile/v0/api.js async defer></script><script src=/js/subscribe.js defer></script><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>
