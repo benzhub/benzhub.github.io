@@ -1,0 +1,307 @@
+<!doctype html><html lang=zh-TW><head><script async src="https://www.googletagmanager.com/gtag/js?id=G-FSEWPBJMJT"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-FSEWPBJMJT")</script><title>TailwindCSS 類別偵測機制：內容掃描、safelist 與動態 class 陷阱完整解析 | TailwindCSS 完整教學 | BenzHub</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><link rel=apple-touch-icon sizes=180x180 href=/favicon/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon/favicon-16x16.png><link rel=manifest href=/favicon/site.webmanifest><link rel=mask-icon href=/favicon/safari-pinned-tab.svg color=#5bbad5><link rel="shortcut icon" href=/favicon/favicon.ico><meta name=theme-color content="#fafafa"><meta property="og:title" content="TailwindCSS 類別偵測機制：內容掃描、safelist 與動態 class 陷阱完整解析 | TailwindCSS 完整教學 | BenzHub"><link rel=stylesheet href="/css/style.min.201494ddcd70f7b4383e7a5589da06d9fa8396271447024f86259380300d97f7.css"><link href=/css/blonde.min.css rel=stylesheet type=text/css media=print onload='this.media=" all"'><meta name=description content="深入解析 TailwindCSS 類別偵測（class detection）如何運作：內容掃描（content scanning）為何是字串掃描而非語法解析、為什麼 text-${color} 這類動態拼接的 class 會失效、v4 自動內容偵測與 @source 指令怎麼用，以及如何用 safelist 確保 class 不被 purge。本篇以 v4 為預設並標註 v3 差異。"><meta property="og:site_name" content="BenzHub"><meta property="og:description" content="深入解析 TailwindCSS 類別偵測（class detection）如何運作：內容掃描（content scanning）為何是字串掃描而非語法解析、為什麼 text-${color} 這類動態拼接的 class 會失效、v4 自動內容偵測與 @source 指令怎麼用，以及如何用 safelist 確保 class 不被 purge。本篇以 v4 為預設並標註 v3 差異。"><meta property="og:url" content="https://benzhub.github.io/post/tailwindcss/003-class-detection/"><meta property="og:type" content="article"><meta property="og:locale" content="zh_TW"><meta name=twitter:card content="summary_large_image"><meta name=twitter:site content><link rel=canonical href=https://benzhub.github.io/post/tailwindcss/003-class-detection/><meta name=twitter:description content="深入解析 TailwindCSS 類別偵測（class detection）如何運作：內容掃描（content scanning）為何是字串掃描而非語法解析、為什麼 text-${color} 這類動態拼接的 class 會失效、v4 自動內容偵測與 @source 指令怎麼用，以及如何用 safelist 確保 class 不被 purge。本篇以 v4 為預設並標註 v3 差異。"><meta property="article:published_time" content="2026-08-03T00:00:00+00:00"><meta property="article:updated_time" content="2026-08-03T00:00:00+00:00"><meta property="og:image" content="https://benzhub.github.io/img/tailwindcss/003-Class-Detection.png"><meta property="og:image:url" content="https://benzhub.github.io/img/tailwindcss/003-Class-Detection.png"><link rel=stylesheet href=/css/custom.css><i class="dark hidden"></i>
+<link rel=alternate hreflang=zh-TW href=https://benzhub.github.io/post/tailwindcss/003-class-detection/><link rel=alternate hreflang=x-default href=https://benzhub.github.io/post/tailwindcss/003-class-detection/><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"\"TailwindCSS 類別偵測機制：內容掃描、safelist 與動態 class 陷阱完整解析 | TailwindCSS 完整教學\"","description":"\"深入解析 TailwindCSS 類別偵測（class detection）如何運作：內容掃描（content scanning）為何是字串掃描而非語法解析、為什麼 text-${color} 這類動態拼接的 class 會失效、v4 自動內容偵測與 @source 指令怎麼用，以及如何用 safelist 確保 class 不被 purge。本篇以 v4 為預設並標註 v3 差異。\"","author":{"@type":"Person","name":"\"BenzHub\"","url":"https:\/\/benzhub.github.io\/about","jobTitle":"\"Software Developer\"","sameAs":["\"https://github.com/benzhub\""]},"datePublished":"2026-08-03T00:00:00\u002b00:00","dateModified":"2026-08-03T00:00:00\u002b00:00","image":"https:\/\/benzhub.github.io\/img\/tailwindcss\/003-Class-Detection.png","publisher":{"@type":"Organization","name":"\"BenzHub\"","url":"\"https://benzhub.github.io/\"","sameAs":["\"https://github.com/benzhub\""]},"mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/benzhub.github.io\/post\/tailwindcss\/003-class-detection\/"},"inLanguage":"zh-TW"}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"\"BenzHub\"","item":"https:\/\/benzhub.github.io\/"},{"@type":"ListItem","position":2,"name":"\"Blog\"","item":"https:\/\/benzhub.github.io\/post\/tailwindcss\/"},{"@type":"ListItem","position":3,"name":"\"TailwindCSS 類別偵測機制：內容掃描、safelist 與動態 class 陷阱完整解析 | TailwindCSS 完整教學\""}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"\"為什麼我寫的 text-${color}-500 沒有生效？\"","acceptedAnswer":{"@type":"Answer","text":"\"因為 TailwindCSS 的類別偵測是「字串掃描」而非執行 JavaScript。掃描器在建構時只讀取原始碼中出現的字面字串，它看到的是 text- 與 -500 兩個片段，永遠拼不出完整的 text-red-500。由於這個完整字串從未出現在原始碼裡，Tailwind 就不會產生對應的 CSS 規則，因此最終 HTML 上雖然有 class 值卻沒有樣式。解法是改用完整 class 字串的映射物件（如 { red: 'text-red-500' }），或用 safelist 明確登記需要的 class。\""}},{"@type":"Question","name":"\"TailwindCSS v4 還需要設定 content 陣列嗎？\"","acceptedAnswer":{"@type":"Answer","text":"\"不需要。v4 的 Oxide 引擎採用自動內容偵測（automatic content detection）：它從 CSS 入口檔往上找到專案根目錄，自動掃描所有非二進位的文字型檔案，並尊重 .gitignore 規則、自動排除 node_modules 與 .git。因此 v4 大多數情況完全不需要手動配置。只有當 class 出現在被排除的位置（如 node_modules 內的 UI 函式庫）時，才需要用 @source 指令額外登記。這與 v3 必須手動維護 content 陣列有很大不同。\""}},{"@type":"Question","name":"\"v4 要怎麼做 safelist（強制保留某些 class）？\"","acceptedAnswer":{"@type":"Answer","text":"\"在 v4 中，safelist 改用 CSS 裡的 @source inline() 指令，而非 v3 config 檔的 safelist 陣列。寫法是在入口 CSS 加上 @source inline(\\\"bg-red-500 bg-blue-500\\\"); 即可強制產生這些 class。它也支援 glob 展開語法，例如 @source inline(\\\"{bg,text}-{red,blue,green}-500\\\") 會展開成多個 class。適合用於 class 名稱存在資料庫、CMS、API 回傳值或第三方函式庫中、無法被靜態掃描到的場景。\""}}]}</script></head><body class="font-sans bg-zinc-50 text-zinc-950 dark:bg-[#0a0a0a] dark:text-zinc-50"><nav class=site-nav id=siteNav><div class="container max-w-screen-xl mx-auto px-5 lg:px-6 flex items-center justify-between w-full"><a href=https://benzhub.github.io/ class="text-lg font-semibold tracking-wide text-zinc-950 dark:text-zinc-50 hover:opacity-70 transition-opacity duration-200">BenzHub</a><div class="hidden md:flex items-center gap-6"><a href=/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors duration-200">資源</a><div class="flex items-center gap-2"><form class="flex items-center" role=search method=get action=https://google.com/search id=navSearchForm><input class="nav-search-input rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50" type=search placeholder=搜尋文章... name=q aria-label=搜尋 id=navSearchInput>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><button onclick=toggleNavSearch() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Search">
+<svg class="w-4 h-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button></div><span class="text-zinc-200 dark:text-zinc-700">|</span><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon2 class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i></button></div><div class="flex md:hidden items-center gap-1"><button onclick=toggleDarkMode() class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Toggle Dark Mode">
+<i id=icon class="icon-moon text-zinc-500 dark:text-zinc-400 text-base inline-flex align-middle leading-normal"></i>
+</button>
+<button id=hamburgerbtn class="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label=Menu>
+<svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div><div class="mobile-menu md:hidden" id=mobileMenu><a href=/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">首頁
+</a><a href=/about/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">關於
+</a><a href=/contact/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">聯絡
+</a><a href=/resourses/ class="text-sm text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 py-2 transition-colors duration-200">資源</a><form class=mt-2 role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form><div class="lang-switcher relative hidden md:block"><button onclick=toggleLangMenu() class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200" aria-label="Switch Language">
+<span>🌐</span>
+<span>繁體中文</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><div id=langDropdown class="lang-dropdown absolute right-0 mt-1 py-1 min-w-[140px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 z-50 hidden"><span class="block px-4 py-2 text-sm font-medium text-blue-500 dark:text-blue-400 cursor-default">✓ 繁體中文</span>
+<a href=/en/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="block px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div><div class="lang-switcher-mobile md:hidden mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700"><p class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Language</p><div class="flex gap-2"><span class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-500 text-white">繁體中文</span>
+<a href=/en/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">English</a>
+<a href=/zh-cn/ class="px-3 py-1.5 rounded-full text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 no-underline">简体中文</a></div></div></div></nav><script>document.getElementById("hamburgerbtn").addEventListener("click",function(){document.getElementById("mobileMenu").classList.toggle("active")}),window.addEventListener("scroll",function(){var e=document.getElementById("siteNav");window.scrollY>50?e.classList.add("scrolled"):e.classList.remove("scrolled")});function toggleNavSearch(){var e=document.getElementById("navSearchInput");e.classList.toggle("expanded"),e.classList.contains("expanded")&&e.focus()}function toggleLangMenu(){var e=document.getElementById("langDropdown");e.classList.toggle("hidden")}document.addEventListener("click",function(e){var t,o,n=document.getElementById("navSearchForm"),s=document.getElementById("navSearchInput");n&&s&&!n.contains(e.target)&&!e.target.closest('[aria-label="Toggle Search"]')&&s.classList.remove("expanded"),o=e.target.closest(".lang-switcher"),o||(t=document.getElementById("langDropdown"),t&&t.classList.add("hidden"))})</script><div class=nav-spacer></div><div class="container max-w-screen-xl mx-auto mt-4 flex-grow px-5 lg:px-0" id=content><div class=lg:mx-5><div class="grid grid-cols-3 gap-6"><div class="col-span-3 lg:col-span-2"><div class="post-detail fade-in my-4"><h1 class="mb-3 text-3xl font-bold text-zinc-950 dark:text-zinc-50">TailwindCSS 類別偵測機制：內容掃描、safelist 與動態 class 陷阱完整解析 | TailwindCSS 完整教學</h1><div class="flex items-center gap-4 text-sm text-zinc-400 dark:text-zinc-500 mb-4"><span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/08/03</span></div><div class="flex flex-wrap gap-1.5 mb-5"><a href=/tags/tailwindcss class="tag-pill no-underline">tailwindcss</a>
+<a href=/tags/css class="tag-pill no-underline">css</a>
+<a href=/tags/%E9%A1%9E%E5%88%A5%E5%81%B5%E6%B8%AC class="tag-pill no-underline">類別偵測</a></div><img class="py-4 m-auto rounded-lg thumb-img" src=https://benzhub.github.io/img/tailwindcss/003-Class-Detection.png alt="TailwindCSS 類別偵測機制：內容掃描、safelist 與動態 class 陷阱完整解析 | TailwindCSS 完整教學"><div class="prose md:prose-lg lg:prose-xl max-w-none dark:prose-invert mt-5"><blockquote><p><strong>TailwindCSS</strong> 最讓新手困惑的一件事，往往是「我明明寫了 class，樣式卻憑空消失」。答案藏在它的<strong>類別偵測（class detection）<strong>機制裡——Tailwind 靠的是</strong>內容掃描（content scanning）</strong>，一種字串層級的搜尋，而不是執行你的程式碼。這是 <strong>TailwindCSS 完整教學</strong> 系列的第三篇，帶你看懂掃描器怎麼「讀」你的原始碼，並徹底避開 <code>text-${color}</code> 這類動態拼接的陷阱。</p></blockquote><h2 id=前言>前言</h2><p><strong>類別偵測（class detection）<strong>指的是 TailwindCSS 在建構時，從你的原始碼裡「找出」哪些 utility class 被使用，藉此決定要產生哪些 CSS 規則的過程。它的關鍵在於：Tailwind 不解析語法樹（AST）、也不執行 JavaScript，而是做一種</strong>快速字串掃描</strong>——只把實際以完整字面字串出現的 class 納入輸出。</p><p>用一個現實世界的類比來理解：想像掃描器是一位<strong>只認得完整單字的圖書館員</strong>。你請他把書架上所有寫著「蘋果」的卡片挑出來，他會逐字比對——看到「蘋」和「果」分別寫在兩張不同卡片上，他不會自己把它們拼成「蘋果」，因為他的工作是<strong>比對字面</strong>，不是推理組合。同理，當你寫 <code>`text-${color}-500`</code> 時，掃描器看到的是 <code>text-</code> 和 <code>-500</code> 兩個片段，它不會、也無法在腦中執行你的變數把它拼成 <code>text-red-500</code>。這正是無數「class 憑空消失」bug 的根源。</p><p>本篇你將學到：</p><ul><li>內容掃描的本質——為什麼它是「字串掃描」而非「語法解析」，以及這個設計決策的代價</li><li>動態拼接 class 的完整陷阱清單，以及對應的安全寫法（映射物件、<code>clsx</code>/<code>cn</code>）</li><li>v4 的<strong>自動內容偵測</strong>如何取代 v3 的 <code>content</code> 陣列，以及 <code>@source</code> 指令的各種用法</li><li>如何用 <strong>safelist</strong>（v4 的 <code>@source inline()</code>）確保 class 不被 purge，以及一套排查流程</li></ul><blockquote><p>本系列以 <strong>TailwindCSS v4</strong> 為預設版本，遇到與 v3 有明顯差異之處會特別標註。</p></blockquote><h2 id=核心概念>核心概念</h2><h3 id=掃描而非解析偵測的本質>掃描而非解析：偵測的本質</h3><p>上一篇《架構與 Oxide 引擎》我們拆解了 v4 建構管線的五個階段，其中第二階段的 <strong>Scanner（掃描器）</strong> 就是本篇的主角。這裡要強調一個容易被誤會的重點：掃描器<strong>不是</strong> JavaScript 或 HTML 的解析器，它只做字串層面的搜尋。</p><pre tabindex=0><code>掃描流程（概念）
+══════════════════════════════════════════════════════════════
+
+  原始檔案：
+  ┌─────────────────────────────────────────────┐
+  │ &lt;button class=&#34;px-4 py-2 bg-brand           │
+  │                text-white rounded-md         │
+  │                hover:bg-brand/90&#34;&gt;           │
+  │   Click me                                   │
+  │ &lt;/button&gt;                                    │
+  └─────────────────────────────────────────────┘
+                      │
+                      │ 字串掃描（非 HTML 解析）
+                      ▼
+  ┌─────────────────────────────────────────────┐
+  │ 提取到的 class candidates（候選字串）：      │
+  │  px-4, py-2, bg-brand, text-white,          │
+  │  rounded-md, hover:bg-brand/90              │
+  └─────────────────────────────────────────────┘
+                      │
+                      │ 驗證：哪些是有效的 utility？
+                      ▼
+  ┌─────────────────────────────────────────────┐
+  │ 確認為有效 utility → 產生對應 CSS            │
+  │ .px-4 { padding-left: 1rem; ... }           │
+  │ .bg-brand { background-color: var(...); }    │
+  │ .hover\:bg-brand\/90:hover { ... }           │
+  └─────────────────────────────────────────────┘
+</code></pre><p>掃描器把整份原始碼當成一大團文字，用啟發式規則切出一個個「看起來像 class」的候選字串（candidate），再逐一驗證哪些是有效的 utility，最後只為有效的那些產生 CSS。<strong>關鍵推論</strong>是：因為它是字串掃描而非程式執行，任何需要在**運行時（runtime）**才能確定的 class 名稱，都無法在建構時被偵測到。</p><p>這裡有一個容易被忽略、卻能省下大量除錯時間的洞見：因為掃描器不理解語法，它其實<strong>不在乎你把 class 寫在哪裡</strong>。無論你的 <code>bg-blue-500</code> 是寫在 HTML 的 <code>class</code> 屬性、JSX 的 <code>className</code>、Vue 的 <code>:class</code>、後端模板（如 <code>.py</code>、<code>.rb</code>、<code>.php</code>）的字串，甚至是 JavaScript 的一般變數宣告裡，只要它是一段完整、連續的字面字串，掃描器都能認出來。反過來說，就算你把 class 端端正正寫在標準的 <code>class</code> 屬性裡，只要它是被拼接出來的，掃描器一樣看不到。<strong>「位置對不對」從來不是重點，「是不是完整字面字串」才是唯一的判準。</strong> 記住這個原則，你就能理解為什麼有些看起來「很不正規」的寫法反而有效，而某些「看起來很標準」的寫法卻失效。</p><p>值得一提的是，這個掃描邏輯在 v3 是用 JavaScript 加正則表達式實作，在 v4 則由上一篇提到的 Rust 版 Oxide 引擎接手。實作語言換了、速度快了一個數量級，但<strong>偵測的根本規則沒有改變</strong>——依舊是「找完整字面字串」。因此本篇談的所有陷阱與解法，在 v3 與 v4 通用，差別只在配置與 safelist 的語法（後面會逐一標註）。</p><h3 id=為什麼字串拼接會破壞偵測>為什麼字串拼接會破壞偵測</h3><p>理解了掃描的本質，就能解釋本篇最重要的現象——為什麼 <code>`text-${color}-500`</code> 會失效。讓我們從掃描器的視角逐步拆解：</p><pre tabindex=0><code>掃描器視角分析
+══════════════════════════════════════════════════════════════
+
+你的程式碼：
+  const color = &#39;red&#39;
+  const cls = `text-${color}-500`
+
+掃描器掃到的字串（字面值）：
+  &#34;color&#34;、&#34;cls&#34;、&#34;text-&#34;、&#34;color&#34;、&#34;-500&#34;
+  → 沒有任何一個是完整的 utility class
+
+你期望的行為：
+  在執行時 → 拼成 text-red-500 ✅
+
+實際情況：
+  建構時掃描 → text-red-500 這個完整字串「從未出現」在原始碼中
+  → 不產生 .text-red-500 的 CSS
+  → 最終 HTML 上 class 屬性有值，但沒有對應樣式 ❌
+
+這是設計決策，不是 bug：
+  Tailwind 選擇建構時靜態分析（換來零運行時），
+  代價就是 class 必須以完整字串出現在原始碼中。
+</code></pre><p>這一點值得反覆強調：<strong>它是設計決策，不是 bug</strong>。Tailwind 用「class 必須完整出現」這個限制，換來了「零運行時、CSS 體積精簡、可靜態分析快取」等好處。掃描器不執行你的 JavaScript，自然也就無從得知 <code>color</code> 變數在執行時會是什麼值。</p><p>為什麼 Tailwind 甘願接受這個限制？因為對立面的代價更高。如果要支援任意動態 class，掃描器就必須在建構時「執行」你的程式碼來推斷所有可能的值——這在理論上等同於要解決不可判定的問題（想想從 API 或使用者輸入來的值，建構時根本不存在），實務上則意味著要把整個 JavaScript 執行環境搬進建構流程，效能與可預測性都會崩塌。Tailwind 選了另一條路：<strong>建構時只做靜態分析，把「動態」的責任交還給開發者</strong>，由你負責確保用到的 class 以完整字串出現。這也是為什麼許多 CSS-in-JS 方案（如 styled-components）能做到完全動態，代價卻是把樣式計算推到瀏覽器運行時、增加 JavaScript bundle 體積。兩種取捨沒有絕對優劣，但你必須理解 Tailwind 站在哪一邊，才能順著它的設計走、而不是跟它對抗。</p><h3 id=安全-vs-不安全一條清楚的分界線>安全 vs 不安全：一條清楚的分界線</h3><p>把上面的原理翻譯成實務準則，就是一條非常清楚的分界線——<strong>完整 class 字串有沒有原原本本地出現在原始碼裡</strong>：</p><pre tabindex=0><code>靜態分析的根本限制
+══════════════════════════════════════════════════════════════
+
+✅ 安全：完整 class 字串出現在原始碼中
+
+  &lt;!-- HTML --&gt;
+  &lt;div class=&#34;bg-red-500&#34;&gt;             ← 完整字串 ✅
+  &lt;div class=&#34;hover:bg-green-400&#34;&gt;     ← 完整字串 ✅
+
+  // JavaScript：三元運算子的兩端都是完整字串
+  const cls = condition
+    ? &#39;bg-red-500&#39;                      ← 完整字串 ✅
+    : &#39;bg-blue-500&#39;                     ← 完整字串 ✅
+
+❌ 不安全：動態拼接，掃描器只看到片段
+
+  const cls = `bg-${color}-500`        ← 看到：bg-、-500 → 無效 ❌
+  const cls = &#39;bg-&#39; + color + &#39;-500&#39;   ← 看到：bg-、-500 → 無效 ❌
+  const cls = [&#39;bg&#39;, color, &#39;500&#39;].join(&#39;-&#39;)  ← 分散片段 → 無效 ❌
+
+根本原因：掃描器只看檔案中出現的「字串字面值」，不執行程式。
+</code></pre><p>只要記住這條線，大部分的 class 偵測問題都能事先避免：<strong>三元運算子安全</strong>（因為兩端都是完整字串），<strong>字串模板與字串相加不安全</strong>（因為完整 class 被拆成了片段）。</p><p>這裡有個新手常見的困惑值得澄清：三元運算子 <code>condition ? 'bg-red-500' : 'bg-blue-500'</code> 明明也「依條件變化」，為什麼它安全、而 <code>`bg-${color}-500`</code> 卻不安全？兩者的差異不在於「有沒有動態」，而在於<strong>完整字串有沒有實際寫在原始碼裡</strong>。三元運算子的兩個分支 <code>'bg-red-500'</code> 與 <code>'bg-blue-500'</code> 都是原原本本、一字不差地出現在你的檔案中，掃描器兩個都能掃到，於是兩個對應的 CSS 規則都會被產生，執行時挑哪一個由瀏覽器決定——這對掃描器完全沒有負擔。而字串模板的完整結果 <code>bg-red-500</code> <strong>從未以連續字串形式出現過</strong>，它是被 <code>${}</code> 從中間切開的。分界線永遠是這一句話：<strong>掃描器要能在你的原始碼裡「看見」那一整串 class</strong>。</p><h3 id=關鍵術語速覽>關鍵術語速覽</h3><ul><li><strong>內容掃描（content scanning）</strong>：Tailwind 從原始碼提取 class 候選字串的過程。</li><li><strong>候選字串（candidate）</strong>：掃描器切出來、還沒驗證的「看起來像 class」的字串。</li><li><strong>purge / tree-shaking</strong>：把沒用到的 class 排除在輸出之外——在 JIT 時代這不是額外步驟，而是「只產生用到的」的自然結果。</li><li><strong>safelist</strong>：明確登記「不管有沒有被掃描到，都強制產生」的一組 class，v4 用 <code>@source inline()</code> 達成。</li><li><strong><code>@source</code></strong>：v4 的 CSS 指令，用來告訴掃描器「額外去掃這個路徑」或「強制納入這些 class」。</li></ul><p>補充一個常見的觀念釐清：在 JIT 時代，「purge」這個詞其實已經有點名不副實。在舊時代（Tailwind v1 與早期 v2）確實是先產生全量 CSS、再靠 PurgeCSS 事後「清除」沒用到的規則，所以叫 purge。但 JIT 引擎的做法是<strong>打從一開始就只產生用到的 class</strong>，根本沒有「先全部生出來再刪掉」這個步驟——它是「加法」而非「減法」。因此在 v4 語境下，與其說「怎麼避免 class 被 purge 掉」，更精確的說法是「<strong>怎麼確保 class 有被掃描到、進而被產生出來</strong>」。本篇後面談的所有手法（映射物件、<code>@source</code>、safelist），本質上都是在回答同一個問題：讓那一整串完整的 class 字串，確實出現在掃描器看得到的地方。</p><h2 id=實作範例>實作範例</h2><p>理論看完，我們來看實際的程式碼——先示範會踩雷的動態拼接，再給出對應的安全寫法，最後是 v4 的 <code>@source</code> 與 safelist 設定。</p><h3 id=反例會失效的動態拼接>反例：會失效的動態拼接</h3><p>以下這個 React 元件看起來很直覺，但它產生的樣式在正式建構後會<strong>全部消失</strong>：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-jsx data-lang=jsx><span style=display:flex><span><span style=color:#75715e>// ❌ 不安全：用字串模板拼接 class，掃描器看不到完整字串
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>BadBadge</span>({ <span style=color:#a6e22e>color</span>, <span style=color:#a6e22e>children</span> }) {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> (
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// 開發時若有殘留全量 CSS 可能「碰巧」有效，正式建構後必定失效
+</span></span></span><span style=display:flex><span>    &lt;<span style=color:#f92672>span</span> <span style=color:#a6e22e>className</span><span style=color:#f92672>=</span>{<span style=color:#e6db74>`bg-</span><span style=color:#e6db74>${</span><span style=color:#a6e22e>color</span><span style=color:#e6db74>}</span><span style=color:#e6db74>-500 text-white`</span>}&gt;
+</span></span><span style=display:flex><span>      {<span style=color:#a6e22e>children</span>}
+</span></span><span style=display:flex><span>    &lt;/<span style=color:#f92672>span</span>&gt;
+</span></span><span style=display:flex><span>  )
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// 其他同樣不安全的常見寫法：
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>size</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;lg&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>cls1</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;px-&#39;</span> <span style=color:#f92672>+</span> <span style=color:#a6e22e>size</span>                 <span style=color:#75715e>// ❌ 字串相加 → px-lg 拼不出來
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> { <span style=color:#a6e22e>themeClass</span> } <span style=color:#f92672>=</span> <span style=color:#66d9ef>await</span> <span style=color:#a6e22e>fetchTheme</span>() <span style=color:#75715e>// ❌ 來自 API，建構時未知
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>saved</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>localStorage</span>.<span style=color:#a6e22e>getItem</span>(<span style=color:#e6db74>&#39;theme&#39;</span>) <span style=color:#75715e>// ❌ 運行時才有值
+</span></span></span></code></pre></div><p>這些寫法的共同點是：<strong>完整的 class 字串在原始碼裡根本不存在</strong>，它只在執行時才被組合出來，而掃描器不執行程式。</p><h3 id=正例一完整-class-字串的映射物件>正例一：完整 class 字串的映射物件</h3><p>最推薦的解法是把每個可能的完整 class 字串預先寫成映射物件（lookup object）。掃描器能清楚看到每一個完整字串：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-jsx data-lang=jsx><span style=display:flex><span><span style=color:#75715e>// ✅ 安全：物件的每個值都是完整 class 字串
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>colorVariants</span> <span style=color:#f92672>=</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>red</span><span style=color:#f92672>:</span>   <span style=color:#e6db74>&#39;bg-red-500 text-white&#39;</span>,
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>blue</span><span style=color:#f92672>:</span>  <span style=color:#e6db74>&#39;bg-blue-500 text-white&#39;</span>,
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>green</span><span style=color:#f92672>:</span> <span style=color:#e6db74>&#39;bg-green-500 text-white&#39;</span>,
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>gray</span><span style=color:#f92672>:</span>  <span style=color:#e6db74>&#39;bg-gray-100 text-gray-900&#39;</span>,
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>Badge</span>({ <span style=color:#a6e22e>color</span>, <span style=color:#a6e22e>children</span> }) {
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// 用鍵查表，而不是拼接字串
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> &lt;<span style=color:#f92672>span</span> <span style=color:#a6e22e>className</span><span style=color:#f92672>=</span>{<span style=color:#a6e22e>colorVariants</span>[<span style=color:#a6e22e>color</span>]}&gt;{<span style=color:#a6e22e>children</span>}&lt;/<span style=color:#f92672>span</span>&gt;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>差別的本質在於：<code>colorVariants[color]</code> 是<strong>查表</strong>，而 <code>`bg-${color}-500`</code> 是<strong>拼接</strong>。查表用到的 <code>bg-red-500</code> 等字串完整寫在原始碼裡，掃描器看得到；拼接則否。</p><h3 id=正例二clsx--cn-條件合併>正例二：clsx / cn 條件合併</h3><p>在稍大的元件庫中（例如 shadcn/ui 風格），常用 <code>clsx</code> 搭配 <code>tailwind-merge</code> 組成一個 <code>cn</code> 工具來做條件式合併。重點同樣是<strong>每個 class 都是完整字串字面值</strong>：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-jsx data-lang=jsx><span style=display:flex><span><span style=color:#66d9ef>import</span> { <span style=color:#a6e22e>clsx</span> } <span style=color:#a6e22e>from</span> <span style=color:#e6db74>&#39;clsx&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>import</span> { <span style=color:#a6e22e>twMerge</span> } <span style=color:#a6e22e>from</span> <span style=color:#e6db74>&#39;tailwind-merge&#39;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// cn 工具：合併條件 class 並解決衝突
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>cn</span>(...<span style=color:#a6e22e>inputs</span>) {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>twMerge</span>(<span style=color:#a6e22e>clsx</span>(<span style=color:#a6e22e>inputs</span>))
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>Button</span>({ <span style=color:#a6e22e>variant</span>, <span style=color:#a6e22e>size</span>, <span style=color:#a6e22e>disabled</span>, <span style=color:#a6e22e>className</span>, <span style=color:#a6e22e>children</span> }) {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> (
+</span></span><span style=display:flex><span>    &lt;<span style=color:#f92672>button</span>
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>className</span><span style=color:#f92672>=</span>{<span style=color:#a6e22e>cn</span>(
+</span></span><span style=display:flex><span>        <span style=color:#75715e>// 基礎樣式（完整字串）
+</span></span></span><span style=display:flex><span>        <span style=color:#e6db74>&#39;inline-flex items-center justify-center rounded-md font-medium transition-colors&#39;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#75715e>// 變體：key 是完整 class 字串，value 是布林條件
+</span></span></span><span style=display:flex><span>        {
+</span></span><span style=display:flex><span>          <span style=color:#e6db74>&#39;bg-brand text-white hover:bg-brand/90&#39;</span><span style=color:#f92672>:</span> <span style=color:#a6e22e>variant</span> <span style=color:#f92672>===</span> <span style=color:#e6db74>&#39;primary&#39;</span>,
+</span></span><span style=display:flex><span>          <span style=color:#e6db74>&#39;border border-gray-200 bg-white text-gray-900 hover:bg-gray-50&#39;</span><span style=color:#f92672>:</span> <span style=color:#a6e22e>variant</span> <span style=color:#f92672>===</span> <span style=color:#e6db74>&#39;secondary&#39;</span>,
+</span></span><span style=display:flex><span>        },
+</span></span><span style=display:flex><span>        <span style=color:#75715e>// 尺寸（每個值都是完整字串）
+</span></span></span><span style=display:flex><span>        {
+</span></span><span style=display:flex><span>          <span style=color:#e6db74>&#39;px-3 py-1.5 text-xs&#39;</span><span style=color:#f92672>:</span> <span style=color:#a6e22e>size</span> <span style=color:#f92672>===</span> <span style=color:#e6db74>&#39;sm&#39;</span>,
+</span></span><span style=display:flex><span>          <span style=color:#e6db74>&#39;px-4 py-2 text-sm&#39;</span><span style=color:#f92672>:</span> <span style=color:#a6e22e>size</span> <span style=color:#f92672>===</span> <span style=color:#e6db74>&#39;md&#39;</span>,
+</span></span><span style=display:flex><span>        },
+</span></span><span style=display:flex><span>        <span style=color:#75715e>// 狀態與外部傳入
+</span></span></span><span style=display:flex><span>        <span style=color:#a6e22e>disabled</span> <span style=color:#f92672>&amp;&amp;</span> <span style=color:#e6db74>&#39;opacity-50 pointer-events-none&#39;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>className</span>,
+</span></span><span style=display:flex><span>      )}
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>disabled</span><span style=color:#f92672>=</span>{<span style=color:#a6e22e>disabled</span>}
+</span></span><span style=display:flex><span>    &gt;
+</span></span><span style=display:flex><span>      {<span style=color:#a6e22e>children</span>}
+</span></span><span style=display:flex><span>    &lt;/<span style=color:#f92672>button</span>&gt;
+</span></span><span style=display:flex><span>  )
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>注意 <code>clsx</code> 的物件語法裡，<strong>key 才是 class 字串、value 是條件</strong>（<code>{ 'bg-brand': isPrimary }</code>），這樣掃描器仍能從原始碼看到 <code>bg-brand</code> 這個完整字串。</p><h3 id=v4-的自動內容偵測>v4 的自動內容偵測</h3><p>在進到 safelist 之前，先看 v4 最大的便利——<strong>自動內容偵測（automatic content detection）</strong>。v3 需要你在 config 裡手動維護 <code>content</code> 陣列，v4 則用一套啟發式規則自動搞定：</p><pre tabindex=0><code>v4 自動偵測規則
+══════════════════════════════════════════════════════════════
+
+  ✅ 自動掃描：
+  ├── 從 CSS 入口檔（@import &#34;tailwindcss&#34; 的位置）往上找專案根目錄
+  ├── 掃描所有文字型檔案（.html, .jsx, .tsx, .vue, .svelte, .py, .rb 等）
+  ├── 尊重 .gitignore 規則（.gitignore 裡的檔案不掃）
+  └── 自動排除：
+      ├── node_modules/（黑名單）
+      ├── .git/（黑名單）
+      ├── 二進位檔案（圖片、字型、影片等）
+      └── 鎖定檔（package-lock.json、yarn.lock 等）
+
+  ⚠️ 需要手動追加（用 @source 指令）：
+  ├── node_modules 內的 UI 函式庫（預設被排除）
+  ├── 建構產物目錄（若 class 只在其中出現）
+  └── 專案根目錄以外的路徑
+</code></pre><p>對照 v3 的心智負擔——忘了把某個副檔名加進 <code>content</code>，class 就默默不生成——v4 的自動偵測讓「掃描範圍」在絕大多數專案裡不再需要操心。</p><p>這個「尊重 <code>.gitignore</code>」的設計其實相當聰明。你的 <code>.gitignore</code> 早已幫你列好了「不屬於原始碼」的東西——建構產物、快取、依賴目錄——這些正好也是掃描器該跳過的。與其讓你再維護一份幾乎重複的排除清單，v4 直接複用 <code>.gitignore</code>，一舉兩得。這也帶出一個實務上的小提醒：如果你有一份<strong>版控在案、確實含有 class 的檔案</strong>，卻因為某種原因被 <code>.gitignore</code> 排除了（例如產生器輸出但你又想 commit 的檔案），那麼掃描器也會一併略過它，這時就要靠下面的 <code>@source</code> 手動補回來。理解「掃描範圍 = 專案原始碼樹 − .gitignore − 黑名單」這個公式，你就能預測任何一個檔案會不會被掃到。</p><h3 id=source-指令擴充與收斂掃描範圍>@source 指令：擴充與收斂掃描範圍</h3><p>當 class 出現在自動偵測<strong>掃不到</strong>的地方時，用 <code>@source</code> 補上。它有幾種常用形態，全部寫在入口 CSS 裡：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-css data-lang=css><span style=display:flex><span><span style=color:#75715e>/* src/index.css */</span>
+</span></span><span style=display:flex><span>@<span style=color:#66d9ef>import</span> <span style=color:#e6db74>&#34;tailwindcss&#34;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>/* ① 追加掃描一個預設被排除的路徑（如某個 UI 函式庫） */</span>
+</span></span><span style=display:flex><span>@<span style=color:#66d9ef>source</span> <span style=color:#e6db74>&#34;../node_modules/my-ui-lib&#34;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>/* ② 排除某些路徑（v4 進階語法） */</span>
+</span></span><span style=display:flex><span>@<span style=color:#66d9ef>source</span> <span style=color:#f92672>not</span> <span style=color:#e6db74>&#34;./src/generated/**&#34;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>/* ③ 設定掃描基準路徑（monorepo 常用） */</span>
+</span></span><span style=display:flex><span><span style=color:#75715e>/* 寫在 @import 那一行： */</span>
+</span></span><span style=display:flex><span><span style=color:#75715e>/* @import &#34;tailwindcss&#34; source(&#34;../src&#34;); */</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>/* ④ 完全關閉自動偵測，只掃你明確登記的來源 */</span>
+</span></span><span style=display:flex><span><span style=color:#75715e>/* @import &#34;tailwindcss&#34; source(none); */</span>
+</span></span><span style=display:flex><span><span style=color:#75715e>/* @source &#34;../admin&#34;; */</span>
+</span></span><span style=display:flex><span><span style=color:#75715e>/* @source &#34;../shared&#34;; */</span>
+</span></span></code></pre></div><blockquote><p><strong>v3 差異</strong>：v3 是在 <code>tailwind.config.js</code> 的 <code>content</code> 陣列列出所有 glob（如 <code>content: ['./src/**/*.{js,jsx,ts,tsx}']</code>）。v4 把這件事移進 CSS，改用 <code>@source</code> 指令，並讓「不設定」成為預設可用的狀態。</p></blockquote><h3 id=safelist用-source-inline-強制保留-class>safelist：用 @source inline() 強制保留 class</h3><p>當 class 名稱<strong>存在於資料庫、CMS、API 回傳值或第三方函式庫</strong>中，它們永遠不會以字面字串出現在你的原始碼裡，自動偵測必然掃不到。這時就需要 <strong>safelist</strong>——在 v4 裡用 <code>@source inline()</code> 達成：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-css data-lang=css><span style=display:flex><span><span style=color:#75715e>/* src/index.css */</span>
+</span></span><span style=display:flex><span>@<span style=color:#66d9ef>import</span> <span style=color:#e6db74>&#34;tailwindcss&#34;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>/* 單一 class */</span>
+</span></span><span style=display:flex><span>@<span style=color:#66d9ef>source</span> <span style=color:#f92672>inline</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;bg-red-500&#34;</span><span style=color:#f92672>)</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>/* 多個 class（用空格分隔） */</span>
+</span></span><span style=display:flex><span>@<span style=color:#66d9ef>source</span> <span style=color:#f92672>inline</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;bg-red-500 bg-blue-500 bg-green-500 text-white text-gray-900&#34;</span><span style=color:#f92672>)</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>/* glob 展開（更簡潔），會自動展開成多個 class */</span>
+</span></span><span style=display:flex><span>@<span style=color:#66d9ef>source</span> <span style=color:#f92672>inline</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;{bg,text,border}-{red,blue,green,yellow}-{400,500,600}&#34;</span><span style=color:#f92672>)</span>;
+</span></span><span style=display:flex><span><span style=color:#75715e>/* 上一行展開為 bg-red-400 bg-red-500 ... 共 3×4×3 = 36 個 class */</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>/* 為動態色彩系統建立完整 safelist */</span>
+</span></span><span style=display:flex><span>@<span style=color:#66d9ef>source</span> <span style=color:#f92672>inline</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;{bg,text}-{brand,accent,neutral}-{50,100,200,300,400,500,600,700,800,900}&#34;</span><span style=color:#f92672>)</span>;
+</span></span></code></pre></div><blockquote><p><strong>v3 差異</strong>：v3 的 safelist 寫在 <code>tailwind.config.js</code> 的 <code>safelist: [...]</code> 陣列裡（也支援用 regex <code>pattern</code>）。v4 一律改用 CSS 裡的 <code>@source inline(...)</code>，語法更貼近「登記來源」的心智模型。</p></blockquote><h2 id=常見錯誤與最佳實踐>常見錯誤與最佳實踐</h2><h3 id=最容易踩的陷阱>最容易踩的陷阱</h3><p><strong>陷阱一（頭號殺手）：動態拼接 class。</strong> 前面已詳述，這裡再列幾個容易「偽裝成安全」的變形：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-jsx data-lang=jsx><span style=display:flex><span><span style=color:#75715e>// ❌ 隱蔽的拼接——看起來像在寫條件，實際仍是拼接
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>type</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;error&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>borderClass</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;border-&#39;</span> <span style=color:#f92672>+</span> <span style=color:#a6e22e>type</span>   <span style=color:#75715e>// → &#39;border-error&#39;，掃描器只看到 border-
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ❌ Object.keys 動態生成
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>theme</span> <span style=color:#f92672>=</span> { <span style=color:#a6e22e>primary</span><span style=color:#f92672>:</span> <span style=color:#e6db74>&#39;#3b82f6&#39;</span>, <span style=color:#a6e22e>accent</span><span style=color:#f92672>:</span> <span style=color:#e6db74>&#39;#f59e0b&#39;</span> }
+</span></span><span style=display:flex><span>Object.<span style=color:#a6e22e>keys</span>(<span style=color:#a6e22e>theme</span>).<span style=color:#a6e22e>map</span>(<span style=color:#a6e22e>key</span> =&gt; <span style=color:#e6db74>`bg-</span><span style=color:#e6db74>${</span><span style=color:#a6e22e>key</span><span style=color:#e6db74>}</span><span style=color:#e6db74>`</span>)  <span style=color:#75715e>// 全是動態拼接
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// ✅ 正解：改成完整字串的條件
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>borderClass</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>type</span> <span style=color:#f92672>===</span> <span style=color:#e6db74>&#39;error&#39;</span> <span style=color:#f92672>?</span> <span style=color:#e6db74>&#39;border-red-500&#39;</span> <span style=color:#f92672>:</span> <span style=color:#e6db74>&#39;border-gray-200&#39;</span>
+</span></span></code></pre></div><p><strong>陷阱二：從 localStorage / Cookie / API 讀取 class 名稱。</strong> 這些值運行時才存在，掃描器看不到。解法是把「可能出現的有限值」用 <code>@source inline()</code> 全部 safelist 起來。</p><p><strong>陷阱三：檔案在掃描範圍外。</strong> class 寫對了但檔案被 <code>.gitignore</code> 排除、或在 <code>node_modules</code> 裡、或副檔名不被辨識。用 <code>@source</code> 追加即可。</p><h3 id=class-沒生成五步排查流程>class 沒生成？五步排查流程</h3><p>當某個 class 就是不出現在輸出 CSS，照這個順序查，幾乎都能定位問題：</p><pre tabindex=0><code>排查步驟
+══════════════════════════════════════════════════════════════
+
+步驟 1：確認 class 是完整字串字面值
+  ✅ class=&#34;text-red-500&#34;    ❌ class={`text-${color}-500`}
+
+步驟 2：確認檔案在掃描範圍內
+  • 被 .gitignore 排除了嗎？  • 在 node_modules 裡嗎？（需 @source）
+  • 副檔名是否可辨識？（.html/.jsx/.tsx/.vue 等）
+
+步驟 3：確認 class 本身有效
+  • 是 Tailwind 提供的 utility 嗎？拼字對嗎？
+  • 是否是 v3 舊 class 在 v4 已被重命名？
+
+步驟 4：用 @source inline() 強制納入測試
+  @source inline(&#34;text-red-500&#34;);
+  → 若加了就有效，代表問題出在「掃描範圍」而非 class 本身
+
+步驟 5：清除快取並重建
+  rm -rf node_modules/.cache/
+  npx @tailwindcss/cli -i input.css -o output.css --watch
+</code></pre><p>步驟 4 是一個很好的<strong>二分法診斷</strong>：強制納入後若生效，代表 class 本身有效、問題在掃描範圍；若仍無效，代表 class 名稱本身有誤（拼錯或已被 v4 重命名）。</p><h3 id=決策樹如何安全地做動態樣式>決策樹：如何安全地做動態樣式</h3><p>最後給一個決策原則，涵蓋絕大多數「要根據狀態切換樣式」的需求：</p><pre tabindex=0><code>決策原則
+══════════════════════════════════════════════════════════════
+
+需求：根據 props / 狀態動態套用不同樣式
+
+方案 A（首選）：預先定義映射物件
+  const colors = { red: &#39;bg-red-500&#39;, blue: &#39;bg-blue-500&#39; }
+  &lt;div className={colors[colorProp]}&gt;
+
+方案 B（可用）：safelist + 已知有限值
+  @source inline(&#34;{bg}-{red,blue,green}-500&#34;);
+  &lt;div className={`bg-${colorProp}-500`}&gt;   // colorProp 只有 3 種可能
+
+方案 C（避免）：無限制的動態值
+  &lt;div className={`bg-${anyUserInput}`}&gt;    // 完全無法預測，掃不到
+
+原則：
+  ├── 可預期的有限值 → 方案 A（映射物件）或方案 B（safelist）
+  └── 真正無限 / 任意的值 → 別用 utility class，改用 inline style：
+      &lt;div style={{ backgroundColor: userColor }}&gt;
+</code></pre><p>為什麼「真正無限的值」要退回 inline style，而不是硬用 safelist 撐？因為 safelist 的每一個 class 都會實際產生一條 CSS 規則進最終輸出。如果你為了一個「可能是任意色碼」的需求，把上百種顏色全部 safelist 起來，就等於親手抵銷了 Tailwind「只產生用到的 class」帶來的體積優勢，CSS 檔會無謂地膨脹。safelist 適合的是「<strong>可預期、數量有限</strong>」的集合（例如一個色票系統的十來種主色）；一旦可能值真的無界（使用者自選色、來自後端的任意數值），utility class 就不是對的工具了，直接用 <code>style={{ }}</code> 把值傳給瀏覽器才是正解——這正好也回到了前一節「Tailwind 把動態責任交還給開發者」的設計哲學。</p><p>一句話總結最佳實踐：<strong>能查表就別拼接；非拼接不可時，就用 <code>@source inline()</code> 把有限的可能值全部登記起來；真正無限的動態值則交給 inline style。</strong></p><h2 id=小結>小結</h2><p>這是 <strong>TailwindCSS 完整教學</strong> 系列的第三篇。上一篇《架構與 Oxide 引擎》我們看懂了 v4 建構管線的五個階段，這一篇則聚焦在管線的第二階段——<strong>Scanner（掃描器）到底怎麼看你的程式碼</strong>。回顧幾個重點：</p><ul><li><strong>類別偵測靠的是字串掃描，不是執行程式。</strong> 掃描器把原始碼當文字搜尋完整的 class 字串，凡是運行時才能確定的 class 都偵測不到。</li><li><strong>動態拼接是頭號陷阱。</strong> <code>`text-${color}-500`</code> 之所以失效，是因為完整字串 <code>text-red-500</code> 從未出現在原始碼——這是設計決策換來零運行時的代價，不是 bug。</li><li><strong>安全寫法是查表而非拼接</strong>：映射物件、<code>clsx</code>/<code>cn</code> 條件合併，關鍵都在於每個 class 都是完整字串字面值。</li><li><strong>v4 用自動內容偵測取代 v3 的 <code>content</code> 陣列</strong>，尊重 <code>.gitignore</code> 並自動排除 <code>node_modules</code>；需要時用 <code>@source</code> 擴充或收斂掃描範圍。</li><li><strong>safelist 在 v4 改用 <code>@source inline(...)</code></strong>（v3 是 config 的 <code>safelist</code> 陣列），用來強制保留來自 CMS、API、資料庫或第三方函式庫、掃描不到的 class。</li></ul><p>掌握了掃描器的脾氣後，你會發現許多「玄學 bug」其實都有清楚的因果。下一篇 <strong>《TailwindCSS 配置系統》</strong>，我們將深入 v4「配置即 CSS」的核心——<code>@theme</code> 指令如何定義設計 Token、CSS 變數如何貫穿整個系統，以及它與 v3 <code>tailwind.config.js</code> 的根本差異。掃描器決定了「哪些 class 會被產生」，而配置系統則決定了「這些 class 產生出什麼樣的值」，兩者正是理解 Tailwind 運作的一體兩面。</p></div><div class=mt-8><div class="p-6 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 not-prose"><div><div class="flex items-center gap-2 mb-1"><a href=/about class="text-base font-semibold text-zinc-900 dark:text-zinc-100 no-underline hover:text-blue-500 transition-colors">BenZ
+</a><span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Software Developer</span></div><p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">熱愛技術的軟體開發者，在這裡分享程式開發經驗與學習筆記。</p><div class="flex items-center gap-3"><a href=https://github.com/benzhub target=_blank rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors no-underline" aria-label=GitHub><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374.0.0 5.373.0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931.0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176.0.0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221.0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a></div></div></div></div></div><div class="product-cta max-w-xl mx-auto my-10 rounded-xl bg-blue-50 dark:bg-zinc-800 border border-blue-100 dark:border-zinc-700 text-center" style="padding:1.75rem 2rem"><p class="text-xs font-bold text-blue-600 tracking-wider mb-1">本週主打</p><h3 class="text-lg font-bold mb-1">AI 自動化入門包</h3><p class="text-sm text-zinc-600 dark:text-zinc-300 mb-5">你每天手動在做的那些煩事,其實 AI 可以自己跑。這份給你 10 個照著做就會的自動化工作流 + 50 個複製即用的提示詞,不用會寫程式。</p><a href=/products/ai-starter-kit/ class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg no-underline" style="padding:.7rem 1.9rem">看看這個產品 →</a></div><div class="subscribe-widget max-w-xl mx-auto my-10 px-6 py-8 text-center rounded-xl bg-zinc-50 dark:bg-zinc-800"><h3 class="text-lg font-bold mb-1">訂閱 BenzHub 電子報</h3><p class="text-sm text-zinc-600 dark:text-zinc-300 mb-4">每週 AI 賺錢實戰 + 免費工具地圖</p><form class="subscribe-form flex flex-col sm:flex-row gap-3 justify-center" data-worker=https://benzhub-newsletter.benzhub.workers.dev data-source=footer-widget><input type=email required placeholder="你的 Email" class="px-4 py-2 rounded-lg border border-zinc-300 dark:bg-zinc-900 dark:border-zinc-600"><div class="cf-turnstile mt-3 flex justify-center" data-sitekey=0x4AAAAAAD4_sR6pI3UknZVz></div><button type=submit class="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700">訂閱</button></form><p class="subscribe-status text-sm text-zinc-500 mt-2"></p></div><div class="post-detail fade-in my-4"><div><h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">相關文章</h3><div class="grid gap-2"><a href=https://benzhub.github.io/post/tailwindcss/002-architecture-jit-oxide/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">TailwindCSS 架構與 Oxide 引擎：JIT、Rust 與 CSS 處理管線完整解析 | TailwindCSS 完整教學</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/08/02</span>
+</a><a href=https://benzhub.github.io/post/tailwindcss/001-utility-first-philosophy/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">Utility-First 是什麼？TailwindCSS 核心哲學完整解析 | TailwindCSS 完整教學</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2026/08/01</span>
+</a><a href=https://benzhub.github.io/post/htmlcss/023-rwd/ class="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors no-underline group"><span class="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">HTML & CSS RWD @media 使用介紹 | CSS</span>
+<span class="text-xs text-zinc-400 dark:text-zinc-500 ml-auto flex-shrink-0">2024/02/01</span></a></div></div></div><div class="post-detail fade-in my-4"><div class="grid grid-cols-2 gap-4"><div><a href=https://benzhub.github.io/post/tailwindcss/002-architecture-jit-oxide/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">&larr; 上一篇</span>
+<span class="text-sm font-medium">TailwindCSS 架構與 Oxide 引擎：JIT、Rust 與 CSS 處理管線完整解析 | TailwindCSS 完整教學</span></a></div><div><a href=https://benzhub.github.io/post/tailwindcss/004-configuration/ class="post-nav-btn no-underline text-center h-full flex flex-col items-center justify-center"><span class="text-xs text-zinc-400 dark:text-zinc-500 block mb-1">下一篇 &rarr;</span>
+<span class="text-sm font-medium">TailwindCSS 配置系統：@theme CSS-first 設定完整解析與 tailwind.config.js 遷移 | TailwindCSS 完整教學</span></a></div></div></div><div class="post-detail fade-in my-4"><script src=https://giscus.app/client.js data-repo=benzhub/benzhub.github.io data-repo-id="MDEwOlJlcG9zaXRvcnkzNTE5NTgwNTM=" data-category=Announcements data-category-id=MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyNzk2NTc1 data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=preferred_color_scheme data-lang=zh-TW crossorigin=anonymous async></script></div></div><div class="hidden lg:block lg:col-span-1 mt-4"><div class="widget fade-in"><p class=widget-title>搜尋</p><form role=search method=get action=https://google.com/search><input class=search-input type=search placeholder=搜尋文章... name=q aria-label=搜尋>
+<input type=hidden name=sitesearch value=https://benzhub.github.io/></form></div><div class="widget fade-in"><p class=widget-title>標籤</p><div class="flex flex-wrap gap-1.5"><a href=/tags/80/20-%E6%B3%95%E5%89%87><span class=tag-pill>80/20 法則</span>
+</a><a href=/tags/acid><span class=tag-pill>acid</span>
+</a><a href=/tags/aggregate><span class=tag-pill>aggregate</span>
+</a><a href=/tags/ai><span class=tag-pill>ai</span>
+</a><a href=/tags/ai-agent><span class=tag-pill>ai agent</span>
+</a><a href=/tags/ai-coding><span class=tag-pill>ai coding</span>
+</a><a href=/tags/ai-workflow><span class=tag-pill>ai workflow</span>
+</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7><span class=tag-pill>ai 工具</span>
+</a><a href=/tags/ai-%E5%B7%A5%E5%85%B7%E7%84%A6%E6%85%AE><span class=tag-pill>ai 工具焦慮</span>
+</a><a href=/tags/ai-%E6%8E%A5%E5%96%AE><span class=tag-pill>ai 接單</span>
+</a><a href=/tags/ai-%E6%8E%A5%E6%A1%88><span class=tag-pill>ai 接案</span>
+</a><a href=/tags/ai-%E7%94%A2%E5%93%81><span class=tag-pill>ai 產品</span>
+</a><a href=/tags/ai-%E7%B9%AA%E5%9C%96><span class=tag-pill>ai 繪圖</span>
+</a><a href=/tags/ai-%E8%87%AA%E5%8B%95%E5%8C%96><span class=tag-pill>ai 自動化</span>
+</a><a href=/tags/ai-%E8%99%9B%E6%93%AC%E4%BA%BA><span class=tag-pill>ai 虛擬人</span>
+</a><a href=/tags/ai-%E8%A1%8C%E9%8A%B7><span class=tag-pill>ai 行銷</span>
+</a><a href=/tags/ai-%E8%A8%AD%E8%A8%88><span class=tag-pill>ai 設計</span>
+</a><a href=/tags/ai-%E8%AE%8A%E7%8F%BE><span class=tag-pill>ai 變現</span>
+</a><a href=/tags/ai-%E8%B3%BA%E9%8C%A2><span class=tag-pill>ai 賺錢</span>
+</a><a href=/tags/ai-income><span class=tag-pill>ai-income</span></a></div></div><div class="widget fade-in"><p class=widget-title>文章系列</p><div class="flex flex-wrap gap-1.5"><a href=/post/postgresql/><span class=tag-pill>PostgreSQL (50)</span>
+</a><a href=/post/javascript/><span class=tag-pill>JavaScript (109)</span>
+</a><a href=/post/django/><span class=tag-pill>Django (44)</span>
+</a><a href=/post/python/><span class=tag-pill>Python (37)</span>
+</a><a href=/post/htmlcss/><span class=tag-pill>HTML & CSS (23)</span>
+</a><a href=/post/tailwindcss/><span class=tag-pill>TailwindCSS (9)</span>
+</a><a href=/post/cloudflare/><span class=tag-pill>Cloudflare (9)</span>
+</a><a href=/post/linux/><span class=tag-pill>Linux (22)</span>
+</a><a href=/post/git/><span class=tag-pill>Git (18)</span>
+</a><a href=/post/ai-insights/><span class=tag-pill>AI Insights (14)</span></a></div></div><div class="widget fade-in"><p class=widget-title>最新文章</p><div class="flex flex-col gap-1"><a href=/post/tailwindcss/009-flexbox/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">TailwindCSS Flexbox 完整指南：flex、justify、align、gap 一次搞定 | TailwindCSS 完整教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/08/09</p></a><a href=/post/cloudflare/009-cron-triggers/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Workers Cron Triggers 排程:scheduled handler 與 cron 表達式實戰 | Cloudflare 完整教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/08/09</p></a><a href=/post/tailwindcss/008-layout-display/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">TailwindCSS Layout 與 Display：block、flex、grid、overflow、object-fit 全解析 | TailwindCSS 完整教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/08/08</p></a><a href=/post/cloudflare/008-websockets/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">Workers WebSockets：WebSocketPair 與 101 升級實戰 | Cloudflare 完整教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/08/08</p></a><a href=/post/tailwindcss/007-typography/ class="block py-2.5 px-3 -mx-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 group"><div class="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-50 transition-colors duration-200">TailwindCSS 排版與文字完整指南：font 字體、text 字級、leading 行高、tracking 字距、text-wrap 與 v4 text-shadow、line-clamp、truncate | TailwindCSS 完整教學</div><p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+2026/08/07</p></a></div></div></div></div></div></div><footer class="site-footer bg-zinc-50 dark:bg-[#0a0a0a]"><p>&copy; 2026 <a href=https://benzhub.github.io/ class="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-200">BenzHub</a></p></footer><script src=https://challenges.cloudflare.com/turnstile/v0/api.js async defer></script><script src=/js/subscribe.js defer></script><script>(function(e,t){function o(){var n,e=t.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4883636813621606",e.crossOrigin="anonymous",n=t.getElementsByTagName("script")[0],n.parentNode.insertBefore(e,n)}var s=!1;function n(){s===!1&&(s=!0,e.removeEventListener("scroll",n),e.removeEventListener("mousemove",n),e.removeEventListener("mousedown",n),e.removeEventListener("touchstart",n),e.removeEventListener("keydown",n),o())}e.addEventListener("scroll",n),e.addEventListener("mousemove",n),e.addEventListener("mousedown",n),e.addEventListener("touchstart",n),e.addEventListener("keydown",n),e.addEventListener("load",function(){e.pageYOffset&&(n(),e.setTimeout(n,3e3))})})(window,document)</script><script>var icon=document.getElementById("icon"),icon2=document.getElementById("icon2");document.documentElement.classList.contains("dark")||localStorage.theme==="dark"||!("theme"in localStorage)&&window.matchMedia("(prefers-color-scheme: dark)").matches?(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark")):document.documentElement.classList.remove("dark");function toggleDarkMode(){document.documentElement.classList.contains("dark")?(icon&&(icon.classList.remove("icon-sun"),icon.classList.add("icon-moon")),icon2&&(icon2.classList.remove("icon-sun"),icon2.classList.add("icon-moon")),document.documentElement.classList.remove("dark"),localStorage.theme="light"):(icon&&(icon.classList.remove("icon-moon"),icon.classList.add("icon-sun")),icon2&&(icon2.classList.remove("icon-moon"),icon2.classList.add("icon-sun")),document.documentElement.classList.add("dark"),localStorage.theme="dark")}document.addEventListener("DOMContentLoaded",function(){var e=new IntersectionObserver(function(t){t.forEach(function(t){t.isIntersecting&&(t.target.classList.add("visible"),e.unobserve(t.target))})},{threshold:0});document.querySelectorAll(".fade-in").forEach(function(t){e.observe(t)})})</script></body></html>
